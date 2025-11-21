@@ -9,20 +9,20 @@
 
 | Milestone | Status | Tasks |
 |-----------|--------|-------|
-| M1: Project Foundation | Not Started | 0/12 |
-| M2: Data Layer | Not Started | 0/8 |
-| M3: Location Services | Not Started | 0/6 |
-| M4: Zone Lookup Engine | Not Started | 0/8 |
-| M5: Rule Interpretation | Not Started | 0/6 |
+| M1: Project Foundation | **COMPLETE** | 12/12 |
+| M2: Data Layer | In Progress | 4/8 |
+| M3: Location Services | **COMPLETE** | 6/6 |
+| M4: Zone Lookup Engine | **COMPLETE** | 8/8 |
+| M5: Rule Interpretation | **COMPLETE** | 6/6 |
 | M6: Main Result View | Not Started | 0/14 |
-| M7: Floating Map | Not Started | 0/10 |
+| M7: Floating Map | In Progress | 1/10 |
 | M8: Onboarding Flow | Not Started | 0/10 |
 | M9: Settings Screen | Not Started | 0/8 |
 | M10: Error Handling & Polish | Not Started | 0/8 |
 | M11: Testing | Not Started | 0/8 |
 | M12: Beta Release | Not Started | 0/6 |
 
-**Overall Progress:** 0/104 tasks complete
+**Overall Progress:** 37/104 tasks complete
 
 ---
 
@@ -32,34 +32,34 @@
 
 ### Tasks
 
-- [ ] **1.1** Create a new Xcode project for SF Parking Zone Finder using SwiftUI App template, targeting iOS 16+, with the folder structure defined in TechnicalArchitecture.md
+- [x] **1.1** Create a new Xcode project for SF Parking Zone Finder using SwiftUI App template, targeting iOS 16+, with the folder structure defined in TechnicalArchitecture.md
 
-- [ ] **1.2** Add Google Maps SDK for iOS as a Swift Package dependency and configure the API key in AppDelegate
+- [x] **1.2** Add Google Maps SDK for iOS as a Swift Package dependency and configure the API key in AppDelegate
 
-- [ ] **1.3** Create the DependencyContainer class with protocol-based service registration for dependency injection
+- [x] **1.3** Create the DependencyContainer class with protocol-based service registration for dependency injection
 
-- [ ] **1.4** Define all service protocols: ZoneServiceProtocol, ZoneDataSourceProtocol, LocationServiceProtocol, MapProviderProtocol, ReverseGeocodingServiceProtocol, RulInterpreterProtocol, ZoneLookupEngineProtocol
+- [x] **1.4** Define all service protocols: ZoneServiceProtocol, ZoneDataSourceProtocol, LocationServiceProtocol, MapProviderProtocol, ReverseGeocodingServiceProtocol, RulInterpreterProtocol, ZoneLookupEngineProtocol
 
-- [ ] **1.5** Create the core data models: CityIdentifier, ParkingZone, ParkingRule, Coordinate, ZoneType, ZoneMetadata, DataAccuracy
+- [x] **1.5** Create the core data models: CityIdentifier, ParkingZone, ParkingRule, Coordinate, ZoneType, ZoneMetadata, DataAccuracy
 
-- [ ] **1.6** Create the permit data models: ParkingPermit, PermitType
+- [x] **1.6** Create the permit data models: ParkingPermit, PermitType
 
-- [ ] **1.7** Create the result models: ZoneLookupResult, LookupConfidence, RuleInterpretationResult, PermitValidityStatus, ConditionalFlag
+- [x] **1.7** Create the result models: ZoneLookupResult, LookupConfidence, RuleInterpretationResult, PermitValidityStatus, ConditionalFlag
 
-- [ ] **1.8** Create the Address model for reverse geocoding results
+- [x] **1.8** Create the Address model for reverse geocoding results
 
-- [ ] **1.9** Set up the app entry point (SFParkingZoneFinderApp.swift) with dependency container initialization
+- [x] **1.9** Set up the app entry point (SFParkingZoneFinderApp.swift) with dependency container initialization
 
-- [ ] **1.10** Create Color+Theme extension with app color definitions for validity statuses (valid green, invalid red, conditional yellow, etc.)
+- [x] **1.10** Create Color+Theme extension with app color definitions for validity statuses (valid green, invalid red, conditional yellow, etc.)
 
-- [ ] **1.11** Add .gitignore entries for Xcode, Swift, and sensitive files (API keys)
+- [x] **1.11** Add .gitignore entries for Xcode, Swift, and sensitive files (API keys)
 
-- [ ] **1.12** Create a basic README.md with project setup instructions
+- [x] **1.12** Create a basic README.md with project setup instructions
 
 **Milestone 1 Complete When:**
-- [ ] Project builds without errors
-- [ ] Google Maps SDK initializes (map view renders)
-- [ ] All protocols and models compile
+- [x] Project builds without errors
+- [x] Google Maps SDK initializes (map view renders)
+- [x] All protocols and models compile
 
 ---
 
@@ -73,11 +73,11 @@
 
 - [ ] **2.2** Implement GeoJSONParser to parse sf_parking_zones.json into ParkingZone model arrays
 
-- [ ] **2.3** Implement LocalZoneDataSource conforming to ZoneDataSourceProtocol that loads zones from the bundled JSON file
+- [x] **2.3** Implement LocalZoneDataSource conforming to ZoneDataSourceProtocol that loads zones from the bundled JSON file
 
-- [ ] **2.4** Implement ZoneCache with in-memory storage for loaded zones
+- [x] **2.4** Implement ZoneCache with in-memory storage for loaded zones
 
-- [ ] **2.5** Implement ZoneRepository that coordinates between ZoneCache and LocalZoneDataSource
+- [x] **2.5** Implement ZoneRepository that coordinates between ZoneCache and LocalZoneDataSource
 
 - [ ] **2.6** Register data layer services in DependencyContainer
 
