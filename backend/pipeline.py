@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from config import OUTPUT_DIR, DATA_DIR, COMPRESS_OUTPUT
-from fetchers import BlockfaceFetcher, MetersFetcher, RPPAreasFetcher, RPPParcelsFetcher
+from fetchers import BlockfaceFetcher, MetersFetcher, RPPAreasFetcher
 from transformers import ParkingDataTransformer
 from validators import DataValidator
 
@@ -128,28 +128,22 @@ class ParkingDataPipeline:
         """Fetch data from all sources concurrently"""
         raw_data = {}
 
-        # Fetch RPP parcels (actual polygons), RPP areas, and blockface in parallel
-        async with RPPParcelsFetcher() as parcels_fetcher, \
-                   RPPAreasFetcher() as rpp_fetcher, \
+        # Fetch blockface (primary source) and RPP areas in parallel
+        async with RPPAreasFetcher() as rpp_fetcher, \
                    BlockfaceFetcher() as blockface_fetcher:
 
             start = datetime.utcnow()
 
-            # Fetch RPP parcel polygons (preferred source for accurate boundaries)
-            try:
-                parcels_task = asyncio.create_task(parcels_fetcher.fetch())
-                raw_data["rpp_parcels"] = await parcels_task
-                logger.info(f"Fetched {len(raw_data['rpp_parcels'])} RPP parcel polygons")
-            except Exception as e:
-                logger.warning(f"RPP parcels fetch failed: {e}")
-                raw_data["rpp_parcels"] = []
-
-            self.run_stats["fetch_times"]["rpp_parcels"] = (datetime.utcnow() - start).total_seconds()
-            self.run_stats["record_counts"]["rpp_parcels"] = len(raw_data["rpp_parcels"])
+            # Blockface is the primary source for parking regulations
+            blockface_task = asyncio.create_task(blockface_fetcher.fetch_rpp_only())
+            raw_data["blockface"] = await blockface_task
+            logger.info(f"Fetched {len(raw_data['blockface'])} blockface records")
+            self.run_stats["fetch_times"]["blockface"] = (datetime.utcnow() - start).total_seconds()
+            self.run_stats["record_counts"]["blockface"] = len(raw_data["blockface"])
 
             start = datetime.utcnow()
 
-            # RPP areas fetch (may return empty if service unavailable)
+            # RPP areas fetch (fallback, may return empty if service unavailable)
             try:
                 rpp_task = asyncio.create_task(rpp_fetcher.fetch())
                 raw_data["rpp_areas"] = await rpp_task
@@ -159,12 +153,6 @@ class ParkingDataPipeline:
 
             self.run_stats["fetch_times"]["rpp_areas"] = (datetime.utcnow() - start).total_seconds()
             self.run_stats["record_counts"]["rpp_areas"] = len(raw_data["rpp_areas"])
-
-            start = datetime.utcnow()
-            blockface_task = asyncio.create_task(blockface_fetcher.fetch_rpp_only())
-            raw_data["blockface"] = await blockface_task
-            self.run_stats["fetch_times"]["blockface"] = (datetime.utcnow() - start).total_seconds()
-            self.run_stats["record_counts"]["blockface"] = len(raw_data["blockface"])
 
         # Fetch meters separately (can be large)
         if not skip_meters:
@@ -185,20 +173,15 @@ class ParkingDataPipeline:
         """Transform raw data into structured objects"""
         zones = []
 
-        # Priority 1: Use RPP parcel polygons (actual detailed boundaries)
-        if raw_data.get("rpp_parcels"):
-            logger.info(f"Using {len(raw_data['rpp_parcels'])} parcel polygons for zone boundaries...")
-            zones = self.transformer.transform_rpp_parcels(raw_data["rpp_parcels"])
+        # Primary: Derive zones from blockface data (parking regulations by street segment)
+        if raw_data.get("blockface"):
+            logger.info(f"Deriving zones from {len(raw_data['blockface'])} blockface records...")
+            zones = self.transformer.derive_zones_from_blockface(raw_data["blockface"])
 
-        # Priority 2: Try RPP areas if parcels unavailable
+        # Fallback: Try RPP areas if blockface unavailable
         if not zones and raw_data.get("rpp_areas"):
             logger.info("Falling back to RPP area polygons...")
             zones = self.transformer.transform_rpp_areas(raw_data["rpp_areas"])
-
-        # Priority 3: Derive from blockface data
-        if not zones and raw_data.get("blockface"):
-            logger.info("No RPP polygons available, deriving zones from blockface data...")
-            zones = self.transformer.derive_zones_from_blockface(raw_data["blockface"])
 
         return {
             "zones": zones,
