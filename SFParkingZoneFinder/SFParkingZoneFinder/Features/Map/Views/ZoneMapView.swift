@@ -28,10 +28,46 @@ struct ZoneMapView: UIViewRepresentable {
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         mapView.addGestureRecognizer(tapGesture)
 
-        // Add zone overlays once on creation (async to avoid blocking)
-        DispatchQueue.main.async {
-            for zone in self.zones {
-                self.addZoneOverlays(zone, to: mapView, context: context)
+        // Load zone overlays in background, add to map on main thread
+        let zonesToLoad = self.zones
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Prepare all polygon data in background
+            var polygons: [(ZonePolygon, String?)] = []
+            var annotations: [ZoneLabelAnnotation] = []
+
+            for zone in zonesToLoad {
+                for boundary in zone.allBoundaryCoordinates {
+                    guard boundary.count >= 3 else { continue }
+                    let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
+                    polygon.zoneId = zone.id
+                    polygon.zoneCode = zone.permitArea
+                    polygons.append((polygon, zone.permitArea))
+                }
+
+                // Calculate centroid for label
+                let allCoords = zone.allBoundaryCoordinates.flatMap { $0 }
+                if !allCoords.isEmpty {
+                    let sumLat = allCoords.reduce(0.0) { $0 + $1.latitude }
+                    let sumLon = allCoords.reduce(0.0) { $0 + $1.longitude }
+                    let centroid = CLLocationCoordinate2D(
+                        latitude: sumLat / Double(allCoords.count),
+                        longitude: sumLon / Double(allCoords.count)
+                    )
+                    let annotation = ZoneLabelAnnotation(
+                        coordinate: centroid,
+                        zoneCode: zone.permitArea ?? zone.displayName,
+                        zoneId: zone.id
+                    )
+                    annotations.append(annotation)
+                }
+            }
+
+            // Add to map on main thread
+            DispatchQueue.main.async {
+                for (polygon, _) in polygons {
+                    mapView.addOverlay(polygon, level: .aboveRoads)
+                }
+                mapView.addAnnotations(annotations)
             }
         }
 
