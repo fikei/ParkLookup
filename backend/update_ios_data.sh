@@ -72,6 +72,28 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Simplify zone polygons for faster map rendering
+SIMPLIFY_SCRIPT="$SCRIPT_DIR/../scripts/simplify_zones.py"
+if [ -f "$SIMPLIFY_SCRIPT" ]; then
+    echo ""
+    echo "Step 3: Simplifying zone polygons..."
+    echo "----------------------------------------"
+
+    # Check if shapely is installed
+    if pip show shapely &> /dev/null; then
+        # Simplify in place (keep blocks separate, reduce vertex count)
+        python "$SIMPLIFY_SCRIPT" "$IOS_RESOURCES/sf_parking_zones.json" "$IOS_RESOURCES/sf_parking_zones.json"
+
+        if [ $? -ne 0 ]; then
+            echo "WARNING: Simplification failed, using unsimplified data"
+        fi
+    else
+        echo "Installing shapely for polygon simplification..."
+        pip install shapely
+        python "$SIMPLIFY_SCRIPT" "$IOS_RESOURCES/sf_parking_zones.json" "$IOS_RESOURCES/sf_parking_zones.json"
+    fi
+fi
+
 # Show result
 echo ""
 echo "=========================================="

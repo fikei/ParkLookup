@@ -3,15 +3,26 @@
 Zone Polygon Simplification Script
 
 This script preprocesses the SF parking zones JSON file to:
-1. Merge all block-level polygons into unified zone boundaries
-2. Simplify the resulting polygons to reduce point count
-3. Extract just the outer boundary (street-facing edges)
+1. Simplify individual block polygons to reduce vertex count (default)
+2. Optionally merge adjacent blocks within the same zone (--merge flag)
+
+Key behaviors:
+- Zone boundaries are ALWAYS preserved (Zone A never merges with Zone B)
+- By default, city blocks stay as separate polygons (just simplified)
+- With --merge, adjacent blocks of the SAME zone combine into larger polygons
 
 Requirements:
     pip install shapely
 
 Usage:
-    python simplify_zones.py input.json output.json [--tolerance 0.0001]
+    # Simplify blocks individually (preserves block boundaries)
+    python simplify_zones.py input.json output.json
+
+    # Merge blocks within zones (creates zone-level polygons)
+    python simplify_zones.py input.json output.json --merge
+
+    # Custom tolerance (default 0.00005 ~= 5.5m)
+    python simplify_zones.py input.json output.json --tolerance 0.0001
 """
 
 import json
@@ -96,16 +107,47 @@ def multipolygon_to_coords(geom) -> List[List[Dict[str, float]]]:
         return []
 
 
+def simplify_block(boundary: List[Dict[str, float]], tolerance: float) -> List[Dict[str, float]]:
+    """
+    Simplify a single block polygon while preserving its shape.
+
+    Args:
+        boundary: List of {latitude, longitude} coordinates
+        tolerance: Simplification tolerance in degrees (~0.00005 = 5.5m)
+
+    Returns:
+        Simplified coordinate list
+    """
+    if not SHAPELY_AVAILABLE:
+        return boundary
+
+    poly = coords_to_polygon(boundary)
+    if poly is None:
+        return boundary
+
+    # Simplify the polygon
+    if tolerance > 0:
+        try:
+            simplified = poly.simplify(tolerance, preserve_topology=True)
+            if simplified.is_valid and not simplified.is_empty:
+                poly = simplified
+        except Exception as e:
+            print(f"  Warning: Simplification failed: {e}")
+
+    return polygon_to_coords(poly)
+
+
 def merge_zone_polygons(boundaries: List[List[Dict[str, float]]], tolerance: float) -> List[List[Dict[str, float]]]:
     """
-    Merge all polygons for a zone into unified boundaries.
+    Merge all block polygons for a zone into unified boundaries.
+    Adjacent blocks of the SAME zone will be combined.
 
     Args:
         boundaries: List of boundary coordinate lists
         tolerance: Simplification tolerance in degrees (~0.0001 = 11m)
 
     Returns:
-        List of simplified boundary coordinate lists
+        List of merged/simplified boundary coordinate lists
     """
     if not SHAPELY_AVAILABLE:
         return boundaries
@@ -120,7 +162,7 @@ def merge_zone_polygons(boundaries: List[List[Dict[str, float]]], tolerance: flo
     if not polygons:
         return boundaries
 
-    # Union all polygons together
+    # Union all polygons together (merges adjacent blocks)
     try:
         merged = unary_union(polygons)
         if not merged.is_valid:
@@ -140,13 +182,14 @@ def merge_zone_polygons(boundaries: List[List[Dict[str, float]]], tolerance: flo
     return multipolygon_to_coords(merged)
 
 
-def process_zones(data: Dict[str, Any], tolerance: float, verbose: bool = True) -> Dict[str, Any]:
+def process_zones(data: Dict[str, Any], tolerance: float, merge: bool = False, verbose: bool = True) -> Dict[str, Any]:
     """
-    Process all zones in the data, merging and simplifying polygons.
+    Process all zones in the data.
 
     Args:
         data: The full zones JSON data
         tolerance: Simplification tolerance in degrees
+        merge: If True, merge adjacent blocks within each zone. If False, simplify blocks individually.
         verbose: Whether to print progress
 
     Returns:
@@ -155,51 +198,91 @@ def process_zones(data: Dict[str, Any], tolerance: float, verbose: bool = True) 
     zones = data.get('zones', [])
     total_original_points = 0
     total_simplified_points = 0
+    total_original_blocks = 0
+    total_simplified_blocks = 0
+
+    mode = "MERGE" if merge else "SIMPLIFY"
+    if verbose:
+        print(f"\nMode: {mode} (blocks {'will be merged' if merge else 'stay separate'})\n")
 
     for i, zone in enumerate(zones):
         zone_id = zone.get('id', f'zone_{i}')
         permit_area = zone.get('permitArea', 'unknown')
         boundaries = zone.get('boundaries', [])
 
-        # Count original points
+        # Count original stats
+        original_blocks = len(boundaries)
         original_points = sum(len(b) for b in boundaries)
         total_original_points += original_points
+        total_original_blocks += original_blocks
 
         if verbose:
-            print(f"Processing zone {permit_area} ({zone_id}): {len(boundaries)} boundaries, {original_points} points...", end=' ')
+            print(f"Processing zone {permit_area} ({zone_id}): {original_blocks} blocks, {original_points} points...", end=' ')
 
-        # Merge and simplify
-        simplified = merge_zone_polygons(boundaries, tolerance)
+        if merge:
+            # Merge adjacent blocks within zone, then simplify
+            simplified = merge_zone_polygons(boundaries, tolerance)
+        else:
+            # Simplify each block individually (preserves block structure)
+            simplified = []
+            for boundary in boundaries:
+                simplified_block = simplify_block(boundary, tolerance)
+                if simplified_block and len(simplified_block) >= 3:
+                    simplified.append(simplified_block)
 
-        # Count simplified points
+        # Count simplified stats
+        simplified_blocks = len(simplified)
         simplified_points = sum(len(b) for b in simplified)
         total_simplified_points += simplified_points
+        total_simplified_blocks += simplified_blocks
 
         if verbose:
-            reduction = (1 - simplified_points / original_points) * 100 if original_points > 0 else 0
-            print(f"-> {len(simplified)} boundaries, {simplified_points} points ({reduction:.1f}% reduction)")
+            point_reduction = (1 - simplified_points / original_points) * 100 if original_points > 0 else 0
+            if merge:
+                print(f"-> {simplified_blocks} polygons, {simplified_points} points ({point_reduction:.1f}% reduction)")
+            else:
+                print(f"-> {simplified_points} points ({point_reduction:.1f}% reduction)")
 
         # Update zone
         zone['boundaries'] = simplified
 
     if verbose:
-        total_reduction = (1 - total_simplified_points / total_original_points) * 100 if total_original_points > 0 else 0
-        print(f"\nTotal: {total_original_points} -> {total_simplified_points} points ({total_reduction:.1f}% reduction)")
+        total_point_reduction = (1 - total_simplified_points / total_original_points) * 100 if total_original_points > 0 else 0
+        print(f"\n{'='*60}")
+        print(f"Total blocks: {total_original_blocks} -> {total_simplified_blocks}")
+        print(f"Total points: {total_original_points} -> {total_simplified_points} ({total_point_reduction:.1f}% reduction)")
 
     return data
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Simplify and merge zone polygons for faster map rendering'
+        description='Simplify zone polygons for faster map rendering',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Simplify blocks individually (default - preserves block boundaries)
+  python simplify_zones.py sf_parking_zones.json sf_parking_zones_simplified.json
+
+  # Merge adjacent blocks within each zone
+  python simplify_zones.py sf_parking_zones.json sf_parking_zones_merged.json --merge
+
+  # More aggressive simplification
+  python simplify_zones.py input.json output.json --tolerance 0.0002
+"""
     )
     parser.add_argument('input', help='Input JSON file path')
     parser.add_argument('output', help='Output JSON file path')
     parser.add_argument(
         '--tolerance', '-t',
         type=float,
-        default=0.0001,
-        help='Simplification tolerance in degrees (default: 0.0001 ≈ 11m)'
+        default=0.00005,
+        help='Simplification tolerance in degrees (default: 0.00005 ~= 5.5m)'
+    )
+    parser.add_argument(
+        '--merge', '-m',
+        action='store_true',
+        help='Merge adjacent blocks within each zone (default: keep blocks separate)'
     )
     parser.add_argument(
         '--quiet', '-q',
@@ -217,9 +300,9 @@ def main():
     data = load_zones(args.input)
 
     print(f"Processing {len(data.get('zones', []))} zones with tolerance {args.tolerance}...")
-    processed = process_zones(data, args.tolerance, verbose=not args.quiet)
+    processed = process_zones(data, args.tolerance, merge=args.merge, verbose=not args.quiet)
 
-    print(f"Saving to {args.output}...")
+    print(f"\nSaving to {args.output}...")
     save_zones(processed, args.output)
 
     print("Done!")
