@@ -2,75 +2,7 @@ import SwiftUI
 import MapKit
 import os.log
 
-private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "FloatingMapView")
-
-/// Floating mini-map showing user location and current zone
-struct FloatingMapView: View {
-    let coordinate: CLLocationCoordinate2D?
-    let zoneName: String?
-    let onTap: () -> Void
-
-    @State private var position: MapCameraPosition
-
-    init(
-        coordinate: CLLocationCoordinate2D?,
-        zoneName: String?,
-        onTap: @escaping () -> Void
-    ) {
-        self.coordinate = coordinate
-        self.zoneName = zoneName
-        self.onTap = onTap
-
-        // Initialize camera position with coordinate or SF default (2x zoom)
-        let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        _position = State(initialValue: .region(MKCoordinateRegion(
-            center: center,
-            span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
-        )))
-    }
-
-    var body: some View {
-        Button(action: onTap) {
-            ZStack {
-                // Map (iOS 17+ API)
-                Map(position: $position) {
-                    UserAnnotation()
-                }
-                .mapControls { }
-                .disabled(true)
-                .allowsHitTesting(false)
-
-                // Expand hint
-                VStack {
-                    HStack {
-                        Spacer()
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                            .font(.caption2)
-                            .foregroundColor(.white)
-                            .padding(6)
-                            .background(Color.black.opacity(0.5))
-                            .cornerRadius(4)
-                    }
-                    Spacer()
-                }
-                .padding(8)
-            }
-        }
-        .frame(width: 120, height: 120)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-        .onChange(of: coordinate?.latitude) { _, _ in
-            if let coord = coordinate {
-                withAnimation {
-                    position = .region(MKCoordinateRegion(
-                        center: coord,
-                        span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
-                    ))
-                }
-            }
-        }
-    }
-}
+private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "ExpandedMapView")
 
 // MARK: - Expanded Map View
 
@@ -312,13 +244,10 @@ private struct MiniZoneCard: View {
 // MARK: - Preview
 
 #Preview {
-    VStack {
-        FloatingMapView(
-            coordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
-            zoneName: "Area Q",
-            onTap: {}
-        )
-    }
-    .padding()
-    .background(Color(.systemGroupedBackground))
+    ExpandedMapView(
+        coordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
+        zoneName: "Area Q",
+        validityStatus: .valid,
+        zones: []
+    )
 }
