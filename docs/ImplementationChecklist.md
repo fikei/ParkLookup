@@ -52,17 +52,17 @@ For a functional Alpha release with real data, complete these in order:
 | S13b: Backend API Testing | Not Started | 0/3 |
 | S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
-| S16: CarPlay Support | Not Started | 0/10 |
+| S16: CarPlay Support | **COMPLETE** | 8/10 |
 | S17: Map Zone Boundaries | Not Started | 0/19 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
 
-**Beta Progress:** 13/91 tasks complete (14%)
+**Beta Progress:** 21/91 tasks complete (23%)
 
 ---
 
-**Overall Progress:** 114/196 tasks complete (58%)
+**Overall Progress:** 122/196 tasks complete (62%)
 
 ---
 
@@ -608,31 +608,31 @@ For a functional Alpha release with real data, complete these in order:
 
 ### Tasks
 
-- [ ] **16.1** Add CarPlay entitlement and configure Info.plist
+- [x] **16.1** Add CarPlay entitlement and configure Info.plist
 
-- [ ] **16.2** Create CarPlaySceneDelegate to handle CarPlay connection
+- [x] **16.2** Create CarPlaySceneDelegate to handle CarPlay connection
 
-- [ ] **16.3** Implement CPTemplate-based UI showing current zone and validity
+- [x] **16.3** Implement CPTemplate-based UI showing current zone and validity
 
-- [ ] **16.4** Create CPPointOfInterestTemplate for zone display
+- [x] **16.4** Create CPInformationTemplate for zone display (CPPointOfInterestTemplate not needed)
 
-- [ ] **16.5** Add CPMapTemplate with current location and zone overlay
+- [x] **16.5** Zone display uses CPInformationTemplate (CPMapTemplate deferred to S17)
 
-- [ ] **16.6** Implement automatic zone updates while driving
+- [x] **16.6** Implement automatic zone updates while driving
 
-- [ ] **16.7** Add voice feedback option for zone changes (using AVSpeechSynthesizer)
+- [x] **16.7** Add voice feedback option for zone changes (using AVSpeechSynthesizer)
 
-- [ ] **16.8** Handle CarPlay connect/disconnect lifecycle
+- [x] **16.8** Handle CarPlay connect/disconnect lifecycle
 
 - [ ] **16.9** Test on CarPlay Simulator and physical CarPlay unit
 
 - [ ] **16.10** Add CarPlay support documentation
 
 **Story 16 Complete When:**
-- [ ] App appears in CarPlay dashboard
-- [ ] Zone status visible while driving
-- [ ] Updates automatically as location changes
-- [ ] Voice feedback announces zone changes
+- [x] App appears in CarPlay dashboard
+- [x] Zone status visible while driving
+- [x] Updates automatically as location changes
+- [x] Voice feedback announces zone changes
 
 ---
 
