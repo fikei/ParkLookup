@@ -20,29 +20,29 @@
 | S7: Floating Map | **COMPLETE** | 10/10 |
 | S8: Onboarding Flow | **COMPLETE** | 10/10 |
 | S9: Settings Screen | **COMPLETE** | 8/8 |
-| S10: UI Testing | Not Started | 0/8 |
-| S11: Data Pipeline | Not Started | 0/6 |
-| S12: Backend API | Not Started | 0/7 |
-| S13: iOS Backend Integration | Not Started | 0/9 |
-| S14: Backend Testing | Not Started | 0/6 |
+| S10: Data Pipeline | Not Started | 0/6 |
+| S11: Backend API | Not Started | 0/7 |
+| S12: iOS Backend Integration | Not Started | 0/9 |
+| S13: Backend Testing | Not Started | 0/6 |
 
-**Alpha Progress:** 82/110 tasks complete (75%)
+**Alpha Progress:** 82/102 tasks complete (80%)
 
 ### 🎯 Epic: Beta Release
 
 | Story | Status | Tasks |
 |-------|--------|-------|
-| S15: Error Handling | Not Started | 0/5 |
-| S16: UI Polish & Animations | Not Started | 0/8 |
-| S17: CarPlay Support | Not Started | 0/10 |
-| S18: Map Zone Boundaries | Not Started | 0/14 |
-| S19: Beta Release Prep | Not Started | 0/6 |
+| S14: Error Handling | Not Started | 0/5 |
+| S15: UI Polish & Animations | Not Started | 0/8 |
+| S16: CarPlay Support | Not Started | 0/10 |
+| S17: Map Zone Boundaries | Not Started | 0/14 |
+| S18: Beta Release Prep | Not Started | 0/6 |
+| S19: UI Testing | Not Started | 0/8 |
 
-**Beta Progress:** 0/43 tasks complete (0%)
+**Beta Progress:** 0/51 tasks complete (0%)
 
 ---
 
-**Overall Progress:** 82/147 tasks complete (56%)
+**Overall Progress:** 82/153 tasks complete (54%)
 
 ---
 
@@ -339,38 +339,9 @@
 
 ---
 
-## Story 10 (S10): UI Testing
-
-**Goal:** Comprehensive UI test coverage for user flows
-
-### Tasks
-
-- [ ] **10.1** Set up XCUITest target and configure test schemes
-
-- [ ] **10.2** Create UI test for complete onboarding flow (welcome → permissions → permits → main)
-
-- [ ] **10.3** Create UI test for main result view displaying zone correctly
-
-- [ ] **10.4** Create UI test for map expand and collapse
-
-- [ ] **10.5** Create UI test for settings navigation and permit management
-
-- [ ] **10.6** Create UI test for pull-to-refresh location update
-
-- [ ] **10.7** Create UI test for error state handling (mock location denied)
-
-- [ ] **10.8** Add accessibility identifier to all interactive elements for reliable testing
-
-**Story 10 Complete When:**
-- [ ] UI test target builds and runs
-- [ ] All critical user flows have UI tests
-- [ ] Tests pass on simulator
-
----
-
 # Alpha Release: Backend Integration
 
-## Story 11 (S11): Data Pipeline
+## Story 10 (S10): Data Pipeline
 
 **Goal:** ETL pipeline to fetch and transform official SF parking data from DataSF and SFMTA
 
@@ -404,7 +375,7 @@
 
 ---
 
-## Story 12 (S12): Backend API
+## Story 11 (S11): Backend API
 
 **Goal:** REST API service to serve zone and parking rule data
 
@@ -432,7 +403,7 @@
 
 ---
 
-## Story 13 (S13): iOS Backend Integration
+## Story 12 (S12): iOS Backend Integration
 
 **Goal:** iOS app connects to backend API with offline fallback
 
@@ -464,7 +435,7 @@
 
 ---
 
-## Story 14 (S14): Backend Testing
+## Story 13 (S13): Backend Testing
 
 **Goal:** Comprehensive test coverage for backend services and integration
 
@@ -491,7 +462,7 @@
 
 # Beta Release
 
-## Story 15 (S15): Error Handling
+## Story 14 (S14): Error Handling
 
 **Goal:** Graceful error states with clear user guidance
 
@@ -514,7 +485,7 @@
 
 ---
 
-## Story 16 (S16): UI Polish & Animations
+## Story 15 (S15): UI Polish & Animations
 
 **Goal:** Enhanced visual polish and delightful user experience
 
@@ -544,7 +515,7 @@
 
 ---
 
-## Story 17 (S17): CarPlay Support
+## Story 16 (S16): CarPlay Support
 
 **Goal:** Allow drivers to check parking zone status via CarPlay dashboard
 
@@ -578,7 +549,7 @@
 
 ---
 
-## Story 18 (S18): Map Zone Boundaries
+## Story 17 (S17): Map Zone Boundaries
 
 **Goal:** Display parking zone boundaries as visual polygons on the expanded map view
 
@@ -624,7 +595,7 @@
 
 ---
 
-## Story 19 (S19): Beta Release Prep
+## Story 18 (S18): Beta Release Prep
 
 **Goal:** App ready for TestFlight distribution
 
@@ -647,6 +618,36 @@
 - [ ] Beta testers can install and use app
 - [ ] No crash on launch for any tester
 - [ ] Feedback collection mechanism in place
+
+---
+
+## Story 19 (S19): UI Testing
+
+**Goal:** Comprehensive UI test coverage for finalized user flows
+
+### Tasks
+
+- [ ] **19.1** Set up XCUITest target and configure test schemes
+
+- [ ] **19.2** Create UI test for complete onboarding flow (welcome → permissions → permits → main)
+
+- [ ] **19.3** Create UI test for main result view displaying zone correctly
+
+- [ ] **19.4** Create UI test for map expand and collapse
+
+- [ ] **19.5** Create UI test for settings navigation and permit management
+
+- [ ] **19.6** Create UI test for pull-to-refresh location update
+
+- [ ] **19.7** Create UI test for error state handling (mock location denied)
+
+- [ ] **19.8** Add accessibility identifiers to all interactive elements for reliable testing
+
+**Story 19 Complete When:**
+- [ ] UI test target builds and runs
+- [ ] All critical user flows have UI tests
+- [ ] Tests pass on simulator
+- [ ] Tests validate finalized UI polish
 
 ---
 
