@@ -151,12 +151,12 @@ The app's **main screen is a full-screen textual view** that displays:
 
 **Default State (Minimized):**
 - Size: ~120x120 points (small, non-intrusive)
-- Position: Floating over top-right of results (customizable position in settings)
+- Position: Floating over top-right of screen (not card), anchored to screen coordinates
+- Zoom level: 2x closer than standard street-level for tight focus on immediate area
 - Content:
   - User's blue location dot with accuracy circle
-  - Current zone boundary in distinct color
-  - Neighboring zones in lighter, differentiated colors
-  - Minimal labels (just zone identifiers, e.g., "Q", "R")
+  - Clean map view without zone label overlay (zone shown in main card)
+  - Expand hint icon (arrows) in corner
 - Interaction:
   - Single tap: Expands to full-screen map
   - Long press (optional): Allows repositioning of widget
@@ -169,19 +169,24 @@ The app's **main screen is a full-screen textual view** that displays:
 **Expanded State (Full-Screen Map):**
 - Triggered by tap on floating map
 - Full-screen map interface showing:
-  - All parking zones with color-coded boundaries
+  - **All parking zone boundaries** as color-coded polygons
   - User location dot with heading indicator
-  - Zone labels directly on map polygons
+  - Zone labels directly on map polygons (e.g., "Q", "R", "A")
   - Interactive legend (tap to toggle zone types)
-  - "Back to Results" button (prominent, top-left, always visible)
-  - Current zone highlighted with thicker border
-- Map provider: **Google Maps SDK for iOS** OR **MapLibre (OpenStreetMap)**
+  - "Done" button (prominent, top-right, always visible)
+  - Current zone highlighted with thicker border and fill color
+- **Zone Boundary Display:**
+  - RPP zones shown with semi-transparent fill and distinct border
+  - Current zone: Bold accent color fill (20% opacity) + thick border
+  - Adjacent zones: Lighter differentiated colors
+  - Zone letters displayed centered on polygon
+- Map provider: **Apple MapKit** (default) OR **Google Maps SDK** (optional)
 - Pan and zoom enabled with standard gestures
 - Tapping a zone polygon shows mini info card with:
   - Zone name
   - Basic rules (1-2 lines)
   - "See Details" button (returns to result view with that zone)
-- Pinch gesture or "Back" button returns to full-screen result view
+- Pinch gesture or "Done" button returns to full-screen result view
 
 ### Interaction Flow
 [User opens app]

@@ -157,10 +157,12 @@ This document outlines the engineering implementation plan for SF Parking Zone F
 
 | Milestone | Description | Deliverables | Exit Criteria |
 |-----------|-------------|--------------|---------------|
-| **M7: Beta Feedback Addressed** | Critical issues from beta resolved | Bug fixes, UX improvements | Beta testers report satisfaction, crash-free rate >99% |
-| **M8: Real-time Location** | Auto-refresh when user moves | Background location updates, zone change detection | Zone updates automatically when crossing boundaries |
-| **M9: Parking Timer** | Timer for time-limited zones | Timer UI, local notifications | User receives alert before time expires |
-| **M10: App Store Launch** | Public release | App Store listing, screenshots, description | App approved and live on App Store |
+| **M7: Floating Map** | Mini-map showing user location | FloatingMapView, ExpandedMapView, Apple MapKit integration | Map displays in top-right, expands to full screen |
+| **M8: Onboarding Flow** | First-launch experience | WelcomeView, LocationPermissionView, PermitSetupView | New users complete onboarding and set permits |
+| **M9: Zone Boundaries on Map** | Display parking zones visually on expanded map | Zone polygon overlays, color-coded boundaries, zone labels | Users can see all zone boundaries on full-screen map |
+| **M10: Settings Screen** | User preferences manageable | Settings screen, permit management, about section | User can add/edit permits, change preferences |
+| **M11: Beta Feedback Addressed** | Critical issues from beta resolved | Bug fixes, UX improvements | Beta testers report satisfaction, crash-free rate >99% |
+| **M12: App Store Launch** | Public release | App Store listing, screenshots, description | App approved and live on App Store |
 
 ### V2.0 Milestones
 
@@ -424,6 +426,53 @@ This document outlines the engineering implementation plan for SF Parking Zone F
 | T7.3.1 | Add map position preference to settings | S |
 | T7.3.2 | Support top-left, top-right, bottom-right | S |
 | T7.3.3 | Persist preference to UserDefaults | S |
+
+---
+
+### Epic 7B: Zone Boundaries on Map (M9)
+
+**Goal:** Display parking zone boundaries as visual polygons on the expanded map view.
+
+#### User Stories
+
+**US7B.1: As a user, I see zone boundaries as colored polygons on the expanded map.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T7B.1.1 | Create ZoneOverlay model with polygon coordinates | M |
+| T7B.1.2 | Implement MKPolygon overlays for each zone | M |
+| T7B.1.3 | Add MKOverlayRenderer to style zone polygons | M |
+| T7B.1.4 | Color current zone with accent fill (20% opacity) + thick border | S |
+| T7B.1.5 | Color adjacent zones with lighter differentiated colors | M |
+
+**US7B.2: As a user, I see zone labels on the map polygons.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T7B.2.1 | Calculate centroid of each zone polygon | S |
+| T7B.2.2 | Add zone label annotations at centroid positions | M |
+| T7B.2.3 | Style labels with zone letter (large, bold, visible) | S |
+| T7B.2.4 | Ensure labels visible at various zoom levels | S |
+
+**US7B.3: As a user, I can tap a zone to see its info.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T7B.3.1 | Implement tap gesture recognizer on zone overlays | M |
+| T7B.3.2 | Create ZoneInfoCard popup view | M |
+| T7B.3.3 | Display zone name, type, and basic rules in card | S |
+| T7B.3.4 | Add "View Details" button to navigate to zone result | S |
+
+**US7B.4: As a user, I can choose my preferred map provider.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T7B.4.1 | Create MapProviderProtocol abstraction for map rendering | M |
+| T7B.4.2 | Implement AppleMapKitAdapter conforming to MapProviderProtocol | M |
+| T7B.4.3 | Implement GoogleMapsAdapter conforming to MapProviderProtocol | L |
+| T7B.4.4 | Implement MapLibreAdapter for OpenStreetMap tiles (open source) | L |
+| T7B.4.5 | Add map provider selection picker to Settings | S |
+| T7B.4.6 | Persist map provider preference to UserDefaults | S |
 
 ---
 

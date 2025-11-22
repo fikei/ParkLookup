@@ -10,19 +10,20 @@
 | Milestone | Status | Tasks |
 |-----------|--------|-------|
 | M1: Project Foundation | **COMPLETE** | 12/12 |
-| M2: Data Layer | In Progress | 4/8 |
+| M2: Data Layer | **COMPLETE** | 8/8 |
 | M3: Location Services | **COMPLETE** | 6/6 |
 | M4: Zone Lookup Engine | **COMPLETE** | 8/8 |
 | M5: Rule Interpretation | **COMPLETE** | 6/6 |
-| M6: Main Result View | Not Started | 0/14 |
-| M7: Floating Map | In Progress | 1/10 |
-| M8: Onboarding Flow | Not Started | 0/10 |
-| M9: Settings Screen | Not Started | 0/8 |
-| M10: Error Handling & Polish | Not Started | 0/8 |
-| M11: Testing | Not Started | 0/8 |
-| M12: Beta Release | Not Started | 0/6 |
+| M6: Main Result View | **COMPLETE** | 14/14 |
+| M7: Floating Map | **COMPLETE** | 10/10 |
+| M8: Onboarding Flow | **COMPLETE** | 10/10 |
+| M9: Zone Boundaries on Map | Not Started | 0/14 |
+| M10: Settings Screen | Not Started | 0/8 |
+| M11: Error Handling & Polish | Not Started | 0/8 |
+| M12: Testing | Not Started | 0/8 |
+| M13: Beta Release | Not Started | 0/6 |
 
-**Overall Progress:** 37/104 tasks complete
+**Overall Progress:** 74/118 tasks complete
 
 ---
 
@@ -280,38 +281,84 @@
 - [ ] **8.10** Create OnboardingContainerView that manages navigation through all onboarding steps and transitions to MainResultView
 
 **Milestone 8 Complete When:**
-- [ ] New user sees welcome screen on first launch
-- [ ] Location permission requested with explanation
-- [ ] User can select multiple permit areas
-- [ ] Permits saved and persist across launches
-- [ ] Onboarding completes and shows main view
-- [ ] Returning users skip directly to main view
+- [x] New user sees welcome screen on first launch
+- [x] Location permission requested with explanation
+- [x] User can select multiple permit areas
+- [x] Permits saved and persist across launches
+- [x] Onboarding completes and shows main view
+- [x] Returning users skip directly to main view
 
 ---
 
-## Milestone 9: Settings Screen
+## Milestone 9: Zone Boundaries on Map
+
+**Goal:** Display parking zone boundaries as visual polygons on the expanded map view, with support for multiple map providers
+
+### Tasks
+
+#### Zone Boundary Display
+- [ ] **9.1** Create ZoneOverlay model with polygon coordinates compatible with both MapKit and Google Maps
+
+- [ ] **9.2** Implement zone polygon overlays for each parking zone from mock data boundaries
+
+- [ ] **9.3** Add overlay renderer to style zone polygons with semi-transparent fill and border
+
+- [ ] **9.4** Style current zone with accent color fill (20% opacity) and thick border
+
+- [ ] **9.5** Style adjacent/nearby zones with lighter differentiated colors
+
+- [ ] **9.6** Calculate zone polygon centroids and add zone label annotations (large, bold letters)
+
+- [ ] **9.7** Implement tap gesture on zone overlays to show ZoneInfoCard popup
+
+- [ ] **9.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
+
+#### Map Provider Abstraction
+- [ ] **9.9** Create MapProviderProtocol abstraction layer for switching between map providers
+
+- [ ] **9.10** Implement AppleMapKitAdapter conforming to MapProviderProtocol (current default)
+
+- [ ] **9.11** Implement GoogleMapsAdapter conforming to MapProviderProtocol (requires Google Maps SDK)
+
+- [ ] **9.12** Implement MapLibreAdapter conforming to MapProviderProtocol (open source alternative using OpenStreetMap tiles)
+
+- [ ] **9.13** Add map provider selection to Settings (Apple Maps, Google Maps, MapLibre/OSM)
+
+- [ ] **9.14** Persist map provider preference and apply on app launch
+
+**Milestone 9 Complete When:**
+- [ ] Expanded map shows all zone boundaries as colored polygons
+- [ ] Current zone highlighted distinctly from other zones
+- [ ] Zone letters visible on map at various zoom levels
+- [ ] Tapping a zone shows info card with zone details
+- [ ] User can switch between Apple Maps, Google Maps, and MapLibre in Settings
+- [ ] Zone boundaries render correctly on all supported map providers
+
+---
+
+## Milestone 10: Settings Screen
 
 **Goal:** User can manage permits and preferences
 
 ### Tasks
 
-- [ ] **9.1** Create SettingsViewModel managing user preferences and permit data
+- [ ] **10.1** Create SettingsViewModel managing user preferences and permit data
 
-- [ ] **9.2** Create PermitManagementView listing current permits with add/edit/delete functionality
+- [ ] **10.2** Create PermitManagementView listing current permits with add/edit/delete functionality
 
-- [ ] **9.3** Create AddPermitView for adding new permits (reuse PermitAreaGrid)
+- [ ] **10.3** Create AddPermitView for adding new permits (reuse PermitAreaGrid)
 
-- [ ] **9.4** Add map preferences section: toggle floating map visibility, map position picker, map style picker
+- [ ] **10.4** Add map preferences section: toggle floating map visibility, map position picker, map style picker
 
-- [ ] **9.5** Create AboutView showing app version, data version, privacy policy, and open source licenses
+- [ ] **10.5** Create AboutView showing app version, data version, privacy policy, and open source licenses
 
-- [ ] **9.6** Add Help section with FAQ placeholder, report issue email link, and rate app link
+- [ ] **10.6** Add Help section with FAQ placeholder, report issue email link, and rate app link
 
-- [ ] **9.7** Assemble SettingsView with all sections using List and NavigationLink
+- [ ] **10.7** Assemble SettingsView with all sections using List and NavigationLink
 
-- [ ] **9.8** Add settings gear icon to MainResultView navigation bar linking to SettingsView
+- [ ] **10.8** Add settings gear icon to MainResultView navigation bar linking to SettingsView
 
-**Milestone 9 Complete When:**
+**Milestone 10 Complete When:**
 - [ ] Settings accessible from main view
 - [ ] User can add, edit, delete permits
 - [ ] Map preferences persist and apply
