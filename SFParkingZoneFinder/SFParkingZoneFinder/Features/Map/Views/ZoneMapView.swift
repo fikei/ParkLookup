@@ -14,7 +14,7 @@ struct ZoneMapView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> MKMapView {
         let startTime = CFAbsoluteTimeGetCurrent()
-        logger.info("makeUIView START - zones count: \(self.zones.count)")
+        logger.info("makeUIView START - zones count: \(self.zones.count), userCoord: \(userCoordinate != nil ? "present" : "nil")")
 
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
@@ -25,12 +25,15 @@ struct ZoneMapView: UIViewRepresentable {
         // Set initial region centered on user (zoomed to ~10-15 blocks)
         // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks
         let center = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        let region = MKCoordinateRegion(
-            center: center,
-            span: MKCoordinateSpan(latitudeDelta: 0.006, longitudeDelta: 0.006)
-        )
+        let desiredSpan = MKCoordinateSpan(latitudeDelta: 0.006, longitudeDelta: 0.006)
+        let region = MKCoordinateRegion(center: center, span: desiredSpan)
         mapView.setRegion(region, animated: false)
-        logger.debug("Map region set in \(String(format: "%.1f", (CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+
+        // Store the desired region in coordinator so we can re-apply after overlays load
+        context.coordinator.initialCenter = center
+        context.coordinator.initialSpan = desiredSpan
+
+        logger.debug("Map region set in \(String(format: "%.1f", (CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms - center: \(center.latitude), \(center.longitude)")
 
         // Add tap gesture for zone selection
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
@@ -88,6 +91,11 @@ struct ZoneMapView: UIViewRepresentable {
             let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
             logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) polygons, \(totalBoundaries) boundaries, \(totalPoints) points")
 
+            // Capture the coordinator and initial region before async block
+            let coordinator = context.coordinator
+            let initialCenter = coordinator.initialCenter
+            let initialSpan = coordinator.initialSpan
+
             // Add to map on main thread
             DispatchQueue.main.async {
                 let mainStartTime = CFAbsoluteTimeGetCurrent()
@@ -100,6 +108,14 @@ struct ZoneMapView: UIViewRepresentable {
                 logger.debug("Overlays added in \(String(format: "%.1f", overlayElapsed))ms")
 
                 mapView.addAnnotations(annotations)
+
+                // Re-apply the initial zoom after overlays are added to prevent MKMapView from auto-fitting
+                if let center = initialCenter, let span = initialSpan {
+                    let region = MKCoordinateRegion(center: center, span: span)
+                    mapView.setRegion(region, animated: false)
+                    logger.debug("Re-applied initial region after overlay load - center: \(center.latitude), \(center.longitude)")
+                }
+
                 let totalMainElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
                 logger.info("Main thread overlay add DONE in \(String(format: "%.1f", totalMainElapsed))ms")
             }
@@ -181,6 +197,10 @@ struct ZoneMapView: UIViewRepresentable {
         var currentZoneId: String?
         var zones: [ParkingZone]
         var onZoneTapped: ((ParkingZone) -> Void)?
+
+        // Store initial region to re-apply after overlays load
+        var initialCenter: CLLocationCoordinate2D?
+        var initialSpan: MKCoordinateSpan?
 
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone) -> Void)?) {
             self.currentZoneId = currentZoneId
