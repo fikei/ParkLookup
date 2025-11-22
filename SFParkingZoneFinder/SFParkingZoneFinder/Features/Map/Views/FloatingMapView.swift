@@ -167,14 +167,11 @@ struct ExpandedMapView: View {
 
     @MapContentBuilder
     private func zonePolygons(for zone: ParkingZone) -> some MapContent {
-        ForEach(zone.allBoundaryCoordinates.indices, id: \.self) { idx in
-            let coords = zone.allBoundaryCoordinates[idx]
-            if coords.count >= 3 {
-                // Draw polygon (styling simplified for compatibility)
-                MapPolygon(coordinates: coords)
-                // Draw outline
-                MapPolyline(coordinates: coords + [coords[0]])
-            }
+        // Filter to valid polygons (3+ coordinates) before iteration
+        let validBoundaries = zone.allBoundaryCoordinates.filter { $0.count >= 3 }
+        ForEach(Array(validBoundaries.enumerated()), id: \.offset) { _, coords in
+            MapPolygon(coordinates: coords)
+            MapPolyline(coordinates: coords + [coords[0]])
         }
     }
 
