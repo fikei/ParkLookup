@@ -84,12 +84,19 @@ final class MainResultViewModel: ObservableObject {
     /// Called when view appears
     func onAppear() {
         // Check location authorization
-        if locationService.authorizationStatus == .notDetermined {
-            locationService.requestWhenInUseAuthorization()
-        }
+        let status = locationService.authorizationStatus
 
-        // Initial lookup
-        refreshLocation()
+        if status == .notDetermined {
+            // Request permission - the authorizationPublisher callback will trigger lookup when granted
+            locationService.requestWhenInUseAuthorization()
+            isLoading = true // Show loading while waiting for permission
+        } else if status == .authorizedWhenInUse || status == .authorizedAlways {
+            // Already authorized - perform lookup
+            refreshLocation()
+        } else {
+            // Denied or restricted
+            error = .locationPermissionDenied
+        }
     }
 
     /// Report an issue with zone data
@@ -117,8 +124,18 @@ final class MainResultViewModel: ObservableObject {
         locationService.authorizationPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
-                if status == .authorizedWhenInUse || status == .authorizedAlways {
-                    self?.refreshLocation()
+                guard let self = self else { return }
+                switch status {
+                case .authorizedWhenInUse, .authorizedAlways:
+                    self.error = nil
+                    self.refreshLocation()
+                case .denied, .restricted:
+                    self.isLoading = false
+                    self.error = .locationPermissionDenied
+                case .notDetermined:
+                    break // Still waiting for user response
+                @unknown default:
+                    break
                 }
             }
             .store(in: &cancellables)
