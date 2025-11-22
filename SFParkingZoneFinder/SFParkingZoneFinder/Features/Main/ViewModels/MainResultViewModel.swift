@@ -85,16 +85,20 @@ final class MainResultViewModel: ObservableObject {
     func onAppear() {
         // Check location authorization
         let status = locationService.authorizationStatus
+        print("DEBUG onAppear: authorization status = \(status.rawValue)")
 
         if status == .notDetermined {
             // Request permission - the authorizationPublisher callback will trigger lookup when granted
+            print("DEBUG onAppear: requesting authorization...")
             locationService.requestWhenInUseAuthorization()
             isLoading = true // Show loading while waiting for permission
         } else if status == .authorizedWhenInUse || status == .authorizedAlways {
             // Already authorized - perform lookup
+            print("DEBUG onAppear: already authorized, calling refreshLocation")
             refreshLocation()
         } else {
             // Denied or restricted
+            print("DEBUG onAppear: denied/restricted")
             error = .locationPermissionDenied
         }
     }
@@ -125,14 +129,18 @@ final class MainResultViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 guard let self = self else { return }
+                print("DEBUG authCallback: status changed to \(status.rawValue)")
                 switch status {
                 case .authorizedWhenInUse, .authorizedAlways:
+                    print("DEBUG authCallback: authorized, calling refreshLocation")
                     self.error = nil
                     self.refreshLocation()
                 case .denied, .restricted:
+                    print("DEBUG authCallback: denied/restricted")
                     self.isLoading = false
                     self.error = .locationPermissionDenied
                 case .notDetermined:
+                    print("DEBUG authCallback: still notDetermined")
                     break // Still waiting for user response
                 @unknown default:
                     break
