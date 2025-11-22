@@ -328,18 +328,38 @@ Accessible via gear icon in navigation bar:
 
 ### Future: Backend API
 
-**Primary sources:**
-- [DataSF Open Data Portal](https://data.sfgov.org/)
-  - Parking meters dataset
-  - Street parking zones
-  - Residential permit areas
-- [SFMTA (San Francisco Municipal Transportation Agency)](https://www.sfmta.com/)
-  - Official RPP area boundaries
-  - Meter pricing and hours
-  - Street cleaning schedules
-  - Temporary parking restrictions
+#### 6.1 DataSF (Primary Source)
 
-**See `BACKEND_FUTURE.md` for detailed backend architecture.**
+| Dataset | Description | Key Data |
+|---------|-------------|----------|
+| **Map of Parking Regulations (Blockface)** | Authoritative blockface-level rules | RPP flags & area codes, time limits, special restrictions, geometry (line segments), update metadata |
+| **Parking Meters Dataset** | Point locations of meters | Cap color/type, helps differentiate metered from permit-only blocks |
+
+**DataSF Portal:** [data.sfgov.org](https://data.sfgov.org/)
+
+#### 6.2 SFMTA / ArcGIS Layers
+
+| Layer | Purpose |
+|-------|---------|
+| **RPP Area Polygons** | Official interactive RPP map boundaries |
+| **Interactive RPP Maps** | Zone boundaries for map overlays, visual consistency with SFMTA |
+
+**Used for:**
+- Validating RPP area codes
+- Zone boundaries for map overlays
+- Visual consistency with official SFMTA data
+
+#### 6.3 Base Map Provider
+
+| Provider | Notes |
+|----------|-------|
+| **Apple MapKit** | Default for iOS (no API key required) |
+| **Google Maps SDK** | Optional (requires API key) |
+| **MapLibre/OSM** | Open source alternative |
+
+**Important:** Base maps are for display only. Do not rely on them for official regulations.
+
+**See `Backend.md` for detailed backend architecture and data pipeline.**
 
 ---
 

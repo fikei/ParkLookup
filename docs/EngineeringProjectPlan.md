@@ -164,13 +164,35 @@ This document outlines the engineering implementation plan for SF Parking Zone F
 | **M11: Beta Feedback Addressed** | Critical issues from beta resolved | Bug fixes, UX improvements | Beta testers report satisfaction, crash-free rate >99% |
 | **M12: App Store Launch** | Public release | App Store listing, screenshots, description | App approved and live on App Store |
 
-### V2.0 Milestones
+### V2.0 Milestones (Backend Integration)
 
 | Milestone | Description | Deliverables | Exit Criteria |
 |-----------|-------------|--------------|---------------|
-| **M11: Backend Live** | Backend API deployed and integrated | API endpoints, iOS client updated | iOS app uses remote data with offline fallback |
-| **M12: Multi-City** | Oakland and Berkeley supported | City data, city switcher UI | Users in Oakland/Berkeley see correct zone data |
-| **M13: Android Launch** | Android app on Play Store | Kotlin/Compose app, Play Store listing | Android app achieves feature parity with iOS V1.1 |
+| **M14: Data Pipeline** | ETL pipeline for official data sources | DataSF/SFMTA data fetchers, transformer, validator | Pipeline successfully imports SF parking data |
+| **M15: Backend API** | REST API for zone/rule data | FastAPI service, PostgreSQL+PostGIS, Redis cache | API returns zones for coordinates |
+| **M16: iOS Backend Integration** | iOS app connects to backend | RemoteZoneDataSource, offline fallback, sync | App uses live data with offline support |
+| **M17: Multi-City** | Oakland and Berkeley supported | City data, city switcher UI | Users in Oakland/Berkeley see correct zone data |
+| **M18: Android Launch** | Android app on Play Store | Kotlin/Compose app, Play Store listing | Android app achieves feature parity with iOS |
+
+### Backend Data Sources
+
+The backend will integrate with official San Francisco parking data:
+
+#### DataSF (Primary)
+| Dataset | Description | Key Fields |
+|---------|-------------|------------|
+| **Map of Parking Regulations (Blockface)** | Authoritative blockface-level rules | RPP flags, area codes, time limits, special restrictions, geometry |
+| **Parking Meters Dataset** | Point locations of meters | Cap color/type, differentiates metered vs permit-only |
+
+#### SFMTA / ArcGIS Layers
+| Layer | Purpose |
+|-------|---------|
+| **RPP Area Polygons** | Official zone boundaries for map overlays |
+| **Interactive RPP Maps** | Validation of area codes, visual consistency |
+
+#### Base Map (Display Only)
+- **Apple MapKit** (default), **Google Maps SDK** (optional), **MapLibre/OSM** (open source)
+- Base maps for visual display only—never for official regulations
 
 ---
 
@@ -649,6 +671,56 @@ This document outlines the engineering implementation plan for SF Parking Zone F
 | T12.2.4 | Write test for settings flow | M |
 
 > **Note:** Full UI test suite documented in TestPlan.md (placeholder).
+
+---
+
+### Epic 13: Backend Data Integration (V2.0)
+
+**Goal:** Replace mock data with live data from official SF parking sources via backend API.
+
+#### User Stories
+
+**US13.1: As a developer, I have a data pipeline that fetches official parking data.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T13.1.1 | Create DataSF Blockface data fetcher (parking regulations) | L |
+| T13.1.2 | Create DataSF Meters data fetcher | M |
+| T13.1.3 | Create SFMTA ArcGIS RPP polygon fetcher | L |
+| T13.1.4 | Implement data transformer (normalize schema, merge sources) | L |
+| T13.1.5 | Implement data validator (geometry, required fields) | M |
+| T13.1.6 | Set up scheduled pipeline (daily DataSF, weekly SFMTA) | M |
+
+**US13.2: As a developer, I have a backend API serving zone data.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T13.2.1 | Set up PostgreSQL + PostGIS database | M |
+| T13.2.2 | Implement database schema (cities, zones, rules tables) | M |
+| T13.2.3 | Create FastAPI service with zone lookup endpoint | L |
+| T13.2.4 | Implement spatial queries (point-in-polygon via PostGIS) | M |
+| T13.2.5 | Add Redis caching layer | M |
+| T13.2.6 | Implement API rate limiting | S |
+| T13.2.7 | Deploy to cloud infrastructure (AWS/GCP) | L |
+
+**US13.3: As an iOS user, the app uses live backend data.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T13.3.1 | Create RemoteZoneDataSource conforming to ZoneDataSourceProtocol | M |
+| T13.3.2 | Implement API client with async/await | M |
+| T13.3.3 | Add offline fallback (use cached data when API unavailable) | M |
+| T13.3.4 | Implement delta sync (only fetch changed data) | M |
+| T13.3.5 | Add data version checking and cache invalidation | S |
+| T13.3.6 | Feature flag to switch between mock and remote data | S |
+
+**US13.4: As a user, I see data freshness and source information.**
+
+| Task | Description | Estimate |
+|------|-------------|----------|
+| T13.4.1 | Display data version in Settings/About | S |
+| T13.4.2 | Show "last updated" timestamp for zone data | S |
+| T13.4.3 | Add data source attribution (DataSF, SFMTA) | S |
 
 ---
 

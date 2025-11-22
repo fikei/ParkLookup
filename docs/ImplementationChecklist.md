@@ -22,8 +22,12 @@
 | M11: Error Handling & Polish | Not Started | 0/8 |
 | M12: Testing | Not Started | 0/8 |
 | M13: Beta Release | Not Started | 0/6 |
+| **V2.0 Backend Integration** | | |
+| M14: Data Pipeline | Not Started | 0/6 |
+| M15: Backend API | Not Started | 0/7 |
+| M16: iOS Backend Integration | Not Started | 0/9 |
 
-**Overall Progress:** 74/118 tasks complete
+**Overall Progress:** 74/140 tasks complete (V1.1: 74/118, V2.0: 0/22)
 
 ---
 
@@ -366,29 +370,29 @@
 
 ---
 
-## Milestone 10: Error Handling & Polish
+## Milestone 11: Error Handling & Polish
 
 **Goal:** Graceful error states and UI polish
 
 ### Tasks
 
-- [ ] **10.1** Create LocationDeniedView with explanation and button to open Settings app
+- [ ] **11.1** Create LocationDeniedView with explanation and button to open Settings app
 
-- [ ] **10.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
+- [ ] **11.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
 
-- [ ] **10.3** Create OutsideCoverageView shown when user is not in any supported zone
+- [ ] **11.3** Create OutsideCoverageView shown when user is not in any supported zone
 
-- [ ] **10.4** Create DataLoadingErrorView for mock data parsing failures
+- [ ] **11.4** Create DataLoadingErrorView for mock data parsing failures
 
-- [ ] **10.5** Integrate error views into MainResultView based on state
+- [ ] **11.5** Integrate error views into MainResultView based on state
 
-- [ ] **10.6** Add haptic feedback for validity status changes and refresh completion
+- [ ] **11.6** Add haptic feedback for validity status changes and refresh completion
 
-- [ ] **10.7** Implement Reduce Motion support checking accessibilityReduceMotion environment value
+- [ ] **11.7** Implement Reduce Motion support checking accessibilityReduceMotion environment value
 
-- [ ] **10.8** Polish all views for visual consistency: spacing, typography, colors
+- [ ] **11.8** Polish all views for visual consistency: spacing, typography, colors
 
-**Milestone 10 Complete When:**
+**Milestone 11 Complete When:**
 - [ ] All error scenarios show appropriate message
 - [ ] Error views have actionable next steps
 - [ ] Reduce Motion preference respected
@@ -396,58 +400,154 @@
 
 ---
 
-## Milestone 11: Testing
+## Milestone 12: Testing
 
 **Goal:** Comprehensive test coverage for core functionality
 
 ### Tasks
 
-- [ ] **11.1** Achieve >90% unit test coverage for ZoneLookupEngine
+- [ ] **12.1** Achieve >90% unit test coverage for ZoneLookupEngine
 
-- [ ] **11.2** Achieve >90% unit test coverage for RuleInterpreter
+- [ ] **12.2** Achieve >90% unit test coverage for RuleInterpreter
 
-- [ ] **11.3** Write unit tests for PermitService (save, load, delete, primary permit)
+- [ ] **12.3** Write unit tests for PermitService (save, load, delete, primary permit)
 
-- [ ] **11.4** Write unit tests for MainResultViewModel
+- [ ] **12.4** Write unit tests for MainResultViewModel
 
-- [ ] **11.5** Create UI test for complete onboarding flow
+- [ ] **12.5** Create UI test for complete onboarding flow
 
-- [ ] **11.6** Create UI test for main result view displaying zone correctly
+- [ ] **12.6** Create UI test for main result view displaying zone correctly
 
-- [ ] **11.7** Create UI test for map expand and collapse
+- [ ] **12.7** Create UI test for map expand and collapse
 
-- [ ] **11.8** Create UI test for settings permit management
+- [ ] **12.8** Create UI test for settings permit management
 
-**Milestone 11 Complete When:**
+**Milestone 12 Complete When:**
 - [ ] All unit tests pass
 - [ ] Core business logic has >80% coverage
 - [ ] UI tests pass for critical flows
 
 ---
 
-## Milestone 12: Beta Release Prep
+## Milestone 13: Beta Release Prep
 
 **Goal:** App ready for TestFlight distribution
 
 ### Tasks
 
-- [ ] **12.1** Configure App Store Connect: create app record, set bundle ID, configure app information
+- [ ] **13.1** Configure App Store Connect: create app record, set bundle ID, configure app information
 
-- [ ] **12.2** Add app icons for all required sizes
+- [ ] **13.2** Add app icons for all required sizes
 
-- [ ] **12.3** Create launch screen / splash screen
+- [ ] **13.3** Create launch screen / splash screen
 
-- [ ] **12.4** Write privacy policy and add to app / settings
+- [ ] **13.4** Write privacy policy and add to app / settings
 
-- [ ] **12.5** Archive build and upload to TestFlight
+- [ ] **13.5** Archive build and upload to TestFlight
 
-- [ ] **12.6** Distribute to beta testers (target: 50+ SF residents)
+- [ ] **13.6** Distribute to beta testers (target: 50+ SF residents)
 
-**Milestone 12 Complete When:**
+**Milestone 13 Complete When:**
 - [ ] App available on TestFlight
 - [ ] Beta testers can install and use app
 - [ ] No crash on launch for any tester
 - [ ] Feedback collection mechanism in place
+
+---
+
+# V2.0 Backend Integration
+
+## Milestone 14: Data Pipeline
+
+**Goal:** ETL pipeline to fetch and transform official SF parking data from DataSF and SFMTA
+
+### Data Sources
+
+| Source | Dataset | Key Data |
+|--------|---------|----------|
+| **DataSF** | Map of Parking Regulations (Blockface) | RPP flags, area codes, time limits, special restrictions, geometry |
+| **DataSF** | Parking Meters Dataset | Meter locations, cap color/type |
+| **SFMTA** | RPP Area Polygons (ArcGIS) | Official zone boundaries |
+
+### Tasks
+
+- [ ] **14.1** Create DataSF Blockface data fetcher (parking regulations, blockface geometry)
+
+- [ ] **14.2** Create DataSF Meters data fetcher (meter locations, types)
+
+- [ ] **14.3** Create SFMTA ArcGIS RPP polygon fetcher (zone boundaries)
+
+- [ ] **14.4** Implement data transformer (normalize schema, merge overlapping sources)
+
+- [ ] **14.5** Implement data validator (geometry validation, required fields check)
+
+- [ ] **14.6** Set up scheduled pipeline (daily for DataSF, weekly for SFMTA)
+
+**Milestone 14 Complete When:**
+- [ ] Pipeline successfully fetches data from all sources
+- [ ] Data transforms into normalized schema
+- [ ] Validator catches invalid/missing data
+- [ ] Pipeline runs on schedule without errors
+
+---
+
+## Milestone 15: Backend API
+
+**Goal:** REST API service to serve zone and parking rule data
+
+### Tasks
+
+- [ ] **15.1** Set up PostgreSQL + PostGIS database with spatial indexes
+
+- [ ] **15.2** Implement database schema (cities, zones, rules, data_versions tables)
+
+- [ ] **15.3** Create FastAPI service with zone lookup endpoint (POST /lookup)
+
+- [ ] **15.4** Implement spatial queries using PostGIS (point-in-polygon)
+
+- [ ] **15.5** Add Redis caching layer for zone data and lookup results
+
+- [ ] **15.6** Implement API rate limiting and API key authentication
+
+- [ ] **15.7** Deploy to cloud infrastructure (AWS/GCP with auto-scaling)
+
+**Milestone 15 Complete When:**
+- [ ] API returns correct zones for test coordinates
+- [ ] Response time < 200ms (p95)
+- [ ] Rate limiting enforced
+- [ ] Deployed and accessible from iOS app
+
+---
+
+## Milestone 16: iOS Backend Integration
+
+**Goal:** iOS app connects to backend API with offline fallback
+
+### Tasks
+
+- [ ] **16.1** Create RemoteZoneDataSource conforming to ZoneDataSourceProtocol
+
+- [ ] **16.2** Implement API client with async/await and error handling
+
+- [ ] **16.3** Add offline fallback (use cached data when API unavailable)
+
+- [ ] **16.4** Implement delta sync (only fetch changed zones based on data version)
+
+- [ ] **16.5** Add data version checking and automatic cache invalidation
+
+- [ ] **16.6** Create feature flag to switch between mock and remote data sources
+
+- [ ] **16.7** Display data version and "last updated" in Settings/About
+
+- [ ] **16.8** Add data source attribution (DataSF, SFMTA)
+
+- [ ] **16.9** Test end-to-end: app startup → API fetch → zone display
+
+**Milestone 16 Complete When:**
+- [ ] App uses live backend data when online
+- [ ] App gracefully falls back to cache when offline
+- [ ] Data freshness visible in settings
+- [ ] Feature flag allows switching to mock data for testing
 
 ---
 

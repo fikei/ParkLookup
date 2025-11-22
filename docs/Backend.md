@@ -374,11 +374,46 @@ Health check endpoint.
 
 ### Data Sources
 
+#### 6.1 DataSF (Primary Source)
+
+| Dataset | Description | Key Fields | URL |
+|---------|-------------|------------|-----|
+| **Map of Parking Regulations (Blockface)** | Authoritative blockface-level rules with geometry (line segments) | RPP flags, area codes, time limits, special restrictions, update metadata | data.sfgov.org |
+| **Parking Meters Dataset** | Point locations of all parking meters | Meter location, cap color/type, pricing | data.sfgov.org |
+
+**Use Cases:**
+- Blockface data: Primary source for RPP zones, time limits, special restrictions
+- Meter data: Differentiate metered (paid) blocks from permit-only/time-limited blocks
+
+#### 6.2 SFMTA / ArcGIS Layers
+
+| Layer | Description | Use Case |
+|-------|-------------|----------|
+| **RPP Area Polygons** | Official residential permit parking area boundaries | Zone boundaries for map overlays, visual consistency with SFMTA |
+| **Interactive RPP Maps** | Official SFMTA residential parking permit maps | Validating RPP area codes, boundary reference |
+
+**Notes:**
+- SFMTA data used to validate and cross-reference DataSF records
+- Zone boundary geometry aligns with official SFMTA definitions
+
+#### 6.3 Base Map Provider
+
+| Provider | Role | Notes |
+|----------|------|-------|
+| **Apple MapKit** | Default basemap rendering | iOS default, no API key required |
+| **Google Maps SDK** | Optional basemap rendering | Requires API key, cost considerations |
+| **MapLibre/OSM** | Open source basemap alternative | Free, community-maintained tiles |
+
+**Important:** Base maps are for visual display only. Never rely on basemap providers for official parking regulations.
+
+#### Data Source Summary
+
 | Source | Data Type | Update Frequency | Format |
 |--------|-----------|------------------|--------|
-| **DataSF** | Parking meters, street segments | Daily | CSV/API |
-| **SFMTA** | RPP boundaries, meter pricing | Weekly | GeoJSON/API |
-| **Manual** | Corrections, edge cases | As needed | JSON |
+| **DataSF Blockface** | Parking regulations, RPP zones | Daily | CSV/GeoJSON/API |
+| **DataSF Meters** | Meter locations, types | Daily | CSV/API |
+| **SFMTA ArcGIS** | RPP boundaries, official maps | Weekly | GeoJSON/API |
+| **Manual Overrides** | Corrections, edge cases | As needed | JSON |
 
 ### Pipeline Architecture
 
