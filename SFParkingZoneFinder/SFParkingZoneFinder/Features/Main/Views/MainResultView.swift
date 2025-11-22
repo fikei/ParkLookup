@@ -84,6 +84,9 @@ struct MainResultView: View {
         .onAppear {
             viewModel.onAppear()
         }
+        .onDisappear {
+            viewModel.onDisappear()
+        }
         .sheet(isPresented: $showingFullRules) {
             FullRulesSheet(
                 zoneName: viewModel.zoneName,

@@ -97,11 +97,74 @@ final class MainResultViewModel: ObservableObject {
             locationService.requestWhenInUseAuthorization()
             isLoading = true // Show loading while waiting for permission
         } else if status == .authorizedWhenInUse || status == .authorizedAlways {
-            // Already authorized - perform lookup
-            refreshLocation()
+            // Already authorized - start continuous updates for real-time driving
+            startContinuousLocationUpdates()
         } else {
             // Denied or restricted
             error = .locationPermissionDenied
+        }
+    }
+
+    /// Called when view disappears
+    func onDisappear() {
+        locationService.stopUpdatingLocation()
+    }
+
+    /// Start continuous location updates for real-time driving use
+    private func startContinuousLocationUpdates() {
+        // Start tracking location
+        locationService.startUpdatingLocation()
+
+        // Subscribe to location updates with debouncing
+        locationService.locationPublisher
+            .debounce(for: .seconds(1), scheduler: DispatchQueue.main) // Debounce to avoid excessive updates
+            .sink { [weak self] location in
+                guard let self = self else { return }
+                Task { @MainActor in
+                    await self.processLocationUpdate(location)
+                }
+            }
+            .store(in: &cancellables)
+
+        // Also do an immediate lookup
+        refreshLocation()
+    }
+
+    /// Process a location update from continuous tracking
+    private func processLocationUpdate(_ location: CLLocation) async {
+        // Skip if we're already loading
+        guard !isLoading else { return }
+
+        // Skip if location hasn't changed significantly (backup check, LocationService already filters at 10m)
+        if let current = currentCoordinate {
+            let currentLocation = CLLocation(latitude: current.latitude, longitude: current.longitude)
+            let distance = location.distance(from: currentLocation)
+            // Only update if moved more than 20 meters
+            guard distance > 20 else { return }
+        }
+
+        // Perform the lookup
+        currentCoordinate = location.coordinate
+        error = nil
+
+        do {
+            // Get parking result
+            let result = await zoneService.getParkingResult(
+                at: location.coordinate,
+                time: Date()
+            )
+
+            // Update UI state
+            updateState(from: result)
+
+            // Get address (don't fail if this fails)
+            await updateAddress(for: location)
+
+            lastUpdated = Date()
+
+        } catch {
+            // Don't show error for continuous updates - just log it
+            print("Continuous location update failed: \(error)")
         }
     }
 
@@ -145,7 +208,7 @@ final class MainResultViewModel: ObservableObject {
                 switch status {
                 case .authorizedWhenInUse, .authorizedAlways:
                     self.error = nil
-                    self.refreshLocation()
+                    self.startContinuousLocationUpdates()
                 case .denied, .restricted:
                     self.isLoading = false
                     self.error = .locationPermissionDenied
