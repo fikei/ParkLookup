@@ -23,7 +23,7 @@ final class DependencyContainer: ObservableObject {
 
     // Data Services
     private(set) lazy var zoneDataSource: ZoneDataSourceProtocol = LocalZoneDataSource()
-    private(set) lazy var zoneCache: ZoneCacheProtocol = ZoneCache()
+    private(set) lazy var zoneCache: ZoneCacheProtocol = PersistentZoneCache()
     private(set) lazy var zoneRepository: ZoneRepository = ZoneRepository(
         dataSource: zoneDataSource,
         cache: zoneCache
