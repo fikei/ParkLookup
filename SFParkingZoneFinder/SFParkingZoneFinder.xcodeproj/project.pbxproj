@@ -46,6 +46,15 @@
 		3C41460D2ED14AC3001BDE61 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146092ED14AC3001BDE61 /* AppDelegate.swift */; };
 		3C41460E2ED14AC3001BDE61 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41460A2ED14AC3001BDE61 /* DependencyContainer.swift */; };
 		3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41460B2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift */; };
+		3C4146192ED1559C001BDE61 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */; };
+		3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */; };
+		3C41461B2ED1559C001BDE61 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */; };
+		3C41461C2ED1559C001BDE61 /* PermitSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146152ED1559C001BDE61 /* PermitSetupView.swift */; };
+		3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146162ED1559C001BDE61 /* WelcomeView.swift */; };
+		3C4146202ED15702001BDE61 /* FloatingMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41461E2ED15702001BDE61 /* FloatingMapView.swift */; };
+		3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146212ED16803001BDE61 /* SettingsViewModel.swift */; };
+		3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146232ED16803001BDE61 /* AddPermitView.swift */; };
+		3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146242ED16803001BDE61 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -90,6 +99,15 @@
 		3C41460A2ED14AC3001BDE61 /* DependencyContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
 		3C41460B2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SFParkingZoneFinderApp.swift; sourceTree = "<group>"; };
 		3C4146102ED15289001BDE61 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SFParkingZoneFinder/Info.plist; sourceTree = "<group>"; };
+		3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationPermissionView.swift; sourceTree = "<group>"; };
+		3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
+		3C4146152ED1559C001BDE61 /* PermitSetupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermitSetupView.swift; sourceTree = "<group>"; };
+		3C4146162ED1559C001BDE61 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		3C41461E2ED15702001BDE61 /* FloatingMapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FloatingMapView.swift; sourceTree = "<group>"; };
+		3C4146212ED16803001BDE61 /* SettingsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		3C4146232ED16803001BDE61 /* AddPermitView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPermitView.swift; sourceTree = "<group>"; };
+		3C4146242ED16803001BDE61 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -273,6 +291,7 @@
 		3C4145E32ED14A6F001BDE61 /* Map */ = {
 			isa = PBXGroup;
 			children = (
+				3C41461F2ED15702001BDE61 /* Views */,
 				3C4145E22ED14A6F001BDE61 /* Adapters */,
 			);
 			path = Map;
@@ -281,6 +300,8 @@
 		3C4145E42ED14A6F001BDE61 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				3C4146262ED16803001BDE61 /* Settings */,
+				3C4146182ED1559C001BDE61 /* Onboarding */,
 				3C4145E02ED14A6F001BDE61 /* Main */,
 				3C4145E32ED14A6F001BDE61 /* Map */,
 			);
@@ -297,6 +318,68 @@
 			);
 			name = App;
 			path = SFParkingZoneFinder/App;
+			sourceTree = "<group>";
+		};
+		3C4146122ED1559C001BDE61 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3C4146172ED1559C001BDE61 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */,
+				3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */,
+				3C4146152ED1559C001BDE61 /* PermitSetupView.swift */,
+				3C4146162ED1559C001BDE61 /* WelcomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3C4146182ED1559C001BDE61 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146122ED1559C001BDE61 /* ViewModels */,
+				3C4146172ED1559C001BDE61 /* Views */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		3C41461F2ED15702001BDE61 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C41461E2ED15702001BDE61 /* FloatingMapView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3C4146222ED16803001BDE61 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146212ED16803001BDE61 /* SettingsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3C4146252ED16803001BDE61 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146232ED16803001BDE61 /* AddPermitView.swift */,
+				3C4146242ED16803001BDE61 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3C4146262ED16803001BDE61 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146222ED16803001BDE61 /* ViewModels */,
+				3C4146252ED16803001BDE61 /* Views */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -376,28 +459,36 @@
 				3C4145FE2ED14A70001BDE61 /* ReverseGeocodingService.swift in Sources */,
 				3C4145F12ED14A70001BDE61 /* ParkingZone.swift in Sources */,
 				3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */,
+				3C4146192ED1559C001BDE61 /* OnboardingViewModel.swift in Sources */,
 				3C4145FD2ED14A70001BDE61 /* PermitService.swift in Sources */,
 				3C4145E62ED14A6F001BDE61 /* LocalZoneDataSource.swift in Sources */,
 				3C4145ED2ED14A6F001BDE61 /* CityIdentifier.swift in Sources */,
 				3C4146072ED14A70001BDE61 /* ZoneStatusCardView.swift in Sources */,
+				3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */,
 				3C4145EF2ED14A6F001BDE61 /* ParkingPermit.swift in Sources */,
 				3C4145FC2ED14A70001BDE61 /* LocationService.swift in Sources */,
 				3C4145F82ED14A70001BDE61 /* RuleInterpreterProtocol.swift in Sources */,
 				3C4146052ED14A70001BDE61 /* RulesSummaryView.swift in Sources */,
+				3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */,
 				3C4146012ED14A70001BDE61 /* ZoneService.swift in Sources */,
 				3C4145F32ED14A70001BDE61 /* ZoneLookupResult.swift in Sources */,
+				3C4146202ED15702001BDE61 /* FloatingMapView.swift in Sources */,
 				3C4145F62ED14A70001BDE61 /* PermitServiceProtocol.swift in Sources */,
 				3C4146002ED14A70001BDE61 /* ZoneLookupEngine.swift in Sources */,
 				3C4146032ED14A70001BDE61 /* AdditionalInfoView.swift in Sources */,
+				3C41461B2ED1559C001BDE61 /* OnboardingContainerView.swift in Sources */,
+				3C41461C2ED1559C001BDE61 /* PermitSetupView.swift in Sources */,
 				3C4145F42ED14A70001BDE61 /* LocationServiceProtocol.swift in Sources */,
 				3C4145EB2ED14A6F001BDE61 /* Color+Theme.swift in Sources */,
 				3C4145F52ED14A70001BDE61 /* MapProviderProtocol.swift in Sources */,
 				3C41460E2ED14AC3001BDE61 /* DependencyContainer.swift in Sources */,
 				3C4146062ED14A70001BDE61 /* ValidityBadgeView.swift in Sources */,
+				3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */,
 				3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */,
 				3C4145F92ED14A70001BDE61 /* ZoneDataSourceProtocol.swift in Sources */,
 				3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */,
 				3C4145FB2ED14A70001BDE61 /* ZoneServiceProtocol.swift in Sources */,
+				3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */,
 				3C4145E52ED14A6F001BDE61 /* ZoneCache.swift in Sources */,
 				3C4145FF2ED14A70001BDE61 /* RuleInterpreter.swift in Sources */,
 				3C4145F22ED14A70001BDE61 /* RuleInterpretationResult.swift in Sources */,
@@ -405,6 +496,7 @@
 				3C4145F72ED14A70001BDE61 /* ReverseGeocodingServiceProtocol.swift in Sources */,
 				3C4145EC2ED14A6F001BDE61 /* Address.swift in Sources */,
 				3C41460D2ED14AC3001BDE61 /* AppDelegate.swift in Sources */,
+				3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */,
 				3C4146082ED14A70001BDE61 /* GoogleMapsAdapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
