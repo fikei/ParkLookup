@@ -83,8 +83,6 @@ struct ExpandedMapView: View {
     @State private var zones: [ParkingZone] = []
     @State private var isLoadingZones = true
 
-    private let zoneService: ZoneServiceProtocol
-
     init(
         coordinate: CLLocationCoordinate2D?,
         zoneName: String?,
@@ -95,7 +93,6 @@ struct ExpandedMapView: View {
         self.zoneName = zoneName
         self.validityStatus = validityStatus
         self.applicablePermits = applicablePermits
-        self.zoneService = DependencyContainer.shared.zoneService
 
         let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         _position = State(initialValue: .region(MKCoordinateRegion(
@@ -115,34 +112,8 @@ struct ExpandedMapView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Map(position: $position) {
-                    // Draw all RPP zone polygons
-                    ForEach(zones) { zone in
-                        ForEach(zone.allBoundaryCoordinates.indices, id: \.self) { boundaryIndex in
-                            let coords = zone.allBoundaryCoordinates[boundaryIndex]
-                            if coords.count >= 3 {
-                                MapPolygon(coordinates: coords)
-                                    .stroke(
-                                        zone.permitArea == currentPermitArea ? Color.green : Color.blue,
-                                        lineWidth: zone.permitArea == currentPermitArea ? 3 : 1
-                                    )
-                                    .foregroundStyle(
-                                        zone.permitArea == currentPermitArea
-                                            ? Color.green.opacity(0.3)
-                                            : Color.blue.opacity(0.15)
-                                    )
-                            }
-                        }
-                    }
-
-                    // User location
-                    UserAnnotation()
-                }
-                .mapControls {
-                    MapCompass()
-                    MapScaleView()
-                }
-                .ignoresSafeArea()
+                mapContent
+                    .ignoresSafeArea()
 
                 // Zone info overlay - Mini Zone Card matching main view style
                 VStack {
@@ -158,17 +129,7 @@ struct ExpandedMapView: View {
 
                 // Loading indicator
                 if isLoadingZones {
-                    VStack {
-                        HStack {
-                            ProgressView()
-                                .padding(8)
-                                .background(.ultraThinMaterial)
-                                .cornerRadius(8)
-                            Spacer()
-                        }
-                        .padding()
-                        Spacer()
-                    }
+                    loadingIndicator
                 }
             }
             .navigationTitle("Map")
@@ -186,10 +147,63 @@ struct ExpandedMapView: View {
         }
     }
 
+    // MARK: - Subviews (broken out for type-checker)
+
+    @ViewBuilder
+    private var mapContent: some View {
+        Map(position: $position) {
+            // Draw zone polygons
+            ForEach(zones) { zone in
+                zonePolygons(for: zone)
+            }
+            // User location
+            UserAnnotation()
+        }
+        .mapControls {
+            MapCompass()
+            MapScaleView()
+        }
+    }
+
+    @MapContentBuilder
+    private func zonePolygons(for zone: ParkingZone) -> some MapContent {
+        let isCurrentZone = zone.permitArea == currentPermitArea
+        let strokeColor: Color = isCurrentZone ? .green : .blue
+        let fillColor: Color = isCurrentZone ? .green.opacity(0.3) : .blue.opacity(0.15)
+        let lineWidth: CGFloat = isCurrentZone ? 3 : 1
+
+        ForEach(zone.allBoundaryCoordinates.indices, id: \.self) { idx in
+            let coords = zone.allBoundaryCoordinates[idx]
+            if coords.count >= 3 {
+                MapPolygon(coordinates: coords)
+                    .stroke(strokeColor, lineWidth: lineWidth)
+                    .foregroundStyle(fillColor)
+            }
+        }
+    }
+
+    private var loadingIndicator: some View {
+        VStack {
+            HStack {
+                ProgressView()
+                    .padding(8)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(8)
+                Spacer()
+            }
+            .padding()
+            Spacer()
+        }
+    }
+
+    // MARK: - Data Loading
+
+    @MainActor
     private func loadZones() async {
         isLoadingZones = true
         do {
-            zones = try await zoneService.getAllZones(for: .sanFrancisco)
+            let service = DependencyContainer.shared.zoneService
+            zones = try await service.getAllZones(for: .sanFrancisco)
         } catch {
             print("Failed to load zones for map: \(error)")
         }
@@ -227,58 +241,64 @@ private struct MiniZoneCard: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            // Mini zone circle with letter
-            ZStack {
-                Circle()
-                    .fill(circleBackground)
-                    .frame(width: 56, height: 56)
-                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-
-                Text(zoneCode ?? "?")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(letterColor)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-            }
-
-            // Zone info
-            VStack(alignment: .leading, spacing: 4) {
-                Text(zoneName ?? "Unknown Zone")
-                    .font(.headline)
-                    .foregroundColor(isValidStyle ? .white : .primary)
-
-                // Validity badge inline
-                HStack(spacing: 6) {
-                    Image(systemName: validityStatus.iconName)
-                        .font(.caption)
-                    Text(validityStatus.displayText)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                }
-                .foregroundColor(isValidStyle ? .white.opacity(0.9) : Color.forValidityStatus(validityStatus))
-            }
-
+            zoneCircle
+            zoneInfo
             Spacer()
-
-            // Legend
-            VStack(alignment: .trailing, spacing: 4) {
-                HStack(spacing: 4) {
-                    Circle().fill(Color.green).frame(width: 8, height: 8)
-                    Text("Your Zone")
-                        .font(.caption2)
-                }
-                HStack(spacing: 4) {
-                    Circle().fill(Color.blue.opacity(0.5)).frame(width: 8, height: 8)
-                    Text("Other Zones")
-                        .font(.caption2)
-                }
-            }
-            .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+            legend
         }
         .padding()
         .background(cardBackground)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+    }
+
+    private var zoneCircle: some View {
+        ZStack {
+            Circle()
+                .fill(circleBackground)
+                .frame(width: 56, height: 56)
+                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+
+            Text(zoneCode ?? "?")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(letterColor)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+        }
+    }
+
+    private var zoneInfo: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(zoneName ?? "Unknown Zone")
+                .font(.headline)
+                .foregroundColor(isValidStyle ? .white : .primary)
+
+            // Validity badge inline
+            HStack(spacing: 6) {
+                Image(systemName: validityStatus.iconName)
+                    .font(.caption)
+                Text(validityStatus.displayText)
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .foregroundColor(isValidStyle ? .white.opacity(0.9) : Color.forValidityStatus(validityStatus))
+        }
+    }
+
+    private var legend: some View {
+        VStack(alignment: .trailing, spacing: 4) {
+            HStack(spacing: 4) {
+                Circle().fill(Color.green).frame(width: 8, height: 8)
+                Text("Your Zone")
+                    .font(.caption2)
+            }
+            HStack(spacing: 4) {
+                Circle().fill(Color.blue.opacity(0.5)).frame(width: 8, height: 8)
+                Text("Other Zones")
+                    .font(.caption2)
+            }
+        }
+        .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
     }
 }
 
