@@ -5,6 +5,13 @@ from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 
 try:
+    from shapely.geometry import LineString, MultiLineString, mapping
+    from shapely.ops import unary_union
+    SHAPELY_AVAILABLE = True
+except ImportError:
+    SHAPELY_AVAILABLE = False
+
+try:
     from scipy.spatial import ConvexHull
     SCIPY_AVAILABLE = True
 except ImportError:
@@ -113,79 +120,191 @@ class ParkingDataTransformer:
 
     def derive_zones_from_blockface(self, raw_blockfaces: List[Dict[str, Any]]) -> List[RPPZone]:
         """
-        Derive RPP zones from blockface data when ArcGIS polygons are unavailable.
-        Creates zones with bounding box polygons from the street segment endpoints.
+        Derive RPP zones from blockface data by buffering street segments into polygons.
+
+        Key features:
+        - Buffers line strings into actual block-face polygons (~10m width)
+        - Handles overlapping zones via rpparea1, rpparea2, rpparea3
+        - Keeps each block face as separate polygon (no convex hull)
         """
         logger.info(f"Deriving zones from {len(raw_blockfaces)} blockface records")
 
-        # Group by RPP area
+        if not SHAPELY_AVAILABLE:
+            logger.warning("Shapely not available - falling back to convex hull method")
+            return self._derive_zones_convex_hull(raw_blockfaces)
+
+        # Buffer distance in degrees (~10 meters at SF latitude)
+        # 1 degree latitude ≈ 111km, so 10m ≈ 0.00009
+        BUFFER_DISTANCE = 0.00009
+
+        # Group buffered polygons by RPP area
+        # A single block face can belong to multiple zones (rpparea1, rpparea2, rpparea3)
+        areas_polygons: Dict[str, List[List[Tuple[float, float]]]] = {}
+
+        processed = 0
+        skipped_no_geom = 0
+        skipped_no_area = 0
+
+        for record in raw_blockfaces:
+            # Get ALL RPP areas for this block face (supports overlapping zones)
+            rpp_areas = []
+            for field in ["rpparea1", "rpparea2", "rpparea3", "RPPAREA1", "RPPAREA2", "RPPAREA3"]:
+                area = record.get(field)
+                if area:
+                    area_code = str(area).upper().strip()
+                    if area_code and area_code not in rpp_areas:
+                        rpp_areas.append(area_code)
+
+            if not rpp_areas:
+                skipped_no_area += 1
+                continue
+
+            # Extract geometry and buffer into polygon
+            geom = record.get("shape") or record.get("the_geom") or record.get("geometry")
+            if not geom:
+                skipped_no_geom += 1
+                continue
+
+            # Convert geometry to Shapely LineString and buffer
+            buffered_polygon = self._buffer_geometry_to_polygon(geom, BUFFER_DISTANCE)
+            if not buffered_polygon:
+                skipped_no_geom += 1
+                continue
+
+            # Add this polygon to ALL its RPP areas (handles overlapping zones)
+            for area_code in rpp_areas:
+                if area_code not in areas_polygons:
+                    areas_polygons[area_code] = []
+                areas_polygons[area_code].append(buffered_polygon)
+
+            processed += 1
+
+        logger.info(f"Processed {processed} blockfaces, skipped {skipped_no_area} (no RPP area), {skipped_no_geom} (no geometry)")
+
+        # Create zones from collected polygons
+        zones = []
+        total_polygons = 0
+
+        for area_code in sorted(areas_polygons.keys()):
+            polygons = areas_polygons[area_code]
+            total_polygons += len(polygons)
+
+            zone = RPPZone(
+                area_code=area_code,
+                name=f"Area {area_code}",
+                polygon=polygons,
+                total_blocks=len(polygons)
+            )
+            zones.append(zone)
+            logger.debug(f"Zone {area_code}: {len(polygons)} block faces")
+
+        logger.info(f"Derived {len(zones)} zones with {total_polygons} total block face polygons")
+        return zones
+
+    def _buffer_geometry_to_polygon(self, geom: Any, buffer_distance: float) -> Optional[List[Tuple[float, float]]]:
+        """
+        Convert a geometry (LineString/MultiLineString) to a buffered polygon.
+        Returns list of (lon, lat) tuples forming the polygon exterior ring.
+        """
+        try:
+            coords = []
+
+            if isinstance(geom, dict):
+                geom_type = geom.get("type", "")
+                raw_coords = geom.get("coordinates", [])
+
+                if geom_type == "LineString":
+                    coords = [(c[0], c[1]) for c in raw_coords]
+                elif geom_type == "MultiLineString":
+                    # Flatten all line segments
+                    for line in raw_coords:
+                        coords.extend([(c[0], c[1]) for c in line])
+                elif geom_type == "Point":
+                    # Single point - create small buffer around it
+                    coords = [(raw_coords[0], raw_coords[1])]
+                else:
+                    # Try to extract coords recursively
+                    self._flatten_coords(raw_coords, coords)
+            elif isinstance(geom, str):
+                # WKT format - skip for now
+                return None
+
+            if len(coords) < 2:
+                return None
+
+            # Create Shapely geometry and buffer
+            if len(coords) == 1:
+                from shapely.geometry import Point
+                line = Point(coords[0])
+            else:
+                line = LineString(coords)
+
+            # Buffer the line to create a polygon
+            buffered = line.buffer(buffer_distance, cap_style=2, join_style=2)  # flat cap, mitre join
+
+            if buffered.is_empty:
+                return None
+
+            # Extract exterior coordinates
+            if hasattr(buffered, 'exterior'):
+                exterior_coords = list(buffered.exterior.coords)
+                return [(c[0], c[1]) for c in exterior_coords]
+            elif hasattr(buffered, 'geoms'):
+                # MultiPolygon - take largest
+                largest = max(buffered.geoms, key=lambda p: p.area)
+                return [(c[0], c[1]) for c in largest.exterior.coords]
+
+            return None
+
+        except Exception as e:
+            logger.debug(f"Failed to buffer geometry: {e}")
+            return None
+
+    def _derive_zones_convex_hull(self, raw_blockfaces: List[Dict[str, Any]]) -> List[RPPZone]:
+        """
+        Fallback: Derive zones using convex hull when Shapely is unavailable.
+        """
+        logger.info("Using convex hull fallback method")
+
+        # Group by RPP area (check all three fields)
         areas: Dict[str, List[Tuple[float, float]]] = {}
 
         for record in raw_blockfaces:
-            # hi6h-neyh dataset uses rpparea1, rpparea2, rpparea3
-            rpp_area = (record.get("rpparea1") or record.get("RPPAREA1") or
-                       record.get("rpp_area") or record.get("RPP_AREA"))
-            if not rpp_area:
-                continue
+            # Get ALL RPP areas for this block face
+            for field in ["rpparea1", "rpparea2", "rpparea3", "RPPAREA1", "RPPAREA2", "RPPAREA3"]:
+                rpp_area = record.get(field)
+                if not rpp_area:
+                    continue
 
-            area_code = str(rpp_area).upper().strip()
-            if not area_code:
-                continue
+                area_code = str(rpp_area).upper().strip()
+                if not area_code:
+                    continue
 
-            if area_code not in areas:
-                areas[area_code] = []
+                if area_code not in areas:
+                    areas[area_code] = []
 
-            # Try to extract coordinates from geometry
-            geom = record.get("shape") or record.get("the_geom") or record.get("geometry")
-            if geom:
-                coords = self._extract_coords_from_geom(geom)
-                areas[area_code].extend(coords)
+                geom = record.get("shape") or record.get("the_geom") or record.get("geometry")
+                if geom:
+                    coords = self._extract_coords_from_geom(geom)
+                    areas[area_code].extend(coords)
 
-        # Create zones with convex hull polygons (or bounding box as fallback)
+        # Create zones with convex hull
         zones = []
-        for area_code, coords in areas.items():
+        for area_code in sorted(areas.keys()):
+            coords = areas[area_code]
             if not coords:
-                # Create zone without polygon
+                continue
+
+            hull_polygon = self._create_convex_hull(coords)
+            if hull_polygon:
                 zones.append(RPPZone(
                     area_code=area_code,
                     name=f"Area {area_code}",
-                    polygon=[],
-                    total_blocks=len([r for r in raw_blockfaces
-                                      if (r.get("rpparea1") or r.get("RPPAREA1") or
-                                          r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
+                    polygon=[hull_polygon],
+                    total_blocks=len(coords)
                 ))
-                continue
 
-            # Try to create convex hull polygon
-            hull_polygon = self._create_convex_hull(coords)
-
-            if hull_polygon:
-                polygon = hull_polygon
-            else:
-                # Fallback to bounding box
-                lons = [c[0] for c in coords]
-                lats = [c[1] for c in coords]
-                min_lon, max_lon = min(lons), max(lons)
-                min_lat, max_lat = min(lats), max(lats)
-                buffer = 0.001  # ~100m
-                polygon = [
-                    (min_lon - buffer, min_lat - buffer),
-                    (max_lon + buffer, min_lat - buffer),
-                    (max_lon + buffer, max_lat + buffer),
-                    (min_lon - buffer, max_lat + buffer),
-                    (min_lon - buffer, min_lat - buffer),
-                ]
-
-            zones.append(RPPZone(
-                area_code=area_code,
-                name=f"Area {area_code}",
-                polygon=[polygon],
-                total_blocks=len([r for r in raw_blockfaces
-                                  if (r.get("rpparea1") or r.get("RPPAREA1") or
-                                      r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
-            ))
-
-        logger.info(f"Derived {len(zones)} zones from blockface data")
+        logger.info(f"Derived {len(zones)} zones using convex hull")
         return zones
 
     def _create_convex_hull(self, coords: List[Tuple[float, float]]) -> Optional[List[Tuple[float, float]]]:
