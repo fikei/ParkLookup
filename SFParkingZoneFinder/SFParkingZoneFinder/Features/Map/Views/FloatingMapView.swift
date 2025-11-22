@@ -74,6 +74,9 @@ struct FloatingMapView: View {
 struct ExpandedMapView: View {
     let coordinate: CLLocationCoordinate2D?
     let zoneName: String?
+    let validityStatus: PermitValidityStatus
+    let applicablePermits: [ParkingPermit]
+
     @Environment(\.dismiss) private var dismiss
 
     @State private var position: MapCameraPosition
@@ -82,9 +85,16 @@ struct ExpandedMapView: View {
 
     private let zoneService: ZoneServiceProtocol
 
-    init(coordinate: CLLocationCoordinate2D?, zoneName: String?) {
+    init(
+        coordinate: CLLocationCoordinate2D?,
+        zoneName: String?,
+        validityStatus: PermitValidityStatus = .noPermitRequired,
+        applicablePermits: [ParkingPermit] = []
+    ) {
         self.coordinate = coordinate
         self.zoneName = zoneName
+        self.validityStatus = validityStatus
+        self.applicablePermits = applicablePermits
         self.zoneService = DependencyContainer.shared.zoneService
 
         let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
@@ -134,41 +144,16 @@ struct ExpandedMapView: View {
                 }
                 .ignoresSafeArea()
 
-                // Zone info overlay
+                // Zone info overlay - Mini Zone Card matching main view style
                 VStack {
                     Spacer()
-                    if let zoneName = zoneName {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Current Zone")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Text(zoneName)
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                            }
-                            Spacer()
-
-                            // Legend
-                            VStack(alignment: .trailing, spacing: 4) {
-                                HStack(spacing: 4) {
-                                    Circle().fill(Color.green).frame(width: 10, height: 10)
-                                    Text("Your Zone")
-                                        .font(.caption2)
-                                }
-                                HStack(spacing: 4) {
-                                    Circle().fill(Color.blue.opacity(0.5)).frame(width: 10, height: 10)
-                                    Text("Other Zones")
-                                        .font(.caption2)
-                                }
-                            }
-                            .foregroundColor(.secondary)
-                        }
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(12)
-                        .padding()
-                    }
+                    MiniZoneCard(
+                        zoneName: zoneName,
+                        zoneCode: currentPermitArea,
+                        validityStatus: validityStatus,
+                        applicablePermits: applicablePermits
+                    )
+                    .padding()
                 }
 
                 // Loading indicator
@@ -209,6 +194,91 @@ struct ExpandedMapView: View {
             print("Failed to load zones for map: \(error)")
         }
         isLoadingZones = false
+    }
+}
+
+// MARK: - Mini Zone Card (matches main ZoneStatusCardView style)
+
+private struct MiniZoneCard: View {
+    let zoneName: String?
+    let zoneCode: String?
+    let validityStatus: PermitValidityStatus
+    let applicablePermits: [ParkingPermit]
+
+    /// Whether to use the "valid" green style
+    private var isValidStyle: Bool {
+        validityStatus == .valid || validityStatus == .multipleApply
+    }
+
+    /// Card background color based on validity
+    private var cardBackground: Color {
+        isValidStyle ? Color.green : Color(.systemBackground)
+    }
+
+    /// Circle background color
+    private var circleBackground: Color {
+        isValidStyle ? Color(.systemBackground) : Color.forValidityStatus(validityStatus).opacity(0.15)
+    }
+
+    /// Text color for zone letter
+    private var letterColor: Color {
+        Color.forValidityStatus(validityStatus)
+    }
+
+    var body: some View {
+        HStack(spacing: 16) {
+            // Mini zone circle with letter
+            ZStack {
+                Circle()
+                    .fill(circleBackground)
+                    .frame(width: 56, height: 56)
+                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+
+                Text(zoneCode ?? "?")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(letterColor)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+            }
+
+            // Zone info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(zoneName ?? "Unknown Zone")
+                    .font(.headline)
+                    .foregroundColor(isValidStyle ? .white : .primary)
+
+                // Validity badge inline
+                HStack(spacing: 6) {
+                    Image(systemName: validityStatus.iconName)
+                        .font(.caption)
+                    Text(validityStatus.displayText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(isValidStyle ? .white.opacity(0.9) : Color.forValidityStatus(validityStatus))
+            }
+
+            Spacer()
+
+            // Legend
+            VStack(alignment: .trailing, spacing: 4) {
+                HStack(spacing: 4) {
+                    Circle().fill(Color.green).frame(width: 8, height: 8)
+                    Text("Your Zone")
+                        .font(.caption2)
+                }
+                HStack(spacing: 4) {
+                    Circle().fill(Color.blue.opacity(0.5)).frame(width: 8, height: 8)
+                    Text("Other Zones")
+                        .font(.caption2)
+                }
+            }
+            .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+        }
+        .padding()
+        .background(cardBackground)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 }
 

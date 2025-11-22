@@ -91,7 +91,9 @@ struct MainResultView: View {
         .sheet(isPresented: $showingExpandedMap) {
             ExpandedMapView(
                 coordinate: viewModel.currentCoordinate,
-                zoneName: viewModel.zoneName
+                zoneName: viewModel.zoneName,
+                validityStatus: viewModel.validityStatus,
+                applicablePermits: viewModel.applicablePermits
             )
         }
         .sheet(isPresented: $showingSettings) {
