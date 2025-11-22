@@ -40,12 +40,13 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
         var nearestDistance: Double = .infinity
 
         for zone in zones {
-            if isPoint(coordinate, insidePolygon: zone.boundaryCoordinates) {
+            // Check if point is inside ANY of the zone's boundaries (MultiPolygon)
+            if isPointInsideZone(coordinate, zone: zone) {
                 matchingZones.append(zone)
             }
 
-            // Track distance to nearest boundary
-            let distance = distanceToPolygonBoundary(coordinate, polygon: zone.boundaryCoordinates)
+            // Track distance to nearest boundary across all polygons
+            let distance = distanceToZoneBoundary(coordinate, zone: zone)
             nearestDistance = min(nearestDistance, distance)
         }
 
@@ -74,6 +75,34 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
             coordinate: coordinate,
             nearestBoundaryDistance: nearestDistance
         )
+    }
+
+    // MARK: - MultiPolygon Zone Checks
+
+    /// Check if point is inside ANY of the zone's boundary polygons
+    private func isPointInsideZone(
+        _ point: CLLocationCoordinate2D,
+        zone: ParkingZone
+    ) -> Bool {
+        for boundary in zone.allBoundaryCoordinates {
+            if isPoint(point, insidePolygon: boundary) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /// Get minimum distance to any boundary polygon in the zone
+    private func distanceToZoneBoundary(
+        _ point: CLLocationCoordinate2D,
+        zone: ParkingZone
+    ) -> Double {
+        var minDistance: Double = .infinity
+        for boundary in zone.allBoundaryCoordinates {
+            let distance = distanceToPolygonBoundary(point, polygon: boundary)
+            minDistance = min(minDistance, distance)
+        }
+        return minDistance
     }
 
     // MARK: - Point in Polygon (Ray Casting)

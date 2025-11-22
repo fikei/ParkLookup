@@ -9,7 +9,7 @@ struct ParkingZone: Codable, Identifiable, Hashable {
     let zoneType: ZoneType
     let permitArea: String?
     let validPermitAreas: [String]
-    let boundary: [Coordinate]
+    let boundaries: [[Coordinate]]  // MultiPolygon: array of polygon boundaries
     let rules: [ParkingRule]
     let requiresPermit: Bool
     let restrictiveness: Int  // 1-10 scale, higher = more restrictive
@@ -29,9 +29,14 @@ struct ParkingZone: Codable, Identifiable, Hashable {
 // MARK: - Computed Properties
 
 extension ParkingZone {
-    /// Boundary as CLLocationCoordinate2D array
+    /// All boundaries as arrays of CLLocationCoordinate2D (MultiPolygon)
+    var allBoundaryCoordinates: [[CLLocationCoordinate2D]] {
+        boundaries.map { $0.map { $0.clCoordinate } }
+    }
+
+    /// First boundary for backward compatibility
     var boundaryCoordinates: [CLLocationCoordinate2D] {
-        boundary.map { $0.clCoordinate }
+        allBoundaryCoordinates.first ?? []
     }
 
     /// Get the primary rule description
