@@ -22,11 +22,12 @@ struct ZoneMapView: UIViewRepresentable {
         mapView.showsCompass = true
         mapView.showsScale = true
 
-        // Set initial region (SF or user location)
+        // Set initial region centered on user (zoomed to ~10-15 blocks)
+        // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks
         let center = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         let region = MKCoordinateRegion(
             center: center,
-            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+            span: MKCoordinateSpan(latitudeDelta: 0.006, longitudeDelta: 0.006)
         )
         mapView.setRegion(region, animated: false)
         logger.debug("Map region set in \(String(format: "%.1f", (CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
