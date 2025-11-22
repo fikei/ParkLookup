@@ -76,6 +76,8 @@ struct ValidityBadgeView: View {
         case .multipleApply:
             let permitAreas = permits.map { $0.area }.joined(separator: ", ")
             return "Multiple permits valid. Your permits for Areas \(permitAreas) are all valid here."
+        case .noPermitSet:
+            return "Permit required. Add a permit in settings to check validity."
         }
     }
 }

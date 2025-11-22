@@ -42,6 +42,8 @@ extension Color {
             return .gray
         case .multipleApply:
             return .blue
+        case .noPermitSet:
+            return .orange
         }
     }
 
@@ -92,6 +94,8 @@ extension UIColor {
             return .systemGray
         case .multipleApply:
             return .systemBlue
+        case .noPermitSet:
+            return .systemOrange
         }
     }
 

@@ -66,6 +66,9 @@ enum PermitValidityStatus: String, Codable {
     /// Multiple user permits are valid here
     case multipleApply
 
+    /// User has no permits configured - prompt to add one
+    case noPermitSet
+
     var displayText: String {
         switch self {
         case .valid:
@@ -78,6 +81,8 @@ enum PermitValidityStatus: String, Codable {
             return "NO PERMIT REQUIRED"
         case .multipleApply:
             return "MULTIPLE PERMITS APPLY"
+        case .noPermitSet:
+            return "PERMIT REQUIRED"
         }
     }
 
@@ -88,6 +93,7 @@ enum PermitValidityStatus: String, Codable {
         case .conditional: return "Conditional"
         case .noPermitRequired: return "No Permit Needed"
         case .multipleApply: return "Multiple Valid"
+        case .noPermitSet: return "Permit Required"
         }
     }
 
@@ -103,6 +109,8 @@ enum PermitValidityStatus: String, Codable {
             return "parkingsign.circle.fill"
         case .multipleApply:
             return "checkmark.circle.badge.checkmark.fill"
+        case .noPermitSet:
+            return "parkingsign.circle"
         }
     }
 }

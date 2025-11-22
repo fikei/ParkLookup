@@ -260,6 +260,8 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             statusText = "Conditional restrictions apply."
         case .multipleApply:
             statusText = "Multiple permits apply."
+        case .noPermitSet:
+            statusText = "Permit required in this area."
         }
 
         let announcement = "Entering \(currentZoneName). \(statusText)"

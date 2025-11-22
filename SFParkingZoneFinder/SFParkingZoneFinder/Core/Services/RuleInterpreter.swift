@@ -21,13 +21,18 @@ final class RuleInterpreter: RuleInterpreterProtocol {
 
         // Determine validity status
         let status: PermitValidityStatus
-        switch matchingPermits.count {
-        case 0:
-            status = .invalid
-        case 1:
-            status = .valid
-        default:
-            status = .multipleApply
+        if userPermits.isEmpty {
+            // User has no permits configured - show neutral status
+            status = .noPermitSet
+        } else {
+            switch matchingPermits.count {
+            case 0:
+                status = .invalid
+            case 1:
+                status = .valid
+            default:
+                status = .multipleApply
+            }
         }
 
         // Check for conditional rules (flag but don't enforce)
