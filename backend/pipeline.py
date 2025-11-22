@@ -99,6 +99,19 @@ class ParkingDataPipeline:
             logger.info(f"Meters: {len(app_data['meters'])}")
             logger.info("=" * 60)
 
+            # Zone summary
+            logger.info("\nZone Summary:")
+            logger.info("-" * 40)
+            total_polygons = 0
+            for zone in sorted(app_data['zones'], key=lambda z: z.get('code', '')):
+                code = zone.get('code', '?')
+                polygon = zone.get('polygon', [])
+                num_polygons = len(polygon)
+                total_polygons += num_polygons
+                logger.info(f"  {code:4s}: {num_polygons:,} polygons")
+            logger.info("-" * 40)
+            logger.info(f"  Total: {total_polygons:,} polygons across {len(app_data['zones'])} zones")
+
             return True
 
         except Exception as e:

@@ -206,6 +206,22 @@ def convert_pipeline_to_ios(input_data: Dict[str, Any]) -> Dict[str, Any]:
     permit_areas = build_permit_areas(ios_zones)
     print(f"  Permit areas: {len(permit_areas)}")
 
+    # Zone summary
+    print("\nZone Summary:")
+    print("-" * 50)
+    total_boundaries = 0
+    total_points = 0
+    for zone in sorted(ios_zones, key=lambda z: z.get('permitArea', '')):
+        code = zone.get('permitArea', '?')
+        boundaries = zone.get('boundaries', [])
+        num_boundaries = len(boundaries)
+        num_points = sum(len(b) for b in boundaries)
+        total_boundaries += num_boundaries
+        total_points += num_points
+        print(f"  {code:4s}: {num_boundaries:,} parcels, {num_points:,} points")
+    print("-" * 50)
+    print(f"  Total: {total_boundaries:,} parcels, {total_points:,} points across {len(ios_zones)} zones")
+
     # Build iOS output structure
     return {
         "version": pipeline_version,
