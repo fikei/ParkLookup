@@ -187,14 +187,14 @@ private struct MiniZoneCard: View {
         isValidStyle ? Color.green : Color(.systemBackground)
     }
 
-    /// Circle background color
+    /// Circle background color - uses zone color
     private var circleBackground: Color {
-        isValidStyle ? Color(.systemBackground) : Color.forValidityStatus(validityStatus).opacity(0.15)
+        ZoneColorProvider.swiftUIColor(for: zoneCode)
     }
 
-    /// Text color for zone letter
+    /// Text color for zone letter - white on zone color background
     private var letterColor: Color {
-        Color.forValidityStatus(validityStatus)
+        .white
     }
 
     var body: some View {
