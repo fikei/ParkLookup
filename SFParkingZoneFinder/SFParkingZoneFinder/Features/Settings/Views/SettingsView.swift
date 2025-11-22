@@ -39,7 +39,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: - Map Preferences Section
-                Section("Map") {
+                Section {
                     Toggle("Show Floating Map", isOn: $viewModel.showFloatingMap)
 
                     Picker("Map Position", selection: $viewModel.mapPosition) {
@@ -47,10 +47,12 @@ struct SettingsView: View {
                             Text(position.displayName).tag(position)
                         }
                     }
+                } header: {
+                    Text("Map")
                 }
 
                 // MARK: - Help Section
-                Section("Help & Support") {
+                Section {
                     Button {
                         viewModel.openSupport()
                     } label: {
@@ -64,10 +66,12 @@ struct SettingsView: View {
                         Label("Rate This App", systemImage: "star")
                             .foregroundColor(.primary)
                     }
+                } header: {
+                    Text("Help & Support")
                 }
 
                 // MARK: - About Section
-                Section("About") {
+                Section {
                     HStack {
                         Text("Version")
                         Spacer()
@@ -94,15 +98,19 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                } header: {
+                    Text("About")
                 }
 
                 // MARK: - Debug Section
                 #if DEBUG
-                Section("Debug") {
+                Section {
                     Button("Reset Onboarding") {
                         viewModel.resetOnboarding()
                     }
                     .foregroundColor(.red)
+                } header: {
+                    Text("Debug")
                 }
                 #endif
             }
