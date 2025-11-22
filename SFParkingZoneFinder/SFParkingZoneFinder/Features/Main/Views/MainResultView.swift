@@ -50,10 +50,9 @@ struct MainResultView: View {
                 .padding()
             }
 
-            // Floating Map (bottom right)
+            // Floating Map (top right)
             if viewModel.showFloatingMap && viewModel.error == nil && !viewModel.isLoading {
                 VStack {
-                    Spacer()
                     HStack {
                         Spacer()
                         FloatingMapView(
@@ -62,8 +61,9 @@ struct MainResultView: View {
                             onTap: { showingExpandedMap = true }
                         )
                         .padding(.trailing, 16)
-                        .padding(.bottom, 32)
+                        .padding(.top, 60)
                     }
+                    Spacer()
                 }
             }
 
