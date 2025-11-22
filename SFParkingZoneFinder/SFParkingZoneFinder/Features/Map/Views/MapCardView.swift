@@ -7,7 +7,7 @@ struct MapCardView: View {
     let zoneName: String?
     let onTap: () -> Void
 
-    @State private var region: MKCoordinateRegion
+    @State private var position: MapCameraPosition
 
     init(
         coordinate: CLLocationCoordinate2D?,
@@ -18,21 +18,24 @@ struct MapCardView: View {
         self.zoneName = zoneName
         self.onTap = onTap
 
-        // Initialize region with coordinate or SF default (2x zoom)
+        // Initialize camera position with coordinate or SF default (2x zoom)
         let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        _region = State(initialValue: MKCoordinateRegion(
+        _position = State(initialValue: .region(MKCoordinateRegion(
             center: center,
             span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
-        ))
+        )))
     }
 
     var body: some View {
         Button(action: onTap) {
             ZStack {
-                // Map
-                Map(coordinateRegion: .constant(region), showsUserLocation: true)
-                    .disabled(true)
-                    .allowsHitTesting(false)
+                // Map (iOS 17+ API)
+                Map(position: $position) {
+                    UserAnnotation()
+                }
+                .mapControls { }  // Hide controls for cleaner look
+                .disabled(true)
+                .allowsHitTesting(false)
 
                 // Expand hint overlay
                 VStack {
@@ -62,7 +65,10 @@ struct MapCardView: View {
         .onChange(of: coordinate?.latitude) { _, _ in
             if let coord = coordinate {
                 withAnimation {
-                    region.center = coord
+                    position = .region(MKCoordinateRegion(
+                        center: coord,
+                        span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
+                    ))
                 }
             }
         }

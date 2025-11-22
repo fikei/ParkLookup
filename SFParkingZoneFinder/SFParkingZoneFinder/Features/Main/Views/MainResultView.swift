@@ -131,6 +131,8 @@ struct OverlappingZonesButton: View {
 struct LoadingOverlay: View {
     @State private var isAnimating = false
 
+    private let brandColor = Color.blue
+
     var body: some View {
         ZStack {
             // Solid background for visibility
@@ -141,17 +143,17 @@ struct LoadingOverlay: View {
                 // Animated parking icon
                 ZStack {
                     Circle()
-                        .fill(Color.accentColor.opacity(0.15))
+                        .fill(brandColor.opacity(0.15))
                         .frame(width: 120, height: 120)
                         .scaleEffect(isAnimating ? 1.1 : 1.0)
 
                     Circle()
-                        .fill(Color.accentColor.opacity(0.3))
+                        .fill(brandColor.opacity(0.3))
                         .frame(width: 80, height: 80)
 
                     Text("P")
                         .font(.system(size: 48, weight: .bold))
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(brandColor)
                 }
 
                 VStack(spacing: 8) {

@@ -7,7 +7,7 @@ struct FloatingMapView: View {
     let zoneName: String?
     let onTap: () -> Void
 
-    @State private var region: MKCoordinateRegion
+    @State private var position: MapCameraPosition
 
     init(
         coordinate: CLLocationCoordinate2D?,
@@ -18,21 +18,24 @@ struct FloatingMapView: View {
         self.zoneName = zoneName
         self.onTap = onTap
 
-        // Initialize region with coordinate or SF default (2x zoom)
+        // Initialize camera position with coordinate or SF default (2x zoom)
         let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        _region = State(initialValue: MKCoordinateRegion(
+        _position = State(initialValue: .region(MKCoordinateRegion(
             center: center,
             span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
-        ))
+        )))
     }
 
     var body: some View {
         Button(action: onTap) {
             ZStack {
-                // Map
-                Map(coordinateRegion: .constant(region), showsUserLocation: true)
-                    .disabled(true) // Prevent interaction, tap opens expanded view
-                    .allowsHitTesting(false)
+                // Map (iOS 17+ API)
+                Map(position: $position) {
+                    UserAnnotation()
+                }
+                .mapControls { }
+                .disabled(true)
+                .allowsHitTesting(false)
 
                 // Expand hint
                 VStack {
@@ -56,7 +59,10 @@ struct FloatingMapView: View {
         .onChange(of: coordinate?.latitude) { _, _ in
             if let coord = coordinate {
                 withAnimation {
-                    region.center = coord
+                    position = .region(MKCoordinateRegion(
+                        center: coord,
+                        span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
+                    ))
                 }
             }
         }
@@ -70,24 +76,26 @@ struct ExpandedMapView: View {
     let zoneName: String?
     @Environment(\.dismiss) private var dismiss
 
-    @State private var region: MKCoordinateRegion
+    @State private var position: MapCameraPosition
 
     init(coordinate: CLLocationCoordinate2D?, zoneName: String?) {
         self.coordinate = coordinate
         self.zoneName = zoneName
 
         let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        _region = State(initialValue: MKCoordinateRegion(
+        _position = State(initialValue: .region(MKCoordinateRegion(
             center: center,
             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-        ))
+        )))
     }
 
     var body: some View {
         NavigationView {
             ZStack {
-                Map(coordinateRegion: $region, showsUserLocation: true)
-                    .ignoresSafeArea()
+                Map(position: $position) {
+                    UserAnnotation()
+                }
+                .ignoresSafeArea()
 
                 // Zone info overlay
                 VStack {
