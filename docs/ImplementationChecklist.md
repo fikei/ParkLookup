@@ -638,6 +638,10 @@ For a functional Alpha release with real data, complete these in order:
 
 **Goal:** Display parking zone boundaries as visual polygons on the expanded map view
 
+### Technical Notes
+
+> **MapContentBuilder Limitations (discovered in Alpha):** SwiftUI's `@MapContentBuilder` has limited support for control flow (no `if let`, complex `ForEach` with conditionals). Initial attempts to render zone polygons using `MapPolygon` and `MapPolyline` with `foregroundStyle()` failed due to these limitations. Consider using `MKMapView` with `UIViewRepresentable` and `MKPolygonRenderer` for reliable polygon rendering, or explore MapKit overlay approach outside of `@MapContentBuilder`.
+
 ### Tasks
 
 #### Zone Boundary Display
