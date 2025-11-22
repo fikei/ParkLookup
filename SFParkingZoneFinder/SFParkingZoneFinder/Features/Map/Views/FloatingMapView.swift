@@ -77,23 +77,60 @@ struct ExpandedMapView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var position: MapCameraPosition
+    @State private var zones: [ParkingZone] = []
+    @State private var isLoadingZones = true
+
+    private let zoneService: ZoneServiceProtocol
 
     init(coordinate: CLLocationCoordinate2D?, zoneName: String?) {
         self.coordinate = coordinate
         self.zoneName = zoneName
+        self.zoneService = DependencyContainer.shared.zoneService
 
         let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         _position = State(initialValue: .region(MKCoordinateRegion(
             center: center,
-            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
         )))
+    }
+
+    /// Extract permit area code from zone name (e.g., "Area Q" -> "Q")
+    private var currentPermitArea: String? {
+        guard let zoneName = zoneName, zoneName.hasPrefix("Area ") else {
+            return zoneName
+        }
+        return String(zoneName.dropFirst(5))
     }
 
     var body: some View {
         NavigationView {
             ZStack {
                 Map(position: $position) {
+                    // Draw all RPP zone polygons
+                    ForEach(zones) { zone in
+                        ForEach(zone.allBoundaryCoordinates.indices, id: \.self) { boundaryIndex in
+                            let coords = zone.allBoundaryCoordinates[boundaryIndex]
+                            if coords.count >= 3 {
+                                MapPolygon(coordinates: coords)
+                                    .stroke(
+                                        zone.permitArea == currentPermitArea ? Color.green : Color.blue,
+                                        lineWidth: zone.permitArea == currentPermitArea ? 3 : 1
+                                    )
+                                    .foregroundStyle(
+                                        zone.permitArea == currentPermitArea
+                                            ? Color.green.opacity(0.3)
+                                            : Color.blue.opacity(0.15)
+                                    )
+                            }
+                        }
+                    }
+
+                    // User location
                     UserAnnotation()
+                }
+                .mapControls {
+                    MapCompass()
+                    MapScaleView()
                 }
                 .ignoresSafeArea()
 
@@ -111,11 +148,41 @@ struct ExpandedMapView: View {
                                     .fontWeight(.bold)
                             }
                             Spacer()
+
+                            // Legend
+                            VStack(alignment: .trailing, spacing: 4) {
+                                HStack(spacing: 4) {
+                                    Circle().fill(Color.green).frame(width: 10, height: 10)
+                                    Text("Your Zone")
+                                        .font(.caption2)
+                                }
+                                HStack(spacing: 4) {
+                                    Circle().fill(Color.blue.opacity(0.5)).frame(width: 10, height: 10)
+                                    Text("Other Zones")
+                                        .font(.caption2)
+                                }
+                            }
+                            .foregroundColor(.secondary)
                         }
                         .padding()
                         .background(.ultraThinMaterial)
                         .cornerRadius(12)
                         .padding()
+                    }
+                }
+
+                // Loading indicator
+                if isLoadingZones {
+                    VStack {
+                        HStack {
+                            ProgressView()
+                                .padding(8)
+                                .background(.ultraThinMaterial)
+                                .cornerRadius(8)
+                            Spacer()
+                        }
+                        .padding()
+                        Spacer()
                     }
                 }
             }
@@ -128,7 +195,20 @@ struct ExpandedMapView: View {
                     }
                 }
             }
+            .task {
+                await loadZones()
+            }
         }
+    }
+
+    private func loadZones() async {
+        isLoadingZones = true
+        do {
+            zones = try await zoneService.getAllZones(for: .sanFrancisco)
+        } catch {
+            print("Failed to load zones for map: \(error)")
+        }
+        isLoadingZones = false
     }
 }
 
