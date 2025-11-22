@@ -22,13 +22,22 @@ final class OnboardingViewModel: ObservableObject {
     // MARK: - Initialization
 
     init(
-        locationService: LocationServiceProtocol = DependencyContainer.shared.locationService,
-        permitService: PermitServiceProtocol = DependencyContainer.shared.permitService
+        locationService: LocationServiceProtocol,
+        permitService: PermitServiceProtocol
     ) {
         self.locationService = locationService
         self.permitService = permitService
 
         setupBindings()
+    }
+
+    /// Convenience initializer using shared dependency container
+    convenience init() {
+        let container = DependencyContainer.shared
+        self.init(
+            locationService: container.locationService,
+            permitService: container.permitService
+        )
     }
 
     // MARK: - Public Methods
