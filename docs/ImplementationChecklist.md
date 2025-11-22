@@ -7,31 +7,45 @@
 
 ## Progress Summary
 
-| Milestone | Status | Tasks |
-|-----------|--------|-------|
-| M1: Project Foundation | **COMPLETE** | 12/12 |
-| M2: Data Layer | **COMPLETE** | 8/8 |
-| M3: Location Services | **COMPLETE** | 6/6 |
-| M4: Zone Lookup Engine | **COMPLETE** | 8/8 |
-| M5: Rule Interpretation | **COMPLETE** | 6/6 |
-| M6: Main Result View | **COMPLETE** | 14/14 |
-| M7: Floating Map | **COMPLETE** | 10/10 |
-| M8: Onboarding Flow | **COMPLETE** | 10/10 |
-| M9: Settings Screen | **COMPLETE** | 8/8 |
-| M10: Error Handling & Polish | Not Started | 0/8 |
-| M11: Map Updates | Not Started | 0/14 |
-| M12: Testing | Not Started | 0/8 |
-| M13: Beta Release | Not Started | 0/6 |
-| **MVP Backend Integration** | | |
-| M14: Data Pipeline | Not Started | 0/6 |
-| M15: Backend API | Not Started | 0/7 |
-| M16: iOS Backend Integration | Not Started | 0/9 |
+### 🚀 Epic: Alpha Release
 
-**Overall Progress:** 82/140 tasks complete (V1.1: 82/118, Backend: 0/22)
+| Story | Status | Tasks |
+|-------|--------|-------|
+| S1: Project Foundation | **COMPLETE** | 12/12 |
+| S2: Data Layer | **COMPLETE** | 8/8 |
+| S3: Location Services | **COMPLETE** | 6/6 |
+| S4: Zone Lookup Engine | **COMPLETE** | 8/8 |
+| S5: Rule Interpretation | **COMPLETE** | 6/6 |
+| S6: Main Result View | **COMPLETE** | 14/14 |
+| S7: Floating Map | **COMPLETE** | 10/10 |
+| S8: Onboarding Flow | **COMPLETE** | 10/10 |
+| S9: Settings Screen | **COMPLETE** | 8/8 |
+| S10: Testing | Not Started | 0/8 |
+| S11: Data Pipeline | Not Started | 0/6 |
+| S12: Backend API | Not Started | 0/7 |
+| S13: iOS Backend Integration | Not Started | 0/9 |
+
+**Alpha Progress:** 82/104 tasks complete (79%)
+
+### 🎯 Epic: Beta Release
+
+| Story | Status | Tasks |
+|-------|--------|-------|
+| S14: Error Handling | Not Started | 0/5 |
+| S15: UI Polish & Animations | Not Started | 0/8 |
+| S16: CarPlay Support | Not Started | 0/10 |
+| S17: Map Zone Boundaries | Not Started | 0/14 |
+| S18: Beta Release Prep | Not Started | 0/6 |
+
+**Beta Progress:** 0/43 tasks complete (0%)
 
 ---
 
-## Milestone 1: Project Foundation
+**Overall Progress:** 82/147 tasks complete (56%)
+
+---
+
+## Story 1 (S1): Project Foundation
 
 **Goal:** Xcode project set up with dependencies and base architecture
 
@@ -61,14 +75,14 @@
 
 - [x] **1.12** Create a basic README.md with project setup instructions
 
-**Milestone 1 Complete When:**
+**Story Complete When:**
 - [x] Project builds without errors
 - [x] Google Maps SDK initializes (map view renders)
 - [x] All protocols and models compile
 
 ---
 
-## Milestone 2: Data Layer
+## Story 2 (S2): Data Layer
 
 **Goal:** Mock parking zone data loads and parses correctly
 
@@ -90,14 +104,14 @@
 
 - [ ] **2.8** Write unit tests for LocalZoneDataSource verifying zones load correctly
 
-**Milestone 2 Complete When:**
+**Story Complete When:**
 - [ ] sf_parking_zones.json contains valid sample data for SF
 - [ ] Calling ZoneRepository.getZones() returns parsed ParkingZone array
 - [ ] Unit tests pass
 
 ---
 
-## Milestone 3: Location Services
+## Story 3 (S3): Location Services
 
 **Goal:** App can acquire device location and reverse geocode to address
 
@@ -115,7 +129,7 @@
 
 - [ ] **3.6** Write unit tests for LocationService using mock CLLocationManager
 
-**Milestone 3 Complete When:**
+**Story Complete When:**
 - [ ] App requests location permission correctly
 - [ ] LocationService returns device coordinates
 - [ ] ReverseGeocodingService returns formatted address
@@ -123,7 +137,7 @@
 
 ---
 
-## Milestone 4: Zone Lookup Engine
+## Story 4 (S4): Zone Lookup Engine
 
 **Goal:** Given coordinates, determine which parking zone(s) contain that point
 
@@ -145,7 +159,7 @@
 
 - [ ] **4.8** Write comprehensive unit tests for ZoneLookupEngine covering: point inside zone, point outside all zones, point on boundary, overlapping zones
 
-**Milestone 4 Complete When:**
+**Story Complete When:**
 - [ ] findZone(at:) returns correct zone for test coordinates
 - [ ] Boundary cases default to most restrictive zone
 - [ ] Overlapping zones all returned in result
@@ -153,7 +167,7 @@
 
 ---
 
-## Milestone 5: Rule Interpretation Engine
+## Story 5 (S5): Rule Interpretation Engine
 
 **Goal:** Determine permit validity and generate human-readable rule summaries
 
@@ -171,7 +185,7 @@
 
 - [ ] **5.6** Write unit tests for RuleInterpreter covering all validity statuses and edge cases
 
-**Milestone 5 Complete When:**
+**Story Complete When:**
 - [ ] interpretRules() returns correct validity for all permit scenarios
 - [ ] Rule summaries are readable and accurate
 - [ ] Conditional rules flagged but not enforced
@@ -179,7 +193,7 @@
 
 ---
 
-## Milestone 6: Main Result View (Primary UI)
+## Story 6 (S6): Main Result View (Primary UI)
 
 **Goal:** Full-screen text result view displaying zone, validity, and rules
 
@@ -213,7 +227,7 @@
 
 - [ ] **6.14** Create a temporary debug entry point to test MainResultView with mock data
 
-**Milestone 6 Complete When:**
+**Story Complete When:**
 - [ ] Main screen shows zone name, validity badge, and rules
 - [ ] Overlapping zones display correctly
 - [ ] Pull to refresh works
@@ -222,7 +236,7 @@
 
 ---
 
-## Milestone 7: Floating Map Component
+## Story 7 (S7): Floating Map Component
 
 **Goal:** Minimized floating map with expansion to full-screen
 
@@ -248,7 +262,7 @@
 
 - [ ] **7.10** Add tap gesture to FloatingMapWidget that presents ExpandedMapView as sheet
 
-**Milestone 7 Complete When:**
+**Story Complete When:**
 - [ ] Floating map renders at correct size and position
 - [ ] User location dot visible on map
 - [ ] Current zone boundary drawn on map
@@ -258,7 +272,7 @@
 
 ---
 
-## Milestone 8: Onboarding Flow
+## Story 8 (S8): Onboarding Flow
 
 **Goal:** First-launch experience with permissions and permit setup
 
@@ -284,7 +298,7 @@
 
 - [ ] **8.10** Create OnboardingContainerView that manages navigation through all onboarding steps and transitions to MainResultView
 
-**Milestone 8 Complete When:**
+**Story Complete When:**
 - [x] New user sees welcome screen on first launch
 - [x] Location permission requested with explanation
 - [x] User can select multiple permit areas
@@ -294,7 +308,7 @@
 
 ---
 
-## Milestone 9: Settings Screen
+## Story 9 (S9): Settings Screen
 
 **Goal:** User can manage permits and preferences
 
@@ -316,7 +330,7 @@
 
 - [x] **9.8** Add settings gear icon to MainResultView bottom section linking to SettingsView
 
-**Milestone 9 Complete When:**
+**Story Complete When:**
 - [x] Settings accessible from main view
 - [x] User can add, edit, delete permits
 - [x] Map preferences persist and apply
@@ -324,83 +338,7 @@
 
 ---
 
-## Milestone 10: Error Handling & Polish
-
-**Goal:** Graceful error states and UI polish
-
-### Tasks
-
-- [ ] **10.1** Create LocationDeniedView with explanation and button to open Settings app
-
-- [ ] **10.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
-
-- [ ] **10.3** Create OutsideCoverageView shown when user is not in any supported zone
-
-- [ ] **10.4** Create DataLoadingErrorView for mock data parsing failures
-
-- [ ] **10.5** Integrate error views into MainResultView based on state
-
-- [ ] **10.6** Add haptic feedback for validity status changes and refresh completion
-
-- [ ] **10.7** Implement Reduce Motion support checking accessibilityReduceMotion environment value
-
-- [ ] **10.8** Polish all views for visual consistency: spacing, typography, colors
-
-**Milestone 10 Complete When:**
-- [ ] All error scenarios show appropriate message
-- [ ] Error views have actionable next steps
-- [ ] Reduce Motion preference respected
-- [ ] UI is visually polished and consistent
-
----
-
-## Milestone 11: Map Updates
-
-**Goal:** Display parking zone boundaries as visual polygons on the expanded map view, with support for multiple map providers
-
-### Tasks
-
-#### Zone Boundary Display
-- [ ] **11.1** Create ZoneOverlay model with polygon coordinates compatible with both MapKit and Google Maps
-
-- [ ] **11.2** Implement zone polygon overlays for each parking zone from mock data boundaries
-
-- [ ] **11.3** Add overlay renderer to style zone polygons with semi-transparent fill and border
-
-- [ ] **11.4** Style current zone with accent color fill (20% opacity) and thick border
-
-- [ ] **11.5** Style adjacent/nearby zones with lighter differentiated colors
-
-- [ ] **11.6** Calculate zone polygon centroids and add zone label annotations (large, bold letters)
-
-- [ ] **11.7** Implement tap gesture on zone overlays to show ZoneInfoCard popup
-
-- [ ] **11.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
-
-#### Map Provider Abstraction
-- [ ] **11.9** Create MapProviderProtocol abstraction layer for switching between map providers
-
-- [ ] **11.10** Implement AppleMapKitAdapter conforming to MapProviderProtocol (current default)
-
-- [ ] **11.11** Implement GoogleMapsAdapter conforming to MapProviderProtocol (requires Google Maps SDK)
-
-- [ ] **11.12** Implement MapLibreAdapter conforming to MapProviderProtocol (open source alternative using OpenStreetMap tiles)
-
-- [ ] **11.13** Add map provider selection to Settings (Apple Maps, Google Maps, MapLibre/OSM)
-
-- [ ] **11.14** Persist map provider preference and apply on app launch
-
-**Milestone 11 Complete When:**
-- [ ] Expanded map shows all zone boundaries as colored polygons
-- [ ] Current zone highlighted distinctly from other zones
-- [ ] Zone letters visible on map at various zoom levels
-- [ ] Tapping a zone shows info card with zone details
-- [ ] User can switch between Apple Maps, Google Maps, and MapLibre in Settings
-- [ ] Zone boundaries render correctly on all supported map providers
-
----
-
-## Milestone 12: Testing
+## Story 10 (S10): Testing
 
 **Goal:** Comprehensive test coverage for core functionality
 
@@ -422,42 +360,16 @@
 
 - [ ] **12.8** Create UI test for settings permit management
 
-**Milestone 12 Complete When:**
+**Story Complete When:**
 - [ ] All unit tests pass
 - [ ] Core business logic has >80% coverage
 - [ ] UI tests pass for critical flows
 
 ---
 
-## Milestone 13: Beta Release Prep
+# Alpha Release: Backend Integration
 
-**Goal:** App ready for TestFlight distribution
-
-### Tasks
-
-- [ ] **13.1** Configure App Store Connect: create app record, set bundle ID, configure app information
-
-- [ ] **13.2** Add app icons for all required sizes
-
-- [ ] **13.3** Create launch screen / splash screen
-
-- [ ] **13.4** Write privacy policy and add to app / settings
-
-- [ ] **13.5** Archive build and upload to TestFlight
-
-- [ ] **13.6** Distribute to beta testers (target: 50+ SF residents)
-
-**Milestone 13 Complete When:**
-- [ ] App available on TestFlight
-- [ ] Beta testers can install and use app
-- [ ] No crash on launch for any tester
-- [ ] Feedback collection mechanism in place
-
----
-
-# V2.0 Backend Integration
-
-## Milestone 14: Data Pipeline
+## Story 11 (S11): Data Pipeline
 
 **Goal:** ETL pipeline to fetch and transform official SF parking data from DataSF and SFMTA
 
@@ -483,7 +395,7 @@
 
 - [ ] **14.6** Set up scheduled pipeline (daily for DataSF, weekly for SFMTA)
 
-**Milestone 14 Complete When:**
+**Story Complete When:**
 - [ ] Pipeline successfully fetches data from all sources
 - [ ] Data transforms into normalized schema
 - [ ] Validator catches invalid/missing data
@@ -491,7 +403,7 @@
 
 ---
 
-## Milestone 15: Backend API
+## Story 12 (S12): Backend API
 
 **Goal:** REST API service to serve zone and parking rule data
 
@@ -511,7 +423,7 @@
 
 - [ ] **15.7** Deploy to cloud infrastructure (AWS/GCP with auto-scaling)
 
-**Milestone 15 Complete When:**
+**Story Complete When:**
 - [ ] API returns correct zones for test coordinates
 - [ ] Response time < 200ms (p95)
 - [ ] Rate limiting enforced
@@ -519,7 +431,7 @@
 
 ---
 
-## Milestone 16: iOS Backend Integration
+## Story 13 (S13): iOS Backend Integration
 
 **Goal:** iOS app connects to backend API with offline fallback
 
@@ -543,11 +455,172 @@
 
 - [ ] **16.9** Test end-to-end: app startup → API fetch → zone display
 
-**Milestone 16 Complete When:**
+**Story 13 Complete When:**
 - [ ] App uses live backend data when online
 - [ ] App gracefully falls back to cache when offline
 - [ ] Data freshness visible in settings
 - [ ] Feature flag allows switching to mock data for testing
+
+---
+
+# Beta Release
+
+## Story 14 (S14): Error Handling
+
+**Goal:** Graceful error states with clear user guidance
+
+### Tasks
+
+- [ ] **14.1** Create LocationDeniedView with explanation and button to open Settings app
+
+- [ ] **14.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
+
+- [ ] **14.3** Create OutsideCoverageView shown when user is not in any supported zone
+
+- [ ] **14.4** Create DataLoadingErrorView for mock data parsing failures
+
+- [ ] **14.5** Integrate error views into MainResultView based on state
+
+**Story 14 Complete When:**
+- [ ] All error scenarios show appropriate message
+- [ ] Error views have actionable next steps
+- [ ] Users can recover from errors easily
+
+---
+
+## Story 15 (S15): UI Polish & Animations
+
+**Goal:** Enhanced visual polish and delightful user experience
+
+### Tasks
+
+- [ ] **15.1** Update deprecated Map initializers to iOS 17+ MapContentBuilder syntax
+
+- [ ] **15.2** Add AccentColor to Assets.xcassets with appropriate light/dark variants
+
+- [ ] **15.3** Improve floating map positioning and responsiveness
+
+- [ ] **15.4** Add smooth animations for state transitions (loading, error, success)
+
+- [ ] **15.5** Implement skeleton loading states for zone information
+
+- [ ] **15.6** Polish typography hierarchy and spacing consistency
+
+- [ ] **15.7** Add subtle haptic feedback for user interactions
+
+- [ ] **15.8** Implement Reduce Motion support checking accessibilityReduceMotion
+
+**Story 15 Complete When:**
+- [ ] No deprecation warnings in codebase
+- [ ] Consistent visual polish throughout app
+- [ ] Smooth, delightful animations
+- [ ] Full accessibility support
+
+---
+
+## Story 16 (S16): CarPlay Support
+
+**Goal:** Allow drivers to check parking zone status via CarPlay dashboard
+
+### Tasks
+
+- [ ] **16.1** Add CarPlay entitlement and configure Info.plist
+
+- [ ] **16.2** Create CarPlaySceneDelegate to handle CarPlay connection
+
+- [ ] **16.3** Implement CPTemplate-based UI showing current zone and validity
+
+- [ ] **16.4** Create CPPointOfInterestTemplate for zone display
+
+- [ ] **16.5** Add CPMapTemplate with current location and zone overlay
+
+- [ ] **16.6** Implement automatic zone updates while driving
+
+- [ ] **16.7** Add voice feedback option for zone changes (using AVSpeechSynthesizer)
+
+- [ ] **16.8** Handle CarPlay connect/disconnect lifecycle
+
+- [ ] **16.9** Test on CarPlay Simulator and physical CarPlay unit
+
+- [ ] **16.10** Add CarPlay support documentation
+
+**Story 16 Complete When:**
+- [ ] App appears in CarPlay dashboard
+- [ ] Zone status visible while driving
+- [ ] Updates automatically as location changes
+- [ ] Voice feedback announces zone changes
+
+---
+
+## Story 17 (S17): Map Zone Boundaries
+
+**Goal:** Display parking zone boundaries as visual polygons on the expanded map view
+
+### Tasks
+
+#### Zone Boundary Display
+- [ ] **17.1** Create ZoneOverlay model with polygon coordinates compatible with both MapKit and Google Maps
+
+- [ ] **17.2** Implement zone polygon overlays for each parking zone from mock data boundaries
+
+- [ ] **17.3** Add overlay renderer to style zone polygons with semi-transparent fill and border
+
+- [ ] **17.4** Style current zone with accent color fill (20% opacity) and thick border
+
+- [ ] **17.5** Style adjacent/nearby zones with lighter differentiated colors
+
+- [ ] **17.6** Calculate zone polygon centroids and add zone label annotations (large, bold letters)
+
+- [ ] **17.7** Implement tap gesture on zone overlays to show ZoneInfoCard popup
+
+- [ ] **17.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
+
+#### Map Provider Abstraction
+- [ ] **17.9** Create MapProviderProtocol abstraction layer for switching between map providers
+
+- [ ] **17.10** Implement AppleMapKitAdapter conforming to MapProviderProtocol (current default)
+
+- [ ] **17.11** Implement GoogleMapsAdapter conforming to MapProviderProtocol (requires Google Maps SDK)
+
+- [ ] **17.12** Implement MapLibreAdapter conforming to MapProviderProtocol (open source alternative using OpenStreetMap tiles)
+
+- [ ] **17.13** Add map provider selection to Settings (Apple Maps, Google Maps, MapLibre/OSM)
+
+- [ ] **17.14** Persist map provider preference and apply on app launch
+
+**Story 17 Complete When:**
+- [ ] Expanded map shows all zone boundaries as colored polygons
+- [ ] Current zone highlighted distinctly from other zones
+- [ ] Zone letters visible on map at various zoom levels
+- [ ] Tapping a zone shows info card with zone details
+- [ ] User can switch between Apple Maps, Google Maps, and MapLibre in Settings
+- [ ] Zone boundaries render correctly on all supported map providers
+
+---
+
+## Story 18 (S18): Beta Release Prep
+
+**Goal:** App ready for TestFlight distribution
+
+### Tasks
+
+- [ ] **18.1** Configure App Store Connect: create app record, set bundle ID, configure app information
+
+- [ ] **18.2** Add app icons for all required sizes
+
+- [ ] **18.3** Create launch screen / splash screen
+
+- [ ] **18.4** Write privacy policy and add to app / settings
+
+- [ ] **18.5** Archive build and upload to TestFlight
+
+- [ ] **18.6** Distribute to beta testers (target: 50+ SF residents)
+
+**Story 18 Complete When:**
+- [ ] App available on TestFlight
+- [ ] Beta testers can install and use app
+- [ ] No crash on launch for any tester
+- [ ] Feedback collection mechanism in place
 
 ---
 
