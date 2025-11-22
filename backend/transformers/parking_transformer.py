@@ -4,6 +4,12 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 
+try:
+    from scipy.spatial import ConvexHull
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -135,7 +141,7 @@ class ParkingDataTransformer:
                 coords = self._extract_coords_from_geom(geom)
                 areas[area_code].extend(coords)
 
-        # Create zones with bounding box polygons
+        # Create zones with convex hull polygons (or bounding box as fallback)
         zones = []
         for area_code, coords in areas.items():
             if not coords:
@@ -150,26 +156,30 @@ class ParkingDataTransformer:
                 ))
                 continue
 
-            # Calculate bounding box and create polygon
-            lons = [c[0] for c in coords]
-            lats = [c[1] for c in coords]
-            min_lon, max_lon = min(lons), max(lons)
-            min_lat, max_lat = min(lats), max(lats)
+            # Try to create convex hull polygon
+            hull_polygon = self._create_convex_hull(coords)
 
-            # Add small buffer
-            buffer = 0.001  # ~100m
-            bbox_polygon = [
-                (min_lon - buffer, min_lat - buffer),
-                (max_lon + buffer, min_lat - buffer),
-                (max_lon + buffer, max_lat + buffer),
-                (min_lon - buffer, max_lat + buffer),
-                (min_lon - buffer, min_lat - buffer),  # Close ring
-            ]
+            if hull_polygon:
+                polygon = hull_polygon
+            else:
+                # Fallback to bounding box
+                lons = [c[0] for c in coords]
+                lats = [c[1] for c in coords]
+                min_lon, max_lon = min(lons), max(lons)
+                min_lat, max_lat = min(lats), max(lats)
+                buffer = 0.001  # ~100m
+                polygon = [
+                    (min_lon - buffer, min_lat - buffer),
+                    (max_lon + buffer, min_lat - buffer),
+                    (max_lon + buffer, max_lat + buffer),
+                    (min_lon - buffer, max_lat + buffer),
+                    (min_lon - buffer, min_lat - buffer),
+                ]
 
             zones.append(RPPZone(
                 area_code=area_code,
                 name=f"Area {area_code}",
-                polygon=[bbox_polygon],
+                polygon=[polygon],
                 total_blocks=len([r for r in raw_blockfaces
                                   if (r.get("rpparea1") or r.get("RPPAREA1") or
                                       r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
@@ -177,6 +187,44 @@ class ParkingDataTransformer:
 
         logger.info(f"Derived {len(zones)} zones from blockface data")
         return zones
+
+    def _create_convex_hull(self, coords: List[Tuple[float, float]]) -> Optional[List[Tuple[float, float]]]:
+        """
+        Create a convex hull polygon from a set of coordinates.
+        Returns None if scipy is not available or if hull creation fails.
+        """
+        if not SCIPY_AVAILABLE:
+            logger.debug("scipy not available, falling back to bounding box")
+            return None
+
+        if len(coords) < 3:
+            return None
+
+        try:
+            import numpy as np
+            # Remove duplicates and convert to numpy array
+            unique_coords = list(set(coords))
+            if len(unique_coords) < 3:
+                return None
+
+            points = np.array(unique_coords)
+
+            # Create convex hull
+            hull = ConvexHull(points)
+
+            # Extract hull vertices in order
+            hull_points = points[hull.vertices]
+
+            # Convert to list of tuples and close the ring
+            polygon = [(float(p[0]), float(p[1])) for p in hull_points]
+            polygon.append(polygon[0])  # Close the ring
+
+            logger.debug(f"Created convex hull with {len(polygon)} points from {len(coords)} input points")
+            return polygon
+
+        except Exception as e:
+            logger.warning(f"Failed to create convex hull: {e}")
+            return None
 
     def _extract_coords_from_geom(self, geom: Any) -> List[Tuple[float, float]]:
         """Extract coordinate pairs from various geometry formats"""
