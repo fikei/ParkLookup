@@ -12,6 +12,9 @@ from fetchers import BlockfaceFetcher, MetersFetcher, RPPAreasFetcher, RPPParcel
 from transformers import ParkingDataTransformer
 from validators import DataValidator
 
+# iOS Resources path (relative to backend directory)
+IOS_RESOURCES_DIR = Path(__file__).parent.parent / "SFParkingZoneFinder" / "SFParkingZoneFinder" / "Resources"
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -111,6 +114,9 @@ class ParkingDataPipeline:
                 logger.info(f"  {code:4s}: {num_polygons:,} polygons")
             logger.info("-" * 40)
             logger.info(f"  Total: {total_polygons:,} polygons across {len(app_data['zones'])} zones")
+
+            # Step 6: Auto-export to iOS (if --export-ios flag or always)
+            self._export_to_ios(app_data)
 
             return True
 
@@ -256,6 +262,32 @@ class ParkingDataPipeline:
                 "zones": app_data["zones"],
             }, f, indent=2)
         logger.info(f"Wrote zones-only file to {zones_path}")
+
+    def _export_to_ios(self, app_data: dict):
+        """Export data to iOS Resources folder using convert_to_ios module"""
+        try:
+            # Import the converter
+            from convert_to_ios import convert_pipeline_to_ios, save_output
+
+            logger.info("\n[Step 6/6] Exporting to iOS bundle...")
+
+            # Convert to iOS format
+            ios_data = convert_pipeline_to_ios(app_data)
+
+            # Ensure iOS Resources directory exists
+            ios_output = IOS_RESOURCES_DIR / "sf_parking_zones.json"
+            IOS_RESOURCES_DIR.mkdir(parents=True, exist_ok=True)
+
+            # Save to iOS Resources
+            save_output(ios_data, ios_output)
+
+            logger.info(f"Exported to iOS: {ios_output}")
+            logger.info(f"  Zones: {len(ios_data.get('zones', []))}")
+
+        except ImportError:
+            logger.warning("convert_to_ios module not found, skipping iOS export")
+        except Exception as e:
+            logger.warning(f"iOS export failed (non-fatal): {e}")
 
 
 async def run_pipeline(skip_meters: bool = False) -> bool:
