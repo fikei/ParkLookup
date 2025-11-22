@@ -147,25 +147,19 @@ final class MainResultViewModel: ObservableObject {
         currentCoordinate = location.coordinate
         error = nil
 
-        do {
-            // Get parking result
-            let result = await zoneService.getParkingResult(
-                at: location.coordinate,
-                time: Date()
-            )
+        // Get parking result
+        let result = await zoneService.getParkingResult(
+            at: location.coordinate,
+            time: Date()
+        )
 
-            // Update UI state
-            updateState(from: result)
+        // Update UI state
+        updateState(from: result)
 
-            // Get address (don't fail if this fails)
-            await updateAddress(for: location)
+        // Get address (don't fail if this fails)
+        await updateAddress(for: location)
 
-            lastUpdated = Date()
-
-        } catch {
-            // Don't show error for continuous updates - just log it
-            print("Continuous location update failed: \(error)")
-        }
+        lastUpdated = Date()
     }
 
     /// Report an issue with zone data
@@ -383,6 +377,8 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return .locationPermissionDenied
         case .locationUnknown, .timeout, .serviceDisabled:
             return .locationUnavailable
+        case .cancelled:
+            return .locationUnavailable // Treat cancelled as unavailable
         }
     }
 }
