@@ -8,9 +8,9 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 // MARK: - Permits Section
-                Section {
+                SwiftUI.Section {
                     ForEach(viewModel.permits) { permit in
                         PermitRow(
                             permit: permit,
@@ -39,7 +39,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: - Map Preferences Section
-                Section {
+                SwiftUI.Section {
                     Toggle("Show Floating Map", isOn: $viewModel.showFloatingMap)
 
                     Picker("Map Position", selection: $viewModel.mapPosition) {
@@ -52,7 +52,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: - Help Section
-                Section {
+                SwiftUI.Section {
                     Button {
                         viewModel.openSupport()
                     } label: {
@@ -71,7 +71,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: - About Section
-                Section {
+                SwiftUI.Section {
                     HStack {
                         Text("Version")
                         Spacer()
@@ -104,7 +104,7 @@ struct SettingsView: View {
 
                 // MARK: - Debug Section
                 #if DEBUG
-                Section {
+                SwiftUI.Section {
                     Button("Reset Onboarding") {
                         viewModel.resetOnboarding()
                     }
@@ -114,6 +114,7 @@ struct SettingsView: View {
                 }
                 #endif
             }
+            .listStyle(.insetGrouped)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
