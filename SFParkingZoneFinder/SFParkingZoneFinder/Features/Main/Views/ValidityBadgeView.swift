@@ -5,6 +5,8 @@ import SwiftUI
 struct ValidityBadgeView: View {
     let status: PermitValidityStatus
     let permits: [ParkingPermit]
+    /// When true, uses white styling for display on colored backgrounds
+    var onColoredBackground: Bool = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -19,15 +21,39 @@ struct ValidityBadgeView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(statusColor.opacity(0.15))
-        .foregroundColor(statusColor)
+        .background(badgeBackground)
+        .foregroundColor(badgeForeground)
         .clipShape(Capsule())
         .overlay(
             Capsule()
-                .stroke(statusColor, lineWidth: 2)
+                .stroke(badgeBorder, lineWidth: 2)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityText)
+    }
+
+    // MARK: - Badge Colors
+
+    private var badgeBackground: Color {
+        if onColoredBackground {
+            // White semi-transparent background on green card
+            return Color.white.opacity(0.25)
+        }
+        return statusColor.opacity(0.15)
+    }
+
+    private var badgeForeground: Color {
+        if onColoredBackground {
+            return .white
+        }
+        return statusColor
+    }
+
+    private var badgeBorder: Color {
+        if onColoredBackground {
+            return Color.white.opacity(0.5)
+        }
+        return statusColor
     }
 
     // MARK: - Computed Properties
