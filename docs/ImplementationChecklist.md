@@ -17,17 +17,17 @@
 | M6: Main Result View | **COMPLETE** | 14/14 |
 | M7: Floating Map | **COMPLETE** | 10/10 |
 | M8: Onboarding Flow | **COMPLETE** | 10/10 |
-| M9: Map Updates | Not Started | 0/14 |
-| M10: Settings Screen | Not Started | 0/8 |
-| M11: Error Handling & Polish | Not Started | 0/8 |
+| M9: Settings Screen | Not Started | 0/8 |
+| M10: Error Handling & Polish | Not Started | 0/8 |
+| M11: Map Updates | Not Started | 0/14 |
 | M12: Testing | Not Started | 0/8 |
 | M13: Beta Release | Not Started | 0/6 |
-| **V2.0 Backend Integration** | | |
+| **MVP Backend Integration** | | |
 | M14: Data Pipeline | Not Started | 0/6 |
 | M15: Backend API | Not Started | 0/7 |
 | M16: iOS Backend Integration | Not Started | 0/9 |
 
-**Overall Progress:** 74/140 tasks complete (V1.1: 74/118, V2.0: 0/22)
+**Overall Progress:** 74/140 tasks complete (V1.1: 74/118, Backend: 0/22)
 
 ---
 
@@ -294,75 +294,29 @@
 
 ---
 
-## Milestone 9: Map Updates
-
-**Goal:** Display parking zone boundaries as visual polygons on the expanded map view, with support for multiple map providers
-
-### Tasks
-
-#### Zone Boundary Display
-- [ ] **9.1** Create ZoneOverlay model with polygon coordinates compatible with both MapKit and Google Maps
-
-- [ ] **9.2** Implement zone polygon overlays for each parking zone from mock data boundaries
-
-- [ ] **9.3** Add overlay renderer to style zone polygons with semi-transparent fill and border
-
-- [ ] **9.4** Style current zone with accent color fill (20% opacity) and thick border
-
-- [ ] **9.5** Style adjacent/nearby zones with lighter differentiated colors
-
-- [ ] **9.6** Calculate zone polygon centroids and add zone label annotations (large, bold letters)
-
-- [ ] **9.7** Implement tap gesture on zone overlays to show ZoneInfoCard popup
-
-- [ ] **9.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
-
-#### Map Provider Abstraction
-- [ ] **9.9** Create MapProviderProtocol abstraction layer for switching between map providers
-
-- [ ] **9.10** Implement AppleMapKitAdapter conforming to MapProviderProtocol (current default)
-
-- [ ] **9.11** Implement GoogleMapsAdapter conforming to MapProviderProtocol (requires Google Maps SDK)
-
-- [ ] **9.12** Implement MapLibreAdapter conforming to MapProviderProtocol (open source alternative using OpenStreetMap tiles)
-
-- [ ] **9.13** Add map provider selection to Settings (Apple Maps, Google Maps, MapLibre/OSM)
-
-- [ ] **9.14** Persist map provider preference and apply on app launch
-
-**Milestone 9 Complete When:**
-- [ ] Expanded map shows all zone boundaries as colored polygons
-- [ ] Current zone highlighted distinctly from other zones
-- [ ] Zone letters visible on map at various zoom levels
-- [ ] Tapping a zone shows info card with zone details
-- [ ] User can switch between Apple Maps, Google Maps, and MapLibre in Settings
-- [ ] Zone boundaries render correctly on all supported map providers
-
----
-
-## Milestone 10: Settings Screen
+## Milestone 9: Settings Screen
 
 **Goal:** User can manage permits and preferences
 
 ### Tasks
 
-- [ ] **10.1** Create SettingsViewModel managing user preferences and permit data
+- [ ] **9.1** Create SettingsViewModel managing user preferences and permit data
 
-- [ ] **10.2** Create PermitManagementView listing current permits with add/edit/delete functionality
+- [ ] **9.2** Create PermitManagementView listing current permits with add/edit/delete functionality
 
-- [ ] **10.3** Create AddPermitView for adding new permits (reuse PermitAreaGrid)
+- [ ] **9.3** Create AddPermitView for adding new permits (reuse PermitAreaGrid)
 
-- [ ] **10.4** Add map preferences section: toggle floating map visibility, map position picker, map style picker
+- [ ] **9.4** Add map preferences section: toggle floating map visibility, map position picker
 
-- [ ] **10.5** Create AboutView showing app version, data version, privacy policy, and open source licenses
+- [ ] **9.5** Create AboutView showing app version, data version, privacy policy, and open source licenses
 
-- [ ] **10.6** Add Help section with FAQ placeholder, report issue email link, and rate app link
+- [ ] **9.6** Add Help section with FAQ placeholder, report issue email link, and rate app link
 
-- [ ] **10.7** Assemble SettingsView with all sections using List and NavigationLink
+- [ ] **9.7** Assemble SettingsView with all sections using List and NavigationLink
 
-- [ ] **10.8** Add settings gear icon to MainResultView navigation bar linking to SettingsView
+- [ ] **9.8** Add settings gear icon to MainResultView navigation bar linking to SettingsView
 
-**Milestone 10 Complete When:**
+**Milestone 9 Complete When:**
 - [ ] Settings accessible from main view
 - [ ] User can add, edit, delete permits
 - [ ] Map preferences persist and apply
@@ -370,33 +324,79 @@
 
 ---
 
-## Milestone 11: Error Handling & Polish
+## Milestone 10: Error Handling & Polish
 
 **Goal:** Graceful error states and UI polish
 
 ### Tasks
 
-- [ ] **11.1** Create LocationDeniedView with explanation and button to open Settings app
+- [ ] **10.1** Create LocationDeniedView with explanation and button to open Settings app
 
-- [ ] **11.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
+- [ ] **10.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
 
-- [ ] **11.3** Create OutsideCoverageView shown when user is not in any supported zone
+- [ ] **10.3** Create OutsideCoverageView shown when user is not in any supported zone
 
-- [ ] **11.4** Create DataLoadingErrorView for mock data parsing failures
+- [ ] **10.4** Create DataLoadingErrorView for mock data parsing failures
 
-- [ ] **11.5** Integrate error views into MainResultView based on state
+- [ ] **10.5** Integrate error views into MainResultView based on state
 
-- [ ] **11.6** Add haptic feedback for validity status changes and refresh completion
+- [ ] **10.6** Add haptic feedback for validity status changes and refresh completion
 
-- [ ] **11.7** Implement Reduce Motion support checking accessibilityReduceMotion environment value
+- [ ] **10.7** Implement Reduce Motion support checking accessibilityReduceMotion environment value
 
-- [ ] **11.8** Polish all views for visual consistency: spacing, typography, colors
+- [ ] **10.8** Polish all views for visual consistency: spacing, typography, colors
 
-**Milestone 11 Complete When:**
+**Milestone 10 Complete When:**
 - [ ] All error scenarios show appropriate message
 - [ ] Error views have actionable next steps
 - [ ] Reduce Motion preference respected
 - [ ] UI is visually polished and consistent
+
+---
+
+## Milestone 11: Map Updates
+
+**Goal:** Display parking zone boundaries as visual polygons on the expanded map view, with support for multiple map providers
+
+### Tasks
+
+#### Zone Boundary Display
+- [ ] **11.1** Create ZoneOverlay model with polygon coordinates compatible with both MapKit and Google Maps
+
+- [ ] **11.2** Implement zone polygon overlays for each parking zone from mock data boundaries
+
+- [ ] **11.3** Add overlay renderer to style zone polygons with semi-transparent fill and border
+
+- [ ] **11.4** Style current zone with accent color fill (20% opacity) and thick border
+
+- [ ] **11.5** Style adjacent/nearby zones with lighter differentiated colors
+
+- [ ] **11.6** Calculate zone polygon centroids and add zone label annotations (large, bold letters)
+
+- [ ] **11.7** Implement tap gesture on zone overlays to show ZoneInfoCard popup
+
+- [ ] **11.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
+
+#### Map Provider Abstraction
+- [ ] **11.9** Create MapProviderProtocol abstraction layer for switching between map providers
+
+- [ ] **11.10** Implement AppleMapKitAdapter conforming to MapProviderProtocol (current default)
+
+- [ ] **11.11** Implement GoogleMapsAdapter conforming to MapProviderProtocol (requires Google Maps SDK)
+
+- [ ] **11.12** Implement MapLibreAdapter conforming to MapProviderProtocol (open source alternative using OpenStreetMap tiles)
+
+- [ ] **11.13** Add map provider selection to Settings (Apple Maps, Google Maps, MapLibre/OSM)
+
+- [ ] **11.14** Persist map provider preference and apply on app launch
+
+**Milestone 11 Complete When:**
+- [ ] Expanded map shows all zone boundaries as colored polygons
+- [ ] Current zone highlighted distinctly from other zones
+- [ ] Zone letters visible on map at various zoom levels
+- [ ] Tapping a zone shows info card with zone details
+- [ ] User can switch between Apple Maps, Google Maps, and MapLibre in Settings
+- [ ] Zone boundaries render correctly on all supported map providers
 
 ---
 
