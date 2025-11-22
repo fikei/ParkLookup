@@ -73,7 +73,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Simplify zone polygons for faster map rendering
-SIMPLIFY_SCRIPT="$SCRIPT_DIR/../scripts/simplify_zones.py"
+SIMPLIFY_SCRIPT="$SCRIPT_DIR/simplify_zones.py"
 if [ -f "$SIMPLIFY_SCRIPT" ]; then
     echo ""
     echo "Step 3: Simplifying zone polygons..."
