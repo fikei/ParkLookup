@@ -480,7 +480,7 @@ class ParkingDataTransformer:
         # Build output
         return {
             "version": datetime.utcnow().strftime("%Y%m%d"),
-            "generated": datetime.utcnow().isoformat(),
+            "generated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "zones": zones_data,
             "meters": [
                 {

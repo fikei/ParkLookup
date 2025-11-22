@@ -82,10 +82,58 @@ final class LocalZoneDataSource: ZoneDataSourceProtocol {
 
 struct ZoneDataResponse: Codable {
     let version: String
-    let generatedAt: Date
+    let generatedAt: String  // Store as String for flexible parsing
     let city: CityInfo
     let permitAreas: [PermitAreaInfo]?
     let zones: [ParkingZone]
+
+    /// Computed Date property with flexible parsing
+    var generatedDate: Date? {
+        FlexibleDateParser.parse(generatedAt)
+    }
+}
+
+/// Helper for parsing various date formats
+enum FlexibleDateParser {
+    private static let formatters: [DateFormatter] = {
+        let formats = [
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd"
+        ]
+        return formats.map { format in
+            let formatter = DateFormatter()
+            formatter.dateFormat = format
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(identifier: "UTC")
+            return formatter
+        }
+    }()
+
+    private static let iso8601Formatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    static func parse(_ string: String) -> Date? {
+        // Try ISO8601 first (handles most standard formats)
+        if let date = iso8601Formatter.date(from: string) {
+            return date
+        }
+
+        // Fall back to custom formatters
+        for formatter in formatters {
+            if let date = formatter.date(from: string) {
+                return date
+            }
+        }
+
+        return nil
+    }
 }
 
 struct CityInfo: Codable {

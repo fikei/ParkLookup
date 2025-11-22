@@ -2,7 +2,7 @@ import Foundation
 import CoreLocation
 
 /// Represents a parking zone with boundaries and rules
-struct ParkingZone: Codable, Identifiable, Hashable {
+struct ParkingZone: Identifiable, Hashable {
     let id: String
     let cityCode: String
     let displayName: String
@@ -23,6 +23,58 @@ struct ParkingZone: Codable, Identifiable, Hashable {
 
     static func == (lhs: ParkingZone, rhs: ParkingZone) -> Bool {
         lhs.id == rhs.id
+    }
+}
+
+// MARK: - Custom Codable (backward compatible with "boundary" and "boundaries")
+
+extension ParkingZone: Codable {
+    enum CodingKeys: String, CodingKey {
+        case id, cityCode, displayName, zoneType, permitArea, validPermitAreas
+        case boundaries  // New MultiPolygon format
+        case boundary    // Old single polygon format (for backward compatibility)
+        case rules, requiresPermit, restrictiveness, metadata
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(String.self, forKey: .id)
+        cityCode = try container.decode(String.self, forKey: .cityCode)
+        displayName = try container.decode(String.self, forKey: .displayName)
+        zoneType = try container.decode(ZoneType.self, forKey: .zoneType)
+        permitArea = try container.decodeIfPresent(String.self, forKey: .permitArea)
+        validPermitAreas = try container.decode([String].self, forKey: .validPermitAreas)
+        rules = try container.decode([ParkingRule].self, forKey: .rules)
+        requiresPermit = try container.decode(Bool.self, forKey: .requiresPermit)
+        restrictiveness = try container.decode(Int.self, forKey: .restrictiveness)
+        metadata = try container.decode(ZoneMetadata.self, forKey: .metadata)
+
+        // Try "boundaries" first (new MultiPolygon format), fall back to "boundary" (old format)
+        if let multiBoundaries = try? container.decode([[Coordinate]].self, forKey: .boundaries) {
+            boundaries = multiBoundaries
+        } else if let singleBoundary = try? container.decode([Coordinate].self, forKey: .boundary) {
+            // Wrap single boundary in array for MultiPolygon compatibility
+            boundaries = [singleBoundary]
+        } else {
+            boundaries = []
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(cityCode, forKey: .cityCode)
+        try container.encode(displayName, forKey: .displayName)
+        try container.encode(zoneType, forKey: .zoneType)
+        try container.encodeIfPresent(permitArea, forKey: .permitArea)
+        try container.encode(validPermitAreas, forKey: .validPermitAreas)
+        try container.encode(boundaries, forKey: .boundaries)
+        try container.encode(rules, forKey: .rules)
+        try container.encode(requiresPermit, forKey: .requiresPermit)
+        try container.encode(restrictiveness, forKey: .restrictiveness)
+        try container.encode(metadata, forKey: .metadata)
     }
 }
 
@@ -113,13 +165,41 @@ enum ZoneType: String, Codable, CaseIterable {
 
 struct ZoneMetadata: Codable, Hashable {
     let dataSource: String
-    let lastUpdated: Date
+    let lastUpdatedString: String  // Store as string for flexible parsing
     let accuracy: DataAccuracy
+
+    /// Computed Date property with flexible parsing
+    var lastUpdated: Date {
+        ZoneMetadata.parseDate(lastUpdatedString) ?? Date()
+    }
 
     enum CodingKeys: String, CodingKey {
         case dataSource
-        case lastUpdated
+        case lastUpdatedString = "lastUpdated"
         case accuracy
+    }
+
+    // Simple date parser for metadata dates
+    private static func parseDate(_ string: String) -> Date? {
+        // Try ISO8601 formats
+        let iso8601 = ISO8601DateFormatter()
+        iso8601.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso8601.date(from: string) {
+            return date
+        }
+
+        // Try without fractional seconds
+        iso8601.formatOptions = [.withInternetDateTime]
+        if let date = iso8601.date(from: string) {
+            return date
+        }
+
+        // Try basic format
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter.date(from: string)
     }
 }
 
