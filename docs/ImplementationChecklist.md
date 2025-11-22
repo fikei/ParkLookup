@@ -51,18 +51,18 @@ For a functional Alpha release with real data, complete these in order:
 | S11: Backend API & Pipeline | Not Started | 0/17 |
 | S13b: Backend API Testing | Not Started | 0/3 |
 | S14: Error Handling | **COMPLETE** | 6/6 |
-| S15: UI Polish & Animations | Not Started | 0/8 |
+| S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | Not Started | 0/10 |
 | S17: Map Zone Boundaries | Not Started | 0/19 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
 
-**Beta Progress:** 6/91 tasks complete (7%)
+**Beta Progress:** 13/91 tasks complete (14%)
 
 ---
 
-**Overall Progress:** 107/196 tasks complete (55%)
+**Overall Progress:** 114/196 tasks complete (58%)
 
 ---
 
@@ -578,27 +578,27 @@ For a functional Alpha release with real data, complete these in order:
 
 ### Tasks
 
-- [ ] **15.1** Update deprecated Map initializers to iOS 17+ MapContentBuilder syntax
+- [x] **15.1** Update deprecated Map initializers to iOS 17+ MapContentBuilder syntax
 
-- [ ] **15.2** Add AccentColor to Assets.xcassets with appropriate light/dark variants
+- [x] **15.2** Add AccentColor to Assets.xcassets with appropriate light/dark variants
 
-- [ ] **15.3** Improve floating map positioning and responsiveness
+- [ ] **15.3** Improve floating map positioning and responsiveness (deferred)
 
-- [ ] **15.4** Add smooth animations for state transitions (loading, error, success)
+- [x] **15.4** Add smooth animations for state transitions (loading, error, success)
 
-- [ ] **15.5** Implement skeleton loading states for zone information
+- [x] **15.5** Implement skeleton loading states for zone information
 
-- [ ] **15.6** Polish typography hierarchy and spacing consistency
+- [x] **15.6** Polish typography hierarchy and spacing consistency
 
-- [ ] **15.7** Add subtle haptic feedback for user interactions
+- [x] **15.7** Add subtle haptic feedback for user interactions
 
-- [ ] **15.8** Implement Reduce Motion support checking accessibilityReduceMotion
+- [x] **15.8** Implement Reduce Motion support checking accessibilityReduceMotion
 
 **Story 15 Complete When:**
-- [ ] No deprecation warnings in codebase
-- [ ] Consistent visual polish throughout app
-- [ ] Smooth, delightful animations
-- [ ] Full accessibility support
+- [x] No deprecation warnings in codebase
+- [x] Consistent visual polish throughout app
+- [x] Smooth, delightful animations
+- [x] Full accessibility support
 
 ---
 

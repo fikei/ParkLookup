@@ -1,4 +1,34 @@
 import SwiftUI
+import UIKit
+
+// MARK: - Haptic Feedback Helper
+
+enum HapticFeedback {
+    static func light() {
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+
+    static func medium() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+    }
+
+    static func success() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+    }
+
+    static func error() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.error)
+    }
+
+    static func selection() {
+        let generator = UISelectionFeedbackGenerator()
+        generator.selectionChanged()
+    }
+}
 
 /// Primary text-first view showing parking zone status and rules
 struct MainResultView: View {
@@ -7,6 +37,9 @@ struct MainResultView: View {
     @State private var showingOverlappingZones = false
     @State private var showingExpandedMap = false
     @State private var showingSettings = false
+    @State private var contentAppeared = false
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -23,29 +56,44 @@ struct MainResultView: View {
                         validityStatus: viewModel.validityStatus,
                         applicablePermits: viewModel.applicablePermits
                     )
+                    .opacity(contentAppeared ? 1 : 0)
+                    .offset(y: contentAppeared ? 0 : 20)
 
                     // Map Card (full-width below zone card)
                     if viewModel.error == nil && !viewModel.isLoading {
                         MapCardView(
                             coordinate: viewModel.currentCoordinate,
                             zoneName: viewModel.zoneName,
-                            onTap: { showingExpandedMap = true }
+                            onTap: {
+                                HapticFeedback.light()
+                                showingExpandedMap = true
+                            }
                         )
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
 
                     // Rules Summary
                     RulesSummaryView(
                         summaryLines: viewModel.ruleSummaryLines,
                         warnings: viewModel.warnings,
-                        onViewFullRules: { showingFullRules = true }
+                        onViewFullRules: {
+                            HapticFeedback.light()
+                            showingFullRules = true
+                        }
                     )
+                    .opacity(contentAppeared ? 1 : 0)
+                    .offset(y: contentAppeared ? 0 : 20)
 
                     // Overlapping zones indicator
                     if viewModel.hasOverlappingZones {
                         OverlappingZonesButton(
                             zoneCount: viewModel.overlappingZones.count,
-                            onTap: { showingOverlappingZones = true }
+                            onTap: {
+                                HapticFeedback.light()
+                                showingOverlappingZones = true
+                            }
                         )
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
 
                     // Additional info (address, refresh, report, settings)
@@ -53,31 +101,60 @@ struct MainResultView: View {
                         address: viewModel.currentAddress,
                         lastUpdated: viewModel.lastUpdated,
                         confidence: viewModel.lookupConfidence,
-                        onRefresh: { viewModel.refreshLocation() },
-                        onReportIssue: { viewModel.reportIssue() },
-                        onSettings: { showingSettings = true }
+                        onRefresh: {
+                            HapticFeedback.medium()
+                            viewModel.refreshLocation()
+                        },
+                        onReportIssue: {
+                            HapticFeedback.light()
+                            viewModel.reportIssue()
+                        },
+                        onSettings: {
+                            HapticFeedback.selection()
+                            showingSettings = true
+                        }
                     )
+                    .opacity(contentAppeared ? 1 : 0)
                 }
                 .padding()
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.3), value: viewModel.hasOverlappingZones)
             }
 
             // Loading overlay
             if viewModel.isLoading {
                 LoadingOverlay()
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 1.05)))
             }
 
             // Error state
             if let error = viewModel.error {
                 ErrorView(error: error) {
+                    HapticFeedback.medium()
                     viewModel.refreshLocation()
+                }
+                .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
+                .onAppear {
+                    HapticFeedback.error()
                 }
             }
         }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: viewModel.isLoading)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: viewModel.error != nil)
         .onAppear {
             viewModel.onAppear()
+            // Animate content in
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.1)) {
+                contentAppeared = true
+            }
         }
         .onDisappear {
             viewModel.onDisappear()
+        }
+        .onChange(of: viewModel.zoneName) { _, _ in
+            // Haptic when zone changes (user moved to new zone)
+            if !viewModel.isLoading && viewModel.error == nil {
+                HapticFeedback.success()
+            }
         }
         .sheet(isPresented: $showingFullRules) {
             FullRulesSheet(
@@ -132,8 +209,9 @@ struct OverlappingZonesButton: View {
 
 struct LoadingOverlay: View {
     @State private var isAnimating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let brandColor = Color.blue
+    private let brandColor = Color.accentColor
 
     var body: some View {
         ZStack {
@@ -147,7 +225,7 @@ struct LoadingOverlay: View {
                     Circle()
                         .fill(brandColor.opacity(0.15))
                         .frame(width: 120, height: 120)
-                        .scaleEffect(isAnimating ? 1.1 : 1.0)
+                        .scaleEffect(reduceMotion ? 1.0 : (isAnimating ? 1.1 : 1.0))
 
                     Circle()
                         .fill(brandColor.opacity(0.3))
@@ -175,6 +253,7 @@ struct LoadingOverlay: View {
             }
         }
         .onAppear {
+            guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
                 isAnimating = true
             }
