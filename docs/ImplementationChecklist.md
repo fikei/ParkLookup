@@ -17,7 +17,7 @@
 | M6: Main Result View | **COMPLETE** | 14/14 |
 | M7: Floating Map | **COMPLETE** | 10/10 |
 | M8: Onboarding Flow | **COMPLETE** | 10/10 |
-| M9: Zone Boundaries on Map | Not Started | 0/14 |
+| M9: Map Updates | Not Started | 0/14 |
 | M10: Settings Screen | Not Started | 0/8 |
 | M11: Error Handling & Polish | Not Started | 0/8 |
 | M12: Testing | Not Started | 0/8 |
@@ -290,7 +290,7 @@
 
 ---
 
-## Milestone 9: Zone Boundaries on Map
+## Milestone 9: Map Updates
 
 **Goal:** Display parking zone boundaries as visual polygons on the expanded map view, with support for multiple map providers
 

@@ -159,7 +159,7 @@ This document outlines the engineering implementation plan for SF Parking Zone F
 |-----------|-------------|--------------|---------------|
 | **M7: Floating Map** | Mini-map showing user location | FloatingMapView, ExpandedMapView, Apple MapKit integration | Map displays in top-right, expands to full screen |
 | **M8: Onboarding Flow** | First-launch experience | WelcomeView, LocationPermissionView, PermitSetupView | New users complete onboarding and set permits |
-| **M9: Zone Boundaries on Map** | Display parking zones visually on expanded map | Zone polygon overlays, color-coded boundaries, zone labels | Users can see all zone boundaries on full-screen map |
+| **M9: Map Updates** | Display parking zones visually on expanded map | Zone polygon overlays, color-coded boundaries, zone labels, map provider options | Users can see zone boundaries and choose map provider |
 | **M10: Settings Screen** | User preferences manageable | Settings screen, permit management, about section | User can add/edit permits, change preferences |
 | **M11: Beta Feedback Addressed** | Critical issues from beta resolved | Bug fixes, UX improvements | Beta testers report satisfaction, crash-free rate >99% |
 | **M12: App Store Launch** | Public release | App Store listing, screenshots, description | App approved and live on App Store |
@@ -429,7 +429,7 @@ This document outlines the engineering implementation plan for SF Parking Zone F
 
 ---
 
-### Epic 7B: Zone Boundaries on Map (M9)
+### Epic 7B: Map Updates (M9)
 
 **Goal:** Display parking zone boundaries as visual polygons on the expanded map view.
 
