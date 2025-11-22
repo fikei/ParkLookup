@@ -232,7 +232,7 @@ enum MapPosition: String, CaseIterable, Codable {
 
 // MARK: - App Errors
 
-enum AppError: LocalizedError, Identifiable {
+enum AppError: LocalizedError, Identifiable, Equatable {
     case locationPermissionDenied
     case locationUnavailable
     case outsideCoverage
