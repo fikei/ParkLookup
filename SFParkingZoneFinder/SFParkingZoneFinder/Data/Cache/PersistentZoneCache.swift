@@ -15,8 +15,8 @@ final class PersistentZoneCache: ZoneCacheProtocol {
     private let lock = NSLock()
 
     /// Current data version - change this when zone data format changes
-    /// Bumped to 1.2: switched from convex hull to actual block boundaries
-    private let cacheVersion = "1.2"
+    /// Bumped to 1.3: merged adjacent blocks into zone-level polygons (98% reduction)
+    private let cacheVersion = "1.3"
 
     private(set) var lastUpdated: Date?
 
