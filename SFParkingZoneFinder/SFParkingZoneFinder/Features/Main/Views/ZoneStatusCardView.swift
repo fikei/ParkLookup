@@ -6,24 +6,40 @@ struct ZoneStatusCardView: View {
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
 
-    var body: some View {
-        VStack(spacing: 16) {
-            // Zone Name (large, prominent)
-            Text(zoneName)
-                .font(.system(size: 34, weight: .bold))
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.7)
-                .lineLimit(2)
-                .accessibilityAddTraits(.isHeader)
-
-            // Validity Badge
-            ValidityBadgeView(
-                status: validityStatus,
-                permits: applicablePermits
-            )
+    /// Extract just the zone letter/code (removes "Area " prefix)
+    private var zoneCode: String {
+        if zoneName.hasPrefix("Area ") {
+            return String(zoneName.dropFirst(5))
         }
-        .padding(24)
+        return zoneName
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                Spacer()
+
+                // Zone Letter (very large, centered)
+                Text(zoneCode)
+                    .font(.system(size: 180, weight: .bold))
+                    .foregroundColor(.primary)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityLabel("Zone \(zoneCode)")
+
+                Spacer()
+
+                // Validity Badge (at bottom)
+                ValidityBadgeView(
+                    status: validityStatus,
+                    permits: applicablePermits
+                )
+                .padding(.bottom, 24)
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+        }
+        .frame(height: UIScreen.main.bounds.height * 0.85)
         .frame(maxWidth: .infinity)
         .background(Color(.systemBackground))
         .cornerRadius(16)
@@ -34,27 +50,17 @@ struct ZoneStatusCardView: View {
 // MARK: - Preview
 
 #Preview {
-    VStack(spacing: 20) {
-        ZoneStatusCardView(
-            zoneName: "Area Q",
-            validityStatus: .valid,
-            applicablePermits: [
-                ParkingPermit(type: .residential, area: "Q")
-            ]
-        )
-
-        ZoneStatusCardView(
-            zoneName: "Area R",
-            validityStatus: .invalid,
-            applicablePermits: []
-        )
-
-        ZoneStatusCardView(
-            zoneName: "Downtown Metered",
-            validityStatus: .noPermitRequired,
-            applicablePermits: []
-        )
+    ScrollView {
+        VStack(spacing: 20) {
+            ZoneStatusCardView(
+                zoneName: "Area Q",
+                validityStatus: .valid,
+                applicablePermits: [
+                    ParkingPermit(type: .residential, area: "Q")
+                ]
+            )
+        }
+        .padding()
     }
-    .padding()
     .background(Color(.systemGroupedBackground))
 }
