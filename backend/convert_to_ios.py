@@ -91,7 +91,8 @@ def convert_polygon_to_boundary(polygon: List[List[List[float]]]) -> List[List[D
 
         boundary = []
         for coord in ring:
-            if isinstance(coord, list) and len(coord) >= 2:
+            # Handle both list [lon, lat] and tuple (lon, lat) formats
+            if isinstance(coord, (list, tuple)) and len(coord) >= 2:
                 boundary.append({
                     "latitude": coord[1],   # GeoJSON is [lon, lat]
                     "longitude": coord[0]
