@@ -56,7 +56,7 @@ struct MapCardView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 160)
+        .frame(height: 120)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
         .onChange(of: coordinate?.latitude) { _, _ in
