@@ -38,9 +38,9 @@ For a functional Alpha release with real data, complete these in order:
 | S12: iOS Data Integration | **COMPLETE** | 9/9 |
 | S13: Backend Testing | **COMPLETE** | 4/4 |
 
-| S14α: TestFlight Alpha Launch | Not Started | 0/6 |
+| S14α: TestFlight Alpha Launch | In Progress | 2/6 |
 
-**Alpha Progress:** 99/105 tasks complete (94%)
+**Alpha Progress:** 101/105 tasks complete (96%)
 
 *Note: API testing tasks moved to S13b in Beta (blocked by S11)*
 
@@ -62,7 +62,7 @@ For a functional Alpha release with real data, complete these in order:
 
 ---
 
-**Overall Progress:** 99/195 tasks complete (51%)
+**Overall Progress:** 101/195 tasks complete (52%)
 
 ---
 
@@ -511,9 +511,9 @@ For a functional Alpha release with real data, complete these in order:
 
 - [ ] **14α.2** Add app icons for all required sizes (1024x1024 App Store, plus device sizes)
 
-- [ ] **14α.3** Create launch screen with app branding (storyboard or SwiftUI)
+- [x] **14α.3** Create launch screen with app branding (storyboard or SwiftUI)
 
-- [ ] **14α.4** Write privacy policy covering location data usage and add to Settings/About
+- [x] **14α.4** Write privacy policy covering location data usage and add to Settings/About
 
 - [ ] **14α.5** Archive build, resolve any signing/capability issues, and upload to TestFlight
 

@@ -5,6 +5,7 @@ struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @Environment(\.dismiss) private var dismiss
     @State private var showingAddPermit = false
+    @State private var showingPrivacyPolicy = false
 
     var body: some View {
         NavigationStack {
@@ -85,13 +86,13 @@ struct SettingsView: View {
                     }
 
                     Button {
-                        viewModel.openPrivacyPolicy()
+                        showingPrivacyPolicy = true
                     } label: {
                         HStack {
                             Text("Privacy Policy")
                                 .foregroundColor(.primary)
                             Spacer()
-                            Image(systemName: "arrow.up.right")
+                            Image(systemName: "chevron.right")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -122,6 +123,9 @@ struct SettingsView: View {
                 AddPermitView { area in
                     viewModel.addPermit(area: area)
                 }
+            }
+            .sheet(isPresented: $showingPrivacyPolicy) {
+                PrivacyPolicyView()
             }
         }
     }
