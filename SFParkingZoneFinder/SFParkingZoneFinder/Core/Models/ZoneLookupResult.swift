@@ -21,13 +21,17 @@ struct ZoneLookupResult {
     /// Distance to nearest zone boundary in meters (for boundary detection)
     let nearestBoundaryDistance: Double?
 
+    /// Error that occurred during lookup (data loading failure)
+    let dataError: ZoneDataError?
+
     init(
         primaryZone: ParkingZone?,
         overlappingZones: [ParkingZone] = [],
         confidence: LookupConfidence,
         timestamp: Date = Date(),
         coordinate: CLLocationCoordinate2D,
-        nearestBoundaryDistance: Double? = nil
+        nearestBoundaryDistance: Double? = nil,
+        dataError: ZoneDataError? = nil
     ) {
         self.primaryZone = primaryZone
         self.overlappingZones = overlappingZones.isEmpty && primaryZone != nil ? [primaryZone!] : overlappingZones
@@ -35,6 +39,30 @@ struct ZoneLookupResult {
         self.timestamp = timestamp
         self.coordinate = coordinate
         self.nearestBoundaryDistance = nearestBoundaryDistance
+        self.dataError = dataError
+    }
+}
+
+// MARK: - Zone Data Error
+
+/// Error types specific to zone data loading
+enum ZoneDataError: Error, Equatable {
+    case fileNotFound(filename: String)
+    case decodingFailed(details: String)
+    case noZonesLoaded
+    case unknown(message: String)
+
+    var localizedDescription: String {
+        switch self {
+        case .fileNotFound(let filename):
+            return "Data file '\(filename)' not found"
+        case .decodingFailed(let details):
+            return "Failed to decode zone data: \(details)"
+        case .noZonesLoaded:
+            return "No zones were loaded"
+        case .unknown(let message):
+            return message
+        }
     }
 }
 
@@ -48,7 +76,12 @@ extension ZoneLookupResult {
 
     /// Whether this result indicates outside coverage
     var isOutsideCoverage: Bool {
-        confidence == .outsideCoverage || primaryZone == nil
+        confidence == .outsideCoverage || (primaryZone == nil && dataError == nil)
+    }
+
+    /// Whether there was an error loading zone data
+    var hasDataError: Bool {
+        dataError != nil
     }
 
     /// Whether user is near a zone boundary (within threshold)
@@ -137,6 +170,23 @@ extension ZoneLookupResult {
             timestamp: timestamp,
             coordinate: coordinate,
             nearestBoundaryDistance: nil
+        )
+    }
+
+    /// Create a result for data loading failure
+    static func dataLoadError(
+        _ error: ZoneDataError,
+        coordinate: CLLocationCoordinate2D,
+        timestamp: Date = Date()
+    ) -> ZoneLookupResult {
+        ZoneLookupResult(
+            primaryZone: nil,
+            overlappingZones: [],
+            confidence: .outsideCoverage,
+            timestamp: timestamp,
+            coordinate: coordinate,
+            nearestBoundaryDistance: nil,
+            dataError: error
         )
     }
 }

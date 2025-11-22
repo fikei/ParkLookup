@@ -161,39 +161,110 @@ struct LoadingOverlay: View {
 struct ErrorView: View {
     let error: AppError
     let onRetry: () -> Void
+    @State private var showTechnicalDetails = false
 
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "exclamationmark.triangle.fill")
+            // Error icon with contextual color
+            Image(systemName: error.iconName)
                 .font(.system(size: 48))
-                .foregroundColor(.orange)
+                .foregroundColor(error.iconColor)
 
-            Text(error.localizedDescription)
-                .font(.headline)
+            // Error title
+            Text(errorTitle)
+                .font(.title2)
+                .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
 
+            // Error description
+            Text(error.localizedDescription)
+                .font(.body)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+
+            // Recovery suggestion
             if let suggestion = error.recoverySuggestion {
                 Text(suggestion)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
+                    .padding(.top, 4)
             }
 
-            Button("Try Again", action: onRetry)
-                .buttonStyle(.borderedProminent)
-
-            if error == .locationPermissionDenied {
-                Button("Open Settings") {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
+            // Action buttons
+            VStack(spacing: 12) {
+                if error.canRetry {
+                    Button(action: onRetry) {
+                        HStack {
+                            Image(systemName: "arrow.clockwise")
+                            Text("Try Again")
+                        }
+                        .frame(minWidth: 140)
                     }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.bordered)
+
+                if error == .locationPermissionDenied {
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "gear")
+                            Text("Open Settings")
+                        }
+                        .frame(minWidth: 140)
+                    }
+                    .buttonStyle(.bordered)
+                }
             }
+            .padding(.top, 8)
+
+            // Technical details for data errors (debug builds)
+            #if DEBUG
+            if case .dataLoadFailed(let dataError) = error {
+                Button {
+                    showTechnicalDetails.toggle()
+                } label: {
+                    HStack {
+                        Image(systemName: "info.circle")
+                        Text("Technical Details")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.secondary)
+                }
+                .padding(.top, 8)
+
+                if showTechnicalDetails {
+                    Text(dataError.debugDescription)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(8)
+                }
+            }
+            #endif
         }
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
+    }
+
+    private var errorTitle: String {
+        switch error {
+        case .locationPermissionDenied:
+            return "Location Access Needed"
+        case .locationUnavailable:
+            return "Location Unavailable"
+        case .outsideCoverage:
+            return "Outside Coverage Area"
+        case .dataLoadFailed:
+            return "Data Error"
+        case .unknown:
+            return "Something Went Wrong"
+        }
     }
 }
 

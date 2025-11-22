@@ -41,10 +41,20 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
             logger.info("Zones not ready, loading...")
             do {
                 try await reloadZones()
+            } catch let error as DataSourceError {
+                let zoneError = convertToZoneDataError(error)
+                logger.error("❌ Failed to load zones: \(zoneError.localizedDescription)")
+                return .dataLoadError(zoneError, coordinate: coordinate)
             } catch {
                 logger.error("❌ Failed to load zones: \(error.localizedDescription)")
-                return .outsideCoverage(coordinate: coordinate)
+                return .dataLoadError(.unknown(message: error.localizedDescription), coordinate: coordinate)
             }
+        }
+
+        // Check if zones were actually loaded
+        if zones.isEmpty {
+            logger.error("❌ No zones loaded - returning data error")
+            return .dataLoadError(.noZonesLoaded, coordinate: coordinate)
         }
 
         logger.info("Have \(self.zones.count) zones loaded")
@@ -206,5 +216,21 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
         let distToEnd = location.distance(from: end)
 
         return min(distToStart, distToEnd)
+    }
+
+    // MARK: - Error Conversion
+
+    /// Convert DataSourceError to ZoneDataError for user-facing error reporting
+    private func convertToZoneDataError(_ error: DataSourceError) -> ZoneDataError {
+        switch error {
+        case .fileNotFound(let filename):
+            return .fileNotFound(filename: filename)
+        case .parsingFailed(let reason):
+            return .decodingFailed(details: reason)
+        case .invalidData(let reason):
+            return .decodingFailed(details: reason)
+        case .cityNotSupported(let city):
+            return .unknown(message: "City '\(city)' is not supported")
+        }
     }
 }

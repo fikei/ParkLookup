@@ -255,6 +255,20 @@ final class MainResultViewModel: ObservableObject {
     }
 
     private func updateState(from result: ParkingResult) {
+        // Check for data loading errors first
+        if let dataError = result.lookupResult.dataError {
+            error = convertToAppError(dataError)
+            zoneName = "Data Error"
+            ruleSummary = ""
+            ruleSummaryLines = []
+            warnings = []
+            conditionalFlags = []
+            applicablePermits = []
+            overlappingZones = []
+            hasOverlappingZones = false
+            return
+        }
+
         // Zone info
         if let zone = result.lookupResult.primaryZone {
             zoneName = zone.displayName
@@ -292,6 +306,22 @@ final class MainResultViewModel: ObservableObject {
         if result.lookupResult.isOutsideCoverage {
             error = .outsideCoverage
         }
+    }
+
+    /// Convert zone data error to user-facing app error
+    private func convertToAppError(_ zoneError: ZoneDataError) -> AppError {
+        let dataError: DataLoadError
+        switch zoneError {
+        case .fileNotFound(let filename):
+            dataError = DataLoadError(type: .fileNotFound, technicalDetails: filename)
+        case .decodingFailed(let details):
+            dataError = DataLoadError(type: .decodingFailed, technicalDetails: details)
+        case .noZonesLoaded:
+            dataError = DataLoadError(type: .noZonesLoaded, technicalDetails: nil)
+        case .unknown(let message):
+            dataError = DataLoadError(type: .unknown, technicalDetails: message)
+        }
+        return .dataLoadFailed(dataError)
     }
 
     private func updateAddress(for location: CLLocation) async {
@@ -336,7 +366,7 @@ enum AppError: LocalizedError, Identifiable, Equatable {
     case locationPermissionDenied
     case locationUnavailable
     case outsideCoverage
-    case dataLoadFailed
+    case dataLoadFailed(DataLoadError)
     case unknown(String)
 
     var id: String { localizedDescription }
@@ -349,8 +379,8 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return "Unable to determine your location. Please try again."
         case .outsideCoverage:
             return "You're outside our coverage area. We currently support San Francisco only."
-        case .dataLoadFailed:
-            return "Unable to load parking zone data."
+        case .dataLoadFailed(let dataError):
+            return dataError.userMessage
         case .unknown(let message):
             return message
         }
@@ -364,10 +394,51 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return "Make sure you have a clear view of the sky and try again."
         case .outsideCoverage:
             return "More cities coming soon!"
-        case .dataLoadFailed:
-            return "Try restarting the app."
+        case .dataLoadFailed(let dataError):
+            return dataError.recoverySuggestion
         case .unknown:
             return nil
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .locationPermissionDenied:
+            return "location.slash.fill"
+        case .locationUnavailable:
+            return "location.fill.viewfinder"
+        case .outsideCoverage:
+            return "map"
+        case .dataLoadFailed:
+            return "exclamationmark.icloud.fill"
+        case .unknown:
+            return "exclamationmark.triangle.fill"
+        }
+    }
+
+    var iconColor: Color {
+        switch self {
+        case .locationPermissionDenied:
+            return .red
+        case .locationUnavailable:
+            return .orange
+        case .outsideCoverage:
+            return .blue
+        case .dataLoadFailed:
+            return .red
+        case .unknown:
+            return .orange
+        }
+    }
+
+    var canRetry: Bool {
+        switch self {
+        case .locationPermissionDenied:
+            return false
+        case .locationUnavailable, .dataLoadFailed, .unknown:
+            return true
+        case .outsideCoverage:
+            return true // User might move
         }
     }
 
@@ -381,6 +452,60 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return .locationUnavailable // Treat cancelled as unavailable
         }
     }
+}
+
+// MARK: - Data Load Error
+
+/// Detailed error information for data loading failures
+struct DataLoadError: Equatable {
+    let type: DataLoadErrorType
+    let technicalDetails: String?
+
+    var userMessage: String {
+        switch type {
+        case .fileNotFound:
+            return "Parking zone data is missing."
+        case .decodingFailed:
+            return "Parking zone data is corrupted or invalid."
+        case .noZonesLoaded:
+            return "No parking zones available."
+        case .networkError:
+            return "Unable to download parking data."
+        case .unknown:
+            return "Unable to load parking zone data."
+        }
+    }
+
+    var recoverySuggestion: String {
+        switch type {
+        case .fileNotFound:
+            return "Try reinstalling the app to restore the data."
+        case .decodingFailed:
+            return "Try updating the app or contact support if the issue persists."
+        case .noZonesLoaded:
+            return "Try refreshing or contact support."
+        case .networkError:
+            return "Check your internet connection and try again."
+        case .unknown:
+            return "Try restarting the app."
+        }
+    }
+
+    /// For debugging - shown in dev builds
+    var debugDescription: String {
+        if let details = technicalDetails {
+            return "\(type.rawValue): \(details)"
+        }
+        return type.rawValue
+    }
+}
+
+enum DataLoadErrorType: String {
+    case fileNotFound = "file_not_found"
+    case decodingFailed = "decoding_failed"
+    case noZonesLoaded = "no_zones_loaded"
+    case networkError = "network_error"
+    case unknown = "unknown"
 }
 
 // MARK: - SwiftUI Alignment Extension
