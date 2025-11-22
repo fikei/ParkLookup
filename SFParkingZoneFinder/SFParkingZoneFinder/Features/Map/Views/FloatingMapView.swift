@@ -72,8 +72,8 @@ struct FloatingMapView: View {
         .frame(width: 120, height: 120)
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-        .onChange(of: coordinate) { _, newCoord in
-            if let coord = newCoord {
+        .onChange(of: coordinate?.latitude) { _, _ in
+            if let coord = coordinate {
                 withAnimation {
                     region.center = coord
                 }
