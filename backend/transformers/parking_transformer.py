@@ -129,7 +129,9 @@ class ParkingDataTransformer:
                 geometry = feature.get("geometry", {})
 
                 # Get RPP area code - try various field names
-                area_code = (props.get("rpp_area") or props.get("RPP_AREA") or
+                # Dataset i886-hxz9 uses "rppeligib" for RPP eligibility area
+                area_code = (props.get("rppeligib") or props.get("RPPELIGIB") or
+                            props.get("rpp_area") or props.get("RPP_AREA") or
                             props.get("rpparea") or props.get("RPPAREA") or
                             props.get("area") or props.get("AREA"))
 
