@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UIKit
 
 /// ViewModel for the Settings screen
 @MainActor
@@ -106,21 +107,5 @@ final class SettingsViewModel: ObservableObject {
 
     func resetOnboarding() {
         UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
-    }
-}
-
-// MARK: - Map Position
-
-enum MapPosition: String, CaseIterable {
-    case topLeft = "topLeft"
-    case topRight = "topRight"
-    case bottomRight = "bottomRight"
-
-    var displayName: String {
-        switch self {
-        case .topLeft: return "Top Left"
-        case .topRight: return "Top Right"
-        case .bottomRight: return "Bottom Right"
-        }
     }
 }
