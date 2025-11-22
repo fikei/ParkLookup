@@ -47,15 +47,15 @@ For a functional Alpha release with real data, complete these in order:
 | S14: Error Handling | Not Started | 0/5 |
 | S15: UI Polish & Animations | Not Started | 0/8 |
 | S16: CarPlay Support | Not Started | 0/10 |
-| S17: Map Zone Boundaries | Not Started | 0/14 |
+| S17: Map Zone Boundaries | Not Started | 0/19 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 
-**Beta Progress:** 0/51 tasks complete (0%)
+**Beta Progress:** 0/56 tasks complete (0%)
 
 ---
 
-**Overall Progress:** 95/153 tasks complete (62%)
+**Overall Progress:** 95/158 tasks complete (60%)
 
 ---
 
@@ -585,18 +585,29 @@ For a functional Alpha release with real data, complete these in order:
 
 - [ ] **17.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
 
+#### Zone Color System
+- [ ] **17.9** Define distinct color palette for all RPP zones (A-Z, AA-LL) with good visual differentiation
+
+- [ ] **17.10** Create ZoneColorProvider service that maps zone codes to SwiftUI/UIKit colors
+
+- [ ] **17.11** Store zone colors in data model or configuration (support both light/dark mode variants)
+
+- [ ] **17.12** Implement color-coded polygon overlays on expanded map view (full screen only)
+
+- [ ] **17.13** Add legend or key showing zone colors (optional, toggleable)
+
 #### Map Provider Abstraction
-- [ ] **17.9** Create MapProviderProtocol abstraction layer for switching between map providers
+- [ ] **17.14** Create MapProviderProtocol abstraction layer for switching between map providers
 
-- [ ] **17.10** Implement AppleMapKitAdapter conforming to MapProviderProtocol (current default)
+- [ ] **17.15** Implement AppleMapKitAdapter conforming to MapProviderProtocol (current default)
 
-- [ ] **17.11** Implement GoogleMapsAdapter conforming to MapProviderProtocol (requires Google Maps SDK)
+- [ ] **17.16** Implement GoogleMapsAdapter conforming to MapProviderProtocol (requires Google Maps SDK)
 
-- [ ] **17.12** Implement MapLibreAdapter conforming to MapProviderProtocol (open source alternative using OpenStreetMap tiles)
+- [ ] **17.17** Implement MapLibreAdapter conforming to MapProviderProtocol (open source alternative using OpenStreetMap tiles)
 
-- [ ] **17.13** Add map provider selection to Settings (Apple Maps, Google Maps, MapLibre/OSM)
+- [ ] **17.18** Add map provider selection to Settings (Apple Maps, Google Maps, MapLibre/OSM)
 
-- [ ] **17.14** Persist map provider preference and apply on app launch
+- [ ] **17.19** Persist map provider preference and apply on app launch
 
 **Story 17 Complete When:**
 - [ ] Expanded map shows all zone boundaries as colored polygons
