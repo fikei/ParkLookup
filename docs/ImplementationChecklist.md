@@ -12,7 +12,7 @@
 For a functional Alpha release with real data, complete these in order:
 1. ✅ S1-S9: iOS app core features (DONE)
 2. ✅ S10: Data Pipeline (DONE)
-3. 🔲 **S12: iOS Data Integration** - Bundle real pipeline data into app
+3. ✅ **S12: iOS Data Integration** - Real pipeline data bundled and tested
 4. 🔲 S13: Backend Testing - Verify everything works
 
 **Optional for Alpha (can defer to Beta):**
@@ -35,10 +35,10 @@ For a functional Alpha release with real data, complete these in order:
 | S9: Settings Screen | **COMPLETE** | 8/8 |
 | S10: Data Pipeline | **COMPLETE** | 6/6 |
 | S11: Backend API | Not Started | 0/7 |
-| S12: iOS Data Integration | In Progress | 5/9 |
+| S12: iOS Data Integration | **COMPLETE** | 9/9 |
 | S13: Backend Testing | In Progress | 2/6 |
 
-**Alpha Progress:** 95/102 tasks complete (93%)
+**Alpha Progress:** 99/102 tasks complete (97%)
 
 ### 🎯 Epic: Beta Release
 
@@ -50,12 +50,13 @@ For a functional Alpha release with real data, complete these in order:
 | S17: Map Zone Boundaries | Not Started | 0/19 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
+| S20: Performance Optimization | Not Started | 0/14 |
 
-**Beta Progress:** 0/56 tasks complete (0%)
+**Beta Progress:** 0/70 tasks complete (0%)
 
 ---
 
-**Overall Progress:** 95/158 tasks complete (60%)
+**Overall Progress:** 99/172 tasks complete (58%)
 
 ---
 
@@ -426,9 +427,9 @@ For a functional Alpha release with real data, complete these in order:
 
 - [x] **12.2** Update LocalZoneDataSource to load official parking_zones.json instead of mock data
 
-- [ ] **12.3** Run pipeline on machine with network access, generate parking_data.json
+- [x] **12.3** Run pipeline on machine with network access, generate parking_data.json
 
-- [ ] **12.4** Bundle pipeline output JSON into iOS app Resources folder
+- [x] **12.4** Bundle pipeline output JSON into iOS app Resources folder
 
 - [x] **12.5** Display data version and "last updated" in Settings/About
 
@@ -436,15 +437,15 @@ For a functional Alpha release with real data, complete these in order:
 
 - [x] **12.7** Create update script to refresh bundled data from pipeline output
 
-- [ ] **12.8** Test iOS app loads and displays real zone data correctly
+- [x] **12.8** Test iOS app loads and displays real zone data correctly
 
-- [ ] **12.9** Verify point-in-polygon lookup works with official zone boundaries
+- [x] **12.9** Verify point-in-polygon lookup works with official zone boundaries
 
 **Story 12 Complete When:**
-- [ ] iOS app displays real SF parking zone data
-- [ ] Zone lookup returns accurate results for test locations
-- [ ] Data source/version visible in Settings
-- [ ] Process documented for updating bundled data
+- [x] iOS app displays real SF parking zone data
+- [x] Zone lookup returns accurate results for test locations
+- [x] Data source/version visible in Settings
+- [x] Process documented for updating bundled data
 
 ---
 
@@ -672,6 +673,54 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] All critical user flows have UI tests
 - [ ] Tests pass on simulator
 - [ ] Tests validate finalized UI polish
+
+---
+
+## Story 20 (S20): Performance Optimization
+
+**Goal:** Optimize zone lookup and data loading for real-world performance with large datasets (83K+ parcels)
+
+### Tasks
+
+#### Spatial Index Optimization
+- [ ] **20.1** Implement R-tree spatial index for zone boundaries using bounding box pre-filtering
+
+- [ ] **20.2** Add zone boundary bounding box caching to avoid recalculating during lookup
+
+- [ ] **20.3** Optimize point-in-polygon to early-exit on bounding box miss
+
+#### Data Loading Optimization
+- [ ] **20.4** Implement lazy loading for zone boundaries (load metadata first, boundaries on demand)
+
+- [ ] **20.5** Add background data loading with progress indicator on app launch
+
+- [ ] **20.6** Profile and optimize JSON parsing for large zone files (>5MB)
+
+#### Memory Management
+- [ ] **20.7** Implement zone boundary simplification for map display (reduce polygon complexity)
+
+- [ ] **20.8** Add memory pressure handling to release cached zones when needed
+
+- [ ] **20.9** Profile memory usage with full SF dataset and optimize if >100MB
+
+#### Lookup Performance
+- [ ] **20.10** Benchmark zone lookup time with 24 zones × 3,673 boundaries (Zone U scale)
+
+- [ ] **20.11** Target <100ms lookup time for 95th percentile on iPhone 12+
+
+- [ ] **20.12** Add performance logging to track lookup times in production builds
+
+#### Startup Performance
+- [ ] **20.13** Measure cold start time with full dataset, target <2s to first result
+
+- [ ] **20.14** Implement incremental zone loading (prioritize nearby zones first)
+
+**Story 20 Complete When:**
+- [ ] Zone lookup completes in <100ms for 95% of requests
+- [ ] App cold start to first result <2 seconds
+- [ ] Memory usage stays under 100MB typical usage
+- [ ] No UI jank during zone loading or lookup
+- [ ] Performance metrics logged for monitoring
 
 ---
 
