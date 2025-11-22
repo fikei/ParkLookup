@@ -35,7 +35,7 @@ class RPPParcelsFetcher(BaseFetcher):
 
     async def fetch(self) -> List[Dict[str, Any]]:
         """
-        Fetch all RPP parcel polygons.
+        Fetch all RPP parcel polygons with pagination.
         Returns GeoJSON features with polygon geometry.
         """
         logger.info(f"Starting fetch from {self.get_source_name()}")
@@ -44,26 +44,47 @@ class RPPParcelsFetcher(BaseFetcher):
         if DATASF_APP_TOKEN:
             headers["X-App-Token"] = DATASF_APP_TOKEN
 
-        # Fetch as GeoJSON to get polygon geometries
-        # The .geojson endpoint returns all features with geometry
-        try:
-            result = await self.fetch_with_retry(
-                self.base_url,
-                headers=headers
-            )
+        all_features = []
+        offset = 0
 
-            # Result should be a GeoJSON FeatureCollection
-            if isinstance(result, dict) and "features" in result:
-                features = result["features"]
-                logger.info(f"Fetched {len(features)} RPP parcel features")
-                return features
-            else:
-                logger.warning(f"Unexpected response format: {type(result)}")
-                return []
+        # GeoJSON endpoint supports pagination via $limit and $offset
+        while True:
+            params = {
+                "$limit": DATASF_PAGE_SIZE,
+                "$offset": offset,
+            }
 
-        except Exception as e:
-            logger.error(f"Failed to fetch RPP parcels: {e}")
-            return []
+            try:
+                logger.info(f"Fetching parcels {offset} to {offset + DATASF_PAGE_SIZE}...")
+                result = await self.fetch_with_retry(
+                    self.base_url,
+                    params=params,
+                    headers=headers
+                )
+
+                # Result should be a GeoJSON FeatureCollection
+                if isinstance(result, dict) and "features" in result:
+                    features = result["features"]
+                    if not features:
+                        break
+
+                    all_features.extend(features)
+                    logger.info(f"Fetched {len(features)} features (total: {len(all_features)})")
+
+                    if len(features) < DATASF_PAGE_SIZE:
+                        break
+
+                    offset += DATASF_PAGE_SIZE
+                else:
+                    logger.warning(f"Unexpected response format: {type(result)}")
+                    break
+
+            except Exception as e:
+                logger.error(f"Failed to fetch RPP parcels at offset {offset}: {e}")
+                break
+
+        logger.info(f"Completed fetch: {len(all_features)} total RPP parcel features")
+        return all_features
 
     async def fetch_by_area(self, area_code: str) -> List[Dict[str, Any]]:
         """Fetch parcels for a specific RPP area"""
