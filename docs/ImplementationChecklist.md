@@ -17,7 +17,7 @@
 | M6: Main Result View | **COMPLETE** | 14/14 |
 | M7: Floating Map | **COMPLETE** | 10/10 |
 | M8: Onboarding Flow | **COMPLETE** | 10/10 |
-| M9: Settings Screen | Not Started | 0/8 |
+| M9: Settings Screen | **COMPLETE** | 8/8 |
 | M10: Error Handling & Polish | Not Started | 0/8 |
 | M11: Map Updates | Not Started | 0/14 |
 | M12: Testing | Not Started | 0/8 |
@@ -27,7 +27,7 @@
 | M15: Backend API | Not Started | 0/7 |
 | M16: iOS Backend Integration | Not Started | 0/9 |
 
-**Overall Progress:** 74/140 tasks complete (V1.1: 74/118, Backend: 0/22)
+**Overall Progress:** 82/140 tasks complete (V1.1: 82/118, Backend: 0/22)
 
 ---
 
@@ -300,27 +300,27 @@
 
 ### Tasks
 
-- [ ] **9.1** Create SettingsViewModel managing user preferences and permit data
+- [x] **9.1** Create SettingsViewModel managing user preferences and permit data
 
-- [ ] **9.2** Create PermitManagementView listing current permits with add/edit/delete functionality
+- [x] **9.2** Create PermitManagementView listing current permits with add/edit/delete functionality
 
-- [ ] **9.3** Create AddPermitView for adding new permits (reuse PermitAreaGrid)
+- [x] **9.3** Create AddPermitView for adding new permits (reuse PermitAreaGrid)
 
-- [ ] **9.4** Add map preferences section: toggle floating map visibility, map position picker
+- [x] **9.4** Add map preferences section: toggle floating map visibility, map position picker
 
-- [ ] **9.5** Create AboutView showing app version, data version, privacy policy, and open source licenses
+- [x] **9.5** Create AboutView showing app version, data version, privacy policy, and open source licenses
 
-- [ ] **9.6** Add Help section with FAQ placeholder, report issue email link, and rate app link
+- [x] **9.6** Add Help section with FAQ placeholder, report issue email link, and rate app link
 
-- [ ] **9.7** Assemble SettingsView with all sections using List and NavigationLink
+- [x] **9.7** Assemble SettingsView with all sections using List and NavigationLink
 
-- [ ] **9.8** Add settings gear icon to MainResultView navigation bar linking to SettingsView
+- [x] **9.8** Add settings gear icon to MainResultView bottom section linking to SettingsView
 
 **Milestone 9 Complete When:**
-- [ ] Settings accessible from main view
-- [ ] User can add, edit, delete permits
-- [ ] Map preferences persist and apply
-- [ ] About information displays correctly
+- [x] Settings accessible from main view
+- [x] User can add, edit, delete permits
+- [x] Map preferences persist and apply
+- [x] About information displays correctly
 
 ---
 
