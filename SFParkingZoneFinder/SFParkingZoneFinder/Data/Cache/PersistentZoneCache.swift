@@ -15,7 +15,8 @@ final class PersistentZoneCache: ZoneCacheProtocol {
     private let lock = NSLock()
 
     /// Current data version - change this when zone data format changes
-    private let cacheVersion = "1.0"
+    /// Bumped to 1.1: simplified polygon data (53% point reduction)
+    private let cacheVersion = "1.1"
 
     private(set) var lastUpdated: Date?
 
