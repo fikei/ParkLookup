@@ -167,19 +167,13 @@ struct ExpandedMapView: View {
 
     @MapContentBuilder
     private func zonePolygons(for zone: ParkingZone) -> some MapContent {
-        let isCurrentZone = zone.permitArea == currentPermitArea
-        let fillColor: Color = isCurrentZone ? .green.opacity(0.35) : .blue.opacity(0.2)
-        let strokeColor: Color = isCurrentZone ? .green : .blue.opacity(0.6)
-
         ForEach(zone.allBoundaryCoordinates.indices, id: \.self) { idx in
             let coords = zone.allBoundaryCoordinates[idx]
             if coords.count >= 3 {
-                // Fill polygon
+                // Draw polygon (styling simplified for compatibility)
                 MapPolygon(coordinates: coords)
-                    .foregroundStyle(fillColor)
-                // Stroke outline
-                MapPolyline(coordinates: coords + [coords[0]]) // Close the loop
-                    .stroke(strokeColor, lineWidth: isCurrentZone ? 2 : 1)
+                // Draw outline
+                MapPolyline(coordinates: coords + [coords[0]])
             }
         }
     }
