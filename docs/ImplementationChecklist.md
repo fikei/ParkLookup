@@ -12,8 +12,9 @@
 For a functional Alpha release with real data, complete these in order:
 1. ✅ S1-S9: iOS app core features (DONE)
 2. ✅ S10: Data Pipeline (DONE)
-3. ✅ **S12: iOS Data Integration** - Real pipeline data bundled and tested
-4. 🔲 S13: Backend Testing - Verify everything works
+3. ✅ S12: iOS Data Integration - Real pipeline data bundled and tested
+4. ✅ S13: Backend Testing - CI/CD and test coverage
+5. 🔲 **S14α: TestFlight Alpha Launch** - Deploy to internal testers
 
 **Deferred to Beta:**
 - S11: Backend API & Pipeline Automation - Full backend with live data
@@ -37,7 +38,9 @@ For a functional Alpha release with real data, complete these in order:
 | S12: iOS Data Integration | **COMPLETE** | 9/9 |
 | S13: Backend Testing | **COMPLETE** | 4/4 |
 
-**Alpha Progress:** 99/99 tasks complete (100%) ✅
+| S14α: TestFlight Alpha Launch | Not Started | 0/6 |
+
+**Alpha Progress:** 99/105 tasks complete (94%)
 
 *Note: API testing tasks moved to S13b in Beta (blocked by S11)*
 
@@ -59,7 +62,7 @@ For a functional Alpha release with real data, complete these in order:
 
 ---
 
-**Overall Progress:** 99/189 tasks complete (52%)
+**Overall Progress:** 99/195 tasks complete (51%)
 
 ---
 
@@ -495,6 +498,32 @@ For a functional Alpha release with real data, complete these in order:
 - [x] Pipeline unit tests pass
 - [x] Pipeline integration tests pass
 - [x] CI/CD runs tests automatically on push
+
+---
+
+## Story 14α (S14α): TestFlight Alpha Launch
+
+**Goal:** Deploy bundled-data Alpha to TestFlight for internal testing
+
+### Tasks
+
+- [ ] **14α.1** Configure App Store Connect: create app record, set bundle ID, app name, and primary category
+
+- [ ] **14α.2** Add app icons for all required sizes (1024x1024 App Store, plus device sizes)
+
+- [ ] **14α.3** Create launch screen with app branding (storyboard or SwiftUI)
+
+- [ ] **14α.4** Write privacy policy covering location data usage and add to Settings/About
+
+- [ ] **14α.5** Archive build, resolve any signing/capability issues, and upload to TestFlight
+
+- [ ] **14α.6** Set up internal testing group and distribute to team (3-5 internal testers)
+
+**Story 14α Complete When:**
+- [ ] App available on TestFlight (internal testing)
+- [ ] App installs and launches without crash
+- [ ] Core flow works: onboarding → permit setup → zone lookup
+- [ ] Privacy policy accessible in app
 
 ---
 
