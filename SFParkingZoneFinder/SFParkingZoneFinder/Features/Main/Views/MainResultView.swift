@@ -5,6 +5,7 @@ struct MainResultView: View {
     @StateObject private var viewModel = MainResultViewModel()
     @State private var showingFullRules = false
     @State private var showingOverlappingZones = false
+    @State private var showingExpandedMap = false
 
     var body: some View {
         ZStack {
@@ -49,6 +50,23 @@ struct MainResultView: View {
                 .padding()
             }
 
+            // Floating Map (bottom right)
+            if viewModel.showFloatingMap && viewModel.error == nil && !viewModel.isLoading {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        FloatingMapView(
+                            coordinate: viewModel.currentCoordinate,
+                            zoneName: viewModel.zoneName,
+                            onTap: { showingExpandedMap = true }
+                        )
+                        .padding(.trailing, 16)
+                        .padding(.bottom, 32)
+                    }
+                }
+            }
+
             // Loading overlay
             if viewModel.isLoading {
                 LoadingOverlay()
@@ -72,6 +90,12 @@ struct MainResultView: View {
         }
         .sheet(isPresented: $showingOverlappingZones) {
             OverlappingZonesSheet(zones: viewModel.overlappingZones)
+        }
+        .sheet(isPresented: $showingExpandedMap) {
+            ExpandedMapView(
+                coordinate: viewModel.currentCoordinate,
+                zoneName: viewModel.zoneName
+            )
         }
     }
 }

@@ -27,6 +27,7 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var currentAddress: String = "Locating..."
     @Published private(set) var lastUpdated: Date?
     @Published private(set) var lookupConfidence: LookupConfidence = .high
+    @Published private(set) var currentCoordinate: CLLocationCoordinate2D?
 
     // User permits
     @Published private(set) var applicablePermits: [ParkingPermit] = []
@@ -155,6 +156,7 @@ final class MainResultViewModel: ObservableObject {
         do {
             // Get current location
             let location = try await locationService.requestSingleLocation()
+            currentCoordinate = location.coordinate
 
             // Get parking result
             let result = await zoneService.getParkingResult(
