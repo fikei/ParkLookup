@@ -8,7 +8,7 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 // MARK: - Permits Section
                 Section {
                     ForEach(viewModel.permits) { permit in
