@@ -6,6 +6,7 @@ struct MainResultView: View {
     @State private var showingFullRules = false
     @State private var showingOverlappingZones = false
     @State private var showingExpandedMap = false
+    @State private var showingSettings = false
 
     var body: some View {
         ZStack {
@@ -50,11 +51,27 @@ struct MainResultView: View {
                 .padding()
             }
 
-            // Floating Map (top right)
-            if viewModel.showFloatingMap && viewModel.error == nil && !viewModel.isLoading {
-                VStack {
-                    HStack {
-                        Spacer()
+            // Settings Button (top left)
+            VStack {
+                HStack {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title3)
+                            .foregroundColor(.primary)
+                            .padding(12)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.top, 60)
+
+                    Spacer()
+
+                    // Floating Map (top right)
+                    if viewModel.showFloatingMap && viewModel.error == nil && !viewModel.isLoading {
                         FloatingMapView(
                             coordinate: viewModel.currentCoordinate,
                             zoneName: viewModel.zoneName,
@@ -63,8 +80,8 @@ struct MainResultView: View {
                         .padding(.trailing, 16)
                         .padding(.top, 60)
                     }
-                    Spacer()
                 }
+                Spacer()
             }
 
             // Loading overlay
@@ -96,6 +113,9 @@ struct MainResultView: View {
                 coordinate: viewModel.currentCoordinate,
                 zoneName: viewModel.zoneName
             )
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
         }
     }
 }

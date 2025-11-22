@@ -33,9 +33,9 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var applicablePermits: [ParkingPermit] = []
     @Published private(set) var userPermits: [ParkingPermit] = []
 
-    // Map
-    @Published var showFloatingMap = true
-    @Published var mapPosition: MapPosition = .topRight
+    // Map preferences (read from UserDefaults)
+    @Published var showFloatingMap: Bool
+    @Published var mapPosition: MapPosition
 
     // MARK: - Dependencies
 
@@ -58,6 +58,11 @@ final class MainResultViewModel: ObservableObject {
         self.zoneService = zoneService
         self.reverseGeocodingService = reverseGeocodingService
         self.permitService = permitService
+
+        // Load map preferences from UserDefaults
+        self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
+        let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
+        self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
 
         setupBindings()
     }
@@ -118,6 +123,17 @@ final class MainResultViewModel: ObservableObject {
                 if self?.lastUpdated != nil {
                     self?.refreshLocation()
                 }
+            }
+            .store(in: &cancellables)
+
+        // Listen for map preference changes from Settings
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
+                let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
+                self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
             }
             .store(in: &cancellables)
 
