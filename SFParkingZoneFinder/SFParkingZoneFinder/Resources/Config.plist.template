@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>GOOGLE_MAPS_API_KEY</key>
+    <string>YOUR_GOOGLE_MAPS_API_KEY_HERE</string>
+</dict>
+</plist>
+<!--
+    SETUP INSTRUCTIONS:
+    1. Copy this file to Config.plist (same directory)
+    2. Replace YOUR_GOOGLE_MAPS_API_KEY_HERE with your actual API key
+    3. Config.plist is gitignored to prevent key leakage
+
+    To get a Google Maps API key:
+    1. Go to https://console.cloud.google.com/
+    2. Create or select a project
+    3. Enable "Maps SDK for iOS"
+    4. Create credentials > API Key
+    5. (Recommended) Restrict the key to your app's bundle ID
+-->

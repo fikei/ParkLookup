@@ -1,0 +1,712 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3C4145E52ED14A6F001BDE61 /* ZoneCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145B12ED14A6F001BDE61 /* ZoneCache.swift */; };
+		3C4145E62ED14A6F001BDE61 /* LocalZoneDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145B32ED14A6F001BDE61 /* LocalZoneDataSource.swift */; };
+		3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145B52ED14A6F001BDE61 /* ZoneRepository.swift */; };
+		3C4145E82ED14A6F001BDE61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C4145B82ED14A6F001BDE61 /* Assets.xcassets */; };
+		3C4145E92ED14A6F001BDE61 /* Config.plist.template in Resources */ = {isa = PBXBuildFile; fileRef = 3C4145B92ED14A6F001BDE61 /* Config.plist.template */; };
+		3C4145EA2ED14A6F001BDE61 /* sf_parking_zones.json in Resources */ = {isa = PBXBuildFile; fileRef = 3C4145BA2ED14A6F001BDE61 /* sf_parking_zones.json */; };
+		3C4145EB2ED14A6F001BDE61 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145BC2ED14A6F001BDE61 /* Color+Theme.swift */; };
+		3C4145EC2ED14A6F001BDE61 /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145BE2ED14A6F001BDE61 /* Address.swift */; };
+		3C4145ED2ED14A6F001BDE61 /* CityIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145BF2ED14A6F001BDE61 /* CityIdentifier.swift */; };
+		3C4145EE2ED14A6F001BDE61 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C02ED14A6F001BDE61 /* Coordinate.swift */; };
+		3C4145EF2ED14A6F001BDE61 /* ParkingPermit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C12ED14A6F001BDE61 /* ParkingPermit.swift */; };
+		3C4145F02ED14A6F001BDE61 /* ParkingRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C22ED14A6F001BDE61 /* ParkingRule.swift */; };
+		3C4145F12ED14A70001BDE61 /* ParkingZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C32ED14A6F001BDE61 /* ParkingZone.swift */; };
+		3C4145F22ED14A70001BDE61 /* RuleInterpretationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C42ED14A6F001BDE61 /* RuleInterpretationResult.swift */; };
+		3C4145F32ED14A70001BDE61 /* ZoneLookupResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C52ED14A6F001BDE61 /* ZoneLookupResult.swift */; };
+		3C4145F42ED14A70001BDE61 /* LocationServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C72ED14A6F001BDE61 /* LocationServiceProtocol.swift */; };
+		3C4145F52ED14A70001BDE61 /* MapProviderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C82ED14A6F001BDE61 /* MapProviderProtocol.swift */; };
+		3C4145F62ED14A70001BDE61 /* PermitServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145C92ED14A6F001BDE61 /* PermitServiceProtocol.swift */; };
+		3C4145F72ED14A70001BDE61 /* ReverseGeocodingServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145CA2ED14A6F001BDE61 /* ReverseGeocodingServiceProtocol.swift */; };
+		3C4145F82ED14A70001BDE61 /* RuleInterpreterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145CB2ED14A6F001BDE61 /* RuleInterpreterProtocol.swift */; };
+		3C4145F92ED14A70001BDE61 /* ZoneDataSourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145CC2ED14A6F001BDE61 /* ZoneDataSourceProtocol.swift */; };
+		3C4145FA2ED14A70001BDE61 /* ZoneLookupEngineProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145CD2ED14A6F001BDE61 /* ZoneLookupEngineProtocol.swift */; };
+		3C4145FB2ED14A70001BDE61 /* ZoneServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145CE2ED14A6F001BDE61 /* ZoneServiceProtocol.swift */; };
+		3C4145FC2ED14A70001BDE61 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D02ED14A6F001BDE61 /* LocationService.swift */; };
+		3C4145FD2ED14A70001BDE61 /* PermitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D12ED14A6F001BDE61 /* PermitService.swift */; };
+		3C4145FE2ED14A70001BDE61 /* ReverseGeocodingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D22ED14A6F001BDE61 /* ReverseGeocodingService.swift */; };
+		3C4145FF2ED14A70001BDE61 /* RuleInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D32ED14A6F001BDE61 /* RuleInterpreter.swift */; };
+		3C4146002ED14A70001BDE61 /* ZoneLookupEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D42ED14A6F001BDE61 /* ZoneLookupEngine.swift */; };
+		3C4146012ED14A70001BDE61 /* ZoneService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D52ED14A6F001BDE61 /* ZoneService.swift */; };
+		3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D82ED14A6F001BDE61 /* MainResultViewModel.swift */; };
+		3C4146032ED14A70001BDE61 /* AdditionalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DA2ED14A6F001BDE61 /* AdditionalInfoView.swift */; };
+		3C4146042ED14A70001BDE61 /* MainResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DB2ED14A6F001BDE61 /* MainResultView.swift */; };
+		3C4146052ED14A70001BDE61 /* RulesSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DC2ED14A6F001BDE61 /* RulesSummaryView.swift */; };
+		3C4146062ED14A70001BDE61 /* ValidityBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DD2ED14A6F001BDE61 /* ValidityBadgeView.swift */; };
+		3C4146072ED14A70001BDE61 /* ZoneStatusCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DE2ED14A6F001BDE61 /* ZoneStatusCardView.swift */; };
+		3C4146082ED14A70001BDE61 /* GoogleMapsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145E12ED14A6F001BDE61 /* GoogleMapsAdapter.swift */; };
+		3C41460D2ED14AC3001BDE61 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146092ED14AC3001BDE61 /* AppDelegate.swift */; };
+		3C41460E2ED14AC3001BDE61 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41460A2ED14AC3001BDE61 /* DependencyContainer.swift */; };
+		3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41460B2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift */; };
+		3C4146192ED1559C001BDE61 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */; };
+		3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */; };
+		3C41461B2ED1559C001BDE61 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */; };
+		3C41461C2ED1559C001BDE61 /* PermitSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146152ED1559C001BDE61 /* PermitSetupView.swift */; };
+		3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146162ED1559C001BDE61 /* WelcomeView.swift */; };
+		3C4146202ED15702001BDE61 /* FloatingMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41461E2ED15702001BDE61 /* FloatingMapView.swift */; };
+		3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146212ED16803001BDE61 /* SettingsViewModel.swift */; };
+		3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146232ED16803001BDE61 /* AddPermitView.swift */; };
+		3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146242ED16803001BDE61 /* SettingsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3C4144FB2ED1413F001BDE61 /* SFParkingZoneFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SFParkingZoneFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C4145B12ED14A6F001BDE61 /* ZoneCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneCache.swift; sourceTree = "<group>"; };
+		3C4145B32ED14A6F001BDE61 /* LocalZoneDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalZoneDataSource.swift; sourceTree = "<group>"; };
+		3C4145B52ED14A6F001BDE61 /* ZoneRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneRepository.swift; sourceTree = "<group>"; };
+		3C4145B82ED14A6F001BDE61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3C4145B92ED14A6F001BDE61 /* Config.plist.template */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Config.plist.template; sourceTree = "<group>"; };
+		3C4145BA2ED14A6F001BDE61 /* sf_parking_zones.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sf_parking_zones.json; sourceTree = "<group>"; };
+		3C4145BC2ED14A6F001BDE61 /* Color+Theme.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
+		3C4145BE2ED14A6F001BDE61 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Address.swift; sourceTree = "<group>"; };
+		3C4145BF2ED14A6F001BDE61 /* CityIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CityIdentifier.swift; sourceTree = "<group>"; };
+		3C4145C02ED14A6F001BDE61 /* Coordinate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
+		3C4145C12ED14A6F001BDE61 /* ParkingPermit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParkingPermit.swift; sourceTree = "<group>"; };
+		3C4145C22ED14A6F001BDE61 /* ParkingRule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParkingRule.swift; sourceTree = "<group>"; };
+		3C4145C32ED14A6F001BDE61 /* ParkingZone.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParkingZone.swift; sourceTree = "<group>"; };
+		3C4145C42ED14A6F001BDE61 /* RuleInterpretationResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RuleInterpretationResult.swift; sourceTree = "<group>"; };
+		3C4145C52ED14A6F001BDE61 /* ZoneLookupResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneLookupResult.swift; sourceTree = "<group>"; };
+		3C4145C72ED14A6F001BDE61 /* LocationServiceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationServiceProtocol.swift; sourceTree = "<group>"; };
+		3C4145C82ED14A6F001BDE61 /* MapProviderProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapProviderProtocol.swift; sourceTree = "<group>"; };
+		3C4145C92ED14A6F001BDE61 /* PermitServiceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermitServiceProtocol.swift; sourceTree = "<group>"; };
+		3C4145CA2ED14A6F001BDE61 /* ReverseGeocodingServiceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReverseGeocodingServiceProtocol.swift; sourceTree = "<group>"; };
+		3C4145CB2ED14A6F001BDE61 /* RuleInterpreterProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RuleInterpreterProtocol.swift; sourceTree = "<group>"; };
+		3C4145CC2ED14A6F001BDE61 /* ZoneDataSourceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneDataSourceProtocol.swift; sourceTree = "<group>"; };
+		3C4145CD2ED14A6F001BDE61 /* ZoneLookupEngineProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneLookupEngineProtocol.swift; sourceTree = "<group>"; };
+		3C4145CE2ED14A6F001BDE61 /* ZoneServiceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneServiceProtocol.swift; sourceTree = "<group>"; };
+		3C4145D02ED14A6F001BDE61 /* LocationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		3C4145D12ED14A6F001BDE61 /* PermitService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermitService.swift; sourceTree = "<group>"; };
+		3C4145D22ED14A6F001BDE61 /* ReverseGeocodingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReverseGeocodingService.swift; sourceTree = "<group>"; };
+		3C4145D32ED14A6F001BDE61 /* RuleInterpreter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RuleInterpreter.swift; sourceTree = "<group>"; };
+		3C4145D42ED14A6F001BDE61 /* ZoneLookupEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneLookupEngine.swift; sourceTree = "<group>"; };
+		3C4145D52ED14A6F001BDE61 /* ZoneService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneService.swift; sourceTree = "<group>"; };
+		3C4145D82ED14A6F001BDE61 /* MainResultViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainResultViewModel.swift; sourceTree = "<group>"; };
+		3C4145DA2ED14A6F001BDE61 /* AdditionalInfoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdditionalInfoView.swift; sourceTree = "<group>"; };
+		3C4145DB2ED14A6F001BDE61 /* MainResultView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainResultView.swift; sourceTree = "<group>"; };
+		3C4145DC2ED14A6F001BDE61 /* RulesSummaryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RulesSummaryView.swift; sourceTree = "<group>"; };
+		3C4145DD2ED14A6F001BDE61 /* ValidityBadgeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValidityBadgeView.swift; sourceTree = "<group>"; };
+		3C4145DE2ED14A6F001BDE61 /* ZoneStatusCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneStatusCardView.swift; sourceTree = "<group>"; };
+		3C4145E12ED14A6F001BDE61 /* GoogleMapsAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleMapsAdapter.swift; sourceTree = "<group>"; };
+		3C4146092ED14AC3001BDE61 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3C41460A2ED14AC3001BDE61 /* DependencyContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
+		3C41460B2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SFParkingZoneFinderApp.swift; sourceTree = "<group>"; };
+		3C4146102ED15289001BDE61 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SFParkingZoneFinder/Info.plist; sourceTree = "<group>"; };
+		3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationPermissionView.swift; sourceTree = "<group>"; };
+		3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
+		3C4146152ED1559C001BDE61 /* PermitSetupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermitSetupView.swift; sourceTree = "<group>"; };
+		3C4146162ED1559C001BDE61 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		3C41461E2ED15702001BDE61 /* FloatingMapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FloatingMapView.swift; sourceTree = "<group>"; };
+		3C4146212ED16803001BDE61 /* SettingsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		3C4146232ED16803001BDE61 /* AddPermitView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPermitView.swift; sourceTree = "<group>"; };
+		3C4146242ED16803001BDE61 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3C4144F82ED1413F001BDE61 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3C4144F22ED1413F001BDE61 = {
+			isa = PBXGroup;
+			children = (
+				3C4146102ED15289001BDE61 /* Info.plist */,
+				3C41460C2ED14AC3001BDE61 /* App */,
+				3C4145D72ED14A6F001BDE61 /* Core */,
+				3C4145B72ED14A6F001BDE61 /* Data */,
+				3C4145E42ED14A6F001BDE61 /* Features */,
+				3C4145BB2ED14A6F001BDE61 /* Resources */,
+				3C4144FC2ED1413F001BDE61 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3C4144FC2ED1413F001BDE61 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C4144FB2ED1413F001BDE61 /* SFParkingZoneFinder.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3C4145B22ED14A6F001BDE61 /* Cache */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145B12ED14A6F001BDE61 /* ZoneCache.swift */,
+			);
+			path = Cache;
+			sourceTree = "<group>";
+		};
+		3C4145B42ED14A6F001BDE61 /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145B32ED14A6F001BDE61 /* LocalZoneDataSource.swift */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
+		3C4145B62ED14A6F001BDE61 /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145B52ED14A6F001BDE61 /* ZoneRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		3C4145B72ED14A6F001BDE61 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145B22ED14A6F001BDE61 /* Cache */,
+				3C4145B42ED14A6F001BDE61 /* Local */,
+				3C4145B62ED14A6F001BDE61 /* Repositories */,
+			);
+			name = Data;
+			path = SFParkingZoneFinder/Data;
+			sourceTree = "<group>";
+		};
+		3C4145BB2ED14A6F001BDE61 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145B82ED14A6F001BDE61 /* Assets.xcassets */,
+				3C4145B92ED14A6F001BDE61 /* Config.plist.template */,
+				3C4145BA2ED14A6F001BDE61 /* sf_parking_zones.json */,
+			);
+			name = Resources;
+			path = SFParkingZoneFinder/Resources;
+			sourceTree = "<group>";
+		};
+		3C4145BD2ED14A6F001BDE61 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145BC2ED14A6F001BDE61 /* Color+Theme.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		3C4145C62ED14A6F001BDE61 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145BE2ED14A6F001BDE61 /* Address.swift */,
+				3C4145BF2ED14A6F001BDE61 /* CityIdentifier.swift */,
+				3C4145C02ED14A6F001BDE61 /* Coordinate.swift */,
+				3C4145C12ED14A6F001BDE61 /* ParkingPermit.swift */,
+				3C4145C22ED14A6F001BDE61 /* ParkingRule.swift */,
+				3C4145C32ED14A6F001BDE61 /* ParkingZone.swift */,
+				3C4145C42ED14A6F001BDE61 /* RuleInterpretationResult.swift */,
+				3C4145C52ED14A6F001BDE61 /* ZoneLookupResult.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3C4145CF2ED14A6F001BDE61 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145C72ED14A6F001BDE61 /* LocationServiceProtocol.swift */,
+				3C4145C82ED14A6F001BDE61 /* MapProviderProtocol.swift */,
+				3C4145C92ED14A6F001BDE61 /* PermitServiceProtocol.swift */,
+				3C4145CA2ED14A6F001BDE61 /* ReverseGeocodingServiceProtocol.swift */,
+				3C4145CB2ED14A6F001BDE61 /* RuleInterpreterProtocol.swift */,
+				3C4145CC2ED14A6F001BDE61 /* ZoneDataSourceProtocol.swift */,
+				3C4145CD2ED14A6F001BDE61 /* ZoneLookupEngineProtocol.swift */,
+				3C4145CE2ED14A6F001BDE61 /* ZoneServiceProtocol.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		3C4145D62ED14A6F001BDE61 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145D02ED14A6F001BDE61 /* LocationService.swift */,
+				3C4145D12ED14A6F001BDE61 /* PermitService.swift */,
+				3C4145D22ED14A6F001BDE61 /* ReverseGeocodingService.swift */,
+				3C4145D32ED14A6F001BDE61 /* RuleInterpreter.swift */,
+				3C4145D42ED14A6F001BDE61 /* ZoneLookupEngine.swift */,
+				3C4145D52ED14A6F001BDE61 /* ZoneService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		3C4145D72ED14A6F001BDE61 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145BD2ED14A6F001BDE61 /* Extensions */,
+				3C4145C62ED14A6F001BDE61 /* Models */,
+				3C4145CF2ED14A6F001BDE61 /* Protocols */,
+				3C4145D62ED14A6F001BDE61 /* Services */,
+			);
+			name = Core;
+			path = SFParkingZoneFinder/Core;
+			sourceTree = "<group>";
+		};
+		3C4145D92ED14A6F001BDE61 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145D82ED14A6F001BDE61 /* MainResultViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3C4145DF2ED14A6F001BDE61 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145DA2ED14A6F001BDE61 /* AdditionalInfoView.swift */,
+				3C4145DB2ED14A6F001BDE61 /* MainResultView.swift */,
+				3C4145DC2ED14A6F001BDE61 /* RulesSummaryView.swift */,
+				3C4145DD2ED14A6F001BDE61 /* ValidityBadgeView.swift */,
+				3C4145DE2ED14A6F001BDE61 /* ZoneStatusCardView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3C4145E02ED14A6F001BDE61 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145D92ED14A6F001BDE61 /* ViewModels */,
+				3C4145DF2ED14A6F001BDE61 /* Views */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		3C4145E22ED14A6F001BDE61 /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				3C4145E12ED14A6F001BDE61 /* GoogleMapsAdapter.swift */,
+			);
+			path = Adapters;
+			sourceTree = "<group>";
+		};
+		3C4145E32ED14A6F001BDE61 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				3C41461F2ED15702001BDE61 /* Views */,
+				3C4145E22ED14A6F001BDE61 /* Adapters */,
+			);
+			path = Map;
+			sourceTree = "<group>";
+		};
+		3C4145E42ED14A6F001BDE61 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146262ED16803001BDE61 /* Settings */,
+				3C4146182ED1559C001BDE61 /* Onboarding */,
+				3C4145E02ED14A6F001BDE61 /* Main */,
+				3C4145E32ED14A6F001BDE61 /* Map */,
+			);
+			name = Features;
+			path = SFParkingZoneFinder/Features;
+			sourceTree = "<group>";
+		};
+		3C41460C2ED14AC3001BDE61 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146092ED14AC3001BDE61 /* AppDelegate.swift */,
+				3C41460A2ED14AC3001BDE61 /* DependencyContainer.swift */,
+				3C41460B2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift */,
+			);
+			name = App;
+			path = SFParkingZoneFinder/App;
+			sourceTree = "<group>";
+		};
+		3C4146122ED1559C001BDE61 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3C4146172ED1559C001BDE61 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */,
+				3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */,
+				3C4146152ED1559C001BDE61 /* PermitSetupView.swift */,
+				3C4146162ED1559C001BDE61 /* WelcomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3C4146182ED1559C001BDE61 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146122ED1559C001BDE61 /* ViewModels */,
+				3C4146172ED1559C001BDE61 /* Views */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		3C41461F2ED15702001BDE61 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C41461E2ED15702001BDE61 /* FloatingMapView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3C4146222ED16803001BDE61 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146212ED16803001BDE61 /* SettingsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3C4146252ED16803001BDE61 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146232ED16803001BDE61 /* AddPermitView.swift */,
+				3C4146242ED16803001BDE61 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3C4146262ED16803001BDE61 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				3C4146222ED16803001BDE61 /* ViewModels */,
+				3C4146252ED16803001BDE61 /* Views */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C4144FA2ED1413F001BDE61 /* SFParkingZoneFinder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C4145092ED14141001BDE61 /* Build configuration list for PBXNativeTarget "SFParkingZoneFinder" */;
+			buildPhases = (
+				3C4144F72ED1413F001BDE61 /* Sources */,
+				3C4144F82ED1413F001BDE61 /* Frameworks */,
+				3C4144F92ED1413F001BDE61 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SFParkingZoneFinder;
+			productName = SFParkingZoneFinder;
+			productReference = 3C4144FB2ED1413F001BDE61 /* SFParkingZoneFinder.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3C4144F32ED1413F001BDE61 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					3C4144FA2ED1413F001BDE61 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = 3C4144F62ED1413F001BDE61 /* Build configuration list for PBXProject "SFParkingZoneFinder" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3C4144F22ED1413F001BDE61;
+			productRefGroup = 3C4144FC2ED1413F001BDE61 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3C4144FA2ED1413F001BDE61 /* SFParkingZoneFinder */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3C4144F92ED1413F001BDE61 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C4145E82ED14A6F001BDE61 /* Assets.xcassets in Resources */,
+				3C4145EA2ED14A6F001BDE61 /* sf_parking_zones.json in Resources */,
+				3C4145E92ED14A6F001BDE61 /* Config.plist.template in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3C4144F72ED1413F001BDE61 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C4145FA2ED14A70001BDE61 /* ZoneLookupEngineProtocol.swift in Sources */,
+				3C4145EE2ED14A6F001BDE61 /* Coordinate.swift in Sources */,
+				3C4145F02ED14A6F001BDE61 /* ParkingRule.swift in Sources */,
+				3C4145FE2ED14A70001BDE61 /* ReverseGeocodingService.swift in Sources */,
+				3C4145F12ED14A70001BDE61 /* ParkingZone.swift in Sources */,
+				3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */,
+				3C4146192ED1559C001BDE61 /* OnboardingViewModel.swift in Sources */,
+				3C4145FD2ED14A70001BDE61 /* PermitService.swift in Sources */,
+				3C4145E62ED14A6F001BDE61 /* LocalZoneDataSource.swift in Sources */,
+				3C4145ED2ED14A6F001BDE61 /* CityIdentifier.swift in Sources */,
+				3C4146072ED14A70001BDE61 /* ZoneStatusCardView.swift in Sources */,
+				3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */,
+				3C4145EF2ED14A6F001BDE61 /* ParkingPermit.swift in Sources */,
+				3C4145FC2ED14A70001BDE61 /* LocationService.swift in Sources */,
+				3C4145F82ED14A70001BDE61 /* RuleInterpreterProtocol.swift in Sources */,
+				3C4146052ED14A70001BDE61 /* RulesSummaryView.swift in Sources */,
+				3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */,
+				3C4146012ED14A70001BDE61 /* ZoneService.swift in Sources */,
+				3C4145F32ED14A70001BDE61 /* ZoneLookupResult.swift in Sources */,
+				3C4146202ED15702001BDE61 /* FloatingMapView.swift in Sources */,
+				3C4145F62ED14A70001BDE61 /* PermitServiceProtocol.swift in Sources */,
+				3C4146002ED14A70001BDE61 /* ZoneLookupEngine.swift in Sources */,
+				3C4146032ED14A70001BDE61 /* AdditionalInfoView.swift in Sources */,
+				3C41461B2ED1559C001BDE61 /* OnboardingContainerView.swift in Sources */,
+				3C41461C2ED1559C001BDE61 /* PermitSetupView.swift in Sources */,
+				3C4145F42ED14A70001BDE61 /* LocationServiceProtocol.swift in Sources */,
+				3C4145EB2ED14A6F001BDE61 /* Color+Theme.swift in Sources */,
+				3C4145F52ED14A70001BDE61 /* MapProviderProtocol.swift in Sources */,
+				3C41460E2ED14AC3001BDE61 /* DependencyContainer.swift in Sources */,
+				3C4146062ED14A70001BDE61 /* ValidityBadgeView.swift in Sources */,
+				3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */,
+				3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */,
+				3C4145F92ED14A70001BDE61 /* ZoneDataSourceProtocol.swift in Sources */,
+				3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */,
+				3C4145FB2ED14A70001BDE61 /* ZoneServiceProtocol.swift in Sources */,
+				3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */,
+				3C4145E52ED14A6F001BDE61 /* ZoneCache.swift in Sources */,
+				3C4145FF2ED14A70001BDE61 /* RuleInterpreter.swift in Sources */,
+				3C4145F22ED14A70001BDE61 /* RuleInterpretationResult.swift in Sources */,
+				3C4146042ED14A70001BDE61 /* MainResultView.swift in Sources */,
+				3C4145F72ED14A70001BDE61 /* ReverseGeocodingServiceProtocol.swift in Sources */,
+				3C4145EC2ED14A6F001BDE61 /* Address.swift in Sources */,
+				3C41460D2ED14AC3001BDE61 /* AppDelegate.swift in Sources */,
+				3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */,
+				3C4146082ED14A70001BDE61 /* GoogleMapsAdapter.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3C4145072ED14141001BDE61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3C4145082ED14141001BDE61 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3C41450A2ED14141001BDE61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SFParkingZoneFinder/Preview Content\"";
+				DEVELOPMENT_TEAM = RJ8FB5M6HX;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SFParkingZoneFinder/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = ": SF Parking Zone Finder needs your location to show parking zones near you.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = studio.cambio.SFParkingZoneFinder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3C41450B2ED14141001BDE61 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SFParkingZoneFinder/Preview Content\"";
+				DEVELOPMENT_TEAM = RJ8FB5M6HX;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SFParkingZoneFinder/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = ": SF Parking Zone Finder needs your location to show parking zones near you.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = studio.cambio.SFParkingZoneFinder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3C4144F62ED1413F001BDE61 /* Build configuration list for PBXProject "SFParkingZoneFinder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C4145072ED14141001BDE61 /* Debug */,
+				3C4145082ED14141001BDE61 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3C4145092ED14141001BDE61 /* Build configuration list for PBXNativeTarget "SFParkingZoneFinder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C41450A2ED14141001BDE61 /* Debug */,
+				3C41450B2ED14141001BDE61 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3C4144F32ED1413F001BDE61 /* Project object */;
+}
