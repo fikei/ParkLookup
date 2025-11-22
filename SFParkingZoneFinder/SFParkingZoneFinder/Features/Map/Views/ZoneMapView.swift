@@ -49,42 +49,71 @@ struct ZoneMapView: UIViewRepresentable {
             logger.debug("Background thread START")
 
             // Prepare all polygon data in background
+            // Filter to only include polygons near the user (performance optimization)
             var polygons: [ZonePolygon] = []
             var annotations: [ZoneLabelAnnotation] = []
             var totalBoundaries = 0
             var totalPoints = 0
+            var filteredOut = 0
+
+            // Filter radius: 0.015 degrees ≈ 1.7km - enough to see surrounding zones when zoomed
+            let filterRadius = 0.015
+            let minLat = center.latitude - filterRadius
+            let maxLat = center.latitude + filterRadius
+            let minLon = center.longitude - filterRadius
+            let maxLon = center.longitude + filterRadius
 
             for (index, zone) in zonesToLoad.enumerated() {
                 let zoneBoundaryCount = zone.allBoundaryCoordinates.count
+                var zoneHasVisiblePolygon = false
+
                 for boundary in zone.allBoundaryCoordinates {
                     guard boundary.count >= 3 else { continue }
                     totalBoundaries += 1
                     totalPoints += boundary.count
-                    let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
-                    polygon.zoneId = zone.id
-                    polygon.zoneCode = zone.permitArea
-                    polygons.append(polygon)
+
+                    // Check if any point of this polygon is within the filter bounds
+                    let isNearUser = boundary.contains { coord in
+                        coord.latitude >= minLat && coord.latitude <= maxLat &&
+                        coord.longitude >= minLon && coord.longitude <= maxLon
+                    }
+
+                    if isNearUser {
+                        let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
+                        polygon.zoneId = zone.id
+                        polygon.zoneCode = zone.permitArea
+                        polygons.append(polygon)
+                        zoneHasVisiblePolygon = true
+                    } else {
+                        filteredOut += 1
+                    }
                 }
+
                 // Log zone info on first few
                 if index < 3 {
                     logger.debug("Zone \(index): id=\(zone.id), permitArea=\(zone.permitArea ?? "nil"), boundaries=\(zoneBoundaryCount)")
                 }
 
-                // Calculate centroid for label
-                let allCoords = zone.allBoundaryCoordinates.flatMap { $0 }
-                if !allCoords.isEmpty {
-                    let sumLat = allCoords.reduce(0.0) { $0 + $1.latitude }
-                    let sumLon = allCoords.reduce(0.0) { $0 + $1.longitude }
-                    let centroid = CLLocationCoordinate2D(
-                        latitude: sumLat / Double(allCoords.count),
-                        longitude: sumLon / Double(allCoords.count)
-                    )
-                    let annotation = ZoneLabelAnnotation(
-                        coordinate: centroid,
-                        zoneCode: zone.permitArea ?? zone.displayName,
-                        zoneId: zone.id
-                    )
-                    annotations.append(annotation)
+                // Only add annotation if zone has visible polygons near user
+                if zoneHasVisiblePolygon {
+                    let nearbyCoords = zone.allBoundaryCoordinates.flatMap { $0 }.filter { coord in
+                        coord.latitude >= minLat && coord.latitude <= maxLat &&
+                        coord.longitude >= minLon && coord.longitude <= maxLon
+                    }
+                    if !nearbyCoords.isEmpty {
+                        let sumLat = nearbyCoords.reduce(0.0) { $0 + $1.latitude }
+                        let sumLon = nearbyCoords.reduce(0.0) { $0 + $1.longitude }
+                        let centroid = CLLocationCoordinate2D(
+                            latitude: sumLat / Double(nearbyCoords.count),
+                            longitude: sumLon / Double(nearbyCoords.count)
+                        )
+                        let annotation = ZoneLabelAnnotation(
+                            coordinate: centroid,
+                            zoneCode: zone.permitArea ?? zone.displayName,
+                            zoneId: zone.id
+                        )
+                        annotations.append(annotation)
+                    }
                 }
 
                 // Log progress every 10 zones
@@ -94,7 +123,7 @@ struct ZoneMapView: UIViewRepresentable {
             }
 
             let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
-            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) polygons, \(totalBoundaries) boundaries, \(totalPoints) points")
+            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) polygons (filtered \(filteredOut)), \(totalBoundaries) total boundaries, \(totalPoints) total points")
 
             // Capture the coordinator and initial region before async block
             let coordinator = context.coordinator
