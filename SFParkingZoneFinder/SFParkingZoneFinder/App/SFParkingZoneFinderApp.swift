@@ -24,42 +24,9 @@ struct ContentView: View {
             if hasCompletedOnboarding {
                 MainResultView()
             } else {
-                // TODO: Replace with OnboardingContainerView
-                OnboardingPlaceholderView(onComplete: {
-                    hasCompletedOnboarding = true
-                })
+                OnboardingContainerView()
             }
         }
-    }
-}
-
-/// Temporary onboarding placeholder until proper onboarding is built
-struct OnboardingPlaceholderView: View {
-    let onComplete: () -> Void
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "car.fill")
-                .font(.system(size: 64))
-                .foregroundColor(.accentColor)
-
-            Text("SF Parking Zone Finder")
-                .font(.title)
-                .fontWeight(.bold)
-
-            Text("Find out if your permit is valid at your current location")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button("Get Started") {
-                onComplete()
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-        }
-        .padding()
     }
 }
 
