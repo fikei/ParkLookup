@@ -831,6 +831,27 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] **F12** Add parking session notes (floor/section for garages, photo of spot)
 - [ ] **F13** Export parking history (CSV for expense tracking)
 
+### Detailed Parking Restrictions (Non-RPP)
+
+- [ ] **F14** Integrate street sweeping schedule data (DataSF street sweeping dataset)
+- [ ] **F15** Add time-limited parking zones (2-hour, 4-hour limits)
+- [ ] **F16** Display meter zones with rate and time limit info
+- [ ] **F17** Show tow-away zones with active hours
+- [ ] **F18** Add commercial loading zones and restrictions
+- [ ] **F19** Display no-parking zones (fire hydrants, driveways, bus stops)
+- [ ] **F20** Create unified "parking rules at this spot" view combining all restriction types
+
+### Move Car Notifications
+
+*Blocked by: F7-F13 (Parking Event Capture)*
+
+- [ ] **F21** Send push notification before street sweeping at parked location
+- [ ] **F22** Alert when approaching time limit for time-restricted parking
+- [ ] **F23** Notify before meter expires (if meter end time was entered)
+- [ ] **F24** Warn about upcoming tow-away hours at current parking spot
+- [ ] **F25** Add configurable notification lead time (15min, 30min, 1hr before)
+- [ ] **F26** Support "snooze" and "I moved" actions on notifications
+
 ---
 
 ## Quick Reference: Prompt Templates
