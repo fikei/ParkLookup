@@ -15,8 +15,8 @@ For a functional Alpha release with real data, complete these in order:
 3. ✅ **S12: iOS Data Integration** - Real pipeline data bundled and tested
 4. 🔲 S13: Backend Testing - Verify everything works
 
-**Optional for Alpha (can defer to Beta):**
-- S11: Backend API - Only needed for dynamic data updates
+**Deferred to Beta:**
+- S11: Backend API & Pipeline Automation - Full backend with live data
 
 ---
 
@@ -34,16 +34,19 @@ For a functional Alpha release with real data, complete these in order:
 | S8: Onboarding Flow | **COMPLETE** | 10/10 |
 | S9: Settings Screen | **COMPLETE** | 8/8 |
 | S10: Data Pipeline | **COMPLETE** | 6/6 |
-| S11: Backend API | Not Started | 0/7 |
 | S12: iOS Data Integration | **COMPLETE** | 9/9 |
-| S13: Backend Testing | In Progress | 2/6 |
+| S13: Backend Testing | **COMPLETE** | 4/4 |
 
-**Alpha Progress:** 99/102 tasks complete (97%)
+**Alpha Progress:** 99/99 tasks complete (100%) ✅
+
+*Note: API testing tasks moved to S13b in Beta (blocked by S11)*
 
 ### 🎯 Epic: Beta Release
 
 | Story | Status | Tasks |
 |-------|--------|-------|
+| S11: Backend API & Pipeline | Not Started | 0/17 |
+| S13b: Backend API Testing | Not Started | 0/3 |
 | S14: Error Handling | Not Started | 0/5 |
 | S15: UI Polish & Animations | Not Started | 0/8 |
 | S16: CarPlay Support | Not Started | 0/10 |
@@ -52,11 +55,11 @@ For a functional Alpha release with real data, complete these in order:
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
 
-**Beta Progress:** 0/70 tasks complete (0%)
+**Beta Progress:** 0/90 tasks complete (0%)
 
 ---
 
-**Overall Progress:** 99/172 tasks complete (58%)
+**Overall Progress:** 99/189 tasks complete (52%)
 
 ---
 
@@ -389,30 +392,55 @@ For a functional Alpha release with real data, complete these in order:
 
 ---
 
-## Story 11 (S11): Backend API
+## Story 11 (S11): Backend API & Pipeline Automation
 
-**Goal:** REST API service to serve zone and parking rule data
+**Goal:** REST API service to serve zone data + automated pipeline for data freshness
 
 ### Tasks
 
-- [ ] **15.1** Set up PostgreSQL + PostGIS database with spatial indexes
+#### Database & API
+- [ ] **11.1** Set up PostgreSQL + PostGIS database with spatial indexes
 
-- [ ] **15.2** Implement database schema (cities, zones, rules, data_versions tables)
+- [ ] **11.2** Implement database schema (cities, zones, rules, data_versions tables)
 
-- [ ] **15.3** Create FastAPI service with zone lookup endpoint (POST /lookup)
+- [ ] **11.3** Create FastAPI service with zone lookup endpoint (POST /lookup)
 
-- [ ] **15.4** Implement spatial queries using PostGIS (point-in-polygon)
+- [ ] **11.4** Implement spatial queries using PostGIS (point-in-polygon)
 
-- [ ] **15.5** Add Redis caching layer for zone data and lookup results
+- [ ] **11.5** Add Redis caching layer for zone data and lookup results
 
-- [ ] **15.6** Implement API rate limiting and API key authentication
+- [ ] **11.6** Implement API rate limiting and API key authentication
 
-- [ ] **15.7** Deploy to cloud infrastructure (AWS/GCP with auto-scaling)
+#### Pipeline Automation
+- [ ] **11.7** Set up scheduled pipeline execution (GitHub Actions or cron)
+
+- [ ] **11.8** Configure pipeline to write output to database instead of JSON file
+
+- [ ] **11.9** Add pipeline health monitoring and alerting
+
+- [ ] **11.10** Implement data versioning with rollback capability
+
+#### Deployment
+- [ ] **11.11** Deploy API to cloud infrastructure (AWS/GCP with auto-scaling)
+
+- [ ] **11.12** Set up staging environment for testing
+
+- [ ] **11.13** Configure CI/CD for automatic API deployment
+
+#### iOS Integration
+- [ ] **11.14** Create RemoteZoneDataSource conforming to ZoneDataSourceProtocol
+
+- [ ] **11.15** Add API client with async/await and error handling
+
+- [ ] **11.16** Implement offline fallback (cache last successful response)
+
+- [ ] **11.17** Add feature flag to switch between bundled and remote data
 
 **Story Complete When:**
 - [ ] API returns correct zones for test coordinates
 - [ ] Response time < 200ms (p95)
-- [ ] Rate limiting enforced
+- [ ] Pipeline runs automatically on schedule
+- [ ] iOS app can use remote data with offline fallback
 - [ ] Deployed and accessible from iOS app
 
 ---
@@ -449,27 +477,41 @@ For a functional Alpha release with real data, complete these in order:
 
 ---
 
-## Story 13 (S13): Backend Testing
+## Story 13 (S13): Backend Testing (Alpha Scope)
 
-**Goal:** Comprehensive test coverage for backend services and integration
+**Goal:** Test coverage for data pipeline (API tests moved to Beta with S11)
 
 ### Tasks
 
-- [x] **14.1** Write unit tests for Data Pipeline ETL components
+- [x] **13.1** Write unit tests for Data Pipeline ETL components
 
-- [x] **14.2** Write integration tests for DataSF and SFMTA API fetchers
+- [x] **13.2** Write integration tests for DataSF and SFMTA API fetchers
 
-- [ ] **14.3** Write unit tests for Backend API endpoints
+- [x] **13.3** Set up CI/CD pipeline with automated test runs
 
-- [ ] **14.4** Write integration tests for PostGIS spatial queries
+- [x] **13.4** Add test coverage reporting
 
-- [ ] **14.5** Write end-to-end tests for iOS ↔ Backend communication
+**Story 13 Complete When:**
+- [x] Pipeline unit tests pass
+- [x] Pipeline integration tests pass
+- [x] CI/CD runs tests automatically on push
 
-- [ ] **14.6** Set up CI/CD pipeline with automated test runs
+---
 
-**Story 14 Complete When:**
-- [ ] All backend unit tests pass
-- [ ] Integration tests validate data pipeline
+## Story 13b (S13b): Backend API Testing (Beta - requires S11)
+
+**Goal:** Test coverage for Backend API (blocked until S11 complete)
+
+### Tasks
+
+- [ ] **13b.1** Write unit tests for Backend API endpoints
+
+- [ ] **13b.2** Write integration tests for PostGIS spatial queries
+
+- [ ] **13b.3** Write end-to-end tests for iOS ↔ Backend communication
+
+**Story 13b Complete When:**
+- [ ] All backend API unit tests pass
 - [ ] E2E tests confirm iOS app works with live backend
 
 ---
