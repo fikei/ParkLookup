@@ -80,8 +80,6 @@ struct ExpandedMapView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var position: MapCameraPosition
-    @State private var zones: [ParkingZone] = []
-    @State private var isLoadingZones = true
 
     init(
         coordinate: CLLocationCoordinate2D?,
@@ -126,11 +124,6 @@ struct ExpandedMapView: View {
                     )
                     .padding()
                 }
-
-                // Loading indicator
-                if isLoadingZones {
-                    loadingIndicator
-                }
             }
             .navigationTitle("Map")
             .navigationBarTitleDisplayMode(.inline)
@@ -141,9 +134,6 @@ struct ExpandedMapView: View {
                     }
                 }
             }
-            .task {
-                await loadZones()
-            }
         }
     }
 
@@ -152,10 +142,6 @@ struct ExpandedMapView: View {
     @ViewBuilder
     private var mapContent: some View {
         Map(position: $position) {
-            // Draw zone polygons
-            ForEach(zones) { zone in
-                zonePolygons(for: zone)
-            }
             // User location
             UserAnnotation()
         }
@@ -163,44 +149,6 @@ struct ExpandedMapView: View {
             MapCompass()
             MapScaleView()
         }
-    }
-
-    @MapContentBuilder
-    private func zonePolygons(for zone: ParkingZone) -> some MapContent {
-        // Filter to valid polygons (3+ coordinates) before iteration
-        let validBoundaries = zone.allBoundaryCoordinates.filter { $0.count >= 3 }
-        ForEach(Array(validBoundaries.enumerated()), id: \.offset) { _, coords in
-            MapPolygon(coordinates: coords)
-            MapPolyline(coordinates: coords + [coords[0]])
-        }
-    }
-
-    private var loadingIndicator: some View {
-        VStack {
-            HStack {
-                ProgressView()
-                    .padding(8)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(8)
-                Spacer()
-            }
-            .padding()
-            Spacer()
-        }
-    }
-
-    // MARK: - Data Loading
-
-    @MainActor
-    private func loadZones() async {
-        isLoadingZones = true
-        do {
-            let service = DependencyContainer.shared.zoneService
-            zones = try await service.getAllZones(for: .sanFrancisco)
-        } catch {
-            print("Failed to load zones for map: \(error)")
-        }
-        isLoadingZones = false
     }
 }
 
@@ -237,7 +185,6 @@ private struct MiniZoneCard: View {
             zoneCircle
             zoneInfo
             Spacer()
-            legend
         }
         .padding()
         .background(cardBackground)
@@ -276,22 +223,6 @@ private struct MiniZoneCard: View {
             }
             .foregroundColor(isValidStyle ? .white.opacity(0.9) : Color.forValidityStatus(validityStatus))
         }
-    }
-
-    private var legend: some View {
-        VStack(alignment: .trailing, spacing: 4) {
-            HStack(spacing: 4) {
-                Circle().fill(Color.green).frame(width: 8, height: 8)
-                Text("Your Zone")
-                    .font(.caption2)
-            }
-            HStack(spacing: 4) {
-                Circle().fill(Color.blue.opacity(0.5)).frame(width: 8, height: 8)
-                Text("Other Zones")
-                    .font(.caption2)
-            }
-        }
-        .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
     }
 }
 
