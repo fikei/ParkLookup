@@ -15,8 +15,8 @@ final class PersistentZoneCache: ZoneCacheProtocol {
     private let lock = NSLock()
 
     /// Current data version - change this when zone data format changes
-    /// Bumped to 1.3: merged adjacent blocks into zone-level polygons (98% reduction)
-    private let cacheVersion = "1.3"
+    /// Bumped to 1.4: switched to blockface buffered polygons (street segments, not parcels)
+    private let cacheVersion = "1.4"
 
     private(set) var lastUpdated: Date?
 
