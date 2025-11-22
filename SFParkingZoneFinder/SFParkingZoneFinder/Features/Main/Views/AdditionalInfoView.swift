@@ -94,6 +94,7 @@ struct ConfidenceIndicator: View {
         case .high: return "checkmark.circle.fill"
         case .medium: return "questionmark.circle"
         case .low: return "exclamationmark.triangle"
+        case .outsideCoverage: return "xmark.circle"
         }
     }
 
@@ -102,6 +103,7 @@ struct ConfidenceIndicator: View {
         case .high: return .green
         case .medium: return .orange
         case .low: return .red
+        case .outsideCoverage: return .gray
         }
     }
 }

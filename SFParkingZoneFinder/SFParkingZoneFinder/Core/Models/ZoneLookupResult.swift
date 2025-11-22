@@ -95,6 +95,15 @@ enum LookupConfidence: String, Codable {
         case .outsideCoverage: return "xmark.circle.fill"
         }
     }
+
+    var displayText: String {
+        switch self {
+        case .high: return "High confidence"
+        case .medium: return "Medium confidence"
+        case .low: return "Low confidence"
+        case .outsideCoverage: return "Outside coverage"
+        }
+    }
 }
 
 // MARK: - Factory Methods
