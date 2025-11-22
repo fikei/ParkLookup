@@ -10,7 +10,7 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 // MARK: - Permits Section
-                SwiftUI.Section {
+                Section(header: Text("My Permits"), footer: permitsFooter) {
                     ForEach(viewModel.permits) { permit in
                         PermitRow(
                             permit: permit,
@@ -30,16 +30,10 @@ struct SettingsView: View {
                     } label: {
                         Label("Add Permit", systemImage: "plus.circle.fill")
                     }
-                } header: {
-                    Text("My Permits")
-                } footer: {
-                    if viewModel.permits.isEmpty {
-                        Text("Add your parking permits to see if you can park in each zone.")
-                    }
                 }
 
                 // MARK: - Map Preferences Section
-                SwiftUI.Section {
+                Section(header: Text("Map")) {
                     Toggle("Show Floating Map", isOn: $viewModel.showFloatingMap)
 
                     Picker("Map Position", selection: $viewModel.mapPosition) {
@@ -47,12 +41,10 @@ struct SettingsView: View {
                             Text(position.displayName).tag(position)
                         }
                     }
-                } header: {
-                    Text("Map")
                 }
 
                 // MARK: - Help Section
-                SwiftUI.Section {
+                Section(header: Text("Help & Support")) {
                     Button {
                         viewModel.openSupport()
                     } label: {
@@ -66,12 +58,10 @@ struct SettingsView: View {
                         Label("Rate This App", systemImage: "star")
                             .foregroundColor(.primary)
                     }
-                } header: {
-                    Text("Help & Support")
                 }
 
                 // MARK: - About Section
-                SwiftUI.Section {
+                Section(header: Text("About")) {
                     HStack {
                         Text("Version")
                         Spacer()
@@ -98,19 +88,15 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                } header: {
-                    Text("About")
                 }
 
                 // MARK: - Debug Section
                 #if DEBUG
-                SwiftUI.Section {
+                Section(header: Text("Debug")) {
                     Button("Reset Onboarding") {
                         viewModel.resetOnboarding()
                     }
                     .foregroundColor(.red)
-                } header: {
-                    Text("Debug")
                 }
                 #endif
             }
@@ -129,6 +115,15 @@ struct SettingsView: View {
                     viewModel.addPermit(area: area)
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var permitsFooter: some View {
+        if viewModel.permits.isEmpty {
+            Text("Add your parking permits to see if you can park in each zone.")
+        } else {
+            EmptyView()
         }
     }
 }
