@@ -262,31 +262,52 @@ struct ZoneMapView: UIViewRepresentable {
             let initialCenter = coordinator.initialCenter
             let initialSpan = coordinator.initialSpan
 
-            // Add to map on main thread
+            // Add to map on main thread in batches to keep UI responsive
             DispatchQueue.main.async {
                 let mainStartTime = CFAbsoluteTimeGetCurrent()
-                logger.debug("Main thread overlay add START - \(polygons.count) polygons")
+                logger.info("Main thread overlay add START - \(polygons.count) polygons, \(annotations.count) annotations")
 
-                for polygon in polygons {
-                    mapView.addOverlay(polygon, level: .aboveRoads)
-                }
-                let overlayElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
-                logger.debug("Overlays added in \(String(format: "%.1f", overlayElapsed))ms")
+                // Mark setup done immediately so map is interactive
+                coordinator.initialSetupDone = true
 
-                mapView.addAnnotations(annotations)
-
-                // Re-apply the initial zoom after overlays are added to prevent MKMapView from auto-fitting
+                // Re-apply the initial zoom first
                 if let center = initialCenter, let span = initialSpan {
                     let region = MKCoordinateRegion(center: center, span: span)
                     mapView.setRegion(region, animated: false)
-                    logger.debug("Re-applied initial region after overlay load - center: \(center.latitude), \(center.longitude)")
+                    logger.debug("Applied initial region - center: \(center.latitude), \(center.longitude)")
                 }
 
-                // Mark initial setup as complete - now updateUIView can handle re-centering
-                coordinator.initialSetupDone = true
+                // Add annotations immediately (they're lightweight)
+                mapView.addAnnotations(annotations)
 
-                let totalMainElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
-                logger.info("Main thread overlay add DONE in \(String(format: "%.1f", totalMainElapsed))ms - initialSetupDone")
+                // Add overlays in batches to keep UI responsive
+                let batchSize = 500
+                let totalPolygons = polygons.count
+
+                func addBatch(startIndex: Int) {
+                    let endIndex = min(startIndex + batchSize, totalPolygons)
+                    let batch = Array(polygons[startIndex..<endIndex])
+
+                    mapView.addOverlays(batch, level: .aboveRoads)
+
+                    if endIndex < totalPolygons {
+                        // Schedule next batch with tiny delay to let UI breathe
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                            addBatch(startIndex: endIndex)
+                        }
+                    } else {
+                        let totalElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
+                        logger.info("All \(totalPolygons) overlays added in \(String(format: "%.1f", totalElapsed))ms")
+                    }
+                }
+
+                // Start adding batches
+                if !polygons.isEmpty {
+                    addBatch(startIndex: 0)
+                }
+
+                let setupElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
+                logger.info("Initial setup done in \(String(format: "%.1f", setupElapsed))ms - overlay batching started")
             }
         }
 
