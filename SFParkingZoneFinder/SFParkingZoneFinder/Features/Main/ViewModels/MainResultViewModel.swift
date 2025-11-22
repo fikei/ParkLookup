@@ -154,25 +154,33 @@ final class MainResultViewModel: ObservableObject {
 
         do {
             // Get current location
+            print("DEBUG: Requesting location...")
             let location = try await locationService.requestSingleLocation()
+            print("DEBUG: Got location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
 
             // Get parking result
+            print("DEBUG: Getting parking result...")
             let result = await zoneService.getParkingResult(
                 at: location.coordinate,
                 time: Date()
             )
+            print("DEBUG: Got parking result, zone: \(result.lookupResult.primaryZone?.displayName ?? "none")")
 
             // Update UI state
             updateState(from: result)
 
             // Get address (don't fail if this fails)
+            print("DEBUG: Getting address...")
             await updateAddress(for: location)
+            print("DEBUG: Done")
 
             lastUpdated = Date()
 
         } catch let locationError as LocationError {
+            print("DEBUG: Location error: \(locationError)")
             error = AppError.from(locationError)
         } catch {
+            print("DEBUG: Other error: \(error)")
             self.error = .unknown(error.localizedDescription)
         }
 
