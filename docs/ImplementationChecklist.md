@@ -35,10 +35,10 @@ For a functional Alpha release with real data, complete these in order:
 | S9: Settings Screen | **COMPLETE** | 8/8 |
 | S10: Data Pipeline | **COMPLETE** | 6/6 |
 | S11: Backend API | Not Started | 0/7 |
-| S12: iOS Data Integration | Not Started | 0/9 |
+| S12: iOS Data Integration | In Progress | 5/9 |
 | S13: Backend Testing | In Progress | 2/6 |
 
-**Alpha Progress:** 90/102 tasks complete (88%)
+**Alpha Progress:** 95/102 tasks complete (93%)
 
 ### 🎯 Epic: Beta Release
 
@@ -55,7 +55,7 @@ For a functional Alpha release with real data, complete these in order:
 
 ---
 
-**Overall Progress:** 90/153 tasks complete (59%)
+**Overall Progress:** 95/153 tasks complete (62%)
 
 ---
 
@@ -422,19 +422,19 @@ For a functional Alpha release with real data, complete these in order:
 
 ### Tasks
 
-- [ ] **12.1** Create conversion script: pipeline output → iOS-compatible GeoJSON schema
+- [x] **12.1** Create conversion script: pipeline output → iOS-compatible GeoJSON schema
 
-- [ ] **12.2** Update LocalZoneDataSource to load official parking_zones.json instead of mock data
+- [x] **12.2** Update LocalZoneDataSource to load official parking_zones.json instead of mock data
 
 - [ ] **12.3** Run pipeline on machine with network access, generate parking_data.json
 
 - [ ] **12.4** Bundle pipeline output JSON into iOS app Resources folder
 
-- [ ] **12.5** Display data version and "last updated" in Settings/About
+- [x] **12.5** Display data version and "last updated" in Settings/About
 
-- [ ] **12.6** Add data source attribution (DataSF, SFMTA) in About screen
+- [x] **12.6** Add data source attribution (DataSF, SFMTA) in About screen
 
-- [ ] **12.7** Create update script to refresh bundled data from pipeline output
+- [x] **12.7** Create update script to refresh bundled data from pipeline output
 
 - [ ] **12.8** Test iOS app loads and displays real zone data correctly
 
