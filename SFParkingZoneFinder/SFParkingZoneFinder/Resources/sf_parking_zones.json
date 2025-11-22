@@ -33,11 +33,11 @@
       "requiresPermit": true,
       "restrictiveness": 8,
       "boundary": [
-        { "latitude": 37.7620, "longitude": -122.4350 },
-        { "latitude": 37.7620, "longitude": -122.4280 },
-        { "latitude": 37.7580, "longitude": -122.4280 },
-        { "latitude": 37.7580, "longitude": -122.4350 },
-        { "latitude": 37.7620, "longitude": -122.4350 }
+        { "latitude": 37.7650, "longitude": -122.4350 },
+        { "latitude": 37.7650, "longitude": -122.4180 },
+        { "latitude": 37.7550, "longitude": -122.4180 },
+        { "latitude": 37.7550, "longitude": -122.4350 },
+        { "latitude": 37.7650, "longitude": -122.4350 }
       ],
       "rules": [
         {
