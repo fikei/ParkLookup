@@ -7,6 +7,7 @@ struct AdditionalInfoView: View {
     let confidence: LookupConfidence
     let onRefresh: () -> Void
     let onReportIssue: () -> Void
+    let onSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -61,6 +62,13 @@ struct AdditionalInfoView: View {
                     Label("Report Issue", systemImage: "exclamationmark.bubble")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                }
+
+                // Settings button
+                Button(action: onSettings) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.title3)
+                        .foregroundColor(.primary)
                 }
             }
         }
@@ -127,7 +135,8 @@ extension Date {
             lastUpdated: Date().addingTimeInterval(-120),
             confidence: .high,
             onRefresh: {},
-            onReportIssue: {}
+            onReportIssue: {},
+            onSettings: {}
         )
 
         AdditionalInfoView(
@@ -135,7 +144,8 @@ extension Date {
             lastUpdated: Date().addingTimeInterval(-3600),
             confidence: .medium,
             onRefresh: {},
-            onReportIssue: {}
+            onReportIssue: {},
+            onSettings: {}
         )
     }
     .padding()

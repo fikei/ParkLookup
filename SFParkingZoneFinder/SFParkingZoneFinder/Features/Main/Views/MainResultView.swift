@@ -39,39 +39,24 @@ struct MainResultView: View {
                         )
                     }
 
-                    // Additional info (address, refresh, report)
+                    // Additional info (address, refresh, report, settings)
                     AdditionalInfoView(
                         address: viewModel.currentAddress,
                         lastUpdated: viewModel.lastUpdated,
                         confidence: viewModel.lookupConfidence,
                         onRefresh: { viewModel.refreshLocation() },
-                        onReportIssue: { viewModel.reportIssue() }
+                        onReportIssue: { viewModel.reportIssue() },
+                        onSettings: { showingSettings = true }
                     )
                 }
                 .padding()
             }
 
-            // Settings Button (top left)
-            VStack {
-                HStack {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .font(.title3)
-                            .foregroundColor(.primary)
-                            .padding(12)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                    }
-                    .padding(.leading, 16)
-                    .padding(.top, 60)
-
-                    Spacer()
-
-                    // Floating Map (top right)
-                    if viewModel.showFloatingMap && viewModel.error == nil && !viewModel.isLoading {
+            // Floating Map (top right)
+            if viewModel.showFloatingMap && viewModel.error == nil && !viewModel.isLoading {
+                VStack {
+                    HStack {
+                        Spacer()
                         FloatingMapView(
                             coordinate: viewModel.currentCoordinate,
                             zoneName: viewModel.zoneName,
@@ -80,8 +65,8 @@ struct MainResultView: View {
                         .padding(.trailing, 16)
                         .padding(.top, 60)
                     }
+                    Spacer()
                 }
-                Spacer()
             }
 
             // Loading overlay
