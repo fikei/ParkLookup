@@ -55,6 +55,7 @@ struct ZoneMapView: UIViewRepresentable {
             var totalPoints = 0
 
             for (index, zone) in zonesToLoad.enumerated() {
+                let zoneBoundaryCount = zone.allBoundaryCoordinates.count
                 for boundary in zone.allBoundaryCoordinates {
                     guard boundary.count >= 3 else { continue }
                     totalBoundaries += 1
@@ -63,6 +64,10 @@ struct ZoneMapView: UIViewRepresentable {
                     polygon.zoneId = zone.id
                     polygon.zoneCode = zone.permitArea
                     polygons.append(polygon)
+                }
+                // Log zone info on first few
+                if index < 3 {
+                    logger.debug("Zone \(index): id=\(zone.id), permitArea=\(zone.permitArea ?? "nil"), boundaries=\(zoneBoundaryCount)")
                 }
 
                 // Calculate centroid for label
@@ -221,17 +226,28 @@ struct ZoneMapView: UIViewRepresentable {
 
         // MARK: - MKMapViewDelegate
 
+        private var rendererCallCount = 0
+
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let polygon = overlay as? ZonePolygon else {
                 return MKOverlayRenderer(overlay: overlay)
             }
 
+            rendererCallCount += 1
             let renderer = MKPolygonRenderer(polygon: polygon)
             let isCurrentZone = polygon.zoneId == currentZoneId
 
-            renderer.fillColor = ZoneColorProvider.fillColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
-            renderer.strokeColor = ZoneColorProvider.strokeColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
+            let fillColor = ZoneColorProvider.fillColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
+            let strokeColor = ZoneColorProvider.strokeColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
+
+            renderer.fillColor = fillColor
+            renderer.strokeColor = strokeColor
             renderer.lineWidth = ZoneColorProvider.strokeWidth(isCurrentZone: isCurrentZone)
+
+            // Log first few and then every 1000th
+            if rendererCallCount <= 5 || rendererCallCount % 1000 == 0 {
+                logger.debug("Renderer #\(self.rendererCallCount) - zoneCode: \(polygon.zoneCode ?? "nil"), fill: \(fillColor.description), stroke: \(strokeColor.description)")
+            }
 
             return renderer
         }
