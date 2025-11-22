@@ -20,22 +20,23 @@
 | S7: Floating Map | **COMPLETE** | 10/10 |
 | S8: Onboarding Flow | **COMPLETE** | 10/10 |
 | S9: Settings Screen | **COMPLETE** | 8/8 |
-| S10: Testing | Not Started | 0/8 |
+| S10: UI Testing | Not Started | 0/8 |
 | S11: Data Pipeline | Not Started | 0/6 |
 | S12: Backend API | Not Started | 0/7 |
 | S13: iOS Backend Integration | Not Started | 0/9 |
+| S14: Backend Testing | Not Started | 0/6 |
 
-**Alpha Progress:** 82/104 tasks complete (79%)
+**Alpha Progress:** 82/110 tasks complete (75%)
 
 ### 🎯 Epic: Beta Release
 
 | Story | Status | Tasks |
 |-------|--------|-------|
-| S14: Error Handling | Not Started | 0/5 |
-| S15: UI Polish & Animations | Not Started | 0/8 |
-| S16: CarPlay Support | Not Started | 0/10 |
-| S17: Map Zone Boundaries | Not Started | 0/14 |
-| S18: Beta Release Prep | Not Started | 0/6 |
+| S15: Error Handling | Not Started | 0/5 |
+| S16: UI Polish & Animations | Not Started | 0/8 |
+| S17: CarPlay Support | Not Started | 0/10 |
+| S18: Map Zone Boundaries | Not Started | 0/14 |
+| S19: Beta Release Prep | Not Started | 0/6 |
 
 **Beta Progress:** 0/43 tasks complete (0%)
 
@@ -338,32 +339,32 @@
 
 ---
 
-## Story 10 (S10): Testing
+## Story 10 (S10): UI Testing
 
-**Goal:** Comprehensive test coverage for core functionality
+**Goal:** Comprehensive UI test coverage for user flows
 
 ### Tasks
 
-- [ ] **12.1** Achieve >90% unit test coverage for ZoneLookupEngine
+- [ ] **10.1** Set up XCUITest target and configure test schemes
 
-- [ ] **12.2** Achieve >90% unit test coverage for RuleInterpreter
+- [ ] **10.2** Create UI test for complete onboarding flow (welcome → permissions → permits → main)
 
-- [ ] **12.3** Write unit tests for PermitService (save, load, delete, primary permit)
+- [ ] **10.3** Create UI test for main result view displaying zone correctly
 
-- [ ] **12.4** Write unit tests for MainResultViewModel
+- [ ] **10.4** Create UI test for map expand and collapse
 
-- [ ] **12.5** Create UI test for complete onboarding flow
+- [ ] **10.5** Create UI test for settings navigation and permit management
 
-- [ ] **12.6** Create UI test for main result view displaying zone correctly
+- [ ] **10.6** Create UI test for pull-to-refresh location update
 
-- [ ] **12.7** Create UI test for map expand and collapse
+- [ ] **10.7** Create UI test for error state handling (mock location denied)
 
-- [ ] **12.8** Create UI test for settings permit management
+- [ ] **10.8** Add accessibility identifier to all interactive elements for reliable testing
 
-**Story Complete When:**
-- [ ] All unit tests pass
-- [ ] Core business logic has >80% coverage
-- [ ] UI tests pass for critical flows
+**Story 10 Complete When:**
+- [ ] UI test target builds and runs
+- [ ] All critical user flows have UI tests
+- [ ] Tests pass on simulator
 
 ---
 
@@ -463,9 +464,34 @@
 
 ---
 
+## Story 14 (S14): Backend Testing
+
+**Goal:** Comprehensive test coverage for backend services and integration
+
+### Tasks
+
+- [ ] **14.1** Write unit tests for Data Pipeline ETL components
+
+- [ ] **14.2** Write integration tests for DataSF and SFMTA API fetchers
+
+- [ ] **14.3** Write unit tests for Backend API endpoints
+
+- [ ] **14.4** Write integration tests for PostGIS spatial queries
+
+- [ ] **14.5** Write end-to-end tests for iOS ↔ Backend communication
+
+- [ ] **14.6** Set up CI/CD pipeline with automated test runs
+
+**Story 14 Complete When:**
+- [ ] All backend unit tests pass
+- [ ] Integration tests validate data pipeline
+- [ ] E2E tests confirm iOS app works with live backend
+
+---
+
 # Beta Release
 
-## Story 14 (S14): Error Handling
+## Story 15 (S15): Error Handling
 
 **Goal:** Graceful error states with clear user guidance
 
@@ -488,7 +514,7 @@
 
 ---
 
-## Story 15 (S15): UI Polish & Animations
+## Story 16 (S16): UI Polish & Animations
 
 **Goal:** Enhanced visual polish and delightful user experience
 
@@ -518,7 +544,7 @@
 
 ---
 
-## Story 16 (S16): CarPlay Support
+## Story 17 (S17): CarPlay Support
 
 **Goal:** Allow drivers to check parking zone status via CarPlay dashboard
 
@@ -552,7 +578,7 @@
 
 ---
 
-## Story 17 (S17): Map Zone Boundaries
+## Story 18 (S18): Map Zone Boundaries
 
 **Goal:** Display parking zone boundaries as visual polygons on the expanded map view
 
@@ -598,7 +624,7 @@
 
 ---
 
-## Story 18 (S18): Beta Release Prep
+## Story 19 (S19): Beta Release Prep
 
 **Goal:** App ready for TestFlight distribution
 
