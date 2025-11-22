@@ -116,8 +116,11 @@ struct ZoneMapView: UIViewRepresentable {
                     logger.debug("Re-applied initial region after overlay load - center: \(center.latitude), \(center.longitude)")
                 }
 
+                // Mark initial setup as complete - now updateUIView can handle re-centering
+                coordinator.initialSetupDone = true
+
                 let totalMainElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
-                logger.info("Main thread overlay add DONE in \(String(format: "%.1f", totalMainElapsed))ms")
+                logger.info("Main thread overlay add DONE in \(String(format: "%.1f", totalMainElapsed))ms - initialSetupDone")
             }
         }
 
@@ -127,12 +130,18 @@ struct ZoneMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
-        logger.debug("updateUIView called - overlays: \(mapView.overlays.count), annotations: \(mapView.annotations.count)")
+        logger.debug("updateUIView called - overlays: \(mapView.overlays.count), annotations: \(mapView.annotations.count), initialSetupDone: \(context.coordinator.initialSetupDone)")
 
         // Update coordinator with current state
         context.coordinator.currentZoneId = currentZoneId
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
+
+        // Skip re-centering during initial setup (overlays are loading async)
+        guard context.coordinator.initialSetupDone else {
+            logger.debug("Skipping re-center - initial setup not done")
+            return
+        }
 
         // Only re-center on user if location changed significantly
         // Don't re-add overlays on every update (expensive!)
@@ -142,10 +151,9 @@ struct ZoneMapView: UIViewRepresentable {
                 .distance(from: CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude))
             if distance > 500 { // Only re-center if moved > 500m
                 logger.debug("Re-centering map (moved \(String(format: "%.0f", distance))m)")
-                let region = MKCoordinateRegion(
-                    center: coord,
-                    span: mapView.region.span
-                )
+                // Use stored initial span to maintain zoom level
+                let span = context.coordinator.initialSpan ?? mapView.region.span
+                let region = MKCoordinateRegion(center: coord, span: span)
                 mapView.setRegion(region, animated: true)
             }
         }
@@ -201,6 +209,9 @@ struct ZoneMapView: UIViewRepresentable {
         // Store initial region to re-apply after overlays load
         var initialCenter: CLLocationCoordinate2D?
         var initialSpan: MKCoordinateSpan?
+
+        // Flag to indicate initial overlay loading is complete
+        var initialSetupDone = false
 
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone) -> Void)?) {
             self.currentZoneId = currentZoneId
