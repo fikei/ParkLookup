@@ -39,12 +39,7 @@ final class LocationService: NSObject, LocationServiceProtocol {
     // MARK: - LocationServiceProtocol
 
     func requestWhenInUseAuthorization() {
-        print("DEBUG LocationService: requestWhenInUseAuthorization called")
-        print("DEBUG LocationService: current status before request = \(locationManager.authorizationStatus.rawValue)")
-        DispatchQueue.main.async {
-            print("DEBUG LocationService: calling requestWhenInUseAuthorization on main thread")
-            self.locationManager.requestWhenInUseAuthorization()
-        }
+        locationManager.requestWhenInUseAuthorization()
     }
 
     func startUpdatingLocation() {
@@ -128,7 +123,6 @@ extension LocationService: CLLocationManagerDelegate {
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        print("DEBUG LocationService: didChangeAuthorization to \(manager.authorizationStatus.rawValue)")
         authorizationSubject.send(manager.authorizationStatus)
     }
 }

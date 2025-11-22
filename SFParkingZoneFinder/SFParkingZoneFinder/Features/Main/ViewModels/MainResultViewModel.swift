@@ -85,20 +85,16 @@ final class MainResultViewModel: ObservableObject {
     func onAppear() {
         // Check location authorization
         let status = locationService.authorizationStatus
-        print("DEBUG onAppear: authorization status = \(status.rawValue)")
 
         if status == .notDetermined {
             // Request permission - the authorizationPublisher callback will trigger lookup when granted
-            print("DEBUG onAppear: requesting authorization...")
             locationService.requestWhenInUseAuthorization()
             isLoading = true // Show loading while waiting for permission
         } else if status == .authorizedWhenInUse || status == .authorizedAlways {
             // Already authorized - perform lookup
-            print("DEBUG onAppear: already authorized, calling refreshLocation")
             refreshLocation()
         } else {
             // Denied or restricted
-            print("DEBUG onAppear: denied/restricted")
             error = .locationPermissionDenied
         }
     }
@@ -129,18 +125,14 @@ final class MainResultViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 guard let self = self else { return }
-                print("DEBUG authCallback: status changed to \(status.rawValue)")
                 switch status {
                 case .authorizedWhenInUse, .authorizedAlways:
-                    print("DEBUG authCallback: authorized, calling refreshLocation")
                     self.error = nil
                     self.refreshLocation()
                 case .denied, .restricted:
-                    print("DEBUG authCallback: denied/restricted")
                     self.isLoading = false
                     self.error = .locationPermissionDenied
                 case .notDetermined:
-                    print("DEBUG authCallback: still notDetermined")
                     break // Still waiting for user response
                 @unknown default:
                     break
@@ -162,33 +154,25 @@ final class MainResultViewModel: ObservableObject {
 
         do {
             // Get current location
-            print("DEBUG: Requesting location...")
             let location = try await locationService.requestSingleLocation()
-            print("DEBUG: Got location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
 
             // Get parking result
-            print("DEBUG: Getting parking result...")
             let result = await zoneService.getParkingResult(
                 at: location.coordinate,
                 time: Date()
             )
-            print("DEBUG: Got parking result, zone: \(result.lookupResult.primaryZone?.displayName ?? "none")")
 
             // Update UI state
             updateState(from: result)
 
             // Get address (don't fail if this fails)
-            print("DEBUG: Getting address...")
             await updateAddress(for: location)
-            print("DEBUG: Done")
 
             lastUpdated = Date()
 
         } catch let locationError as LocationError {
-            print("DEBUG: Location error: \(locationError)")
             error = AppError.from(locationError)
         } catch {
-            print("DEBUG: Other error: \(error)")
             self.error = .unknown(error.localizedDescription)
         }
 

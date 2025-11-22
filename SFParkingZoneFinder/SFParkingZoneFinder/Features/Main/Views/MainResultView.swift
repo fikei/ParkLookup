@@ -7,7 +7,6 @@ struct MainResultView: View {
     @State private var showingOverlappingZones = false
 
     var body: some View {
-        let _ = print("DEBUG: MainResultView body rendering")
         ZStack {
             // Background
             Color(.systemGroupedBackground)
