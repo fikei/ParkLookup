@@ -18,11 +18,11 @@ struct MapCardView: View {
         self.zoneName = zoneName
         self.onTap = onTap
 
-        // Initialize region with coordinate or SF default
+        // Initialize region with coordinate or SF default (2x zoom)
         let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         _region = State(initialValue: MKCoordinateRegion(
             center: center,
-            span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+            span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
         ))
     }
 

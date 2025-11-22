@@ -7,19 +7,19 @@ struct ZoneStatusCardView: View {
     let applicablePermits: [ParkingPermit]
 
     /// Responsive card height based on screen size
-    /// Calculated to show: zone card + map card (120pt) + 10% of rules card (~60pt peek)
+    /// Calculated to show: zone card + map card (120pt) + rules header peek (~44pt)
     private var cardHeight: CGFloat {
         let screenHeight = UIScreen.main.bounds.height
         let safeAreaTop: CGFloat = 59  // Approximate for notch devices
         let safeAreaBottom: CGFloat = 34
         let padding: CGFloat = 32  // 16pt top + 16pt horizontal padding
         let mapCardHeight: CGFloat = 120
-        let rulesPeek: CGFloat = 60  // ~10% of rules card visible
+        let rulesHeaderPeek: CGFloat = 44  // Just the "Parking Rules" header visible
         let spacing: CGFloat = 32  // spacing between cards
 
-        let availableHeight = screenHeight - safeAreaTop - safeAreaBottom - padding - mapCardHeight - rulesPeek - spacing
+        let availableHeight = screenHeight - safeAreaTop - safeAreaBottom - padding - mapCardHeight - rulesHeaderPeek - spacing
         // Clamp between reasonable min/max values
-        return min(max(availableHeight, 300), 500)
+        return min(max(availableHeight, 300), 520)
     }
 
     /// Extract just the zone letter/code (removes "Area " prefix)

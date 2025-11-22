@@ -129,21 +129,51 @@ struct OverlappingZonesButton: View {
 // MARK: - Loading Overlay
 
 struct LoadingOverlay: View {
+    @State private var isAnimating = false
+
     var body: some View {
         ZStack {
-            Color.black.opacity(0.3)
+            // Solid background for visibility
+            Color(.systemGroupedBackground)
                 .ignoresSafeArea()
 
-            VStack(spacing: 16) {
+            VStack(spacing: 24) {
+                // Animated parking icon
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.15))
+                        .frame(width: 120, height: 120)
+                        .scaleEffect(isAnimating ? 1.1 : 1.0)
+
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.3))
+                        .frame(width: 80, height: 80)
+
+                    Text("P")
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(.accentColor)
+                }
+
+                VStack(spacing: 8) {
+                    Text("Finding your zone...")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+
+                    Text("Checking your location")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
                 ProgressView()
-                    .scaleEffect(1.5)
-                Text("Finding your zone...")
-                    .font(.headline)
-                    .foregroundColor(.white)
+                    .scaleEffect(1.2)
+                    .padding(.top, 8)
             }
-            .padding(32)
-            .background(.ultraThinMaterial)
-            .cornerRadius(16)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
         }
     }
 }
