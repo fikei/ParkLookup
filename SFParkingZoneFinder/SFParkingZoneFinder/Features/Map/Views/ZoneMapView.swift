@@ -28,6 +28,13 @@ struct ZoneMapView: UIViewRepresentable {
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         mapView.addGestureRecognizer(tapGesture)
 
+        // Add zone overlays once on creation (async to avoid blocking)
+        DispatchQueue.main.async {
+            for zone in self.zones {
+                self.addZoneOverlays(zone, to: mapView, context: context)
+            }
+        }
+
         return mapView
     }
 
@@ -37,16 +44,8 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
 
-        // Remove existing overlays and annotations (except user location)
-        mapView.removeOverlays(mapView.overlays)
-        mapView.removeAnnotations(mapView.annotations.filter { !($0 is MKUserLocation) })
-
-        // Add zone polygons and labels
-        for zone in zones {
-            addZoneOverlays(zone, to: mapView, context: context)
-        }
-
-        // Re-center on user if location changed significantly
+        // Only re-center on user if location changed significantly
+        // Don't re-add overlays on every update (expensive!)
         if let coord = userCoordinate {
             let currentCenter = mapView.centerCoordinate
             let distance = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
