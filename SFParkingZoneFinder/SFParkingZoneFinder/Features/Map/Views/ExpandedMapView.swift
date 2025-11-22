@@ -63,23 +63,25 @@ struct ExpandedMapView: View {
 
                 // Zone info overlay
                 VStack {
+                    // Current zone card at top
+                    MiniZoneCard(
+                        zoneName: zoneName,
+                        zoneCode: currentPermitArea,
+                        validityStatus: validityStatus,
+                        applicablePermits: applicablePermits
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+
                     Spacer()
 
-                    // Show selected zone card if tapped, otherwise current zone
+                    // Tapped zone info card at bottom
                     if let selected = selectedZone {
                         TappedZoneCard(zone: selected) {
                             selectedZone = nil
                         }
                         .padding()
                         .transition(.move(edge: .bottom).combined(with: .opacity))
-                    } else {
-                        MiniZoneCard(
-                            zoneName: zoneName,
-                            zoneCode: currentPermitArea,
-                            validityStatus: validityStatus,
-                            applicablePermits: applicablePermits
-                        )
-                        .padding()
                     }
                 }
                 .animation(.easeInOut(duration: 0.2), value: selectedZone?.id)
