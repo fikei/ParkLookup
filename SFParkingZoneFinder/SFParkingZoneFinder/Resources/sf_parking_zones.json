@@ -1,0 +1,388 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2025-11-01T00:00:00Z",
+  "city": {
+    "code": "sf",
+    "name": "San Francisco",
+    "state": "CA",
+    "bounds": {
+      "north": 37.8324,
+      "south": 37.6398,
+      "east": -122.3281,
+      "west": -122.5274
+    }
+  },
+  "permitAreas": [
+    { "code": "A", "name": "Area A", "neighborhoods": ["Telegraph Hill", "North Beach"] },
+    { "code": "B", "name": "Area B", "neighborhoods": ["Marina", "Cow Hollow"] },
+    { "code": "C", "name": "Area C", "neighborhoods": ["Russian Hill"] },
+    { "code": "K", "name": "Area K", "neighborhoods": ["Glen Park", "Diamond Heights"] },
+    { "code": "L", "name": "Area L", "neighborhoods": ["Noe Valley"] },
+    { "code": "N", "name": "Area N", "neighborhoods": ["Potrero Hill"] },
+    { "code": "Q", "name": "Area Q", "neighborhoods": ["Castro", "Upper Market"] },
+    { "code": "R", "name": "Area R", "neighborhoods": ["Haight-Ashbury"] }
+  ],
+  "zones": [
+    {
+      "id": "sf_rpp_q_001",
+      "cityCode": "sf",
+      "displayName": "Area Q",
+      "zoneType": "rpp",
+      "permitArea": "Q",
+      "validPermitAreas": ["Q"],
+      "requiresPermit": true,
+      "restrictiveness": 8,
+      "boundary": [
+        { "latitude": 37.7620, "longitude": -122.4350 },
+        { "latitude": 37.7620, "longitude": -122.4280 },
+        { "latitude": 37.7580, "longitude": -122.4280 },
+        { "latitude": 37.7580, "longitude": -122.4350 },
+        { "latitude": 37.7620, "longitude": -122.4350 }
+      ],
+      "rules": [
+        {
+          "id": "q_rule_001",
+          "ruleType": "permit_required",
+          "description": "Residential Permit Area Q only",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 120,
+          "meterRate": null,
+          "specialConditions": "2-hour limit for non-permit holders"
+        },
+        {
+          "id": "q_rule_002",
+          "ruleType": "street_cleaning",
+          "description": "No parking during street cleaning: Wednesday 8-10 AM",
+          "enforcementDays": ["wednesday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 10, "minute": 0 },
+          "timeLimit": null,
+          "meterRate": null,
+          "specialConditions": "Tow-away enforced"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_rpp_r_001",
+      "cityCode": "sf",
+      "displayName": "Area R",
+      "zoneType": "rpp",
+      "permitArea": "R",
+      "validPermitAreas": ["R"],
+      "requiresPermit": true,
+      "restrictiveness": 8,
+      "boundary": [
+        { "latitude": 37.7700, "longitude": -122.4500 },
+        { "latitude": 37.7700, "longitude": -122.4400 },
+        { "latitude": 37.7650, "longitude": -122.4400 },
+        { "latitude": 37.7650, "longitude": -122.4500 },
+        { "latitude": 37.7700, "longitude": -122.4500 }
+      ],
+      "rules": [
+        {
+          "id": "r_rule_001",
+          "ruleType": "permit_required",
+          "description": "Residential Permit Area R only",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 21, "minute": 0 },
+          "timeLimit": 120,
+          "meterRate": null,
+          "specialConditions": "2-hour limit for non-permit holders"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_rpp_a_001",
+      "cityCode": "sf",
+      "displayName": "Area A",
+      "zoneType": "rpp",
+      "permitArea": "A",
+      "validPermitAreas": ["A"],
+      "requiresPermit": true,
+      "restrictiveness": 8,
+      "boundary": [
+        { "latitude": 37.8020, "longitude": -122.4100 },
+        { "latitude": 37.8020, "longitude": -122.4000 },
+        { "latitude": 37.7980, "longitude": -122.4000 },
+        { "latitude": 37.7980, "longitude": -122.4100 },
+        { "latitude": 37.8020, "longitude": -122.4100 }
+      ],
+      "rules": [
+        {
+          "id": "a_rule_001",
+          "ruleType": "permit_required",
+          "description": "Residential Permit Area A only",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 60,
+          "meterRate": null,
+          "specialConditions": "1-hour limit for non-permit holders"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_rpp_l_001",
+      "cityCode": "sf",
+      "displayName": "Area L",
+      "zoneType": "rpp",
+      "permitArea": "L",
+      "validPermitAreas": ["L"],
+      "requiresPermit": true,
+      "restrictiveness": 7,
+      "boundary": [
+        { "latitude": 37.7520, "longitude": -122.4330 },
+        { "latitude": 37.7520, "longitude": -122.4250 },
+        { "latitude": 37.7480, "longitude": -122.4250 },
+        { "latitude": 37.7480, "longitude": -122.4330 },
+        { "latitude": 37.7520, "longitude": -122.4330 }
+      ],
+      "rules": [
+        {
+          "id": "l_rule_001",
+          "ruleType": "permit_required",
+          "description": "Residential Permit Area L only",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 120,
+          "meterRate": null,
+          "specialConditions": "2-hour limit for non-permit holders"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_metered_downtown_001",
+      "cityCode": "sf",
+      "displayName": "Downtown Metered",
+      "zoneType": "metered",
+      "permitArea": null,
+      "validPermitAreas": [],
+      "requiresPermit": false,
+      "restrictiveness": 5,
+      "boundary": [
+        { "latitude": 37.7900, "longitude": -122.4050 },
+        { "latitude": 37.7900, "longitude": -122.3950 },
+        { "latitude": 37.7850, "longitude": -122.3950 },
+        { "latitude": 37.7850, "longitude": -122.4050 },
+        { "latitude": 37.7900, "longitude": -122.4050 }
+      ],
+      "rules": [
+        {
+          "id": "meter_rule_001",
+          "ruleType": "metered",
+          "description": "Metered parking - $3.00/hour",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStartTime": { "hour": 9, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 120,
+          "meterRate": 3.00,
+          "specialConditions": "Free on Sundays and holidays"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_metered_soma_001",
+      "cityCode": "sf",
+      "displayName": "SoMa Metered",
+      "zoneType": "metered",
+      "permitArea": null,
+      "validPermitAreas": [],
+      "requiresPermit": false,
+      "restrictiveness": 5,
+      "boundary": [
+        { "latitude": 37.7800, "longitude": -122.4100 },
+        { "latitude": 37.7800, "longitude": -122.4000 },
+        { "latitude": 37.7750, "longitude": -122.4000 },
+        { "latitude": 37.7750, "longitude": -122.4100 },
+        { "latitude": 37.7800, "longitude": -122.4100 }
+      ],
+      "rules": [
+        {
+          "id": "soma_meter_001",
+          "ruleType": "metered",
+          "description": "Metered parking - $2.50/hour",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStartTime": { "hour": 9, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 240,
+          "meterRate": 2.50,
+          "specialConditions": "4-hour max"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_time_limited_001",
+      "cityCode": "sf",
+      "displayName": "2-Hour Parking",
+      "zoneType": "time_limited",
+      "permitArea": null,
+      "validPermitAreas": [],
+      "requiresPermit": false,
+      "restrictiveness": 4,
+      "boundary": [
+        { "latitude": 37.7550, "longitude": -122.4200 },
+        { "latitude": 37.7550, "longitude": -122.4150 },
+        { "latitude": 37.7520, "longitude": -122.4150 },
+        { "latitude": 37.7520, "longitude": -122.4200 },
+        { "latitude": 37.7550, "longitude": -122.4200 }
+      ],
+      "rules": [
+        {
+          "id": "time_rule_001",
+          "ruleType": "time_limit",
+          "description": "2-hour parking limit",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 120,
+          "meterRate": null,
+          "specialConditions": "No limit on weekends"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_rpp_n_001",
+      "cityCode": "sf",
+      "displayName": "Area N",
+      "zoneType": "rpp",
+      "permitArea": "N",
+      "validPermitAreas": ["N"],
+      "requiresPermit": true,
+      "restrictiveness": 7,
+      "boundary": [
+        { "latitude": 37.7620, "longitude": -122.4000 },
+        { "latitude": 37.7620, "longitude": -122.3900 },
+        { "latitude": 37.7570, "longitude": -122.3900 },
+        { "latitude": 37.7570, "longitude": -122.4000 },
+        { "latitude": 37.7620, "longitude": -122.4000 }
+      ],
+      "rules": [
+        {
+          "id": "n_rule_001",
+          "ruleType": "permit_required",
+          "description": "Residential Permit Area N only",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 120,
+          "meterRate": null,
+          "specialConditions": "2-hour limit for non-permit holders"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_rpp_k_001",
+      "cityCode": "sf",
+      "displayName": "Area K",
+      "zoneType": "rpp",
+      "permitArea": "K",
+      "validPermitAreas": ["K"],
+      "requiresPermit": true,
+      "restrictiveness": 7,
+      "boundary": [
+        { "latitude": 37.7420, "longitude": -122.4400 },
+        { "latitude": 37.7420, "longitude": -122.4300 },
+        { "latitude": 37.7380, "longitude": -122.4300 },
+        { "latitude": 37.7380, "longitude": -122.4400 },
+        { "latitude": 37.7420, "longitude": -122.4400 }
+      ],
+      "rules": [
+        {
+          "id": "k_rule_001",
+          "ruleType": "permit_required",
+          "description": "Residential Permit Area K only",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStartTime": { "hour": 8, "minute": 0 },
+          "enforcementEndTime": { "hour": 18, "minute": 0 },
+          "timeLimit": 120,
+          "meterRate": null,
+          "specialConditions": "2-hour limit for non-permit holders"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "medium"
+      }
+    },
+    {
+      "id": "sf_tow_away_001",
+      "cityCode": "sf",
+      "displayName": "Tow-Away Zone",
+      "zoneType": "tow_away",
+      "permitArea": null,
+      "validPermitAreas": [],
+      "requiresPermit": false,
+      "restrictiveness": 10,
+      "boundary": [
+        { "latitude": 37.7880, "longitude": -122.4070 },
+        { "latitude": 37.7880, "longitude": -122.4060 },
+        { "latitude": 37.7870, "longitude": -122.4060 },
+        { "latitude": 37.7870, "longitude": -122.4070 },
+        { "latitude": 37.7880, "longitude": -122.4070 }
+      ],
+      "rules": [
+        {
+          "id": "tow_rule_001",
+          "ruleType": "tow_away",
+          "description": "Tow-Away Zone - No Parking Any Time",
+          "enforcementDays": ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStartTime": { "hour": 0, "minute": 0 },
+          "enforcementEndTime": { "hour": 23, "minute": 59 },
+          "timeLimit": null,
+          "meterRate": null,
+          "specialConditions": "Vehicles will be towed at owner's expense"
+        }
+      ],
+      "metadata": {
+        "dataSource": "mock_v1",
+        "lastUpdated": "2025-11-01T00:00:00Z",
+        "accuracy": "high"
+      }
+    }
+  ]
+}

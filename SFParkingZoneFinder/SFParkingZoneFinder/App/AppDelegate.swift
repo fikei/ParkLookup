@@ -1,5 +1,8 @@
 import UIKit
+
+#if canImport(GoogleMaps)
 import GoogleMaps
+#endif
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -12,12 +15,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     private func configureGoogleMaps() {
+        #if canImport(GoogleMaps)
         // Load API key from configuration
         guard let apiKey = googleMapsAPIKey else {
-            assertionFailure("Google Maps API key not found. Add GOOGLE_MAPS_API_KEY to Config.plist or environment.")
+            print("⚠️ Google Maps API key not found. Maps will not work.")
+            print("   Add GOOGLE_MAPS_API_KEY to Config.plist or environment.")
             return
         }
         GMSServices.provideAPIKey(apiKey)
+        print("✅ Google Maps SDK initialized")
+        #else
+        print("ℹ️ Google Maps SDK not installed. Map features will use placeholder.")
+        #endif
     }
 
     /// Retrieves the Google Maps API key from configuration
