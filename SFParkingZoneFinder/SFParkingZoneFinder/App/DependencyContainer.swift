@@ -14,6 +14,8 @@ final class DependencyContainer: ObservableObject {
     // MARK: - Published Services (for SwiftUI observation)
 
     @Published private(set) var isInitialized = false
+    @Published private(set) var isZonesLoaded = false
+    @Published private(set) var zoneLoadingStatus = "Starting up..."
 
     // MARK: - Service Instances
 
@@ -42,19 +44,45 @@ final class DependencyContainer: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        // Private init for singleton
+        // Start loading zones immediately in background
+        Task { @MainActor in
+            await loadZonesInBackground()
+        }
     }
 
-    /// Initialize all services - call on app launch
-    func initialize() async {
-        // Pre-load zone data
+    /// Load zones in background - called automatically on init
+    private func loadZonesInBackground() async {
+        zoneLoadingStatus = "Loading parking zones..."
+
         do {
             _ = try await zoneRepository.getZones(for: .sanFrancisco)
+            zoneLoadingStatus = "Ready!"
+            isZonesLoaded = true
             isInitialized = true
         } catch {
             print("Failed to initialize zone data: \(error)")
+            zoneLoadingStatus = "Ready"
             // App can still function, will show error state
+            isZonesLoaded = true
             isInitialized = true
+        }
+    }
+
+    /// Wait for zones to be loaded (for use after onboarding)
+    func waitForZonesLoaded() async {
+        // If already loaded, return immediately
+        if isZonesLoaded { return }
+
+        // Otherwise wait for the published property to change
+        await withCheckedContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = $isZonesLoaded
+                .filter { $0 }
+                .first()
+                .sink { _ in
+                    cancellable?.cancel()
+                    continuation.resume()
+                }
         }
     }
 

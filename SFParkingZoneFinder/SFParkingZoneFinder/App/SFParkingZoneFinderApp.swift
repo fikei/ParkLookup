@@ -19,40 +19,39 @@ struct ContentView: View {
     @EnvironmentObject var container: DependencyContainer
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
-    @State private var isLoading = true
-    @State private var loadingStatus = "Starting up..."
+    @State private var isTransitioning = false
 
     var body: some View {
         Group {
-            if isLoading {
-                LaunchLoadingView(status: loadingStatus)
-            } else if hasCompletedOnboarding {
+            if !hasCompletedOnboarding {
+                // Show onboarding immediately - zones load in background
+                OnboardingContainerView()
+            } else if container.isZonesLoaded && !isTransitioning {
+                // User has completed onboarding and zones are ready
                 MainResultView()
             } else {
-                OnboardingContainerView()
+                // User has completed onboarding but zones still loading
+                // (or brief transition after onboarding completes)
+                LaunchLoadingView(status: container.zoneLoadingStatus)
+                    .task {
+                        await container.waitForZonesLoaded()
+                        // Brief delay to show "Ready!" state
+                        try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+                    }
             }
         }
-        .task {
-            await preloadData()
-        }
-    }
-
-    private func preloadData() async {
-        loadingStatus = "Loading parking zones..."
-
-        // Preload zones so the lookup engine is ready
-        do {
-            _ = try await container.zoneRepository.getZones(for: .sanFrancisco)
-            loadingStatus = "Ready!"
-
-            // Brief delay to show "Ready!" state
-            try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-        } catch {
-            loadingStatus = "Ready"
-        }
-
-        withAnimation(.easeOut(duration: 0.3)) {
-            isLoading = false
+        .onChange(of: hasCompletedOnboarding) { _, completed in
+            if completed {
+                // Brief transition when onboarding completes
+                isTransitioning = true
+                Task {
+                    await container.waitForZonesLoaded()
+                    try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        isTransitioning = false
+                    }
+                }
+            }
         }
     }
 }
