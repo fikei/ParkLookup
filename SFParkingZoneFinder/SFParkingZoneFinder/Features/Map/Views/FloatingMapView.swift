@@ -1,5 +1,8 @@
 import SwiftUI
 import MapKit
+import os.log
+
+private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "FloatingMapView")
 
 /// Floating mini-map showing user location and current zone
 struct FloatingMapView: View {
@@ -96,6 +99,10 @@ struct ExpandedMapView: View {
         self.applicablePermits = applicablePermits
         self.zones = zones
         self.currentZoneId = currentZoneId
+
+        let totalBoundaries = zones.reduce(0) { $0 + $1.boundaries.count }
+        let totalPoints = zones.reduce(0) { $0 + $1.boundaries.reduce(0) { $0 + $1.count } }
+        logger.info("ExpandedMapView init - zones: \(zones.count), boundaries: \(totalBoundaries), points: \(totalPoints)")
     }
 
     /// Extract permit area code from zone name (e.g., "Area Q" -> "Q")
@@ -107,6 +114,8 @@ struct ExpandedMapView: View {
     }
 
     var body: some View {
+        let _ = logger.debug("ExpandedMapView body evaluated - zones: \(zones.count)")
+
         NavigationView {
             ZStack {
                 // Zone map with polygons

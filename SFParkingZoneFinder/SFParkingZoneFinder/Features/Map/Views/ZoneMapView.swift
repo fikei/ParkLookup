@@ -1,5 +1,8 @@
 import SwiftUI
 import MapKit
+import os.log
+
+private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "ZoneMapView")
 
 /// MKMapView-based map with zone polygon overlays
 /// Uses UIViewRepresentable to enable MKPolygonRenderer (not available in SwiftUI Map)
@@ -10,6 +13,9 @@ struct ZoneMapView: UIViewRepresentable {
     let onZoneTapped: ((ParkingZone) -> Void)?
 
     func makeUIView(context: Context) -> MKMapView {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        logger.info("makeUIView START - zones count: \(self.zones.count)")
+
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
@@ -23,6 +29,7 @@ struct ZoneMapView: UIViewRepresentable {
             span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
         )
         mapView.setRegion(region, animated: false)
+        logger.debug("Map region set in \(String(format: "%.1f", (CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
 
         // Add tap gesture for zone selection
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
@@ -30,18 +37,28 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Load zone overlays in background, add to map on main thread
         let zonesToLoad = self.zones
-        DispatchQueue.global(qos: .userInitiated).async {
-            // Prepare all polygon data in background
-            var polygons: [(ZonePolygon, String?)] = []
-            var annotations: [ZoneLabelAnnotation] = []
+        let zoneCount = zonesToLoad.count
+        logger.info("Starting background polygon prep for \(zoneCount) zones")
 
-            for zone in zonesToLoad {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let bgStartTime = CFAbsoluteTimeGetCurrent()
+            logger.debug("Background thread START")
+
+            // Prepare all polygon data in background
+            var polygons: [ZonePolygon] = []
+            var annotations: [ZoneLabelAnnotation] = []
+            var totalBoundaries = 0
+            var totalPoints = 0
+
+            for (index, zone) in zonesToLoad.enumerated() {
                 for boundary in zone.allBoundaryCoordinates {
                     guard boundary.count >= 3 else { continue }
+                    totalBoundaries += 1
+                    totalPoints += boundary.count
                     let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
                     polygon.zoneId = zone.id
                     polygon.zoneCode = zone.permitArea
-                    polygons.append((polygon, zone.permitArea))
+                    polygons.append(polygon)
                 }
 
                 // Calculate centroid for label
@@ -60,21 +77,41 @@ struct ZoneMapView: UIViewRepresentable {
                     )
                     annotations.append(annotation)
                 }
+
+                // Log progress every 10 zones
+                if (index + 1) % 10 == 0 || index == zoneCount - 1 {
+                    logger.debug("Processed \(index + 1)/\(zoneCount) zones")
+                }
             }
+
+            let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
+            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) polygons, \(totalBoundaries) boundaries, \(totalPoints) points")
 
             // Add to map on main thread
             DispatchQueue.main.async {
-                for (polygon, _) in polygons {
+                let mainStartTime = CFAbsoluteTimeGetCurrent()
+                logger.debug("Main thread overlay add START - \(polygons.count) polygons")
+
+                for polygon in polygons {
                     mapView.addOverlay(polygon, level: .aboveRoads)
                 }
+                let overlayElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
+                logger.debug("Overlays added in \(String(format: "%.1f", overlayElapsed))ms")
+
                 mapView.addAnnotations(annotations)
+                let totalMainElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
+                logger.info("Main thread overlay add DONE in \(String(format: "%.1f", totalMainElapsed))ms")
             }
         }
 
+        let elapsed = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
+        logger.info("makeUIView RETURN in \(String(format: "%.1f", elapsed))ms (background work continues)")
         return mapView
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
+        logger.debug("updateUIView called - overlays: \(mapView.overlays.count), annotations: \(mapView.annotations.count)")
+
         // Update coordinator with current state
         context.coordinator.currentZoneId = currentZoneId
         context.coordinator.zones = zones
@@ -87,6 +124,7 @@ struct ZoneMapView: UIViewRepresentable {
             let distance = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
                 .distance(from: CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude))
             if distance > 500 { // Only re-center if moved > 500m
+                logger.debug("Re-centering map (moved \(String(format: "%.0f", distance))m)")
                 let region = MKCoordinateRegion(
                     center: coord,
                     span: mapView.region.span
