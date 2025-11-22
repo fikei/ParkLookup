@@ -134,7 +134,17 @@ def simplify_block(boundary: List[Dict[str, float]], tolerance: float) -> List[D
         except Exception as e:
             print(f"  Warning: Simplification failed: {e}")
 
-    return polygon_to_coords(poly)
+    # Handle case where make_valid() returned a MultiPolygon or GeometryCollection
+    if isinstance(poly, Polygon):
+        return polygon_to_coords(poly)
+    elif isinstance(poly, MultiPolygon):
+        # Return the largest polygon from the MultiPolygon
+        largest = max(poly.geoms, key=lambda p: p.area)
+        return polygon_to_coords(largest)
+    else:
+        # For other geometry types, try to extract polygons
+        coords_list = multipolygon_to_coords(poly)
+        return coords_list[0] if coords_list else boundary
 
 
 def merge_zone_polygons(boundaries: List[List[Dict[str, float]]], tolerance: float) -> List[List[Dict[str, float]]]:
