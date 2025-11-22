@@ -17,13 +17,16 @@ class BlockfaceFetcher(BaseFetcher):
     """
     Fetches parking regulation data from DataSF Blockface dataset.
 
+    Dataset: Parking regulations (except non-metered color curb)
+    ID: hi6h-neyh
+
     This dataset contains:
     - Street segments with parking regulations
-    - RPP (Residential Parking Permit) flags and area codes
-    - Time limits, hours of operation
-    - Geometry (line segments for each block face)
+    - RPP (Residential Parking Permit) areas (rpparea1, rpparea2, rpparea3)
+    - Time limits (hrlimit), hours of operation (hrs_begin, hrs_end)
+    - Geometry (multilinestring for each block face)
 
-    API: https://data.sfgov.org/Transportation/Map-of-Parking-Regulations/dpvh-nd9g
+    API: https://data.sfgov.org/Transportation/Parking-regulations-except-non-metered-color-curb-/hi6h-neyh
     """
 
     def __init__(self):
@@ -95,7 +98,7 @@ class BlockfaceFetcher(BaseFetcher):
                 "$limit": DATASF_PAGE_SIZE,
                 "$offset": offset,
                 "$order": ":id",
-                "$where": "rpp_area IS NOT NULL",  # Only RPP records
+                "$where": "rpparea1 IS NOT NULL",  # Only RPP records
             }
 
             records = await self.fetch_with_retry(

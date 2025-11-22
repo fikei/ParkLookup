@@ -116,7 +116,9 @@ class ParkingDataTransformer:
         areas: Dict[str, List[Tuple[float, float]]] = {}
 
         for record in raw_blockfaces:
-            rpp_area = record.get("rpp_area") or record.get("RPP_AREA")
+            # hi6h-neyh dataset uses rpparea1, rpparea2, rpparea3
+            rpp_area = (record.get("rpparea1") or record.get("RPPAREA1") or
+                       record.get("rpp_area") or record.get("RPP_AREA"))
             if not rpp_area:
                 continue
 
@@ -128,7 +130,7 @@ class ParkingDataTransformer:
                 areas[area_code] = []
 
             # Try to extract coordinates from geometry
-            geom = record.get("the_geom") or record.get("geometry") or record.get("shape")
+            geom = record.get("shape") or record.get("the_geom") or record.get("geometry")
             if geom:
                 coords = self._extract_coords_from_geom(geom)
                 areas[area_code].extend(coords)
@@ -143,7 +145,8 @@ class ParkingDataTransformer:
                     name=f"Area {area_code}",
                     polygon=[],
                     total_blocks=len([r for r in raw_blockfaces
-                                      if (r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
+                                      if (r.get("rpparea1") or r.get("RPPAREA1") or
+                                          r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
                 ))
                 continue
 
@@ -168,7 +171,8 @@ class ParkingDataTransformer:
                 name=f"Area {area_code}",
                 polygon=[bbox_polygon],
                 total_blocks=len([r for r in raw_blockfaces
-                                  if (r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
+                                  if (r.get("rpparea1") or r.get("RPPAREA1") or
+                                      r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
             ))
 
         logger.info(f"Derived {len(zones)} zones from blockface data")
@@ -207,22 +211,44 @@ class ParkingDataTransformer:
     def transform_blockface(self, raw_blockfaces: List[Dict[str, Any]]) -> List[ParkingRegulation]:
         """
         Transform DataSF blockface data into ParkingRegulation objects.
+        hi6h-neyh dataset field mappings:
+        - rpparea1/rpparea2/rpparea3 -> rpp_area
+        - regulation -> regulation type
+        - days -> enforcement days (e.g., "M-F")
+        - hrs_begin/hrs_end or hours -> time range
+        - hrlimit -> time limit in hours
+        - shape -> geometry
         """
         logger.info(f"Transforming {len(raw_blockfaces)} blockface records")
         regulations = []
 
         for record in raw_blockfaces:
             try:
+                # Get RPP area from multiple possible fields
+                rpp_area = (record.get("rpparea1") or record.get("RPPAREA1") or
+                           record.get("rpp_area") or record.get("RPP_AREA"))
+
+                # Get time limit - hi6h-neyh uses 'hrlimit' in hours
+                time_limit = None
+                hrlimit = record.get("hrlimit") or record.get("HRLIMIT")
+                if hrlimit:
+                    try:
+                        time_limit = int(float(hrlimit)) * 60  # Convert hours to minutes
+                    except (ValueError, TypeError):
+                        time_limit = self._parse_time_limit(hrlimit)
+                else:
+                    time_limit = self._parse_time_limit(record.get("time_limit"))
+
                 regulation = ParkingRegulation(
-                    street_name=record.get("street", ""),
-                    from_street=record.get("from_street", ""),
-                    to_street=record.get("to_street", ""),
-                    side=record.get("side", ""),
-                    rpp_area=record.get("rpp_area"),
-                    time_limit=self._parse_time_limit(record.get("time_limit")),
-                    hours_begin=record.get("hours_begin"),
-                    hours_end=record.get("hours_end"),
-                    days=self._parse_days(record.get("days", "")),
+                    street_name=record.get("street") or record.get("STREET") or "",
+                    from_street=record.get("from_street") or record.get("FROM_STREET") or "",
+                    to_street=record.get("to_street") or record.get("TO_STREET") or "",
+                    side=record.get("side") or record.get("SIDE") or "",
+                    rpp_area=rpp_area,
+                    time_limit=time_limit,
+                    hours_begin=record.get("hrs_begin") or record.get("HRS_BEGIN") or record.get("hours_begin"),
+                    hours_end=record.get("hrs_end") or record.get("HRS_END") or record.get("hours_end"),
+                    days=self._parse_days(record.get("days") or record.get("DAYS") or ""),
                     geometry=self._extract_geometry(record),
                 )
 
@@ -378,7 +404,8 @@ class ParkingDataTransformer:
 
     def _extract_geometry(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Extract geometry from record if present"""
-        for key in ["the_geom", "geometry", "shape"]:
+        # hi6h-neyh dataset uses 'shape' field
+        for key in ["shape", "the_geom", "geometry"]:
             if key in record:
                 return record[key]
         return None

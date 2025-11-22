@@ -18,7 +18,7 @@ LOGS_DIR.mkdir(exist_ok=True)
 
 # DataSF API endpoints
 DATASF_BASE_URL = "https://data.sfgov.org/resource"
-BLOCKFACE_DATASET_ID = "qbyz-te2i"  # Map of Parking Regulations (correct ID)
+BLOCKFACE_DATASET_ID = "hi6h-neyh"  # Parking regulations (except non-metered color curb)
 METERS_DATASET_ID = "8vzz-qzz9"     # Parking Meters
 
 # SFMTA ArcGIS endpoints - SF Gov Enterprise GIS

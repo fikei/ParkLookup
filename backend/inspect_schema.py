@@ -4,7 +4,7 @@ import asyncio
 import aiohttp
 import json
 
-DATASET_URL = "https://data.sfgov.org/resource/qbyz-te2i.json"
+DATASET_URL = "https://data.sfgov.org/resource/hi6h-neyh.json"
 
 async def inspect():
     async with aiohttp.ClientSession() as session:
