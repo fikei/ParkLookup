@@ -74,9 +74,14 @@ extension ZoneLookupResult {
         overlappingZones.count > 1
     }
 
-    /// Whether this result indicates outside coverage
+    /// Whether this result indicates outside coverage (truly outside supported cities)
     var isOutsideCoverage: Bool {
-        confidence == .outsideCoverage || (primaryZone == nil && dataError == nil)
+        confidence == .outsideCoverage
+    }
+
+    /// Whether this result indicates in-city but not in any known zone
+    var isUnknownArea: Bool {
+        confidence == .unknownArea
     }
 
     /// Whether there was an error loading zone data
@@ -99,8 +104,10 @@ extension ZoneLookupResult {
             return "Near zone boundary"
         case .low:
             return "Location approximate"
+        case .unknownArea:
+            return "Status unknown"
         case .outsideCoverage:
-            return "Outside covered area"
+            return "Outside San Francisco"
         }
     }
 }
@@ -117,7 +124,10 @@ enum LookupConfidence: String, Codable {
     /// Poor GPS accuracy or at exact boundary
     case low
 
-    /// Location not in any known zone
+    /// In supported city but not in any known zone (status unknown)
+    case unknownArea
+
+    /// Location not in any supported city
     case outsideCoverage
 
     var iconName: String {
@@ -125,6 +135,7 @@ enum LookupConfidence: String, Codable {
         case .high: return "checkmark.circle.fill"
         case .medium: return "exclamationmark.circle.fill"
         case .low: return "questionmark.circle.fill"
+        case .unknownArea: return "questionmark.circle.fill"
         case .outsideCoverage: return "xmark.circle.fill"
         }
     }
@@ -134,6 +145,7 @@ enum LookupConfidence: String, Codable {
         case .high: return "High confidence"
         case .medium: return "Medium confidence"
         case .low: return "Low confidence"
+        case .unknownArea: return "Unknown area"
         case .outsideCoverage: return "Outside coverage"
         }
     }
@@ -142,7 +154,7 @@ enum LookupConfidence: String, Codable {
 // MARK: - Factory Methods
 
 extension ZoneLookupResult {
-    /// Create a result for outside coverage
+    /// Create a result for outside coverage (outside supported cities)
     static func outsideCoverage(
         coordinate: CLLocationCoordinate2D,
         timestamp: Date = Date()
@@ -151,6 +163,21 @@ extension ZoneLookupResult {
             primaryZone: nil,
             overlappingZones: [],
             confidence: .outsideCoverage,
+            timestamp: timestamp,
+            coordinate: coordinate,
+            nearestBoundaryDistance: nil
+        )
+    }
+
+    /// Create a result for unknown area (in city but no zone data)
+    static func unknownArea(
+        coordinate: CLLocationCoordinate2D,
+        timestamp: Date = Date()
+    ) -> ZoneLookupResult {
+        ZoneLookupResult(
+            primaryZone: nil,
+            overlappingZones: [],
+            confidence: .unknownArea,
             timestamp: timestamp,
             coordinate: coordinate,
             nearestBoundaryDistance: nil

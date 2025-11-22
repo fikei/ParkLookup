@@ -88,10 +88,10 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
 
         logger.info("Found \(matchingZones.count) matching zones, nearest boundary: \(nearestDistance)m")
 
-        // No zones found
+        // No zones found - but we're in SF, so status is unknown (not "outside coverage")
         if matchingZones.isEmpty {
-            logger.warning("⚠️ No matching zones found - returning outsideCoverage")
-            return .outsideCoverage(coordinate: coordinate)
+            logger.warning("⚠️ No matching zones found in SF - returning unknownArea")
+            return .unknownArea(coordinate: coordinate)
         }
 
         // Sort by restrictiveness (most restrictive first)

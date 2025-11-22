@@ -302,9 +302,11 @@ final class MainResultViewModel: ObservableObject {
         // Confidence
         lookupConfidence = result.lookupResult.confidence
 
-        // Check for outside coverage
+        // Check for special location statuses
         if result.lookupResult.isOutsideCoverage {
             error = .outsideCoverage
+        } else if result.lookupResult.isUnknownArea {
+            error = .unknownArea
         }
     }
 
@@ -365,7 +367,8 @@ enum MapPosition: String, CaseIterable, Codable, Hashable {
 enum AppError: LocalizedError, Identifiable, Equatable {
     case locationPermissionDenied
     case locationUnavailable
-    case outsideCoverage
+    case unknownArea        // In SF but not in any known zone
+    case outsideCoverage    // Outside SF entirely
     case dataLoadFailed(DataLoadError)
     case unknown(String)
 
@@ -377,8 +380,10 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return "Location access is required to find parking zones near you."
         case .locationUnavailable:
             return "Unable to determine your location. Please try again."
+        case .unknownArea:
+            return "We don't have parking data for this specific location yet."
         case .outsideCoverage:
-            return "You're outside our coverage area. We currently support San Francisco only."
+            return "You're outside San Francisco. We currently support SF only."
         case .dataLoadFailed(let dataError):
             return dataError.userMessage
         case .unknown(let message):
@@ -392,6 +397,8 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return "Open Settings to enable location access."
         case .locationUnavailable:
             return "Make sure you have a clear view of the sky and try again."
+        case .unknownArea:
+            return "Check posted signs for parking restrictions."
         case .outsideCoverage:
             return "More cities coming soon!"
         case .dataLoadFailed(let dataError):
@@ -407,6 +414,8 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return "location.slash.fill"
         case .locationUnavailable:
             return "location.fill.viewfinder"
+        case .unknownArea:
+            return "questionmark.circle.fill"
         case .outsideCoverage:
             return "map"
         case .dataLoadFailed:
@@ -422,6 +431,8 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return .red
         case .locationUnavailable:
             return .orange
+        case .unknownArea:
+            return .yellow
         case .outsideCoverage:
             return .blue
         case .dataLoadFailed:
@@ -437,6 +448,8 @@ enum AppError: LocalizedError, Identifiable, Equatable {
             return false
         case .locationUnavailable, .dataLoadFailed, .unknown:
             return true
+        case .unknownArea:
+            return true // User might move to a known area
         case .outsideCoverage:
             return true // User might move
         }

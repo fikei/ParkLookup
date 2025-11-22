@@ -50,7 +50,7 @@ For a functional Alpha release with real data, complete these in order:
 |-------|--------|-------|
 | S11: Backend API & Pipeline | Not Started | 0/17 |
 | S13b: Backend API Testing | Not Started | 0/3 |
-| S14: Error Handling | Not Started | 0/5 |
+| S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | Not Started | 0/8 |
 | S16: CarPlay Support | Not Started | 0/10 |
 | S17: Map Zone Boundaries | Not Started | 0/19 |
@@ -58,11 +58,11 @@ For a functional Alpha release with real data, complete these in order:
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
 
-**Beta Progress:** 0/90 tasks complete (0%)
+**Beta Progress:** 6/91 tasks complete (7%)
 
 ---
 
-**Overall Progress:** 101/195 tasks complete (52%)
+**Overall Progress:** 107/196 tasks complete (55%)
 
 ---
 
@@ -553,20 +553,22 @@ For a functional Alpha release with real data, complete these in order:
 
 ### Tasks
 
-- [ ] **14.1** Create LocationDeniedView with explanation and button to open Settings app
+- [x] **14.1** Create LocationDeniedView with explanation and button to open Settings app
 
-- [ ] **14.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
+- [x] **14.2** Create LocationUnavailableView for GPS timeout scenarios with retry button
 
-- [ ] **14.3** Create OutsideCoverageView shown when user is not in any supported zone
+- [x] **14.3** Create OutsideCoverageView shown when user is outside SF
 
-- [ ] **14.4** Create DataLoadingErrorView for mock data parsing failures
+- [x] **14.4** Create UnknownAreaView for locations in SF without zone data (distinct from outside coverage)
 
-- [ ] **14.5** Integrate error views into MainResultView based on state
+- [x] **14.5** Create DataLoadingErrorView for data parsing failures
+
+- [x] **14.6** Integrate error views into MainResultView based on state
 
 **Story 14 Complete When:**
-- [ ] All error scenarios show appropriate message
-- [ ] Error views have actionable next steps
-- [ ] Users can recover from errors easily
+- [x] All error scenarios show appropriate message
+- [x] Error views have actionable next steps
+- [x] Users can recover from errors easily
 
 ---
 
@@ -796,6 +798,28 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] Memory usage stays under 100MB typical usage
 - [ ] No UI jank during zone loading or lookup
 - [ ] Performance metrics logged for monitoring
+
+---
+
+## Future Enhancements (Post-Beta)
+
+### Data Coverage Improvements
+
+- [ ] **F1** Add paid/metered parking zones to map data (DataSF meters dataset integration)
+
+- [ ] **F2** Implement city-wide coverage map to distinguish between:
+  - RPP zones (current data)
+  - Metered/paid parking areas
+  - Unregulated street parking
+  - Private/no parking areas
+
+- [ ] **F3** Define "unknown area" handling with visual map boundaries showing data coverage
+
+### Additional Cities
+
+- [ ] **F4** Add Oakland RPP zone support
+- [ ] **F5** Add Berkeley RPP zone support
+- [ ] **F6** Abstract city-specific logic for multi-city scalability
 
 ---
 

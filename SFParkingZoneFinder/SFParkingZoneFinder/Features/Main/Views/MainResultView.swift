@@ -284,8 +284,10 @@ struct ErrorView: View {
             return "Location Access Needed"
         case .locationUnavailable:
             return "Location Unavailable"
+        case .unknownArea:
+            return "Unknown Parking Area"
         case .outsideCoverage:
-            return "Outside Coverage Area"
+            return "Outside San Francisco"
         case .dataLoadFailed:
             return "Data Error"
         case .unknown:
