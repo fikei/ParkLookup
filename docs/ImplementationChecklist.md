@@ -7,6 +7,19 @@
 
 ## Progress Summary
 
+### 🎯 Minimum Viable Alpha Path
+
+For a functional Alpha release with real data, complete these in order:
+1. ✅ S1-S9: iOS app core features (DONE)
+2. ✅ S10: Data Pipeline (DONE)
+3. 🔲 **S12: iOS Data Integration** - Bundle real pipeline data into app
+4. 🔲 S13: Backend Testing - Verify everything works
+
+**Optional for Alpha (can defer to Beta):**
+- S11: Backend API - Only needed for dynamic data updates
+
+---
+
 ### 🚀 Epic: Alpha Release
 
 | Story | Status | Tasks |
@@ -22,10 +35,10 @@
 | S9: Settings Screen | **COMPLETE** | 8/8 |
 | S10: Data Pipeline | **COMPLETE** | 6/6 |
 | S11: Backend API | Not Started | 0/7 |
-| S12: iOS Backend Integration | Not Started | 0/9 |
-| S13: Backend Testing | Not Started | 0/6 |
+| S12: iOS Data Integration | Not Started | 0/9 |
+| S13: Backend Testing | In Progress | 2/6 |
 
-**Alpha Progress:** 88/102 tasks complete (86%)
+**Alpha Progress:** 90/102 tasks complete (88%)
 
 ### 🎯 Epic: Beta Release
 
@@ -42,7 +55,7 @@
 
 ---
 
-**Overall Progress:** 88/153 tasks complete (58%)
+**Overall Progress:** 90/153 tasks complete (59%)
 
 ---
 
@@ -403,35 +416,35 @@
 
 ---
 
-## Story 12 (S12): iOS Backend Integration
+## Story 12 (S12): iOS Data Integration (Static Bundle)
 
-**Goal:** iOS app connects to backend API with offline fallback
+**Goal:** iOS app uses real parking data from pipeline output (bundled at build time)
 
 ### Tasks
 
-- [ ] **16.1** Create RemoteZoneDataSource conforming to ZoneDataSourceProtocol
+- [ ] **12.1** Create conversion script: pipeline output → iOS-compatible GeoJSON schema
 
-- [ ] **16.2** Implement API client with async/await and error handling
+- [ ] **12.2** Update LocalZoneDataSource to load official parking_zones.json instead of mock data
 
-- [ ] **16.3** Add offline fallback (use cached data when API unavailable)
+- [ ] **12.3** Run pipeline on machine with network access, generate parking_data.json
 
-- [ ] **16.4** Implement delta sync (only fetch changed zones based on data version)
+- [ ] **12.4** Bundle pipeline output JSON into iOS app Resources folder
 
-- [ ] **16.5** Add data version checking and automatic cache invalidation
+- [ ] **12.5** Display data version and "last updated" in Settings/About
 
-- [ ] **16.6** Create feature flag to switch between mock and remote data sources
+- [ ] **12.6** Add data source attribution (DataSF, SFMTA) in About screen
 
-- [ ] **16.7** Display data version and "last updated" in Settings/About
+- [ ] **12.7** Create update script to refresh bundled data from pipeline output
 
-- [ ] **16.8** Add data source attribution (DataSF, SFMTA)
+- [ ] **12.8** Test iOS app loads and displays real zone data correctly
 
-- [ ] **16.9** Test end-to-end: app startup → API fetch → zone display
+- [ ] **12.9** Verify point-in-polygon lookup works with official zone boundaries
 
-**Story 13 Complete When:**
-- [ ] App uses live backend data when online
-- [ ] App gracefully falls back to cache when offline
-- [ ] Data freshness visible in settings
-- [ ] Feature flag allows switching to mock data for testing
+**Story 12 Complete When:**
+- [ ] iOS app displays real SF parking zone data
+- [ ] Zone lookup returns accurate results for test locations
+- [ ] Data source/version visible in Settings
+- [ ] Process documented for updating bundled data
 
 ---
 
@@ -441,9 +454,9 @@
 
 ### Tasks
 
-- [ ] **14.1** Write unit tests for Data Pipeline ETL components
+- [x] **14.1** Write unit tests for Data Pipeline ETL components
 
-- [ ] **14.2** Write integration tests for DataSF and SFMTA API fetchers
+- [x] **14.2** Write integration tests for DataSF and SFMTA API fetchers
 
 - [ ] **14.3** Write unit tests for Backend API endpoints
 
