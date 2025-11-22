@@ -24,39 +24,48 @@ struct ZoneStatusCardView: View {
         isValidStyle ? Color.green : Color(.systemBackground)
     }
 
-    /// Text color based on validity (white on green, primary otherwise)
-    private var textColor: Color {
-        isValidStyle ? .white : .primary
+    /// Circle background color (system background on green, or status color otherwise)
+    private var circleBackground: Color {
+        isValidStyle ? Color(.systemBackground) : Color.forValidityStatus(validityStatus).opacity(0.15)
+    }
+
+    /// Text color for zone letter
+    private var letterColor: Color {
+        Color.forValidityStatus(validityStatus)
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
-                Spacer()
+        VStack(spacing: 16) {
+            Spacer()
 
-                // Zone Letter (very large, centered)
+            // Zone Letter in Circle
+            ZStack {
+                Circle()
+                    .fill(circleBackground)
+                    .frame(width: 200, height: 200)
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+
                 Text(zoneCode)
-                    .font(.system(size: 180, weight: .bold))
-                    .foregroundColor(textColor)
+                    .font(.system(size: 120, weight: .bold))
+                    .foregroundColor(letterColor)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
-                    .accessibilityAddTraits(.isHeader)
-                    .accessibilityLabel("Zone \(zoneCode)")
-
-                Spacer()
-
-                // Validity Badge (at bottom)
-                ValidityBadgeView(
-                    status: validityStatus,
-                    permits: applicablePermits,
-                    onColoredBackground: isValidStyle
-                )
-                .padding(.bottom, 24)
             }
-            .frame(width: geometry.size.width, height: geometry.size.height)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityLabel("Zone \(zoneCode)")
+
+            Spacer()
+
+            // Validity Badge (at bottom)
+            ValidityBadgeView(
+                status: validityStatus,
+                permits: applicablePermits,
+                onColoredBackground: isValidStyle
+            )
+            .padding(.bottom, 24)
         }
-        .frame(height: UIScreen.main.bounds.height * 0.85)
         .frame(maxWidth: .infinity)
+        .frame(height: 340)
         .background(cardBackground)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)

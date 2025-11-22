@@ -24,6 +24,15 @@ struct MainResultView: View {
                         applicablePermits: viewModel.applicablePermits
                     )
 
+                    // Map Card (full-width below zone card)
+                    if viewModel.error == nil && !viewModel.isLoading {
+                        MapCardView(
+                            coordinate: viewModel.currentCoordinate,
+                            zoneName: viewModel.zoneName,
+                            onTap: { showingExpandedMap = true }
+                        )
+                    }
+
                     // Rules Summary
                     RulesSummaryView(
                         summaryLines: viewModel.ruleSummaryLines,
@@ -50,23 +59,6 @@ struct MainResultView: View {
                     )
                 }
                 .padding()
-            }
-
-            // Floating Map (top right)
-            if viewModel.showFloatingMap && viewModel.error == nil && !viewModel.isLoading {
-                VStack {
-                    HStack {
-                        Spacer()
-                        FloatingMapView(
-                            coordinate: viewModel.currentCoordinate,
-                            zoneName: viewModel.zoneName,
-                            onTap: { showingExpandedMap = true }
-                        )
-                        .padding(.trailing, 16)
-                        .padding(.top, 60)
-                    }
-                    Spacer()
-                }
             }
 
             // Loading overlay
