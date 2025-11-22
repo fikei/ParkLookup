@@ -123,6 +123,10 @@ struct ZoneMapView: UIViewRepresentable {
     let userCoordinate: CLLocationCoordinate2D?
     let onZoneTapped: ((ParkingZone) -> Void)?
 
+    /// When true, uses convex hull (smoothed envelope). When false, uses actual block boundaries.
+    /// Set to false to see the preprocessed polygon data as-is.
+    static var useConvexHull: Bool = false
+
     func makeUIView(context: Context) -> MKMapView {
         let startTime = CFAbsoluteTimeGetCurrent()
         logger.info("makeUIView START - zones count: \(self.zones.count), userCoord: \(userCoordinate != nil ? "present" : "nil")")
@@ -155,17 +159,16 @@ struct ZoneMapView: UIViewRepresentable {
         let zoneCount = zonesToLoad.count
         logger.info("Starting background polygon prep for \(zoneCount) zones")
 
+        let useConvexHull = ZoneMapView.useConvexHull
         DispatchQueue.global(qos: .userInitiated).async {
             let bgStartTime = CFAbsoluteTimeGetCurrent()
-            logger.debug("Background thread START")
+            logger.info("Background thread START - useConvexHull: \(useConvexHull)")
 
-            // Prepare zone convex hulls - one polygon per zone instead of thousands of blocks
-            // This dramatically reduces polygon count while showing zone coverage
             var polygons: [ZonePolygon] = []
             var annotations: [ZoneLabelAnnotation] = []
             var totalBoundaries = 0
             var totalPoints = 0
-            var hullPoints = 0
+            var outputPoints = 0
 
             // Filter radius for visible zones
             let filterRadius = 0.03   // ~3.3km - visible area
@@ -179,8 +182,8 @@ struct ZoneMapView: UIViewRepresentable {
                 let zoneBoundaryCount = zone.allBoundaryCoordinates.count
                 totalBoundaries += zoneBoundaryCount
 
-                // Collect all points from boundaries within the filter area
-                var nearbyPoints: [CLLocationCoordinate2D] = []
+                // Collect nearby boundaries
+                var nearbyBoundaries: [[CLLocationCoordinate2D]] = []
 
                 for boundary in zone.allBoundaryCoordinates {
                     totalPoints += boundary.count
@@ -192,50 +195,67 @@ struct ZoneMapView: UIViewRepresentable {
                     }
 
                     if hasNearbyPoint {
-                        // Add all points from this boundary to our collection
-                        nearbyPoints.append(contentsOf: boundary)
+                        nearbyBoundaries.append(boundary)
                     }
                 }
 
                 // Log zone info on first few
                 if index < 3 {
-                    logger.debug("Zone \(index): id=\(zone.id), permitArea=\(zone.permitArea ?? "nil"), boundaries=\(zoneBoundaryCount), nearbyPoints=\(nearbyPoints.count)")
+                    let pointCounts = nearbyBoundaries.map { $0.count }
+                    logger.info("Zone \(index): id=\(zone.id), permitArea=\(zone.permitArea ?? "nil"), boundaries=\(zoneBoundaryCount), nearbyBoundaries=\(nearbyBoundaries.count), pointsPerBoundary=\(pointCounts.prefix(5))")
                 }
 
-                // Create convex hull from all nearby points for this zone
-                if nearbyPoints.count >= 3 {
-                    let hull = convexHull(nearbyPoints)
-                    if hull.count >= 3 {
-                        let polygon = ZonePolygon(coordinates: hull, count: hull.count)
+                if useConvexHull {
+                    // CONVEX HULL MODE: Create single smoothed envelope per zone
+                    let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
+                    if allNearbyPoints.count >= 3 {
+                        let hull = convexHull(allNearbyPoints)
+                        if hull.count >= 3 {
+                            let polygon = ZonePolygon(coordinates: hull, count: hull.count)
+                            polygon.zoneId = zone.id
+                            polygon.zoneCode = zone.permitArea
+                            polygons.append(polygon)
+                            outputPoints += hull.count
+                        }
+                    }
+                } else {
+                    // ACTUAL BOUNDARIES MODE: Use preprocessed block polygons as-is
+                    for boundary in nearbyBoundaries {
+                        guard boundary.count >= 3 else { continue }
+                        let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
                         polygon.zoneId = zone.id
                         polygon.zoneCode = zone.permitArea
                         polygons.append(polygon)
-                        hullPoints += hull.count
-
-                        // Add annotation at centroid of hull
-                        let sumLat = hull.reduce(0.0) { $0 + $1.latitude }
-                        let sumLon = hull.reduce(0.0) { $0 + $1.longitude }
-                        let centroid = CLLocationCoordinate2D(
-                            latitude: sumLat / Double(hull.count),
-                            longitude: sumLon / Double(hull.count)
-                        )
-                        let annotation = ZoneLabelAnnotation(
-                            coordinate: centroid,
-                            zoneCode: zone.permitArea ?? zone.displayName,
-                            zoneId: zone.id
-                        )
-                        annotations.append(annotation)
+                        outputPoints += boundary.count
                     }
+                }
+
+                // Add annotation at zone centroid (from all nearby boundaries)
+                let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
+                if !allNearbyPoints.isEmpty {
+                    let sumLat = allNearbyPoints.reduce(0.0) { $0 + $1.latitude }
+                    let sumLon = allNearbyPoints.reduce(0.0) { $0 + $1.longitude }
+                    let centroid = CLLocationCoordinate2D(
+                        latitude: sumLat / Double(allNearbyPoints.count),
+                        longitude: sumLon / Double(allNearbyPoints.count)
+                    )
+                    let annotation = ZoneLabelAnnotation(
+                        coordinate: centroid,
+                        zoneCode: zone.permitArea ?? zone.displayName,
+                        zoneId: zone.id
+                    )
+                    annotations.append(annotation)
                 }
 
                 // Log progress every 10 zones
                 if (index + 1) % 10 == 0 || index == zoneCount - 1 {
-                    logger.debug("Processed \(index + 1)/\(zoneCount) zones")
+                    logger.debug("Processed \(index + 1)/\(zoneCount) zones, polygons so far: \(polygons.count)")
                 }
             }
 
             let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
-            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) zone hulls (\(hullPoints) points from \(totalPoints) original), \(totalBoundaries) total boundaries")
+            let modeStr = useConvexHull ? "convex hull" : "actual boundaries"
+            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - mode: \(modeStr), \(polygons.count) polygons (\(outputPoints) points from \(totalPoints) original), \(totalBoundaries) total boundaries")
 
             // Capture the coordinator and initial region before async block
             let coordinator = context.coordinator
