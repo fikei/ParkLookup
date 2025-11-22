@@ -821,6 +821,16 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] **F5** Add Berkeley RPP zone support
 - [ ] **F6** Abstract city-specific logic for multi-city scalability
 
+### Parking Event Capture
+
+- [ ] **F7** Detect parking events (location stationary for >2 minutes after driving)
+- [ ] **F8** Save parking location with timestamp, zone info, and address
+- [ ] **F9** Track parking duration with optional reminders (street sweeping, meter expiry)
+- [ ] **F10** Show "Find My Car" feature with walking directions to saved location
+- [ ] **F11** Build parking history view with filter by zone, date, duration
+- [ ] **F12** Add parking session notes (floor/section for garages, photo of spot)
+- [ ] **F13** Export parking history (CSV for expense tracking)
+
 ---
 
 ## Quick Reference: Prompt Templates
