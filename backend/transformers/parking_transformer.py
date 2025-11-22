@@ -105,6 +105,105 @@ class ParkingDataTransformer:
         logger.info(f"Transformed {len(zones)} RPP zones")
         return zones
 
+    def derive_zones_from_blockface(self, raw_blockfaces: List[Dict[str, Any]]) -> List[RPPZone]:
+        """
+        Derive RPP zones from blockface data when ArcGIS polygons are unavailable.
+        Creates zones with bounding box polygons from the street segment endpoints.
+        """
+        logger.info(f"Deriving zones from {len(raw_blockfaces)} blockface records")
+
+        # Group by RPP area
+        areas: Dict[str, List[Tuple[float, float]]] = {}
+
+        for record in raw_blockfaces:
+            rpp_area = record.get("rpp_area") or record.get("RPP_AREA")
+            if not rpp_area:
+                continue
+
+            area_code = str(rpp_area).upper().strip()
+            if not area_code:
+                continue
+
+            if area_code not in areas:
+                areas[area_code] = []
+
+            # Try to extract coordinates from geometry
+            geom = record.get("the_geom") or record.get("geometry") or record.get("shape")
+            if geom:
+                coords = self._extract_coords_from_geom(geom)
+                areas[area_code].extend(coords)
+
+        # Create zones with bounding box polygons
+        zones = []
+        for area_code, coords in areas.items():
+            if not coords:
+                # Create zone without polygon
+                zones.append(RPPZone(
+                    area_code=area_code,
+                    name=f"Area {area_code}",
+                    polygon=[],
+                    total_blocks=len([r for r in raw_blockfaces
+                                      if (r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
+                ))
+                continue
+
+            # Calculate bounding box and create polygon
+            lons = [c[0] for c in coords]
+            lats = [c[1] for c in coords]
+            min_lon, max_lon = min(lons), max(lons)
+            min_lat, max_lat = min(lats), max(lats)
+
+            # Add small buffer
+            buffer = 0.001  # ~100m
+            bbox_polygon = [
+                (min_lon - buffer, min_lat - buffer),
+                (max_lon + buffer, min_lat - buffer),
+                (max_lon + buffer, max_lat + buffer),
+                (min_lon - buffer, max_lat + buffer),
+                (min_lon - buffer, min_lat - buffer),  # Close ring
+            ]
+
+            zones.append(RPPZone(
+                area_code=area_code,
+                name=f"Area {area_code}",
+                polygon=[bbox_polygon],
+                total_blocks=len([r for r in raw_blockfaces
+                                  if (r.get("rpp_area") or r.get("RPP_AREA") or "").upper().strip() == area_code])
+            ))
+
+        logger.info(f"Derived {len(zones)} zones from blockface data")
+        return zones
+
+    def _extract_coords_from_geom(self, geom: Any) -> List[Tuple[float, float]]:
+        """Extract coordinate pairs from various geometry formats"""
+        coords = []
+
+        if isinstance(geom, dict):
+            # GeoJSON format
+            if "coordinates" in geom:
+                raw_coords = geom["coordinates"]
+                if isinstance(raw_coords, list):
+                    # Could be Point, LineString, or MultiLineString
+                    self._flatten_coords(raw_coords, coords)
+        elif isinstance(geom, str):
+            # WKT or other string format - skip for now
+            pass
+
+        return coords
+
+    def _flatten_coords(self, raw: Any, coords: List[Tuple[float, float]]):
+        """Recursively flatten coordinate arrays"""
+        if not raw:
+            return
+        if isinstance(raw[0], (int, float)):
+            # This is a coordinate pair [lon, lat]
+            if len(raw) >= 2:
+                coords.append((float(raw[0]), float(raw[1])))
+        elif isinstance(raw[0], list):
+            # Nested array
+            for item in raw:
+                self._flatten_coords(item, coords)
+
     def transform_blockface(self, raw_blockfaces: List[Dict[str, Any]]) -> List[ParkingRegulation]:
         """
         Transform DataSF blockface data into ParkingRegulation objects.

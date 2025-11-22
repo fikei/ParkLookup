@@ -114,14 +114,20 @@ class ParkingDataPipeline:
                    BlockfaceFetcher() as blockface_fetcher:
 
             start = datetime.utcnow()
-            rpp_task = asyncio.create_task(rpp_fetcher.fetch())
-            blockface_task = asyncio.create_task(blockface_fetcher.fetch_rpp_only())
 
-            raw_data["rpp_areas"] = await rpp_task
+            # RPP areas fetch (may return empty if service unavailable)
+            try:
+                rpp_task = asyncio.create_task(rpp_fetcher.fetch())
+                raw_data["rpp_areas"] = await rpp_task
+            except Exception as e:
+                logger.warning(f"RPP areas fetch failed (will derive from blockface): {e}")
+                raw_data["rpp_areas"] = []
+
             self.run_stats["fetch_times"]["rpp_areas"] = (datetime.utcnow() - start).total_seconds()
             self.run_stats["record_counts"]["rpp_areas"] = len(raw_data["rpp_areas"])
 
             start = datetime.utcnow()
+            blockface_task = asyncio.create_task(blockface_fetcher.fetch_rpp_only())
             raw_data["blockface"] = await blockface_task
             self.run_stats["fetch_times"]["blockface"] = (datetime.utcnow() - start).total_seconds()
             self.run_stats["record_counts"]["blockface"] = len(raw_data["blockface"])
@@ -143,8 +149,15 @@ class ParkingDataPipeline:
 
     def _transform_data(self, raw_data: dict, skip_meters: bool) -> dict:
         """Transform raw data into structured objects"""
+        # Try to get zones from RPP areas first, fallback to deriving from blockface
+        zones = self.transformer.transform_rpp_areas(raw_data["rpp_areas"])
+
+        if not zones and raw_data.get("blockface"):
+            logger.info("No RPP area polygons available, deriving zones from blockface data...")
+            zones = self.transformer.derive_zones_from_blockface(raw_data["blockface"])
+
         return {
-            "zones": self.transformer.transform_rpp_areas(raw_data["rpp_areas"]),
+            "zones": zones,
             "regulations": self.transformer.transform_blockface(raw_data["blockface"]),
             "meters": self.transformer.transform_meters(raw_data["meters"]) if not skip_meters else [],
         }

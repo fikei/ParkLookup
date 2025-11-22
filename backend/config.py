@@ -18,12 +18,14 @@ LOGS_DIR.mkdir(exist_ok=True)
 
 # DataSF API endpoints
 DATASF_BASE_URL = "https://data.sfgov.org/resource"
-BLOCKFACE_DATASET_ID = "dpvh-nd9g"  # Map of Parking Regulations
+BLOCKFACE_DATASET_ID = "qbyz-te2i"  # Map of Parking Regulations (correct ID)
 METERS_DATASET_ID = "8vzz-qzz9"     # Parking Meters
 
-# SFMTA ArcGIS endpoints
+# SFMTA ArcGIS endpoints - SF Gov Enterprise GIS
+# Note: RPP boundaries may not be published as a separate layer
+# The blockface data includes RPP area info per street segment
 SFMTA_ARCGIS_BASE = "https://services.arcgis.com/Zs2aNLFN00jrS4gG/arcgis/rest/services"
-RPP_AREAS_SERVICE = "RPP_Areas/FeatureServer/0"
+RPP_AREAS_SERVICE = "RPP_Areas/FeatureServer/0"  # May need to be updated if service exists
 
 # API settings
 DATASF_APP_TOKEN = os.getenv("DATASF_APP_TOKEN", "")  # Optional but recommended
