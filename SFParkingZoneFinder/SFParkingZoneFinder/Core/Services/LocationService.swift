@@ -12,6 +12,9 @@ final class LocationService: NSObject, LocationServiceProtocol {
     private let authorizationSubject = PassthroughSubject<CLAuthorizationStatus, Never>()
 
     private var singleLocationContinuation: CheckedContinuation<CLLocation, Error>?
+    private var timeoutTask: Task<Void, Never>?
+    private let continuationLock = NSLock()
+    private var isContinuousUpdatesActive = false
 
     private(set) var currentLocation: CLLocation?
 
@@ -43,14 +46,24 @@ final class LocationService: NSObject, LocationServiceProtocol {
     }
 
     func startUpdatingLocation() {
+        isContinuousUpdatesActive = true
         locationManager.startUpdatingLocation()
     }
 
     func stopUpdatingLocation() {
+        isContinuousUpdatesActive = false
         locationManager.stopUpdatingLocation()
     }
 
     func requestSingleLocation() async throws -> CLLocation {
+        // If continuous updates are active and we have a recent location, return it immediately
+        if isContinuousUpdatesActive, let current = currentLocation {
+            // Check if the location is recent (within last 30 seconds)
+            if Date().timeIntervalSince(current.timestamp) < 30 {
+                return current
+            }
+        }
+
         // Check authorization first
         switch authorizationStatus {
         case .denied:
@@ -69,19 +82,57 @@ final class LocationService: NSObject, LocationServiceProtocol {
         }
 
         return try await withCheckedThrowingContinuation { continuation in
+            continuationLock.lock()
+
+            // Cancel any existing continuation
+            if let existing = singleLocationContinuation {
+                existing.resume(throwing: LocationError.cancelled)
+            }
+
             self.singleLocationContinuation = continuation
+            continuationLock.unlock()
+
+            // Cancel any existing timeout
+            timeoutTask?.cancel()
 
             // Set timeout
-            Task {
-                try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
-                if self.singleLocationContinuation != nil {
-                    self.singleLocationContinuation?.resume(throwing: LocationError.timeout)
-                    self.singleLocationContinuation = nil
-                    self.locationManager.stopUpdatingLocation()
+            timeoutTask = Task {
+                do {
+                    try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+                    self.resumeContinuationWithError(LocationError.timeout)
+                } catch {
+                    // Task was cancelled, do nothing
                 }
             }
 
+            // Request a single location update
             locationManager.requestLocation()
+        }
+    }
+
+    // MARK: - Private Methods
+
+    private func resumeContinuationWithLocation(_ location: CLLocation) {
+        continuationLock.lock()
+        defer { continuationLock.unlock() }
+
+        if let continuation = singleLocationContinuation {
+            singleLocationContinuation = nil
+            timeoutTask?.cancel()
+            timeoutTask = nil
+            continuation.resume(returning: location)
+        }
+    }
+
+    private func resumeContinuationWithError(_ error: LocationError) {
+        continuationLock.lock()
+        defer { continuationLock.unlock() }
+
+        if let continuation = singleLocationContinuation {
+            singleLocationContinuation = nil
+            timeoutTask?.cancel()
+            timeoutTask = nil
+            continuation.resume(throwing: error)
         }
     }
 }
@@ -93,33 +144,31 @@ extension LocationService: CLLocationManagerDelegate {
         guard let location = locations.last else { return }
 
         currentLocation = location
+
+        // Always publish for continuous updates
         locationSubject.send(location)
 
-        // Handle single location request
-        if let continuation = singleLocationContinuation {
-            continuation.resume(returning: location)
-            singleLocationContinuation = nil
-        }
+        // Handle single location request (thread-safe)
+        resumeContinuationWithLocation(location)
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        if let continuation = singleLocationContinuation {
-            let locationError: LocationError
-            if let clError = error as? CLError {
-                switch clError.code {
-                case .denied:
-                    locationError = .permissionDenied
-                case .locationUnknown:
-                    locationError = .locationUnknown
-                default:
-                    locationError = .locationUnknown
-                }
-            } else {
+        let locationError: LocationError
+        if let clError = error as? CLError {
+            switch clError.code {
+            case .denied:
+                locationError = .permissionDenied
+            case .locationUnknown:
+                locationError = .locationUnknown
+            default:
                 locationError = .locationUnknown
             }
-            continuation.resume(throwing: locationError)
-            singleLocationContinuation = nil
+        } else {
+            locationError = .locationUnknown
         }
+
+        // Handle single location request error (thread-safe)
+        resumeContinuationWithError(locationError)
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

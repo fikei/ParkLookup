@@ -39,6 +39,7 @@ enum LocationError: LocalizedError {
     case locationUnknown
     case timeout
     case serviceDisabled
+    case cancelled
 
     var errorDescription: String? {
         switch self {
@@ -52,6 +53,8 @@ enum LocationError: LocalizedError {
             return "Location request timed out. Please try again."
         case .serviceDisabled:
             return "Location services are disabled. Please enable in Settings."
+        case .cancelled:
+            return "Location request was cancelled."
         }
     }
 }
