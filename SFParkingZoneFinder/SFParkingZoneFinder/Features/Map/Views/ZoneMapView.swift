@@ -61,6 +61,60 @@ private func simplifyPolygon(_ coords: [CLLocationCoordinate2D], tolerance: Doub
     return simplified
 }
 
+// MARK: - Convex Hull Algorithm (Graham Scan)
+
+/// Computes the convex hull of a set of points using Graham scan algorithm
+/// Returns points in counter-clockwise order forming the hull
+private func convexHull(_ points: [CLLocationCoordinate2D]) -> [CLLocationCoordinate2D] {
+    guard points.count >= 3 else { return points }
+
+    // Find the bottom-most point (or left-most in case of tie)
+    var sorted = points
+    let pivot = sorted.min { a, b in
+        if a.latitude != b.latitude {
+            return a.latitude < b.latitude
+        }
+        return a.longitude < b.longitude
+    }!
+
+    // Sort points by polar angle with respect to pivot
+    sorted.sort { a, b in
+        let angleA = atan2(a.latitude - pivot.latitude, a.longitude - pivot.longitude)
+        let angleB = atan2(b.latitude - pivot.latitude, b.longitude - pivot.longitude)
+        if angleA != angleB {
+            return angleA < angleB
+        }
+        // If same angle, closer point first
+        let distA = (a.latitude - pivot.latitude) * (a.latitude - pivot.latitude) +
+                    (a.longitude - pivot.longitude) * (a.longitude - pivot.longitude)
+        let distB = (b.latitude - pivot.latitude) * (b.latitude - pivot.latitude) +
+                    (b.longitude - pivot.longitude) * (b.longitude - pivot.longitude)
+        return distA < distB
+    }
+
+    // Cross product to determine turn direction
+    func cross(_ o: CLLocationCoordinate2D, _ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> Double {
+        return (a.longitude - o.longitude) * (b.latitude - o.latitude) -
+               (a.latitude - o.latitude) * (b.longitude - o.longitude)
+    }
+
+    // Build hull
+    var hull: [CLLocationCoordinate2D] = []
+    for point in sorted {
+        while hull.count >= 2 && cross(hull[hull.count - 2], hull[hull.count - 1], point) <= 0 {
+            hull.removeLast()
+        }
+        hull.append(point)
+    }
+
+    // Close the hull
+    if hull.count >= 3 {
+        hull.append(hull[0])
+    }
+
+    return hull
+}
+
 /// MKMapView-based map with zone polygon overlays
 /// Uses UIViewRepresentable to enable MKPolygonRenderer (not available in SwiftUI Map)
 struct ZoneMapView: UIViewRepresentable {
@@ -105,95 +159,65 @@ struct ZoneMapView: UIViewRepresentable {
             let bgStartTime = CFAbsoluteTimeGetCurrent()
             logger.debug("Background thread START")
 
-            // Prepare all polygon data in background
-            // Filter to only include polygons near the user (performance optimization)
-            // Apply simplification to reduce point count for smoother rendering
+            // Prepare zone convex hulls - one polygon per zone instead of thousands of blocks
+            // This dramatically reduces polygon count while showing zone coverage
             var polygons: [ZonePolygon] = []
             var annotations: [ZoneLabelAnnotation] = []
             var totalBoundaries = 0
             var totalPoints = 0
-            var simplifiedPoints = 0
-            var filteredOut = 0
+            var hullPoints = 0
 
-            // Two-tier filter: inner radius (full detail) and outer radius (simplified)
-            let innerRadius = 0.008   // ~900m - full detail
-            let outerRadius = 0.025   // ~2.8km - simplified polygons
+            // Filter radius for visible zones
+            let filterRadius = 0.03   // ~3.3km - visible area
 
-            let innerMinLat = center.latitude - innerRadius
-            let innerMaxLat = center.latitude + innerRadius
-            let innerMinLon = center.longitude - innerRadius
-            let innerMaxLon = center.longitude + innerRadius
-
-            let outerMinLat = center.latitude - outerRadius
-            let outerMaxLat = center.latitude + outerRadius
-            let outerMinLon = center.longitude - outerRadius
-            let outerMaxLon = center.longitude + outerRadius
-
-            // Simplification tolerance (in degrees) - higher = more simplified
-            let simplificationTolerance = 0.00005  // ~5m tolerance for outer polygons
+            let minLat = center.latitude - filterRadius
+            let maxLat = center.latitude + filterRadius
+            let minLon = center.longitude - filterRadius
+            let maxLon = center.longitude + filterRadius
 
             for (index, zone) in zonesToLoad.enumerated() {
                 let zoneBoundaryCount = zone.allBoundaryCoordinates.count
-                var zoneHasVisiblePolygon = false
+                totalBoundaries += zoneBoundaryCount
+
+                // Collect all points from boundaries within the filter area
+                var nearbyPoints: [CLLocationCoordinate2D] = []
 
                 for boundary in zone.allBoundaryCoordinates {
-                    guard boundary.count >= 3 else { continue }
-                    totalBoundaries += 1
                     totalPoints += boundary.count
 
-                    // Check if polygon is in inner radius (full detail)
-                    let isInInnerRadius = boundary.contains { coord in
-                        coord.latitude >= innerMinLat && coord.latitude <= innerMaxLat &&
-                        coord.longitude >= innerMinLon && coord.longitude <= innerMaxLon
+                    // Check if any point of this boundary is within filter bounds
+                    let hasNearbyPoint = boundary.contains { coord in
+                        coord.latitude >= minLat && coord.latitude <= maxLat &&
+                        coord.longitude >= minLon && coord.longitude <= maxLon
                     }
 
-                    // Check if polygon is in outer radius (simplified)
-                    let isInOuterRadius = boundary.contains { coord in
-                        coord.latitude >= outerMinLat && coord.latitude <= outerMaxLat &&
-                        coord.longitude >= outerMinLon && coord.longitude <= outerMaxLon
-                    }
-
-                    if isInInnerRadius {
-                        // Full detail for nearby polygons
-                        let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
-                        polygon.zoneId = zone.id
-                        polygon.zoneCode = zone.permitArea
-                        polygons.append(polygon)
-                        simplifiedPoints += boundary.count
-                        zoneHasVisiblePolygon = true
-                    } else if isInOuterRadius {
-                        // Simplified for distant polygons
-                        let simplified = simplifyPolygon(boundary, tolerance: simplificationTolerance)
-                        if simplified.count >= 3 {
-                            let polygon = ZonePolygon(coordinates: simplified, count: simplified.count)
-                            polygon.zoneId = zone.id
-                            polygon.zoneCode = zone.permitArea
-                            polygons.append(polygon)
-                            simplifiedPoints += simplified.count
-                            zoneHasVisiblePolygon = true
-                        }
-                    } else {
-                        filteredOut += 1
+                    if hasNearbyPoint {
+                        // Add all points from this boundary to our collection
+                        nearbyPoints.append(contentsOf: boundary)
                     }
                 }
 
                 // Log zone info on first few
                 if index < 3 {
-                    logger.debug("Zone \(index): id=\(zone.id), permitArea=\(zone.permitArea ?? "nil"), boundaries=\(zoneBoundaryCount)")
+                    logger.debug("Zone \(index): id=\(zone.id), permitArea=\(zone.permitArea ?? "nil"), boundaries=\(zoneBoundaryCount), nearbyPoints=\(nearbyPoints.count)")
                 }
 
-                // Only add annotation if zone has visible polygons near user
-                if zoneHasVisiblePolygon {
-                    let nearbyCoords = zone.allBoundaryCoordinates.flatMap { $0 }.filter { coord in
-                        coord.latitude >= outerMinLat && coord.latitude <= outerMaxLat &&
-                        coord.longitude >= outerMinLon && coord.longitude <= outerMaxLon
-                    }
-                    if !nearbyCoords.isEmpty {
-                        let sumLat = nearbyCoords.reduce(0.0) { $0 + $1.latitude }
-                        let sumLon = nearbyCoords.reduce(0.0) { $0 + $1.longitude }
+                // Create convex hull from all nearby points for this zone
+                if nearbyPoints.count >= 3 {
+                    let hull = convexHull(nearbyPoints)
+                    if hull.count >= 3 {
+                        let polygon = ZonePolygon(coordinates: hull, count: hull.count)
+                        polygon.zoneId = zone.id
+                        polygon.zoneCode = zone.permitArea
+                        polygons.append(polygon)
+                        hullPoints += hull.count
+
+                        // Add annotation at centroid of hull
+                        let sumLat = hull.reduce(0.0) { $0 + $1.latitude }
+                        let sumLon = hull.reduce(0.0) { $0 + $1.longitude }
                         let centroid = CLLocationCoordinate2D(
-                            latitude: sumLat / Double(nearbyCoords.count),
-                            longitude: sumLon / Double(nearbyCoords.count)
+                            latitude: sumLat / Double(hull.count),
+                            longitude: sumLon / Double(hull.count)
                         )
                         let annotation = ZoneLabelAnnotation(
                             coordinate: centroid,
@@ -211,7 +235,7 @@ struct ZoneMapView: UIViewRepresentable {
             }
 
             let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
-            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) polygons (\(simplifiedPoints) points, filtered \(filteredOut)), \(totalBoundaries) total boundaries")
+            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) zone hulls (\(hullPoints) points from \(totalPoints) original), \(totalBoundaries) total boundaries")
 
             // Capture the coordinator and initial region before async block
             let coordinator = context.coordinator
