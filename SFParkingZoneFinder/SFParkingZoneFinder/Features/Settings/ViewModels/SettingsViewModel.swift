@@ -23,6 +23,7 @@ final class SettingsViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let permitService: PermitServiceProtocol
+    private let zoneDataSource: ZoneDataSourceProtocol
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - App Info
@@ -36,13 +37,18 @@ final class SettingsViewModel: ObservableObject {
     }
 
     var dataVersion: String {
-        "2025.11.1 (Mock Data)"
+        zoneDataSource.getDataVersion()
+    }
+
+    var dataSourceAttribution: String {
+        "Data from DataSF & SFMTA"
     }
 
     // MARK: - Initialization
 
-    init(permitService: PermitServiceProtocol) {
+    init(permitService: PermitServiceProtocol, zoneDataSource: ZoneDataSourceProtocol) {
         self.permitService = permitService
+        self.zoneDataSource = zoneDataSource
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
         let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
         self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
@@ -51,7 +57,10 @@ final class SettingsViewModel: ObservableObject {
     }
 
     convenience init() {
-        self.init(permitService: DependencyContainer.shared.permitService)
+        self.init(
+            permitService: DependencyContainer.shared.permitService,
+            zoneDataSource: DependencyContainer.shared.zoneDataSource
+        )
     }
 
     // MARK: - Private Methods

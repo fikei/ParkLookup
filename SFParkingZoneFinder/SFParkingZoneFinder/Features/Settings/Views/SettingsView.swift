@@ -76,6 +76,14 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
 
+                    HStack {
+                        Text("Data Source")
+                        Spacer()
+                        Text(viewModel.dataSourceAttribution)
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+
                     Button {
                         viewModel.openPrivacyPolicy()
                     } label: {
