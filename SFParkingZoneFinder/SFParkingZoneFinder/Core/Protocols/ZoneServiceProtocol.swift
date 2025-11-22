@@ -24,6 +24,9 @@ protocol ZoneServiceProtocol {
 
     /// Check if service is ready
     var isReady: Bool { get }
+
+    /// All loaded zones (synchronous, for map display)
+    var allLoadedZones: [ParkingZone] { get }
 }
 
 // MARK: - Parking Result

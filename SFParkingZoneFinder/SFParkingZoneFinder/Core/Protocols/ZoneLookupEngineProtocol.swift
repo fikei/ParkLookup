@@ -11,6 +11,9 @@ protocol ZoneLookupEngineProtocol {
     /// Check if the engine has loaded zone data
     var isReady: Bool { get }
 
+    /// All loaded zones (for map display)
+    var allZones: [ParkingZone] { get }
+
     /// Reload zone data
     func reloadZones() async throws
 }

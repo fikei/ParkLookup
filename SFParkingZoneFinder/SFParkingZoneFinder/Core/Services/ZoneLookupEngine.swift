@@ -11,6 +11,9 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
     private var zones: [ParkingZone] = []
     private(set) var isReady = false
 
+    /// All loaded zones (for map display)
+    var allZones: [ParkingZone] { zones }
+
     /// Threshold in meters for boundary detection
     private let boundaryThreshold: Double = 10.0
 

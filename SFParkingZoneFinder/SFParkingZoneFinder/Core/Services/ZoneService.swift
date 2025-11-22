@@ -17,6 +17,10 @@ final class ZoneService: ZoneServiceProtocol {
         lookupEngine.isReady
     }
 
+    var allLoadedZones: [ParkingZone] {
+        lookupEngine.allZones
+    }
+
     init(
         repository: ZoneRepository,
         lookupEngine: ZoneLookupEngineProtocol,

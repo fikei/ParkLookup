@@ -53,16 +53,16 @@ For a functional Alpha release with real data, complete these in order:
 | S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | **COMPLETE** | 8/10 |
-| S17: Map Zone Boundaries | Not Started | 0/19 |
+| S17: Map Zone Boundaries | In Progress | 10/19 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
 
-**Beta Progress:** 21/91 tasks complete (23%)
+**Beta Progress:** 31/91 tasks complete (34%)
 
 ---
 
-**Overall Progress:** 122/196 tasks complete (62%)
+**Overall Progress:** 132/196 tasks complete (67%)
 
 ---
 
@@ -649,28 +649,28 @@ For a functional Alpha release with real data, complete these in order:
 #### Zone Boundary Display
 - [ ] **17.1** Create ZoneOverlay model with polygon coordinates compatible with both MapKit and Google Maps
 
-- [ ] **17.2** Implement zone polygon overlays for each parking zone from mock data boundaries
+- [x] **17.2** Implement zone polygon overlays for each parking zone from mock data boundaries
 
-- [ ] **17.3** Add overlay renderer to style zone polygons with semi-transparent fill and border
+- [x] **17.3** Add overlay renderer to style zone polygons with semi-transparent fill and border
 
-- [ ] **17.4** Style current zone with accent color fill (20% opacity) and thick border
+- [x] **17.4** Style current zone with accent color fill (20% opacity) and thick border
 
-- [ ] **17.5** Style adjacent/nearby zones with lighter differentiated colors
+- [x] **17.5** Style adjacent/nearby zones with lighter differentiated colors
 
-- [ ] **17.6** Calculate zone polygon centroids and add zone label annotations (large, bold letters)
+- [x] **17.6** Calculate zone polygon centroids and add zone label annotations (large, bold letters)
 
-- [ ] **17.7** Implement tap gesture on zone overlays to show ZoneInfoCard popup
+- [x] **17.7** Implement tap gesture on zone overlays to show ZoneInfoCard popup
 
-- [ ] **17.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
+- [x] **17.8** Create ZoneInfoCard popup view with zone name, type, basic rules, and "View Details" button
 
 #### Zone Color System
-- [ ] **17.9** Define distinct color palette for all RPP zones (A-Z, AA-LL) with good visual differentiation
+- [x] **17.9** Define distinct color palette for all RPP zones (A-Z, AA-LL) with good visual differentiation
 
-- [ ] **17.10** Create ZoneColorProvider service that maps zone codes to SwiftUI/UIKit colors
+- [x] **17.10** Create ZoneColorProvider service that maps zone codes to SwiftUI/UIKit colors
 
 - [ ] **17.11** Store zone colors in data model or configuration (support both light/dark mode variants)
 
-- [ ] **17.12** Implement color-coded polygon overlays on expanded map view (full screen only)
+- [x] **17.12** Implement color-coded polygon overlays on expanded map view (full screen only)
 
 - [ ] **17.13** Add legend or key showing zone colors (optional, toggleable)
 

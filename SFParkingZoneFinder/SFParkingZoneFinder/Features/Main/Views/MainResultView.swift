@@ -170,7 +170,9 @@ struct MainResultView: View {
                 coordinate: viewModel.currentCoordinate,
                 zoneName: viewModel.zoneName,
                 validityStatus: viewModel.validityStatus,
-                applicablePermits: viewModel.applicablePermits
+                applicablePermits: viewModel.applicablePermits,
+                zones: viewModel.allLoadedZones,
+                currentZoneId: viewModel.currentZoneId
             )
         }
         .sheet(isPresented: $showingSettings) {

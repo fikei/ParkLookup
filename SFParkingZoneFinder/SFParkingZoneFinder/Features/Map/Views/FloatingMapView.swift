@@ -76,27 +76,26 @@ struct ExpandedMapView: View {
     let zoneName: String?
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
+    let zones: [ParkingZone]
+    let currentZoneId: String?
 
     @Environment(\.dismiss) private var dismiss
-
-    @State private var position: MapCameraPosition
+    @State private var selectedZone: ParkingZone?
 
     init(
         coordinate: CLLocationCoordinate2D?,
         zoneName: String?,
         validityStatus: PermitValidityStatus = .noPermitRequired,
-        applicablePermits: [ParkingPermit] = []
+        applicablePermits: [ParkingPermit] = [],
+        zones: [ParkingZone] = [],
+        currentZoneId: String? = nil
     ) {
         self.coordinate = coordinate
         self.zoneName = zoneName
         self.validityStatus = validityStatus
         self.applicablePermits = applicablePermits
-
-        let center = coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        _position = State(initialValue: .region(MKCoordinateRegion(
-            center: center,
-            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-        )))
+        self.zones = zones
+        self.currentZoneId = currentZoneId
     }
 
     /// Extract permit area code from zone name (e.g., "Area Q" -> "Q")
@@ -110,22 +109,41 @@ struct ExpandedMapView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                mapContent
-                    .ignoresSafeArea()
+                // Zone map with polygons
+                ZoneMapView(
+                    zones: zones,
+                    currentZoneId: currentZoneId,
+                    userCoordinate: coordinate,
+                    onZoneTapped: { zone in
+                        selectedZone = zone
+                    }
+                )
+                .ignoresSafeArea()
 
-                // Zone info overlay - Mini Zone Card matching main view style
+                // Zone info overlay
                 VStack {
                     Spacer()
-                    MiniZoneCard(
-                        zoneName: zoneName,
-                        zoneCode: currentPermitArea,
-                        validityStatus: validityStatus,
-                        applicablePermits: applicablePermits
-                    )
-                    .padding()
+
+                    // Show selected zone card if tapped, otherwise current zone
+                    if let selected = selectedZone {
+                        TappedZoneCard(zone: selected) {
+                            selectedZone = nil
+                        }
+                        .padding()
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else {
+                        MiniZoneCard(
+                            zoneName: zoneName,
+                            zoneCode: currentPermitArea,
+                            validityStatus: validityStatus,
+                            applicablePermits: applicablePermits
+                        )
+                        .padding()
+                    }
                 }
+                .animation(.easeInOut(duration: 0.2), value: selectedZone?.id)
             }
-            .navigationTitle("Map")
+            .navigationTitle("Zone Map")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -136,19 +154,75 @@ struct ExpandedMapView: View {
             }
         }
     }
+}
 
-    // MARK: - Subviews (broken out for type-checker)
+// MARK: - Tapped Zone Card
 
-    @ViewBuilder
-    private var mapContent: some View {
-        Map(position: $position) {
-            // User location
-            UserAnnotation()
+private struct TappedZoneCard: View {
+    let zone: ParkingZone
+    let onDismiss: () -> Void
+
+    private var zoneCode: String {
+        zone.permitArea ?? zone.displayName
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with dismiss button
+            HStack {
+                HStack(spacing: 12) {
+                    // Zone circle with color
+                    ZStack {
+                        Circle()
+                            .fill(ZoneColorProvider.swiftUIColor(for: zone.permitArea))
+                            .frame(width: 44, height: 44)
+
+                        Text(zoneCode)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .minimumScaleFactor(0.5)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(zone.displayName)
+                            .font(.headline)
+                        Text(zone.zoneType.displayName)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // Rules summary
+            if let ruleDesc = zone.primaryRuleDescription {
+                Text(ruleDesc)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            // Enforcement hours
+            if let hours = zone.enforcementHours {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                    Text(hours)
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+            }
         }
-        .mapControls {
-            MapCompass()
-            MapScaleView()
-        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 }
 

@@ -22,6 +22,7 @@ final class MainResultViewModel: ObservableObject {
     // Overlapping zones
     @Published private(set) var hasOverlappingZones = false
     @Published private(set) var overlappingZones: [ParkingZone] = []
+    @Published private(set) var currentZoneId: String?
 
     // Location
     @Published private(set) var currentAddress: String = "Locating..."
@@ -36,6 +37,11 @@ final class MainResultViewModel: ObservableObject {
     // Map preferences (read from UserDefaults)
     @Published var showFloatingMap: Bool
     @Published var mapPosition: MapPosition
+
+    /// All loaded zones for map display
+    var allLoadedZones: [ParkingZone] {
+        zoneService.allLoadedZones
+    }
 
     // MARK: - Dependencies
 
@@ -272,8 +278,10 @@ final class MainResultViewModel: ObservableObject {
         // Zone info
         if let zone = result.lookupResult.primaryZone {
             zoneName = zone.displayName
+            currentZoneId = zone.id
         } else {
             zoneName = "Unknown Zone"
+            currentZoneId = nil
         }
 
         // Validity & rules
