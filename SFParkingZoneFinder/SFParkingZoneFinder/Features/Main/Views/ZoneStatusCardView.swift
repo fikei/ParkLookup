@@ -51,10 +51,8 @@ struct ZoneStatusCardView: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            Spacer()
-
-            // Zone Letter in Circle
+        ZStack {
+            // Zone Letter in Circle (truly centered)
             ZStack {
                 Circle()
                     .fill(circleBackground)
@@ -70,15 +68,16 @@ struct ZoneStatusCardView: View {
             .accessibilityAddTraits(.isHeader)
             .accessibilityLabel("Zone \(zoneCode)")
 
-            Spacer()
-
-            // Validity Badge (at bottom)
-            ValidityBadgeView(
-                status: validityStatus,
-                permits: applicablePermits,
-                onColoredBackground: isValidStyle
-            )
-            .padding(.bottom, 24)
+            // Validity Badge (positioned at bottom)
+            VStack {
+                Spacer()
+                ValidityBadgeView(
+                    status: validityStatus,
+                    permits: applicablePermits,
+                    onColoredBackground: isValidStyle
+                )
+                .padding(.bottom, 24)
+            }
         }
         .frame(maxWidth: .infinity)
         .frame(height: cardHeight)
