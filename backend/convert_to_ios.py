@@ -64,28 +64,43 @@ PERMIT_AREA_NEIGHBORHOODS = {
 }
 
 
-def convert_polygon_to_boundary(polygon: List[List[List[float]]]) -> List[Dict[str, float]]:
+def convert_polygon_to_boundary(polygon: List[List[List[float]]]) -> List[List[Dict[str, float]]]:
     """
     Convert pipeline polygon format to iOS boundary format.
 
-    Pipeline: [[[lon, lat], [lon, lat], ...]]  (rings of [lon, lat] arrays)
-    iOS: [{latitude: lat, longitude: lon}, ...]  (flat array of coordinate objects)
+    Pipeline format (from parcels): list of polygon rings, one per parcel
+        [[lon, lat], [lon, lat], ...]  - parcel 1
+        [[lon, lat], [lon, lat], ...]  - parcel 2
+        ...
+
+    iOS format: list of boundaries (MultiPolygon support)
+        [[{latitude, longitude}, ...], [{latitude, longitude}, ...], ...]
     """
-    if not polygon or not polygon[0]:
+    if not polygon:
         return []
 
-    # Take first ring (exterior boundary)
-    exterior_ring = polygon[0]
+    boundaries = []
+    for ring in polygon:
+        if not ring or not isinstance(ring, list):
+            continue
 
-    boundary = []
-    for coord in exterior_ring:
-        if len(coord) >= 2:
-            boundary.append({
-                "latitude": coord[1],   # GeoJSON is [lon, lat]
-                "longitude": coord[0]
-            })
+        # Check if this is a ring of coordinates or a nested structure
+        if isinstance(ring[0], (int, float)):
+            # This is a single coordinate [lon, lat], not a ring
+            continue
 
-    return boundary
+        boundary = []
+        for coord in ring:
+            if isinstance(coord, list) and len(coord) >= 2:
+                boundary.append({
+                    "latitude": coord[1],   # GeoJSON is [lon, lat]
+                    "longitude": coord[0]
+                })
+
+        if boundary:
+            boundaries.append(boundary)
+
+    return boundaries
 
 
 def generate_zone_id(area_code: str, index: int = 1) -> str:
@@ -115,10 +130,10 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         return None
 
     polygon = zone_data.get("polygon", [])
-    boundary = convert_polygon_to_boundary(polygon)
+    boundaries = convert_polygon_to_boundary(polygon)
 
-    if not boundary:
-        print(f"  Warning: Zone {code} has no boundary, skipping")
+    if not boundaries:
+        print(f"  Warning: Zone {code} has no boundaries, skipping")
         return None
 
     return {
@@ -130,12 +145,13 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         "validPermitAreas": [code],
         "requiresPermit": True,
         "restrictiveness": 8,  # RPP zones are moderately restrictive
-        "boundary": boundary,
+        "boundaries": boundaries,  # MultiPolygon: list of polygon boundaries
         "rules": [generate_default_rule(code)],
         "metadata": {
             "dataSource": "datasf_sfmta",
             "lastUpdated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "accuracy": "high"
+            "accuracy": "high",
+            "polygonCount": len(boundaries)
         }
     }
 
