@@ -251,7 +251,7 @@ final class MainResultViewModel: ObservableObject {
 
 // MARK: - Map Position
 
-enum MapPosition: String, CaseIterable, Codable {
+enum MapPosition: String, CaseIterable, Codable, Hashable {
     case topLeft
     case topRight
     case bottomRight
@@ -261,6 +261,14 @@ enum MapPosition: String, CaseIterable, Codable {
         case .topLeft: return .topLeading
         case .topRight: return .topTrailing
         case .bottomRight: return .bottomTrailing
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .topLeft: return "Top Left"
+        case .topRight: return "Top Right"
+        case .bottomRight: return "Bottom Right"
         }
     }
 }
