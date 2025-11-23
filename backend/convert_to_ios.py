@@ -178,9 +178,13 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
 
     # Process multi-permit polygon data
     # multi_permit_polygons: Dict[polygon_index -> List[all_valid_areas]]
+    # Note: We do NOT aggregate multi-permit areas into zone's validPermitAreas.
+    # The zone's validPermitAreas should only contain its own permit area.
+    # Multi-permit info is per-boundary and stored in multiPermitBoundaries.
+    # The iOS app determines valid permit areas at lookup time based on
+    # overlapping zones at the user's location.
     multi_permit_polygons = zone_data.get("multiPermitPolygons", {})
     multi_permit_boundaries = []
-    all_valid_areas = {code}  # Start with zone's own permit area
 
     for idx_str, valid_areas in multi_permit_polygons.items():
         idx = int(idx_str)
@@ -189,8 +193,6 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
                 "boundaryIndex": idx,
                 "validPermitAreas": valid_areas
             })
-            # Collect all valid permit areas from multi-permit boundaries
-            all_valid_areas.update(valid_areas)
 
     # Get time limit from pipeline data (defaults to 120 min / 2 hours)
     time_limit = zone_data.get("nonPermitTimeLimit", 120)
@@ -201,7 +203,7 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         "displayName": f"Zone {code}",
         "zoneType": "rpp",
         "permitArea": code,
-        "validPermitAreas": sorted(list(all_valid_areas)),  # All valid permits for this zone
+        "validPermitAreas": [code],  # Zone's own permit area only; multi-permit handled per-boundary
         "requiresPermit": True,
         "restrictiveness": 8,  # RPP zones are moderately restrictive
         "boundaries": boundaries,  # MultiPolygon: list of polygon boundaries

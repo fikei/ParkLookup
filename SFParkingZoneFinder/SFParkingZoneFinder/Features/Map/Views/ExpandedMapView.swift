@@ -110,7 +110,6 @@ private struct TappedZoneCard: View {
     let onDismiss: () -> Void
 
     @State private var animationIndex: Int = 0
-    private let animationTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
 
     private var zoneCode: String {
         zone.permitArea ?? zone.displayName
@@ -134,6 +133,14 @@ private struct TappedZoneCard: View {
         return zoneCode
     }
 
+    /// Currently highlighted area for multi-permit zones
+    private var currentSelectedArea: String {
+        guard isMultiPermitZone, animationIndex < allPermitAreas.count else {
+            return zoneCode
+        }
+        return allPermitAreas[animationIndex]
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header with dismiss button
@@ -146,11 +153,6 @@ private struct TappedZoneCard: View {
                             animationIndex: animationIndex,
                             size: 44
                         )
-                        .onReceive(animationTimer) { _ in
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                animationIndex = (animationIndex + 1) % allPermitAreas.count
-                            }
-                        }
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 animationIndex = (animationIndex + 1) % allPermitAreas.count
@@ -171,13 +173,17 @@ private struct TappedZoneCard: View {
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(isMultiPermitZone ? "Multi-Permit Zone" : zone.displayName)
-                            .font(.headline)
                         if isMultiPermitZone {
-                            Text("Valid: \(allPermitAreas.joined(separator: ", "))")
+                            // Show currently selected area
+                            Text("Zone \(currentSelectedArea)")
+                                .font(.headline)
+                                .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                            Text("Tap to cycle • Valid: \(allPermitAreas.joined(separator: ", "))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         } else {
+                            Text(zone.displayName)
+                                .font(.headline)
                             Text(zone.zoneType.displayName)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
@@ -212,17 +218,6 @@ private struct TappedZoneCard: View {
                 .foregroundColor(.secondary)
             }
 
-            // Multi-permit hint
-            if isMultiPermitZone {
-                HStack(spacing: 6) {
-                    Image(systemName: "info.circle")
-                        .font(.caption)
-                    Text("Tap circles to cycle through permits")
-                        .font(.caption)
-                        .italic()
-                }
-                .foregroundColor(.secondary.opacity(0.8))
-            }
         }
         .padding()
         .background(Color(.systemBackground))
@@ -297,7 +292,6 @@ private struct MiniZoneCard: View {
     let allValidPermitAreas: [String]
 
     @State private var animationIndex: Int = 0
-    private let animationTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
 
     /// Whether this is a multi-permit location
     private var isMultiPermitLocation: Bool {
@@ -359,11 +353,6 @@ private struct MiniZoneCard: View {
                 animationIndex: animationIndex,
                 size: 56
             )
-            .onReceive(animationTimer) { _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    animationIndex = (animationIndex + 1) % orderedPermitAreas.count
-                }
-            }
             .onTapGesture {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     animationIndex = (animationIndex + 1) % orderedPermitAreas.count
@@ -385,13 +374,24 @@ private struct MiniZoneCard: View {
         }
     }
 
+    /// Currently highlighted area for multi-permit locations
+    private var currentSelectedArea: String {
+        guard isMultiPermitLocation, animationIndex < orderedPermitAreas.count else {
+            return zoneCode ?? "?"
+        }
+        return orderedPermitAreas[animationIndex]
+    }
+
     private var zoneInfo: some View {
         VStack(alignment: .leading, spacing: 4) {
             if isMultiPermitLocation {
-                Text("Multi-Permit Zone")
+                // Show currently selected area name
+                Text("Zone \(currentSelectedArea)")
                     .font(.headline)
                     .foregroundColor(isValidStyle ? .white : .primary)
-                Text("Valid: \(orderedPermitAreas.joined(separator: ", "))")
+                    .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                // Show all valid areas and hint to tap
+                Text("Tap to cycle • Valid: \(orderedPermitAreas.joined(separator: ", "))")
                     .font(.caption)
                     .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
             } else {

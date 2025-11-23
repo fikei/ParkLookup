@@ -10,7 +10,6 @@ struct ZoneStatusCardView: View {
     let meteredSubtitle: String?  // For metered zones: "$2/hr • 2hr max"
 
     @State private var animationIndex: Int = 0
-    private let animationTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
 
     /// Responsive card height based on screen size
     /// Calculated to show: zone card + map card (120pt) + rules header peek (~20pt)
@@ -119,11 +118,6 @@ struct ZoneStatusCardView: View {
                         animationIndex: animationIndex,
                         size: 160
                     )
-                    .onReceive(animationTimer) { _ in
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            animationIndex = (animationIndex + 1) % orderedPermitAreas.count
-                        }
-                    }
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             animationIndex = (animationIndex + 1) % orderedPermitAreas.count

@@ -129,11 +129,14 @@ final class RuleInterpreter: RuleInterpreterProtocol {
             }
         }
 
-        // Time limits
+        // Time limits - permit holders have no limit in their zone
         if let limit = zone.nonPermitTimeLimit {
             let hours = limit / 60
             let limitText = hours > 0 ? "\(hours)-hour" : "\(limit)-minute"
-            lines.append("\(limitText) limit for non-permit holders")
+            lines.append("\(limitText) limit without permit")
+            if let area = zone.permitArea {
+                lines.append("No limit with Zone \(area) permit")
+            }
         }
 
         // Enforcement hours
