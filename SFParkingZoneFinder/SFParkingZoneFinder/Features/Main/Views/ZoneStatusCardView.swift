@@ -119,7 +119,7 @@ struct ZoneStatusCardView: View {
                 .rotation3DEffect(
                     .degrees(isFlipped ? 180 : 0),
                     axis: (x: 0, y: 1, z: 0),
-                    perspective: 0.5
+                    perspective: 0.8
                 )
 
             // Back of card (rules)
@@ -128,12 +128,12 @@ struct ZoneStatusCardView: View {
                 .rotation3DEffect(
                     .degrees(isFlipped ? 0 : -180),
                     axis: (x: 0, y: 1, z: 0),
-                    perspective: 0.5
+                    perspective: 0.8
                 )
         }
         .frame(maxWidth: .infinity)
         .frame(height: cardHeight)
-        .animation(.easeInOut(duration: 0.5), value: isFlipped)
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isFlipped)
     }
 
     // MARK: - Front Card

@@ -33,7 +33,6 @@ enum HapticFeedback {
 /// Primary text-first view showing parking zone status and rules
 struct MainResultView: View {
     @StateObject private var viewModel = MainResultViewModel()
-    @State private var showingFullRules = false
     @State private var showingOverlappingZones = false
     @State private var showingExpandedMap = false
     @State private var showingSettings = false
@@ -76,18 +75,6 @@ struct MainResultView: View {
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
-
-                    // Rules Summary
-                    RulesSummaryView(
-                        summaryLines: viewModel.ruleSummaryLines,
-                        warnings: viewModel.warnings,
-                        onViewFullRules: {
-                            HapticFeedback.light()
-                            showingFullRules = true
-                        }
-                    )
-                    .opacity(contentAppeared ? 1 : 0)
-                    .offset(y: contentAppeared ? 0 : 20)
 
                     // Overlapping zones indicator
                     if viewModel.hasOverlappingZones {
@@ -160,12 +147,6 @@ struct MainResultView: View {
             if !viewModel.isLoading && viewModel.error == nil {
                 HapticFeedback.success()
             }
-        }
-        .sheet(isPresented: $showingFullRules) {
-            FullRulesSheet(
-                zoneName: viewModel.zoneName,
-                ruleSummaryLines: viewModel.ruleSummaryLines
-            )
         }
         .sheet(isPresented: $showingOverlappingZones) {
             OverlappingZonesSheet(zones: viewModel.overlappingZones)
@@ -379,47 +360,6 @@ struct ErrorView: View {
             return "Data Error"
         case .unknown:
             return "Something Went Wrong"
-        }
-    }
-}
-
-// MARK: - Full Rules Sheet
-
-struct FullRulesSheet: View {
-    let zoneName: String
-    let ruleSummaryLines: [String]
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(zoneName)
-                        .font(.title)
-                        .fontWeight(.bold)
-
-                    ForEach(Array(ruleSummaryLines.enumerated()), id: \.offset) { index, line in
-                        HStack(alignment: .top, spacing: 12) {
-                            Text("\(index + 1).")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
-                                .frame(width: 24, alignment: .trailing)
-                            Text(line)
-                                .font(.body)
-                        }
-                    }
-
-                    Spacer()
-                }
-                .padding()
-            }
-            .navigationTitle("Full Rules")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
         }
     }
 }
