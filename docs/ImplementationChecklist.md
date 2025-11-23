@@ -57,13 +57,13 @@ For a functional Alpha release with real data, complete these in order:
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
-| S21: Zone Card UI Refinements | In Progress | 11/18 |
+| S21: Zone Card UI Refinements | In Progress | 15/18 |
 
-**Beta Progress:** 47/116 tasks complete (41%)
+**Beta Progress:** 51/116 tasks complete (44%)
 
 ---
 
-**Overall Progress:** 148/221 tasks complete (67%)
+**Overall Progress:** 152/221 tasks complete (69%)
 
 ---
 
@@ -852,14 +852,14 @@ For a functional Alpha release with real data, complete these in order:
 
 - [x] **21.11** Apply white text on zone-colored background for all states
 
-#### Future Card Content (Design Phase)
-- [ ] **21.12** Design content areas for "In Permit Zone" state (expanded + minimized)
+#### Card Content Implementation
+- [x] **21.12** Implement content areas for "In Permit Zone" state (expanded + minimized)
 
-- [ ] **21.13** Design content areas for "Multi-Permit Zone" state (expanded + minimized)
+- [x] **21.13** Implement content areas for "Multi-Permit Zone" state (expanded + minimized)
 
-- [ ] **21.14** Design content areas for "Out of Permit Zone" state (expanded + minimized)
+- [x] **21.14** Implement content areas for "Out of Permit Zone" state (expanded + minimized)
 
-- [ ] **21.15** Design content areas for "Paid Parking" state (expanded + minimized)
+- [x] **21.15** Implement content areas for "Paid Parking" state (expanded + minimized)
 
 - [ ] **21.16** Add time-based information (time until restrictions, street cleaning)
 
