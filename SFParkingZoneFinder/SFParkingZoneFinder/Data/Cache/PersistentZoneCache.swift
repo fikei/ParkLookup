@@ -15,8 +15,8 @@ final class PersistentZoneCache: ZoneCacheProtocol {
     private let lock = NSLock()
 
     /// Current data version - change this when zone data format changes
-    /// Bumped to 2.2: fixed validPermitAreas to include all permits from multi-permit boundaries
-    private let cacheVersion = "2.2"
+    /// Bumped to 2.3: added actual non-permit time limits from blockface data
+    private let cacheVersion = "2.3"
 
     private(set) var lastUpdated: Date?
 

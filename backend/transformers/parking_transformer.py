@@ -1070,14 +1070,26 @@ class ParkingDataTransformer:
             # Convert multi_permit_polygons dict keys to strings for JSON
             mp_polygons = {str(k): v for k, v in zone.multi_permit_polygons.items()}
             total_multi_permit += len(mp_polygons)
+
+            # Calculate most common time limit for non-permit holders in this zone
+            zone_regs = regulations_by_area.get(zone.area_code, [])
+            time_limits = [r.get("timeLimit") for r in zone_regs if r.get("timeLimit")]
+            if time_limits:
+                # Use most common time limit (mode)
+                from collections import Counter
+                most_common_limit = Counter(time_limits).most_common(1)[0][0]
+            else:
+                most_common_limit = 120  # Default 2 hours
+
             zones_data.append({
                 "code": zone.area_code,
                 "name": zone.name,
                 "polygon": zone.polygon,
                 "neighborhoods": zone.neighborhoods,
-                "blockCount": len(regulations_by_area.get(zone.area_code, [])),
+                "blockCount": len(zone_regs),
                 "zoneType": "rpp",  # Residential Permit Parking
                 "multiPermitPolygons": mp_polygons,  # Index -> list of valid permit areas
+                "nonPermitTimeLimit": most_common_limit,  # Minutes, limit for non-permit holders
             })
         logger.info(f"Total multi-permit polygons across all zones: {total_multi_permit}")
 

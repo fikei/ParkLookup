@@ -109,8 +109,20 @@ def generate_zone_id(area_code: str, index: int = 1) -> str:
     return f"sf_rpp_{area_code.lower()}_{index:03d}"
 
 
-def generate_default_rule(area_code: str) -> Dict[str, Any]:
-    """Generate a default RPP rule for a zone"""
+def generate_default_rule(area_code: str, time_limit: int = 120) -> Dict[str, Any]:
+    """Generate a default RPP rule for a zone
+
+    Args:
+        area_code: The permit area code
+        time_limit: Non-permit holder time limit in minutes (from blockface data)
+    """
+    # Format time limit for description
+    if time_limit >= 60:
+        hours = time_limit // 60
+        time_str = f"{hours}-hour" if hours == 1 else f"{hours}-hour"
+    else:
+        time_str = f"{time_limit}-minute"
+
     return {
         "id": f"{area_code.lower()}_rule_001",
         "ruleType": "permit_required",
@@ -118,9 +130,9 @@ def generate_default_rule(area_code: str) -> Dict[str, Any]:
         "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
         "enforcementStartTime": {"hour": 8, "minute": 0},
         "enforcementEndTime": {"hour": 18, "minute": 0},
-        "timeLimit": 120,
+        "timeLimit": time_limit,
         "meterRate": None,
-        "specialConditions": "2-hour limit for non-permit holders"
+        "specialConditions": f"{time_str} limit for non-permit holders"
     }
 
 
@@ -180,6 +192,9 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
             # Collect all valid permit areas from multi-permit boundaries
             all_valid_areas.update(valid_areas)
 
+    # Get time limit from pipeline data (defaults to 120 min / 2 hours)
+    time_limit = zone_data.get("nonPermitTimeLimit", 120)
+
     return {
         "id": generate_zone_id(code, index),
         "cityCode": "sf",
@@ -191,13 +206,14 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         "restrictiveness": 8,  # RPP zones are moderately restrictive
         "boundaries": boundaries,  # MultiPolygon: list of polygon boundaries
         "multiPermitBoundaries": multi_permit_boundaries,  # Boundaries that accept multiple permits
-        "rules": [generate_default_rule(code)],
+        "rules": [generate_default_rule(code, time_limit)],
         "metadata": {
             "dataSource": "datasf_sfmta",
             "lastUpdated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "accuracy": "high",
             "polygonCount": len(boundaries),
-            "multiPermitCount": len(multi_permit_boundaries)
+            "multiPermitCount": len(multi_permit_boundaries),
+            "nonPermitTimeLimit": time_limit  # Minutes
         }
     }
 
