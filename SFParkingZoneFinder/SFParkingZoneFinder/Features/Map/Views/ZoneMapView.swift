@@ -127,6 +127,13 @@ struct ZoneMapView: UIViewRepresentable {
     /// A value of 0.25 means the user appears at 75% from top (25% from bottom)
     var verticalBias: Double = 0.0
 
+    /// Whether to show zone polygon overlays (false = clean map with just user location)
+    var showOverlays: Bool = true
+
+    /// Zoom multiplier (1.0 = default, smaller = more zoomed in, larger = more zoomed out)
+    /// 0.8 = 20% more zoomed in
+    var zoomMultiplier: Double = 1.0
+
     /// When true, uses convex hull (smoothed envelope). When false, uses actual block boundaries.
     /// Set to false to see the preprocessed polygon data as-is.
     static var useConvexHull: Bool = false
@@ -142,9 +149,13 @@ struct ZoneMapView: UIViewRepresentable {
         mapView.showsScale = true
 
         // Set initial region centered on user (zoomed to ~10-15 blocks)
-        // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks
+        // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
         let userCenter = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        let desiredSpan = MKCoordinateSpan(latitudeDelta: 0.006, longitudeDelta: 0.006)
+        let baseSpan = 0.006
+        let desiredSpan = MKCoordinateSpan(
+            latitudeDelta: baseSpan * zoomMultiplier,
+            longitudeDelta: baseSpan * zoomMultiplier
+        )
 
         // Apply vertical bias: offset center northward to push user location down on screen
         // verticalBias of 0.25 means user appears at 75% from top (halfway between center and bottom)
@@ -303,18 +314,20 @@ struct ZoneMapView: UIViewRepresentable {
             let rppPolygons = polygons.filter { $0.zoneType != .metered }
             logger.info("Zone layering: \(meteredPolygons.count) metered (bottom), \(rppPolygons.count) RPP (top)")
 
-            // Capture the coordinator and initial region before async block
+            // Capture the coordinator, initial region, and showOverlays before async block
             let coordinator = context.coordinator
             let initialCenter = coordinator.initialCenter
             let initialSpan = coordinator.initialSpan
+            let shouldShowOverlays = self.showOverlays
 
             // Add to map on main thread in batches to keep UI responsive
             DispatchQueue.main.async {
                 let mainStartTime = CFAbsoluteTimeGetCurrent()
-                logger.info("Main thread overlay add START - \(polygons.count) polygons, \(annotations.count) annotations")
+                logger.info("Main thread overlay add START - \(polygons.count) polygons, \(annotations.count) annotations, showOverlays: \(shouldShowOverlays)")
 
                 // Mark setup done immediately so map is interactive
                 coordinator.initialSetupDone = true
+                coordinator.showOverlays = shouldShowOverlays
 
                 // Re-apply the initial zoom first
                 if let center = initialCenter, let span = initialSpan {
@@ -325,6 +338,15 @@ struct ZoneMapView: UIViewRepresentable {
 
                 // Add annotations immediately (they're lightweight)
                 mapView.addAnnotations(annotations)
+
+                // Hide annotations if overlays should be hidden
+                if !shouldShowOverlays {
+                    for annotation in annotations {
+                        if let view = mapView.view(for: annotation) {
+                            view.alpha = 0
+                        }
+                    }
+                }
 
                 // Add overlays in batches - metered zones first (bottom layer), then RPP zones (top layer)
                 let batchSize = 500
@@ -339,6 +361,15 @@ struct ZoneMapView: UIViewRepresentable {
 
                     mapView.addOverlays(batch, level: .aboveRoads)
 
+                    // Hide overlays if showOverlays is false
+                    if !shouldShowOverlays {
+                        for overlay in batch {
+                            if let renderer = mapView.renderer(for: overlay) {
+                                renderer.alpha = 0
+                            }
+                        }
+                    }
+
                     if endIndex < totalPolygons {
                         // Schedule next batch with tiny delay to let UI breathe
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
@@ -347,12 +378,16 @@ struct ZoneMapView: UIViewRepresentable {
                     } else {
                         let totalElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
                         logger.info("All \(totalPolygons) overlays added in \(String(format: "%.1f", totalElapsed))ms")
+                        // Mark overlays as visible/hidden based on initial state
+                        coordinator.overlaysCurrentlyVisible = shouldShowOverlays
                     }
                 }
 
                 // Start adding batches
                 if !orderedPolygons.isEmpty {
                     addBatch(startIndex: 0)
+                } else {
+                    coordinator.overlaysCurrentlyVisible = shouldShowOverlays
                 }
 
                 let setupElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
@@ -372,6 +407,52 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.currentZoneId = currentZoneId
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
+        context.coordinator.showOverlays = showOverlays
+
+        // Handle overlay visibility changes
+        let overlaysVisible = context.coordinator.overlaysCurrentlyVisible
+        if showOverlays != overlaysVisible {
+            if showOverlays {
+                // Show overlays with fade animation
+                for overlay in mapView.overlays {
+                    if let renderer = mapView.renderer(for: overlay) {
+                        renderer.alpha = 0
+                    }
+                }
+                for annotation in mapView.annotations where annotation is ZoneLabelAnnotation {
+                    if let view = mapView.view(for: annotation) {
+                        view.alpha = 0
+                    }
+                }
+                UIView.animate(withDuration: 0.3) {
+                    for overlay in mapView.overlays {
+                        if let renderer = mapView.renderer(for: overlay) {
+                            renderer.alpha = 1
+                        }
+                    }
+                    for annotation in mapView.annotations where annotation is ZoneLabelAnnotation {
+                        if let view = mapView.view(for: annotation) {
+                            view.alpha = 1
+                        }
+                    }
+                }
+            } else {
+                // Hide overlays
+                UIView.animate(withDuration: 0.3) {
+                    for overlay in mapView.overlays {
+                        if let renderer = mapView.renderer(for: overlay) {
+                            renderer.alpha = 0
+                        }
+                    }
+                    for annotation in mapView.annotations where annotation is ZoneLabelAnnotation {
+                        if let view = mapView.view(for: annotation) {
+                            view.alpha = 0
+                        }
+                    }
+                }
+            }
+            context.coordinator.overlaysCurrentlyVisible = showOverlays
+        }
 
         // Skip re-centering during initial setup (overlays are loading async)
         guard context.coordinator.initialSetupDone else {
@@ -379,24 +460,31 @@ struct ZoneMapView: UIViewRepresentable {
             return
         }
 
-        // Only re-center on user if location changed significantly
-        // Don't re-add overlays on every update (expensive!)
+        // Calculate current desired region
         if let coord = userCoordinate {
+            let baseSpan = 0.006
+            let span = MKCoordinateSpan(
+                latitudeDelta: baseSpan * zoomMultiplier,
+                longitudeDelta: baseSpan * zoomMultiplier
+            )
+            let latOffset = span.latitudeDelta * verticalBias
+            let biasedCenter = CLLocationCoordinate2D(
+                latitude: coord.latitude + latOffset,
+                longitude: coord.longitude
+            )
+
+            // Check if we need to update region (zoom/bias changed or moved significantly)
+            let currentSpan = mapView.region.span
             let currentCenter = mapView.centerCoordinate
+            let spanChanged = abs(currentSpan.latitudeDelta - span.latitudeDelta) > 0.0001
             let distance = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
-                .distance(from: CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude))
-            if distance > 500 { // Only re-center if moved > 500m
-                logger.debug("Re-centering map (moved \(String(format: "%.0f", distance))m)")
-                // Use stored initial span to maintain zoom level
-                let span = context.coordinator.initialSpan ?? mapView.region.span
-                // Apply vertical bias when re-centering
-                let latOffset = span.latitudeDelta * verticalBias
-                let biasedCenter = CLLocationCoordinate2D(
-                    latitude: coord.latitude + latOffset,
-                    longitude: coord.longitude
-                )
+                .distance(from: CLLocation(latitude: currentCenter.latitude - (currentSpan.latitudeDelta * context.coordinator.lastVerticalBias), longitude: currentCenter.longitude))
+
+            if spanChanged || distance > 500 {
+                logger.debug("Updating map region - spanChanged: \(spanChanged), distance: \(String(format: "%.0f", distance))m")
                 let region = MKCoordinateRegion(center: biasedCenter, span: span)
                 mapView.setRegion(region, animated: true)
+                context.coordinator.lastVerticalBias = verticalBias
             }
         }
     }
@@ -455,6 +543,11 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Flag to indicate initial overlay loading is complete
         var initialSetupDone = false
+
+        // Track overlay visibility state
+        var showOverlays: Bool = true
+        var overlaysCurrentlyVisible: Bool = false  // Start hidden, will be set true after initial load if showOverlays is true
+        var lastVerticalBias: Double = 0.0
 
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone) -> Void)?) {
             self.currentZoneId = currentZoneId

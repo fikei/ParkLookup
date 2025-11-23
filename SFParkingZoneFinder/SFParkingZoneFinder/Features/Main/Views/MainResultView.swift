@@ -65,7 +65,11 @@ struct MainResultView: View {
                     },
                     // When collapsed, shift user location to 50% between card bottom and screen bottom
                     // A bias of ~0.25 places the user indicator in the visible map area below the card
-                    verticalBias: isMapExpanded ? 0.0 : 0.25
+                    verticalBias: isMapExpanded ? 0.0 : 0.25,
+                    // Hide zone overlays on home screen, show when expanded
+                    showOverlays: isMapExpanded,
+                    // Zoom in 20% when expanded (0.8 = smaller span = more zoomed in)
+                    zoomMultiplier: isMapExpanded ? 0.8 : 1.0
                 )
                 .ignoresSafeArea()
             } else {
