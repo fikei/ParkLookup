@@ -108,25 +108,9 @@ final class RuleInterpreter: RuleInterpreterProtocol {
         // Zone type
         lines.append(zone.displayName)
 
-        // Permit requirement - check for multi-permit boundaries
+        // Permit requirement
         if zone.requiresPermit, let area = zone.permitArea {
-            // Check if zone has any multi-permit boundaries (blocks where multiple permit types are valid)
-            if !zone.multiPermitBoundaries.isEmpty {
-                // Get unique additional permit areas from multi-permit boundaries
-                let additionalAreas = Set(zone.multiPermitBoundaries.flatMap { $0.validPermitAreas })
-                    .filter { $0 != area }
-                    .sorted()
-
-                if !additionalAreas.isEmpty {
-                    let allAreas = [area] + additionalAreas
-                    // "Valid permits" means any of these permits will work on this block
-                    lines.append("Valid permits: \(allAreas.joined(separator: " or "))")
-                } else {
-                    lines.append("Residential permit Zone \(area) only")
-                }
-            } else {
-                lines.append("Residential permit Zone \(area) only")
-            }
+            lines.append("Residential permit Zone \(area) required")
         }
 
         // Time limits - permit holders have no limit in their zone

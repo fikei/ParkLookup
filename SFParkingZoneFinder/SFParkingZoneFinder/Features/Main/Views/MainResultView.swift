@@ -57,7 +57,8 @@ struct MainResultView: View {
                         validityStatus: viewModel.validityStatus,
                         applicablePermits: viewModel.applicablePermits,
                         allValidPermitAreas: viewModel.allValidPermitAreas,
-                        meteredSubtitle: viewModel.meteredSubtitle
+                        meteredSubtitle: viewModel.meteredSubtitle,
+                        timeLimitMinutes: viewModel.timeLimitMinutes
                     )
                     .opacity(contentAppeared ? 1 : 0)
                     .offset(y: contentAppeared ? 0 : 20)

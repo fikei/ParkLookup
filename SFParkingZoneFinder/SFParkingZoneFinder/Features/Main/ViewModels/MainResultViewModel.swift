@@ -15,6 +15,7 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var zoneName: String = "—"
     @Published private(set) var zoneType: ZoneType = .residentialPermit
     @Published private(set) var meteredSubtitle: String? = nil  // "$2/hr • 2hr max" for metered zones
+    @Published private(set) var timeLimitMinutes: Int? = nil  // Time limit in minutes for non-permit holders
     @Published private(set) var validityStatus: PermitValidityStatus = .noPermitRequired
     @Published private(set) var ruleSummary: String = ""
     @Published private(set) var ruleSummaryLines: [String] = []
@@ -287,11 +288,13 @@ final class MainResultViewModel: ObservableObject {
             zoneName = zone.displayName
             zoneType = zone.zoneType
             meteredSubtitle = zone.meteredSubtitle  // "$2/hr • 2hr max" for metered zones
+            timeLimitMinutes = zone.nonPermitTimeLimit  // Time limit for non-permit holders
             currentZoneId = zone.id
         } else {
             zoneName = "Unknown Zone"
             zoneType = .residentialPermit
             meteredSubtitle = nil
+            timeLimitMinutes = nil
             currentZoneId = nil
         }
 

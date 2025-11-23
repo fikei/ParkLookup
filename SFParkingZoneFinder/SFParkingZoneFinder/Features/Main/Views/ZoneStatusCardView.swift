@@ -8,6 +8,7 @@ struct ZoneStatusCardView: View {
     let applicablePermits: [ParkingPermit]
     let allValidPermitAreas: [String]  // All valid permits from overlapping zones
     let meteredSubtitle: String?  // For metered zones: "$2/hr • 2hr max"
+    let timeLimitMinutes: Int?  // Time limit in minutes for non-permit holders
 
     @State private var animationIndex: Int = 0
 
@@ -157,7 +158,8 @@ struct ZoneStatusCardView: View {
                 ValidityBadgeView(
                     status: validityStatus,
                     permits: applicablePermits,
-                    onColoredBackground: isValidStyle
+                    onColoredBackground: isValidStyle,
+                    timeLimitMinutes: timeLimitMinutes
                 )
                 .padding(.bottom, 24)
             }
@@ -239,7 +241,8 @@ private struct LargeMultiPermitCircleView: View {
                 ParkingPermit(type: .residential, area: "Q")
             ],
             allValidPermitAreas: ["Q"],
-            meteredSubtitle: nil
+            meteredSubtitle: nil,
+            timeLimitMinutes: 120
         )
         .padding()
     }
@@ -254,7 +257,8 @@ private struct LargeMultiPermitCircleView: View {
             validityStatus: .invalid,
             applicablePermits: [],
             allValidPermitAreas: ["R"],
-            meteredSubtitle: nil
+            meteredSubtitle: nil,
+            timeLimitMinutes: 120
         )
         .padding()
     }
@@ -271,7 +275,8 @@ private struct LargeMultiPermitCircleView: View {
                 ParkingPermit(type: .residential, area: "A")
             ],
             allValidPermitAreas: ["A", "B"],
-            meteredSubtitle: nil
+            meteredSubtitle: nil,
+            timeLimitMinutes: 120
         )
         .padding()
     }
@@ -286,7 +291,8 @@ private struct LargeMultiPermitCircleView: View {
             validityStatus: .conditional,
             applicablePermits: [],
             allValidPermitAreas: ["U"],
-            meteredSubtitle: nil
+            meteredSubtitle: nil,
+            timeLimitMinutes: 120
         )
         .padding()
     }
@@ -301,7 +307,8 @@ private struct LargeMultiPermitCircleView: View {
             validityStatus: .noPermitRequired,
             applicablePermits: [],
             allValidPermitAreas: [],
-            meteredSubtitle: "$3/hr • 2hr max"
+            meteredSubtitle: "$3/hr • 2hr max",
+            timeLimitMinutes: 120
         )
         .padding()
     }

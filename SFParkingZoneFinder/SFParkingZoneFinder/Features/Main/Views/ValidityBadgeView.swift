@@ -7,15 +7,35 @@ struct ValidityBadgeView: View {
     let permits: [ParkingPermit]
     /// When true, uses white styling for display on colored backgrounds
     var onColoredBackground: Bool = false
+    /// Time limit in minutes for non-permit holders (for "Park until" display)
+    var timeLimitMinutes: Int? = nil
+
+    /// Calculate "Park until" time based on current time + time limit
+    private var parkUntilText: String? {
+        guard status == .invalid, let limit = timeLimitMinutes else { return nil }
+
+        let parkUntil = Date().addingTimeInterval(TimeInterval(limit * 60))
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return "PARK UNTIL \(formatter.string(from: parkUntil))"
+    }
+
+    /// Display text - shows "Park until" for invalid status when time limit available
+    private var displayText: String {
+        if let parkUntil = parkUntilText {
+            return parkUntil
+        }
+        return status.displayText
+    }
 
     var body: some View {
         HStack(spacing: 12) {
             // Shape indicator (accessibility: not color-only)
-            Image(systemName: status.iconName)
+            Image(systemName: status == .invalid && parkUntilText != nil ? "clock" : status.iconName)
                 .font(.system(size: 20, weight: .semibold))
 
             // Text
-            Text(status.displayText)
+            Text(displayText)
                 .font(.subheadline)
                 .fontWeight(.semibold)
         }
