@@ -15,8 +15,8 @@ final class PersistentZoneCache: ZoneCacheProtocol {
     private let lock = NSLock()
 
     /// Current data version - change this when zone data format changes
-    /// Bumped to 1.9: fixed metered zones - removed flood fill, smaller grid cells (~55m)
-    private let cacheVersion = "1.9"
+    /// Bumped to 2.0: fixed TopologyException in polygon cleanup, robust geometry handling
+    private let cacheVersion = "2.0"
 
     private(set) var lastUpdated: Date?
 

@@ -380,6 +380,30 @@ class ParkingDataTransformer:
 
         logger.info("Splitting different-zone overlaps...")
 
+        def fix_polygon(poly: Polygon) -> Optional[Polygon]:
+            """Fix invalid polygon using buffer(0) and make_valid"""
+            if poly is None or poly.is_empty:
+                return None
+            try:
+                if not poly.is_valid:
+                    # Try buffer(0) first - fixes most self-intersection issues
+                    fixed = poly.buffer(0)
+                    if fixed.is_empty:
+                        fixed = make_valid(poly)
+                    if isinstance(fixed, Polygon) and not fixed.is_empty:
+                        return fixed
+                    elif isinstance(fixed, MultiPolygon) and len(fixed.geoms) > 0:
+                        return max(fixed.geoms, key=lambda p: p.area)
+                    elif hasattr(fixed, 'geoms'):
+                        # GeometryCollection - extract largest polygon
+                        polys = [g for g in fixed.geoms if isinstance(g, Polygon) and not g.is_empty]
+                        if polys:
+                            return max(polys, key=lambda p: p.area)
+                    return None
+                return poly
+            except Exception:
+                return None
+
         # Build spatial index of all polygons with their zone info
         all_polys: List[Tuple[int, int, Polygon, str]] = []  # (zone_idx, poly_idx, shapely_poly, area_code)
 
@@ -389,16 +413,18 @@ class ParkingDataTransformer:
                     continue
                 try:
                     poly = Polygon(coords)
-                    if not poly.is_valid:
-                        poly = make_valid(poly)
-                    if isinstance(poly, Polygon) and not poly.is_empty:
+                    poly = fix_polygon(poly)
+                    if poly is not None:
                         all_polys.append((zone_idx, poly_idx, poly, zone.area_code))
                 except Exception:
                     continue
 
+        logger.info(f"Built index with {len(all_polys)} valid polygons")
+
         # Track modified polygons
         modified: Dict[Tuple[int, int], Polygon] = {}
         overlap_count = 0
+        error_count = 0
 
         # Check each pair of polygons from different zones
         for i, (z_idx1, p_idx1, poly1, area1) in enumerate(all_polys):
@@ -407,22 +433,28 @@ class ParkingDataTransformer:
                 if area1 == area2:
                     continue
 
-                # Get current versions (may be modified)
-                current1 = modified.get((z_idx1, p_idx1), poly1)
-                current2 = modified.get((z_idx2, p_idx2), poly2)
-
-                # Check for overlap
-                if not current1.intersects(current2):
-                    continue
-
-                intersection = current1.intersection(current2)
-                if intersection.is_empty or intersection.area < 1e-10:
-                    continue
-
-                overlap_count += 1
-
-                # Split the overlap: give half to each zone
                 try:
+                    # Get current versions (may be modified)
+                    current1 = modified.get((z_idx1, p_idx1), poly1)
+                    current2 = modified.get((z_idx2, p_idx2), poly2)
+
+                    # Fix geometries if needed
+                    current1 = fix_polygon(current1)
+                    current2 = fix_polygon(current2)
+                    if current1 is None or current2 is None:
+                        continue
+
+                    # Check for overlap
+                    if not current1.intersects(current2):
+                        continue
+
+                    intersection = current1.intersection(current2)
+                    if intersection.is_empty or intersection.area < 1e-10:
+                        continue
+
+                    overlap_count += 1
+
+                    # Split the overlap: give half to each zone
                     # Get centroid of overlap
                     centroid = intersection.centroid
 
@@ -456,25 +488,23 @@ class ParkingDataTransformer:
                     new_poly1 = current1.difference(intersection.intersection(zone2_gets))
                     new_poly2 = current2.difference(intersection.intersection(zone1_gets))
 
-                    # Validate results
-                    if not new_poly1.is_empty and new_poly1.is_valid:
-                        if isinstance(new_poly1, Polygon):
-                            modified[(z_idx1, p_idx1)] = new_poly1
-                        elif isinstance(new_poly1, MultiPolygon) and len(new_poly1.geoms) > 0:
-                            # Take largest piece
-                            modified[(z_idx1, p_idx1)] = max(new_poly1.geoms, key=lambda p: p.area)
+                    # Fix and validate results
+                    new_poly1 = fix_polygon(new_poly1) if isinstance(new_poly1, Polygon) else None
+                    new_poly2 = fix_polygon(new_poly2) if isinstance(new_poly2, Polygon) else None
 
-                    if not new_poly2.is_empty and new_poly2.is_valid:
-                        if isinstance(new_poly2, Polygon):
-                            modified[(z_idx2, p_idx2)] = new_poly2
-                        elif isinstance(new_poly2, MultiPolygon) and len(new_poly2.geoms) > 0:
-                            modified[(z_idx2, p_idx2)] = max(new_poly2.geoms, key=lambda p: p.area)
+                    if new_poly1 is not None:
+                        modified[(z_idx1, p_idx1)] = new_poly1
+
+                    if new_poly2 is not None:
+                        modified[(z_idx2, p_idx2)] = new_poly2
 
                 except Exception as e:
-                    logger.debug(f"Failed to split overlap between {area1} and {area2}: {e}")
+                    error_count += 1
+                    if error_count <= 5:
+                        logger.debug(f"Failed to process overlap between {area1} and {area2}: {e}")
                     continue
 
-        logger.info(f"Processed {overlap_count} cross-zone overlaps")
+        logger.info(f"Processed {overlap_count} cross-zone overlaps ({error_count} errors skipped)")
 
         # Apply modifications to zones
         if not modified:
