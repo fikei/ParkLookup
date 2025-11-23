@@ -413,7 +413,7 @@ struct ZoneMapView: UIViewRepresentable {
         let overlaysVisible = context.coordinator.overlaysCurrentlyVisible
         if showOverlays != overlaysVisible {
             if showOverlays {
-                // Show overlays with fade animation
+                // Show overlays with slow fade animation when maximizing
                 for overlay in mapView.overlays {
                     if let renderer = mapView.renderer(for: overlay) {
                         renderer.alpha = 0
@@ -424,7 +424,8 @@ struct ZoneMapView: UIViewRepresentable {
                         view.alpha = 0
                     }
                 }
-                UIView.animate(withDuration: 0.6, delay: 0.2, options: [.curveEaseOut]) {
+                // Slower fade in: 1.2s duration with 0.4s delay for smooth appearance
+                UIView.animate(withDuration: 1.2, delay: 0.4, options: [.curveEaseOut]) {
                     for overlay in mapView.overlays {
                         if let renderer = mapView.renderer(for: overlay) {
                             renderer.alpha = 1
@@ -437,7 +438,7 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 }
             } else {
-                // Hide overlays
+                // Hide overlays with fade out
                 UIView.animate(withDuration: 0.4, delay: 0, options: [.curveEaseIn]) {
                     for overlay in mapView.overlays {
                         if let renderer = mapView.renderer(for: overlay) {
