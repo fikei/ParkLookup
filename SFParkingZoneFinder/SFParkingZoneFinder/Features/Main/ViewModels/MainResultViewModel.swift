@@ -5,6 +5,21 @@ import os.log
 
 private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
 
+// MARK: - Future Feature TODOs
+// TODO: Support time-limited parking zones (non-RPP areas with time restrictions)
+//       - Display time limit warnings and "Park Until" time
+//       - Handle zones that are time-limited during certain hours only
+//
+// TODO: Support street cleaning restrictions
+//       - Show street cleaning schedule for current location
+//       - Warn user if parked during upcoming street cleaning
+//       - Calculate "Move by" time based on cleaning schedule
+//
+// TODO: Support no-parking zones and unlimited parking areas
+//       - Handle zones with no parking restrictions (infinity = unlimited)
+//       - Show "Unlimited Parking" for truly unrestricted areas
+//       - Differentiate from RPP "unlimited" (which means permit holder unlimited)
+
 /// ViewModel for the main parking result view
 @MainActor
 final class MainResultViewModel: ObservableObject {
