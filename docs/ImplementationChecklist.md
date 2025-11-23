@@ -53,16 +53,17 @@ For a functional Alpha release with real data, complete these in order:
 | S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | **COMPLETE** | 8/10 |
-| S17: Map Zone Boundaries | In Progress | 10/19 |
+| S17: Map Zone Boundaries | In Progress | 15/24 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
+| S21: Zone Card UI Refinements | In Progress | 11/18 |
 
-**Beta Progress:** 31/91 tasks complete (34%)
+**Beta Progress:** 47/114 tasks complete (41%)
 
 ---
 
-**Overall Progress:** 132/196 tasks complete (67%)
+**Overall Progress:** 148/219 tasks complete (68%)
 
 ---
 
@@ -644,6 +645,8 @@ For a functional Alpha release with real data, complete these in order:
 
 > **MapContentBuilder Limitations (discovered in Alpha):** SwiftUI's `@MapContentBuilder` has limited support for control flow (no `if let`, complex `ForEach` with conditionals). Initial attempts to render zone polygons using `MapPolygon` and `MapPolyline` with `foregroundStyle()` failed due to these limitations. Consider using `MKMapView` with `UIViewRepresentable` and `MKPolygonRenderer` for reliable polygon rendering, or explore MapKit overlay approach outside of `@MapContentBuilder`.
 
+> **Async Zone Loading Bug (discovered Nov 2025):** Zone overlays were only loaded in `makeUIView`. If zones arrived after map creation (async loading), overlays never appeared. Fixed by adding `overlaysLoaded` flag and `loadOverlays()` helper in `updateUIView` to load overlays when zones become available.
+
 ### Tasks
 
 #### Zone Boundary Display
@@ -673,6 +676,17 @@ For a functional Alpha release with real data, complete these in order:
 - [x] **17.12** Implement color-coded polygon overlays on expanded map view (full screen only)
 
 - [ ] **17.13** Add legend or key showing zone colors (optional, toggleable)
+
+#### Zone Overlay Fixes
+- [x] **17.20** Fix zone overlays not loading when zones arrive after map creation (async loading bug)
+
+- [x] **17.21** Add `overlaysLoaded` flag to coordinator to track overlay loading state
+
+- [x] **17.22** Create `loadOverlays()` helper function for deferred overlay loading from `updateUIView`
+
+- [x] **17.23** Reduce stroke prominence (3.0/1.5 → 2.0/1.0 line width)
+
+- [x] **17.24** Improve multi-permit zone dash pattern ([8,4] → [4,2], same width as regular)
 
 #### Map Provider Abstraction
 - [ ] **17.14** Create MapProviderProtocol abstraction layer for switching between map providers
@@ -798,6 +812,62 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] Memory usage stays under 100MB typical usage
 - [ ] No UI jank during zone loading or lookup
 - [ ] Performance metrics logged for monitoring
+
+---
+
+## Story 21 (S21): Zone Card UI Refinements
+
+**Goal:** Polish zone card appearance and behavior across expanded/minimized states
+
+### Tasks
+
+#### Card Dimensions & Layout
+- [x] **21.1** Reduce expanded card height by 20% (miniCardHeight 88→70pt)
+
+- [x] **21.2** Scale zone circle proportionally (56→44pt) for reduced card height
+
+- [x] **21.3** Adjust HStack spacing (16→12pt) for tighter layout
+
+#### Map Zoom Levels
+- [x] **21.4** Configure expanded map zoom multiplier (1.3→0.5)
+
+- [x] **21.5** Configure collapsed map zoom multiplier (0.7→0.65)
+
+#### Permit Status Badges
+- [x] **21.6** Move PERMIT INVALID badge from minimized card to expanded card
+
+- [x] **21.7** Position PERMIT INVALID badge in top-left corner alongside PERMIT VALID badge
+
+- [x] **21.8** Apply consistent badge styling (gray background for invalid)
+
+#### Zone Circle Colors
+- [x] **21.9** Update zone circle on expanded card to use zone-specific color palette
+
+- [x] **21.10** Use ZoneColorProvider.swiftUIColor for consistent zone colors
+
+- [x] **21.11** Apply white text on zone-colored background for all states
+
+#### Future Card Content (Design Phase)
+- [ ] **21.12** Design content areas for "In Permit Zone" state (expanded + minimized)
+
+- [ ] **21.13** Design content areas for "Multi-Permit Zone" state (expanded + minimized)
+
+- [ ] **21.14** Design content areas for "Out of Permit Zone" state (expanded + minimized)
+
+- [ ] **21.15** Design content areas for "Paid Parking" state (expanded + minimized)
+
+- [ ] **21.16** Add time-based information (time until restrictions, street cleaning)
+
+- [ ] **21.17** Add enforcement hours display
+
+- [ ] **21.18** Add distance to nearest valid zone (out of permit zone state)
+
+**Story 21 Complete When:**
+- [x] Expanded card has reduced height with proportional elements
+- [x] Map zoom levels tuned for optimal zone visibility
+- [x] Permit badges positioned correctly on expanded card
+- [x] Zone circles display zone-specific colors
+- [ ] Content design completed for all four parking states
 
 ---
 
