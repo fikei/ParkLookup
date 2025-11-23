@@ -168,7 +168,10 @@ extension ParkingZone {
         guard zoneType == .metered else { return nil }
 
         let rate = metadata.hourlyRate ?? 2.0
-        let timeLimit = metadata.avgTimeLimit ?? 120
+        let rawTimeLimit = metadata.avgTimeLimit ?? 120
+
+        // Round to standard meter time limits (15, 30, 60, 120, 240 minutes)
+        let timeLimit = Self.roundToStandardTimeLimit(rawTimeLimit)
 
         let rateStr = rate.truncatingRemainder(dividingBy: 1) == 0
             ? "$\(Int(rate))/hr"
@@ -183,6 +186,12 @@ extension ParkingZone {
         }
 
         return "\(rateStr) • \(timeStr)"
+    }
+
+    /// Round a time limit to the nearest standard meter time limit
+    private static func roundToStandardTimeLimit(_ minutes: Int) -> Int {
+        let standardLimits = [15, 30, 60, 120, 240]
+        return standardLimits.min(by: { abs($0 - minutes) < abs($1 - minutes) }) ?? 60
     }
 }
 
