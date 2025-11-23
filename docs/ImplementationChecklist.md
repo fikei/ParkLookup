@@ -58,12 +58,15 @@ For a functional Alpha release with real data, complete these in order:
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
 | S21: Zone Card UI Refinements | In Progress | 15/18 |
+| S22: CarPlay Experience Update | Not Started | 0/10 |
 
-**Beta Progress:** 51/116 tasks complete (44%)
+**Beta Progress:** 51/126 tasks complete (40%)
 
 ---
 
-**Overall Progress:** 152/221 tasks complete (69%)
+**Overall Progress:** 152/231 tasks complete (66%)
+
+*Note: Future Enhancement tasks (F-series) not included in progress counts*
 
 ---
 
@@ -872,7 +875,44 @@ For a functional Alpha release with real data, complete these in order:
 - [x] Map zoom levels tuned for optimal zone visibility
 - [x] Permit badges positioned correctly on expanded card
 - [x] Zone circles display zone-specific colors
-- [ ] Content design completed for all four parking states
+- [x] Content design completed for all four parking states
+
+---
+
+## Story 22 (S22): CarPlay Experience Update
+
+**Goal:** Enhance CarPlay integration with improved zone display and interaction
+
+### Tasks
+
+#### Zone Display Improvements
+- [ ] **22.1** Update CPInformationTemplate to show state-specific content (valid/invalid/metered)
+
+- [ ] **22.2** Add zone color indicator to CarPlay display
+
+- [ ] **22.3** Show time limit information for out-of-permit zones
+
+- [ ] **22.4** Display metered parking rate and limit info
+
+#### Navigation & Interaction
+- [ ] **22.5** Add "Find Parking" button to navigate to nearest valid zone
+
+- [ ] **22.6** Implement zone change alerts with haptic feedback
+
+- [ ] **22.7** Add quick actions for common tasks (save location, start timer)
+
+#### Visual Polish
+- [ ] **22.8** Improve CarPlay template styling for better readability while driving
+
+- [ ] **22.9** Add dark mode support for CarPlay display
+
+- [ ] **22.10** Test on CarPlay Simulator and physical unit
+
+**Story 22 Complete When:**
+- [ ] CarPlay shows state-specific zone information
+- [ ] Zone changes are clearly communicated to driver
+- [ ] Quick actions accessible without distraction
+- [ ] Tested on physical CarPlay unit
 
 ---
 
@@ -896,15 +936,34 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] **F5** Add Berkeley RPP zone support
 - [ ] **F6** Abstract city-specific logic for multi-city scalability
 
-### Parking Event Capture
+### Parking Experience (Full Feature)
 
+**Goal:** Complete parking session management from arrival to departure
+
+#### Parking Event Detection
 - [ ] **F7** Detect parking events (location stationary for >2 minutes after driving)
 - [ ] **F8** Save parking location with timestamp, zone info, and address
-- [ ] **F9** Track parking duration with optional reminders (street sweeping, meter expiry)
-- [ ] **F10** Show "Find My Car" feature with walking directions to saved location
-- [ ] **F11** Build parking history view with filter by zone, date, duration
-- [ ] **F12** Add parking session notes (floor/section for garages, photo of spot)
-- [ ] **F13** Export parking history (CSV for expense tracking)
+- [ ] **F9** Auto-detect when user leaves parked car (walking away from location)
+
+#### Active Parking Session
+- [ ] **F10** Show active parking session card on home screen
+- [ ] **F11** Display elapsed time since parked with live counter
+- [ ] **F12** Track parking duration with countdown for time-limited zones
+- [ ] **F13** Integrate with meter payment apps (PayByPhone, ParkMobile deep links)
+- [ ] **F14-P** Add "I'm leaving" button to end parking session
+
+#### Find My Car
+- [ ] **F15-P** Show "Find My Car" button when away from parked location
+- [ ] **F16-P** Display walking directions to saved parking location
+- [ ] **F17-P** Show distance and estimated walk time to car
+- [ ] **F18-P** Add AR view option for finding car in garages
+
+#### Parking History
+- [ ] **F19-P** Build parking history view with list of past sessions
+- [ ] **F20-P** Filter history by zone, date range, duration
+- [ ] **F21-P** Add parking session notes (floor/section for garages, photo of spot)
+- [ ] **F22-P** Show statistics (most visited zones, average duration, total time)
+- [ ] **F23-P** Export parking history (CSV for expense tracking)
 
 ### Detailed Parking Restrictions (Non-RPP)
 
@@ -916,16 +975,35 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] **F19** Display no-parking zones (fire hydrants, driveways, bus stops)
 - [ ] **F20** Create unified "parking rules at this spot" view combining all restriction types
 
-### Move Car Notifications
+### Notification Experience (Full Feature)
 
-*Blocked by: F7-F13 (Parking Event Capture)*
+**Goal:** Proactive alerts to help users avoid parking violations
 
-- [ ] **F21** Send push notification before street sweeping at parked location
-- [ ] **F22** Alert when approaching time limit for time-restricted parking
-- [ ] **F23** Notify before meter expires (if meter end time was entered)
-- [ ] **F24** Warn about upcoming tow-away hours at current parking spot
-- [ ] **F25** Add configurable notification lead time (15min, 30min, 1hr before)
-- [ ] **F26** Support "snooze" and "I moved" actions on notifications
+*Blocked by: Parking Experience (F7-F23-P)*
+
+#### Move Car Alerts
+- [ ] **F-N1** Send push notification before street sweeping at parked location
+- [ ] **F-N2** Alert when approaching time limit for time-restricted parking
+- [ ] **F-N3** Notify before meter expires (if meter end time was entered)
+- [ ] **F-N4** Warn about upcoming tow-away hours at current parking spot
+
+#### Configuration
+- [ ] **F-N5** Add configurable notification lead time (15min, 30min, 1hr before)
+- [ ] **F-N6** Allow per-notification-type enable/disable settings
+- [ ] **F-N7** Set quiet hours (no notifications during sleep time)
+- [ ] **F-N8** Configure notification sound and vibration preferences
+
+#### Notification Actions
+- [ ] **F-N9** Support "Snooze" action on notifications (remind again in 10min)
+- [ ] **F-N10** Add "I moved" action to dismiss and end parking session
+- [ ] **F-N11** Add "Navigate to car" action for quick directions
+- [ ] **F-N12** Support "Extend meter" deep link to payment app
+
+#### Smart Notifications
+- [ ] **F-N13** Learn user patterns (typical parking duration, common zones)
+- [ ] **F-N14** Adjust notification timing based on walking distance to car
+- [ ] **F-N15** Detect when user is already walking to car (suppress alerts)
+- [ ] **F-N16** Send summary notification at end of day (parking stats)
 
 ---
 
