@@ -115,14 +115,25 @@ private struct TappedZoneCard: View {
         zone.permitArea ?? zone.displayName
     }
 
-    /// Whether this zone accepts multiple permits
+    /// Whether this zone has multi-permit boundaries (accepts multiple permits)
     private var isMultiPermitZone: Bool {
-        zone.validPermitAreas.count > 1 && zone.zoneType == .residentialPermit
+        !zone.multiPermitBoundaries.isEmpty && zone.zoneType == .residentialPermit
     }
 
-    /// All valid permit areas for multi-permit zones
+    /// All valid permit areas aggregated from multi-permit boundaries
     private var allPermitAreas: [String] {
-        zone.validPermitAreas.isEmpty ? [zone.permitArea ?? zoneCode] : zone.validPermitAreas
+        guard isMultiPermitZone else {
+            return [zone.permitArea ?? zoneCode]
+        }
+        // Aggregate all unique permit areas from multi-permit boundaries
+        var areas = Set<String>()
+        if let permitArea = zone.permitArea {
+            areas.insert(permitArea)
+        }
+        for boundary in zone.multiPermitBoundaries {
+            areas.formUnion(boundary.validPermitAreas)
+        }
+        return areas.sorted()
     }
 
     /// Combined zone code for multi-permit (e.g., "A/B")
