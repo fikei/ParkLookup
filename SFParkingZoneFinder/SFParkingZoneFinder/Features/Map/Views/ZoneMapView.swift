@@ -138,6 +138,14 @@ struct ZoneMapView: UIViewRepresentable {
     /// Set to false to see the preprocessed polygon data as-is.
     static var useConvexHull: Bool = false
 
+    /// Validates a coordinate to ensure it won't cause NaN errors
+    private func isValidCoordinate(_ coord: CLLocationCoordinate2D?) -> Bool {
+        guard let c = coord else { return false }
+        return c.latitude.isFinite && c.longitude.isFinite &&
+               c.latitude >= -90 && c.latitude <= 90 &&
+               c.longitude >= -180 && c.longitude <= 180
+    }
+
     func makeUIView(context: Context) -> MKMapView {
         logger.info("ZoneMapView init - \(self.zones.count) zones")
 
@@ -149,7 +157,8 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Set initial region centered on user (zoomed to ~10-15 blocks)
         // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
-        let userCenter = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
         let baseSpan = 0.006
         let desiredSpan = MKCoordinateSpan(
             latitudeDelta: baseSpan * zoomMultiplier,
@@ -436,8 +445,8 @@ struct ZoneMapView: UIViewRepresentable {
         // Skip re-centering during initial setup (overlays are loading async)
         guard context.coordinator.initialSetupDone else { return }
 
-        // Calculate current desired region
-        if let coord = userCoordinate {
+        // Calculate current desired region (only if coordinate is valid)
+        if let coord = userCoordinate, isValidCoordinate(coord) {
             let baseSpan = 0.006
             let span = MKCoordinateSpan(
                 latitudeDelta: baseSpan * zoomMultiplier,
@@ -520,7 +529,8 @@ struct ZoneMapView: UIViewRepresentable {
         let coordinator = context.coordinator
 
         let useConvexHull = ZoneMapView.useConvexHull
-        let userCenter = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
 
         DispatchQueue.global(qos: .userInitiated).async {
             var polygons: [ZonePolygon] = []

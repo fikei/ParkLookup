@@ -45,8 +45,17 @@ struct MainResultView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The coordinate to use for map centering (searched or current)
+    /// Validates coordinates to prevent NaN errors in CoreGraphics
     private var activeCoordinate: CLLocationCoordinate2D? {
-        searchedCoordinate ?? viewModel.currentCoordinate
+        let coord = searchedCoordinate ?? viewModel.currentCoordinate
+        // Validate coordinate to prevent NaN errors
+        guard let c = coord,
+              c.latitude.isFinite && c.longitude.isFinite,
+              c.latitude >= -90 && c.latitude <= 90,
+              c.longitude >= -180 && c.longitude <= 180 else {
+            return nil
+        }
+        return c
     }
 
     /// Extract permit area code from zone name
