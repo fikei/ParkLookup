@@ -486,8 +486,8 @@ struct ZoneMapView: UIViewRepresentable {
                 logger.debug("Updating map region - spanChanged: \(spanChanged), biasChanged: \(biasChanged), distance: \(String(format: "%.0f", distance))m")
                 let region = MKCoordinateRegion(center: biasedCenter, span: span)
 
-                // Use slower animation (0.8s) for smooth transition when expanding/collapsing
-                UIView.animate(withDuration: 0.8, delay: 0, options: [.curveEaseInOut]) {
+                // Use slow animation (1.4s) for smooth transition when expanding/collapsing
+                UIView.animate(withDuration: 1.4, delay: 0, options: [.curveEaseInOut]) {
                     mapView.setRegion(region, animated: false)
                 }
 
