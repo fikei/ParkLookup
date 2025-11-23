@@ -214,13 +214,12 @@ class SearchCompleterDelegate: NSObject, ObservableObject, MKLocalSearchComplete
             self.results = completer.results.filter { result in
                 let subtitle = result.subtitle.lowercased()
                 let title = result.title.lowercased()
-                // Check for San Francisco indicators in the result
-                return subtitle.contains("san francisco") ||
-                       subtitle.contains("sf, ca") ||
-                       subtitle.contains("sf,ca") ||
-                       title.contains("san francisco") ||
-                       // Also accept results with no subtitle (likely within biased region)
-                       (subtitle.isEmpty && !title.contains(","))
+                let combined = "\(title) \(subtitle)"
+                // Only accept results that explicitly mention San Francisco
+                return combined.contains("san francisco") ||
+                       combined.contains("sf, ca") ||
+                       combined.contains("sf,ca") ||
+                       combined.contains(", sf")
             }
         }
     }

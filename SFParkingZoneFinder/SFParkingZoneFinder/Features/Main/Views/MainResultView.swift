@@ -198,10 +198,19 @@ struct MainResultView: View {
 
             // Error state
             if let error = viewModel.error {
-                ErrorView(error: error) {
-                    HapticFeedback.medium()
-                    viewModel.refreshLocation()
-                }
+                ErrorView(
+                    error: error,
+                    onRetry: {
+                        HapticFeedback.medium()
+                        viewModel.refreshLocation()
+                    },
+                    onDismiss: {
+                        // Reset to current location and clear searched coordinate
+                        HapticFeedback.light()
+                        searchedCoordinate = nil
+                        viewModel.refreshLocation()
+                    }
+                )
                 .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                 .onAppear {
                     HapticFeedback.error()
@@ -1222,7 +1231,14 @@ struct LoadingOverlay: View {
 struct ErrorView: View {
     let error: AppError
     let onRetry: () -> Void
+    let onDismiss: (() -> Void)?
     @State private var showTechnicalDetails = false
+
+    init(error: AppError, onRetry: @escaping () -> Void, onDismiss: (() -> Void)? = nil) {
+        self.error = error
+        self.onRetry = onRetry
+        self.onDismiss = onDismiss
+    }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -1269,6 +1285,18 @@ struct ErrorView: View {
                         HStack {
                             Image(systemName: "gear")
                             Text("Open Settings")
+                        }
+                        .frame(minWidth: 140)
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                // Show "Back to Map" for area-related errors
+                if let onDismiss = onDismiss, (error == .unknownArea || error == .outsideCoverage) {
+                    Button(action: onDismiss) {
+                        HStack {
+                            Image(systemName: "map")
+                            Text("Back to Map")
                         }
                         .frame(minWidth: 140)
                     }
