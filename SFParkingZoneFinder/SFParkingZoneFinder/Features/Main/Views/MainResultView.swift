@@ -39,6 +39,7 @@ struct MainResultView: View {
     @State private var isMapExpanded = false
     @State private var selectedZone: ParkingZone?
     @State private var searchedCoordinate: CLLocationCoordinate2D?
+    @State private var showOutsideCoverageAlert = false
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -98,6 +99,9 @@ struct MainResultView: View {
                             onResetToCurrentLocation: {
                                 searchedCoordinate = nil
                                 viewModel.refreshLocation()
+                            },
+                            onOutsideCoverage: {
+                                showOutsideCoverageAlert = true
                             }
                         )
                         .padding(.horizontal)
@@ -224,6 +228,11 @@ struct MainResultView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+        }
+        .alert("Outside Coverage Area", isPresented: $showOutsideCoverageAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("That address is outside San Francisco. We currently only support SF parking zones.")
         }
     }
 }

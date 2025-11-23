@@ -1,14 +1,43 @@
 import SwiftUI
 import MapKit
+import CoreLocation
 import os.log
 
 private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "AddressSearch")
+
+// San Francisco bounds for filtering search results
+private let sfBounds = (
+    north: 37.8324,
+    south: 37.6398,
+    east: -122.3281,
+    west: -122.5274
+)
+
+private func isWithinSF(_ coordinate: CLLocationCoordinate2D) -> Bool {
+    coordinate.latitude >= sfBounds.south &&
+    coordinate.latitude <= sfBounds.north &&
+    coordinate.longitude >= sfBounds.west &&
+    coordinate.longitude <= sfBounds.east
+}
 
 /// Search card for address lookup with type-ahead suggestions
 struct AddressSearchCard: View {
     let currentAddress: String?
     let onAddressSelected: (CLLocationCoordinate2D) -> Void
     let onResetToCurrentLocation: () -> Void
+    let onOutsideCoverage: (() -> Void)?
+
+    init(
+        currentAddress: String?,
+        onAddressSelected: @escaping (CLLocationCoordinate2D) -> Void,
+        onResetToCurrentLocation: @escaping () -> Void,
+        onOutsideCoverage: (() -> Void)? = nil
+    ) {
+        self.currentAddress = currentAddress
+        self.onAddressSelected = onAddressSelected
+        self.onResetToCurrentLocation = onResetToCurrentLocation
+        self.onOutsideCoverage = onOutsideCoverage
+    }
 
     @State private var searchText = ""
     @State private var isSearching = false
@@ -137,9 +166,16 @@ struct AddressSearchCard: View {
 
         search.start { response, error in
             if let coordinate = response?.mapItems.first?.placemark.coordinate {
-                logger.info("Selected address: \(result.title)")
-                onAddressSelected(coordinate)
-                cancelSearch()
+                // Validate coordinate is within SF coverage area
+                if isWithinSF(coordinate) {
+                    logger.info("Selected address: \(result.title)")
+                    onAddressSelected(coordinate)
+                    cancelSearch()
+                } else {
+                    logger.warning("Selected address outside SF coverage: \(result.title)")
+                    onOutsideCoverage?()
+                    cancelSearch()
+                }
             } else if let error = error {
                 logger.error("Search failed: \(error.localizedDescription)")
             }
@@ -157,10 +193,10 @@ class SearchCompleterDelegate: NSObject, ObservableObject, MKLocalSearchComplete
         super.init()
         completer.delegate = self
         completer.resultTypes = .address
-        // Bias results towards San Francisco
+        // Restrict results to San Francisco area
         completer.region = MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-            span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
+            span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
         )
     }
 
@@ -174,7 +210,18 @@ class SearchCompleterDelegate: NSObject, ObservableObject, MKLocalSearchComplete
 
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         DispatchQueue.main.async {
-            self.results = completer.results
+            // Filter results to only show San Francisco addresses
+            self.results = completer.results.filter { result in
+                let subtitle = result.subtitle.lowercased()
+                let title = result.title.lowercased()
+                // Check for San Francisco indicators in the result
+                return subtitle.contains("san francisco") ||
+                       subtitle.contains("sf, ca") ||
+                       subtitle.contains("sf,ca") ||
+                       title.contains("san francisco") ||
+                       // Also accept results with no subtitle (likely within biased region)
+                       (subtitle.isEmpty && !title.contains(","))
+            }
         }
     }
 
