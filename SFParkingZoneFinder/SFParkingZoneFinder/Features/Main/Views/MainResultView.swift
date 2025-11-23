@@ -303,16 +303,16 @@ private struct AnimatedZoneCard: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isExpanded)
     }
 
-    /// Fixed height for mini card (56pt circle + 16pt padding top/bottom)
-    private var miniCardHeight: CGFloat { 88 }
+    /// Fixed height for mini card (reduced by 20%)
+    private var miniCardHeight: CGFloat { 70 }
 
     // MARK: - Mini Content (expanded map mode)
 
     private var miniContent: some View {
         ZStack {
-            HStack(spacing: 16) {
-                // Zone circle
-                zoneCircle(size: 56)
+            HStack(spacing: 12) {
+                // Zone circle (scaled down to fit reduced card height)
+                zoneCircle(size: 44)
 
                 // Zone info
                 VStack(alignment: .leading, spacing: 4) {
