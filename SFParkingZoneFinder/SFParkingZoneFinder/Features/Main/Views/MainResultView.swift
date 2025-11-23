@@ -309,41 +309,63 @@ private struct AnimatedZoneCard: View {
     // MARK: - Mini Content (expanded map mode)
 
     private var miniContent: some View {
-        HStack(spacing: 16) {
-            // Zone circle
-            zoneCircle(size: 56)
+        ZStack {
+            HStack(spacing: 16) {
+                // Zone circle
+                zoneCircle(size: 56)
 
-            // Zone info
-            VStack(alignment: .leading, spacing: 4) {
-                if isValidStyle {
-                    // When permit is valid, show "No Parking Restrictions"
-                    Text("No Parking Restrictions")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Text(isMultiPermitLocation ? formattedZonesList : zoneName)
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.8))
-                } else if isMultiPermitLocation {
-                    Text("Zone \(currentSelectedArea)")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                    Text(formattedZonesList)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                } else {
-                    Text(zoneName)
-                        .font(.headline)
-                        .foregroundColor(.primary)
+                // Zone info
+                VStack(alignment: .leading, spacing: 4) {
+                    if isValidStyle {
+                        // When permit is valid, show "No Parking Restrictions"
+                        Text("No Parking Restrictions")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        Text(isMultiPermitLocation ? formattedZonesList : zoneName)
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.8))
+                    } else if isMultiPermitLocation {
+                        Text("Zone \(currentSelectedArea)")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                            .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                        Text(formattedZonesList)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text(zoneName)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                    }
+
+                    // Status badge
+                    miniStatusBadge
                 }
 
-                // Status badge
-                miniStatusBadge
+                Spacer()
             }
+            .padding()
 
-            Spacer()
+            // Permit status badge in top right corner
+            if !isValidStyle && zoneType == .residentialPermit {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text("PERMIT INVALID")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(.systemGray5))
+                            .clipShape(Capsule())
+                            .padding(.top, 8)
+                            .padding(.trailing, 12)
+                    }
+                    Spacer()
+                }
+            }
         }
-        .padding()
     }
 
     /// Mini card status badge - shows "PERMIT VALID" when valid
