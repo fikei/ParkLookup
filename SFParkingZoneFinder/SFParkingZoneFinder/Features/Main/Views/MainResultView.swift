@@ -153,7 +153,6 @@ struct MainResultView: View {
                         // Bottom info card (only in expanded mode)
                         if isMapExpanded {
                             ExpandedBottomCard(
-                                address: viewModel.currentAddress,
                                 onSettingsTap: {
                                     HapticFeedback.selection()
                                     showingSettings = true
@@ -998,24 +997,10 @@ private struct MiniMultiPermitCircleView: View {
 // MARK: - Expanded Bottom Card
 
 private struct ExpandedBottomCard: View {
-    let address: String?
     let onSettingsTap: () -> Void
 
     var body: some View {
         HStack {
-            // Address
-            if let addr = address {
-                HStack(spacing: 6) {
-                    Image(systemName: "location.fill")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(addr)
-                        .font(.subheadline)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                }
-            }
-
             Spacer()
 
             // Settings button
