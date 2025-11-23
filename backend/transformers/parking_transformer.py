@@ -5,8 +5,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 
 try:
-    from shapely.geometry import LineString, MultiLineString, mapping
+    from shapely.geometry import LineString, MultiLineString, Polygon, MultiPolygon, mapping, box
     from shapely.ops import unary_union
+    from shapely.validation import make_valid
     SHAPELY_AVAILABLE = True
 except ImportError:
     SHAPELY_AVAILABLE = False
@@ -231,7 +232,289 @@ class ParkingDataTransformer:
             logger.debug(f"Zone {area_code}: {len(polygons)} block faces ({mp_count} multi-permit)")
 
         logger.info(f"Derived {len(zones)} zones with {total_polygons} total block face polygons")
+
+        # Cleanup polygons: merge same-rule overlaps, split different-rule overlaps
+        zones = self._cleanup_zone_polygons(zones)
+
         return zones
+
+    def _cleanup_zone_polygons(self, zones: List[RPPZone]) -> List[RPPZone]:
+        """
+        Clean up zone polygons:
+        1. Merge overlapping polygons within the same zone (same rules)
+        2. Split overlapping polygons between different zones (average the boundary)
+
+        This reduces visual clutter and ensures no overlapping boundaries.
+        """
+        if not SHAPELY_AVAILABLE:
+            logger.warning("Shapely not available - skipping polygon cleanup")
+            return zones
+
+        logger.info("Cleaning up zone polygons...")
+
+        # Step 1: Merge same-zone overlapping polygons
+        zones = self._merge_same_zone_polygons(zones)
+
+        # Step 2: Split different-zone overlaps
+        zones = self._split_different_zone_overlaps(zones)
+
+        return zones
+
+    def _merge_same_zone_polygons(self, zones: List[RPPZone]) -> List[RPPZone]:
+        """
+        Merge overlapping or touching polygons within the same zone.
+        Groups polygons by their multi-permit signature and merges each group.
+        """
+        logger.info("Merging same-zone overlapping polygons...")
+        merged_zones = []
+        total_before = 0
+        total_after = 0
+
+        for zone in zones:
+            total_before += len(zone.polygon)
+
+            # Group polygons by their multi-permit signature
+            # Polygons with same valid permit areas can be merged
+            groups: Dict[Tuple[str, ...], List[Tuple[int, List[Tuple[float, float]]]]] = {}
+
+            for idx, poly_coords in enumerate(zone.polygon):
+                # Get the permit signature for this polygon
+                if idx in zone.multi_permit_polygons:
+                    sig = tuple(sorted(zone.multi_permit_polygons[idx]))
+                else:
+                    sig = (zone.area_code,)
+
+                if sig not in groups:
+                    groups[sig] = []
+                groups[sig].append((idx, poly_coords))
+
+            # Merge each group
+            new_polygons = []
+            new_multi_permit = {}
+
+            for sig, poly_list in groups.items():
+                merged = self._merge_polygon_group([p[1] for p in poly_list])
+
+                for merged_poly in merged:
+                    new_idx = len(new_polygons)
+                    new_polygons.append(merged_poly)
+
+                    # Track multi-permit status (if signature has multiple areas)
+                    if len(sig) > 1:
+                        new_multi_permit[new_idx] = list(sig)
+
+            total_after += len(new_polygons)
+
+            merged_zone = RPPZone(
+                area_code=zone.area_code,
+                name=zone.name,
+                polygon=new_polygons,
+                neighborhoods=zone.neighborhoods,
+                total_blocks=zone.total_blocks,
+                multi_permit_polygons=new_multi_permit
+            )
+            merged_zones.append(merged_zone)
+
+        logger.info(f"Merged polygons: {total_before} -> {total_after} ({total_before - total_after} reduced)")
+        return merged_zones
+
+    def _merge_polygon_group(self, polygons: List[List[Tuple[float, float]]]) -> List[List[Tuple[float, float]]]:
+        """
+        Merge a list of polygon coordinate lists into fewer polygons using union.
+        Returns list of merged polygon coordinates.
+        """
+        if not polygons:
+            return []
+
+        try:
+            # Convert to Shapely polygons
+            shapely_polys = []
+            for coords in polygons:
+                if len(coords) < 4:  # Need at least 3 points + closing
+                    continue
+                try:
+                    poly = Polygon(coords)
+                    if not poly.is_valid:
+                        poly = make_valid(poly)
+                    if poly.is_valid and not poly.is_empty:
+                        # Handle case where make_valid returns GeometryCollection
+                        if isinstance(poly, (Polygon, MultiPolygon)):
+                            shapely_polys.append(poly)
+                        elif hasattr(poly, 'geoms'):
+                            for geom in poly.geoms:
+                                if isinstance(geom, Polygon) and not geom.is_empty:
+                                    shapely_polys.append(geom)
+                except Exception:
+                    continue
+
+            if not shapely_polys:
+                return polygons  # Return original if conversion failed
+
+            # Union all polygons
+            merged = unary_union(shapely_polys)
+
+            # Extract result coordinates
+            result = []
+            if isinstance(merged, Polygon):
+                if not merged.is_empty:
+                    result.append(list(merged.exterior.coords))
+            elif isinstance(merged, MultiPolygon):
+                for poly in merged.geoms:
+                    if not poly.is_empty:
+                        result.append(list(poly.exterior.coords))
+
+            return result if result else polygons
+
+        except Exception as e:
+            logger.debug(f"Polygon merge failed: {e}")
+            return polygons
+
+    def _split_different_zone_overlaps(self, zones: List[RPPZone]) -> List[RPPZone]:
+        """
+        Split overlapping polygons between different zones by averaging the boundary.
+        For each pair of overlapping polygons from different zones, adjust so they
+        meet at the midline instead of overlapping.
+        """
+        if len(zones) < 2:
+            return zones
+
+        logger.info("Splitting different-zone overlaps...")
+
+        # Build spatial index of all polygons with their zone info
+        all_polys: List[Tuple[int, int, Polygon, str]] = []  # (zone_idx, poly_idx, shapely_poly, area_code)
+
+        for zone_idx, zone in enumerate(zones):
+            for poly_idx, coords in enumerate(zone.polygon):
+                if len(coords) < 4:
+                    continue
+                try:
+                    poly = Polygon(coords)
+                    if not poly.is_valid:
+                        poly = make_valid(poly)
+                    if isinstance(poly, Polygon) and not poly.is_empty:
+                        all_polys.append((zone_idx, poly_idx, poly, zone.area_code))
+                except Exception:
+                    continue
+
+        # Track modified polygons
+        modified: Dict[Tuple[int, int], Polygon] = {}
+        overlap_count = 0
+
+        # Check each pair of polygons from different zones
+        for i, (z_idx1, p_idx1, poly1, area1) in enumerate(all_polys):
+            for j, (z_idx2, p_idx2, poly2, area2) in enumerate(all_polys[i+1:], start=i+1):
+                # Skip same zone
+                if area1 == area2:
+                    continue
+
+                # Get current versions (may be modified)
+                current1 = modified.get((z_idx1, p_idx1), poly1)
+                current2 = modified.get((z_idx2, p_idx2), poly2)
+
+                # Check for overlap
+                if not current1.intersects(current2):
+                    continue
+
+                intersection = current1.intersection(current2)
+                if intersection.is_empty or intersection.area < 1e-10:
+                    continue
+
+                overlap_count += 1
+
+                # Split the overlap: give half to each zone
+                try:
+                    # Get centroid of overlap
+                    centroid = intersection.centroid
+
+                    # Create a split line through the centroid
+                    # Use the major axis of the intersection's bounding box
+                    minx, miny, maxx, maxy = intersection.bounds
+                    width = maxx - minx
+                    height = maxy - miny
+
+                    # Split perpendicular to the longer axis
+                    if width > height:
+                        # Vertical split
+                        split_x = centroid.x
+                        left_box = box(minx - 0.01, miny - 0.01, split_x, maxy + 0.01)
+                        right_box = box(split_x, miny - 0.01, maxx + 0.01, maxy + 0.01)
+                    else:
+                        # Horizontal split
+                        split_y = centroid.y
+                        left_box = box(minx - 0.01, miny - 0.01, maxx + 0.01, split_y)
+                        right_box = box(minx - 0.01, split_y, maxx + 0.01, maxy + 0.01)
+
+                    # Assign halves: zone with lower code gets "left/bottom", other gets "right/top"
+                    if area1 < area2:
+                        zone1_gets = left_box
+                        zone2_gets = right_box
+                    else:
+                        zone1_gets = right_box
+                        zone2_gets = left_box
+
+                    # Subtract the other zone's half from each polygon
+                    new_poly1 = current1.difference(intersection.intersection(zone2_gets))
+                    new_poly2 = current2.difference(intersection.intersection(zone1_gets))
+
+                    # Validate results
+                    if not new_poly1.is_empty and new_poly1.is_valid:
+                        if isinstance(new_poly1, Polygon):
+                            modified[(z_idx1, p_idx1)] = new_poly1
+                        elif isinstance(new_poly1, MultiPolygon) and len(new_poly1.geoms) > 0:
+                            # Take largest piece
+                            modified[(z_idx1, p_idx1)] = max(new_poly1.geoms, key=lambda p: p.area)
+
+                    if not new_poly2.is_empty and new_poly2.is_valid:
+                        if isinstance(new_poly2, Polygon):
+                            modified[(z_idx2, p_idx2)] = new_poly2
+                        elif isinstance(new_poly2, MultiPolygon) and len(new_poly2.geoms) > 0:
+                            modified[(z_idx2, p_idx2)] = max(new_poly2.geoms, key=lambda p: p.area)
+
+                except Exception as e:
+                    logger.debug(f"Failed to split overlap between {area1} and {area2}: {e}")
+                    continue
+
+        logger.info(f"Processed {overlap_count} cross-zone overlaps")
+
+        # Apply modifications to zones
+        if not modified:
+            return zones
+
+        result_zones = []
+        for zone_idx, zone in enumerate(zones):
+            new_polygons = []
+            new_multi_permit = {}
+
+            for poly_idx, coords in enumerate(zone.polygon):
+                key = (zone_idx, poly_idx)
+                if key in modified:
+                    # Use modified polygon
+                    mod_poly = modified[key]
+                    if isinstance(mod_poly, Polygon) and not mod_poly.is_empty:
+                        new_coords = list(mod_poly.exterior.coords)
+                        new_idx = len(new_polygons)
+                        new_polygons.append(new_coords)
+
+                        # Preserve multi-permit status
+                        if poly_idx in zone.multi_permit_polygons:
+                            new_multi_permit[new_idx] = zone.multi_permit_polygons[poly_idx]
+                else:
+                    # Keep original
+                    new_idx = len(new_polygons)
+                    new_polygons.append(coords)
+                    if poly_idx in zone.multi_permit_polygons:
+                        new_multi_permit[new_idx] = zone.multi_permit_polygons[poly_idx]
+
+            result_zones.append(RPPZone(
+                area_code=zone.area_code,
+                name=zone.name,
+                polygon=new_polygons,
+                neighborhoods=zone.neighborhoods,
+                total_blocks=zone.total_blocks,
+                multi_permit_polygons=new_multi_permit
+            ))
+
+        return result_zones
 
     def _buffer_geometry_to_polygon(self, geom: Any, buffer_distance: float) -> Optional[List[Tuple[float, float]]]:
         """
