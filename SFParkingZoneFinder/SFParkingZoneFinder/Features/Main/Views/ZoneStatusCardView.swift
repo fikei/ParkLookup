@@ -70,6 +70,19 @@ struct ZoneStatusCardView: View {
         return zoneName
     }
 
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = orderedPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
     /// Display name shown below the zone code
     private var displaySubtitle: String? {
         if isMeteredZone {
@@ -77,7 +90,7 @@ struct ZoneStatusCardView: View {
             return meteredSubtitle ?? "$2/hr • 2hr max"
         }
         if isMultiPermitLocation {
-            return "Multi Permit Zone"
+            return formattedZonesList
         }
         return nil
     }
@@ -405,7 +418,7 @@ private struct LargeMultiPermitCircleView: View {
             meteredSubtitle: nil,
             timeLimitMinutes: 120,
             ruleSummaryLines: [
-                "Multi Permit Zone",
+                "Zones A & B",
                 "Zone A or Zone B permit required",
                 "2-hour limit without permit"
             ]

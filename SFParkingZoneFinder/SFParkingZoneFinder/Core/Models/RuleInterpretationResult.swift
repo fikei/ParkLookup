@@ -72,7 +72,7 @@ enum PermitValidityStatus: String, Codable {
     var displayText: String {
         switch self {
         case .valid:
-            return "YOUR PERMIT IS VALID HERE"
+            return "NO PARKING RESTRICTIONS"
         case .invalid:
             return "YOUR PERMIT IS NOT VALID HERE"
         case .conditional:
@@ -80,7 +80,7 @@ enum PermitValidityStatus: String, Codable {
         case .noPermitRequired:
             return "NO PERMIT REQUIRED"
         case .multipleApply:
-            return "MULTIPLE PERMITS APPLY"
+            return "NO PARKING RESTRICTIONS"
         case .noPermitSet:
             return "PERMIT REQUIRED"
         }

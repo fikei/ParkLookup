@@ -34,7 +34,6 @@ enum HapticFeedback {
 /// Primary view showing fullscreen map with zone card overlay
 struct MainResultView: View {
     @StateObject private var viewModel = MainResultViewModel()
-    @State private var showingOverlappingZones = false
     @State private var showingSettings = false
     @State private var contentAppeared = false
     @State private var isMapExpanded = false
@@ -117,19 +116,9 @@ struct MainResultView: View {
                         if isMapExpanded {
                             ExpandedBottomCard(
                                 address: viewModel.currentAddress,
-                                hasOverlappingZones: viewModel.hasOverlappingZones,
-                                overlappingZoneCount: viewModel.overlappingZones.count,
-                                onOverlappingZonesTap: {
-                                    HapticFeedback.light()
-                                    showingOverlappingZones = true
-                                },
                                 onSettingsTap: {
                                     HapticFeedback.selection()
                                     showingSettings = true
-                                },
-                                onRefresh: {
-                                    HapticFeedback.medium()
-                                    viewModel.refreshLocation()
                                 }
                             )
                             .padding(.horizontal)
@@ -202,9 +191,6 @@ struct MainResultView: View {
             if !viewModel.isLoading && viewModel.error == nil {
                 HapticFeedback.success()
             }
-        }
-        .sheet(isPresented: $showingOverlappingZones) {
-            OverlappingZonesSheet(zones: viewModel.overlappingZones)
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
@@ -329,27 +315,69 @@ private struct AnimatedZoneCard: View {
 
             // Zone info
             VStack(alignment: .leading, spacing: 4) {
-                if isMultiPermitLocation {
+                if isValidStyle {
+                    // When permit is valid, show "No Parking Restrictions"
+                    Text("No Parking Restrictions")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    Text(isMultiPermitLocation ? formattedZonesList : zoneName)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.8))
+                } else if isMultiPermitLocation {
                     Text("Zone \(currentSelectedArea)")
                         .font(.headline)
-                        .foregroundColor(isValidStyle ? .white : .primary)
+                        .foregroundColor(.primary)
                         .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                    Text("Multi Permit Zone")
+                    Text(formattedZonesList)
                         .font(.caption)
-                        .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                        .foregroundColor(.secondary)
                 } else {
                     Text(zoneName)
                         .font(.headline)
-                        .foregroundColor(isValidStyle ? .white : .primary)
+                        .foregroundColor(.primary)
                 }
 
-                // Status or Park Until
-                statusBadge
+                // Status badge
+                miniStatusBadge
             }
 
             Spacer()
         }
         .padding()
+    }
+
+    /// Mini card status badge - shows "PERMIT VALID" when valid
+    private var miniStatusBadge: some View {
+        Group {
+            if isValidStyle {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                    Text("PERMIT VALID")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.white.opacity(0.9))
+            } else if let parkUntil = parkUntilText {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                    Text(parkUntil)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.orange)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: validityStatus.iconName)
+                        .font(.caption)
+                    Text(validityStatus.displayText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(Color.forValidityStatus(validityStatus))
+            }
+        }
     }
 
     // MARK: - Large Content (home screen mode)
@@ -372,10 +400,23 @@ private struct AnimatedZoneCard: View {
                     }
                 }
 
-                // Info button (top right)
+                // Top row: PERMIT VALID badge (left) and Info button (right)
                 VStack {
                     HStack {
+                        // PERMIT VALID badge (only when permit is valid)
+                        if isValidStyle {
+                            Text("PERMIT VALID")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.25))
+                                .clipShape(Capsule())
+                        }
+
                         Spacer()
+
                         Button {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                                 isFlipped = true
@@ -385,8 +426,8 @@ private struct AnimatedZoneCard: View {
                                 .font(.title2)
                                 .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
                         }
-                        .padding(16)
                     }
+                    .padding(16)
                     Spacer()
                 }
 
@@ -414,9 +455,25 @@ private struct AnimatedZoneCard: View {
         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isFlipped)
     }
 
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = orderedPermitAreas
+        switch areas.count {
+        case 0:
+            return "Zone"
+        case 1:
+            return "Zone \(areas[0])"
+        case 2:
+            return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
     private var displaySubtitle: String? {
         if zoneType == .metered { return meteredSubtitle ?? "$2/hr • 2hr max" }
-        if isMultiPermitLocation { return "Multi Permit Zone" }
+        if isMultiPermitLocation { return formattedZonesList }
         return nil
     }
 
@@ -628,6 +685,19 @@ private struct MiniZoneCardView: View {
         return orderedPermitAreas[animationIndex]
     }
 
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = orderedPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
     /// Calculate "Park until" time
     private var parkUntilText: String? {
         guard (validityStatus == .invalid || validityStatus == .noPermitSet),
@@ -674,7 +744,7 @@ private struct MiniZoneCardView: View {
                         .font(.headline)
                         .foregroundColor(isValidStyle ? .white : .primary)
                         .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                    Text("Multi Permit Zone")
+                    Text(formattedZonesList)
                         .font(.caption)
                         .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
                 } else {
@@ -762,17 +832,13 @@ private struct MiniMultiPermitCircleView: View {
 
 private struct ExpandedBottomCard: View {
     let address: String?
-    let hasOverlappingZones: Bool
-    let overlappingZoneCount: Int
-    let onOverlappingZonesTap: () -> Void
     let onSettingsTap: () -> Void
-    let onRefresh: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
+        HStack {
             // Address
             if let addr = address {
-                HStack {
+                HStack(spacing: 6) {
                     Image(systemName: "location.fill")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -780,48 +846,19 @@ private struct ExpandedBottomCard: View {
                         .font(.subheadline)
                         .foregroundColor(.primary)
                         .lineLimit(1)
-                    Spacer()
                 }
             }
 
-            // Overlapping zones
-            if hasOverlappingZones {
-                Button(action: onOverlappingZonesTap) {
-                    HStack {
-                        Image(systemName: "square.stack.3d.up")
-                            .foregroundColor(.orange)
-                        Text("\(overlappingZoneCount) overlapping zones")
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
+            Spacer()
 
-            // Action buttons
-            HStack(spacing: 16) {
-                Button(action: onRefresh) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.clockwise")
-                        Text("Refresh")
-                    }
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
+            // Settings button
+            Button(action: onSettingsTap) {
+                HStack(spacing: 6) {
+                    Image(systemName: "gearshape")
+                    Text("Settings")
                 }
-
-                Spacer()
-
-                Button(action: onSettingsTap) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "gearshape")
-                        Text("Settings")
-                    }
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
-                }
+                .font(.subheadline)
+                .foregroundColor(.blue)
             }
         }
         .padding()
@@ -862,6 +899,19 @@ private struct TappedZoneInfoCard: View {
         return allPermitAreas[animationIndex]
     }
 
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = allPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -894,7 +944,7 @@ private struct TappedZoneInfoCard: View {
                             Text("Zone \(currentSelectedArea)")
                                 .font(.headline)
                                 .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                            Text("Multi Permit Zone")
+                            Text(formattedZonesList)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         } else {

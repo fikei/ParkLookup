@@ -152,6 +152,19 @@ private struct TappedZoneCard: View {
         return allPermitAreas[animationIndex]
     }
 
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = allPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header with dismiss button
@@ -189,7 +202,7 @@ private struct TappedZoneCard: View {
                             Text("Zone \(currentSelectedArea)")
                                 .font(.headline)
                                 .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                            Text("Multi Permit Zone")
+                            Text(formattedZonesList)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         } else {
@@ -393,6 +406,19 @@ private struct MiniZoneCard: View {
         return orderedPermitAreas[animationIndex]
     }
 
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = orderedPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
     private var zoneInfo: some View {
         VStack(alignment: .leading, spacing: 4) {
             if isMultiPermitLocation {
@@ -401,7 +427,7 @@ private struct MiniZoneCard: View {
                     .font(.headline)
                     .foregroundColor(isValidStyle ? .white : .primary)
                     .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                Text("Multi Permit Zone")
+                Text(formattedZonesList)
                     .font(.caption)
                     .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
             } else {
