@@ -68,8 +68,8 @@ struct MainResultView: View {
                     verticalBias: isMapExpanded ? 0.0 : 0.5,
                     // Hide zone overlays on home screen, show when expanded
                     showOverlays: isMapExpanded,
-                    // Minimized: zoomed in (0.7), Expanded: zoomed out (1.3)
-                    zoomMultiplier: isMapExpanded ? 1.3 : 0.7
+                    // Collapsed: 0.65, Expanded: 0.5
+                    zoomMultiplier: isMapExpanded ? 0.5 : 0.65
                 )
                 .ignoresSafeArea()
             } else {
