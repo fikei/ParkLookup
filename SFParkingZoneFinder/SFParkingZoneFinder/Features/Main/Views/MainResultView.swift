@@ -71,26 +71,33 @@ struct MainResultView: View {
         ZStack {
             // Layer 1: Fullscreen Map (always visible as background)
             if viewModel.error == nil && !viewModel.isLoading {
-                ZoneMapView(
-                    zones: viewModel.allLoadedZones,
-                    currentZoneId: viewModel.currentZoneId,
-                    userCoordinate: activeCoordinate,
-                    onZoneTapped: { zone in
-                        if isMapExpanded {
-                            selectedZone = zone
-                        }
-                    },
-                    devSettingsHash: devSettings.settingsHash,
-                    // When collapsed, shift user location below the card
-                    // A bias of 0.5 places the user indicator well below the large card
-                    verticalBias: isMapExpanded ? 0.0 : 0.5,
-                    // Hide zone overlays on home screen, show when expanded
-                    showOverlays: isMapExpanded,
-                    // Collapsed: 0.65, Expanded: 0.5
-                    zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
-                    // Show pin for searched address
-                    searchedCoordinate: searchedCoordinate
-                )
+                ZStack {
+                    ZoneMapView(
+                        zones: viewModel.allLoadedZones,
+                        currentZoneId: viewModel.currentZoneId,
+                        userCoordinate: activeCoordinate,
+                        onZoneTapped: { zone in
+                            if isMapExpanded {
+                                selectedZone = zone
+                            }
+                        },
+                        devSettingsHash: devSettings.settingsHash,
+                        // When collapsed, shift user location below the card
+                        // A bias of 0.5 places the user indicator well below the large card
+                        verticalBias: isMapExpanded ? 0.0 : 0.5,
+                        // Hide zone overlays on home screen, show when expanded
+                        showOverlays: isMapExpanded,
+                        // Collapsed: 0.65, Expanded: 0.5
+                        zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
+                        // Show pin for searched address
+                        searchedCoordinate: searchedCoordinate
+                    )
+
+                    // Developer overlay (only in expanded map mode when developer mode is unlocked)
+                    if isMapExpanded && devSettings.developerModeUnlocked {
+                        DeveloperMapOverlay(devSettings: devSettings)
+                    }
+                }
                 .ignoresSafeArea()
             } else {
                 Color(.systemGroupedBackground)

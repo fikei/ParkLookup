@@ -66,6 +66,11 @@ struct ExpandedMapView: View {
                 )
                 .ignoresSafeArea()
 
+                // Developer overlay (when developer mode is unlocked)
+                if devSettings.developerModeUnlocked {
+                    DeveloperMapOverlay(devSettings: devSettings)
+                }
+
                 // Zone info overlay
                 VStack {
                     // Current zone card at top
