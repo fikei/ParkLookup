@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Displays the zone name and permit validity status prominently
+/// Supports flip animation to show parking rules on the back
 struct ZoneStatusCardView: View {
     let zoneName: String
     let zoneType: ZoneType
@@ -9,8 +10,10 @@ struct ZoneStatusCardView: View {
     let allValidPermitAreas: [String]  // All valid permits from overlapping zones
     let meteredSubtitle: String?  // For metered zones: "$2/hr • 2hr max"
     let timeLimitMinutes: Int?  // Time limit in minutes for non-permit holders
+    let ruleSummaryLines: [String]  // Parking rules to show on back of card
 
     @State private var animationIndex: Int = 0
+    @State private var isFlipped: Bool = false
 
     /// Responsive card height based on screen size
     /// Calculated to show: zone card + map card (120pt) + rules header peek (~20pt)
@@ -110,6 +113,33 @@ struct ZoneStatusCardView: View {
 
     var body: some View {
         ZStack {
+            // Front of card
+            frontCard
+                .opacity(isFlipped ? 0 : 1)
+                .rotation3DEffect(
+                    .degrees(isFlipped ? 180 : 0),
+                    axis: (x: 0, y: 1, z: 0),
+                    perspective: 0.5
+                )
+
+            // Back of card (rules)
+            backCard
+                .opacity(isFlipped ? 1 : 0)
+                .rotation3DEffect(
+                    .degrees(isFlipped ? 0 : -180),
+                    axis: (x: 0, y: 1, z: 0),
+                    perspective: 0.5
+                )
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: cardHeight)
+        .animation(.easeInOut(duration: 0.5), value: isFlipped)
+    }
+
+    // MARK: - Front Card
+
+    private var frontCard: some View {
+        ZStack {
             // Zone Letter in Circle (truly centered)
             VStack(spacing: 8) {
                 if isMultiPermitLocation {
@@ -152,6 +182,22 @@ struct ZoneStatusCardView: View {
             .accessibilityAddTraits(.isHeader)
             .accessibilityLabel(isMeteredZone ? "Paid parking zone at \(displaySubtitle ?? "this location")" : "Zone \(singleZoneCode)")
 
+            // Info button (top right)
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        isFlipped = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.title2)
+                            .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                    }
+                    .padding(16)
+                }
+                Spacer()
+            }
+
             // Validity Badge (positioned at bottom)
             VStack {
                 Spacer()
@@ -164,8 +210,76 @@ struct ZoneStatusCardView: View {
                 .padding(.bottom, 24)
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: cardHeight)
+        .background(cardBackground)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+    }
+
+    // MARK: - Back Card (Rules)
+
+    private var backCard: some View {
+        ZStack {
+            VStack(alignment: .leading, spacing: 16) {
+                // Header
+                HStack {
+                    Text("Parking Rules")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(isValidStyle ? .white : .primary)
+
+                    Spacer()
+
+                    Button {
+                        isFlipped = false
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+
+                // Rules list
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(ruleSummaryLines, id: \.self) { rule in
+                            HStack(alignment: .top, spacing: 12) {
+                                Image(systemName: "circle.fill")
+                                    .font(.system(size: 6))
+                                    .foregroundColor(isValidStyle ? .white.opacity(0.7) : .secondary)
+                                    .padding(.top, 6)
+
+                                Text(rule)
+                                    .font(.body)
+                                    .foregroundColor(isValidStyle ? .white : .primary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+
+                        if ruleSummaryLines.isEmpty {
+                            Text("No specific rules available")
+                                .font(.body)
+                                .foregroundColor(isValidStyle ? .white.opacity(0.7) : .secondary)
+                                .italic()
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+
+                Spacer()
+
+                // Tap to flip back hint
+                HStack {
+                    Spacer()
+                    Text("Tap X to flip back")
+                        .font(.caption)
+                        .foregroundColor(isValidStyle ? .white.opacity(0.5) : .secondary.opacity(0.7))
+                    Spacer()
+                }
+                .padding(.bottom, 16)
+            }
+        }
         .background(cardBackground)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
@@ -242,7 +356,14 @@ private struct LargeMultiPermitCircleView: View {
             ],
             allValidPermitAreas: ["Q"],
             meteredSubtitle: nil,
-            timeLimitMinutes: 120
+            timeLimitMinutes: 120,
+            ruleSummaryLines: [
+                "Zone Q",
+                "Residential permit Zone Q required",
+                "2-hour limit without permit",
+                "No limit with Zone Q permit",
+                "Enforced 8:00 AM - 6:00 PM"
+            ]
         )
         .padding()
     }
@@ -258,7 +379,13 @@ private struct LargeMultiPermitCircleView: View {
             applicablePermits: [],
             allValidPermitAreas: ["R"],
             meteredSubtitle: nil,
-            timeLimitMinutes: 120
+            timeLimitMinutes: 120,
+            ruleSummaryLines: [
+                "Zone R",
+                "Residential permit Zone R required",
+                "2-hour limit without permit",
+                "No limit with Zone R permit"
+            ]
         )
         .padding()
     }
@@ -276,7 +403,12 @@ private struct LargeMultiPermitCircleView: View {
             ],
             allValidPermitAreas: ["A", "B"],
             meteredSubtitle: nil,
-            timeLimitMinutes: 120
+            timeLimitMinutes: 120,
+            ruleSummaryLines: [
+                "Multi Permit Zone",
+                "Zone A or Zone B permit required",
+                "2-hour limit without permit"
+            ]
         )
         .padding()
     }
@@ -292,7 +424,12 @@ private struct LargeMultiPermitCircleView: View {
             applicablePermits: [],
             allValidPermitAreas: ["U"],
             meteredSubtitle: nil,
-            timeLimitMinutes: 120
+            timeLimitMinutes: 120,
+            ruleSummaryLines: [
+                "Zone U",
+                "Residential permit Zone U required",
+                "Special conditions may apply"
+            ]
         )
         .padding()
     }
@@ -308,7 +445,13 @@ private struct LargeMultiPermitCircleView: View {
             applicablePermits: [],
             allValidPermitAreas: [],
             meteredSubtitle: "$3/hr • 2hr max",
-            timeLimitMinutes: 120
+            timeLimitMinutes: 120,
+            ruleSummaryLines: [
+                "Paid Parking",
+                "$3/hr metered parking",
+                "2-hour maximum",
+                "Enforced 9:00 AM - 6:00 PM"
+            ]
         )
         .padding()
     }

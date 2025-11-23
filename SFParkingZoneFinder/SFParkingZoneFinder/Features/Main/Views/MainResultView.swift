@@ -50,7 +50,7 @@ struct MainResultView: View {
             // Main content
             ScrollView {
                 VStack(spacing: 16) {
-                    // Zone Status Card (prominent at top)
+                    // Zone Status Card (prominent at top, flips to show rules)
                     ZoneStatusCardView(
                         zoneName: viewModel.zoneName,
                         zoneType: viewModel.zoneType,
@@ -58,7 +58,8 @@ struct MainResultView: View {
                         applicablePermits: viewModel.applicablePermits,
                         allValidPermitAreas: viewModel.allValidPermitAreas,
                         meteredSubtitle: viewModel.meteredSubtitle,
-                        timeLimitMinutes: viewModel.timeLimitMinutes
+                        timeLimitMinutes: viewModel.timeLimitMinutes,
+                        ruleSummaryLines: viewModel.ruleSummaryLines
                     )
                     .opacity(contentAppeared ? 1 : 0)
                     .offset(y: contentAppeared ? 0 : 20)
