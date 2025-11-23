@@ -314,10 +314,18 @@ private struct AnimatedZoneCard: View {
                 // Zone circle (scaled down to fit reduced card height)
                 zoneCircle(size: 44)
 
-                // Zone info
+                // Zone info - state-specific content
                 VStack(alignment: .leading, spacing: 4) {
-                    if isValidStyle {
-                        // When permit is valid, show "No Parking Restrictions"
+                    if zoneType == .metered {
+                        // PAID PARKING STATE
+                        Text(zoneName)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(meteredSubtitle ?? "$2/hr • 2hr max")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else if isValidStyle {
+                        // IN PERMIT ZONE (valid) - single or multi
                         Text("No Parking Restrictions")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -325,6 +333,7 @@ private struct AnimatedZoneCard: View {
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.8))
                     } else if isMultiPermitLocation {
+                        // MULTI-PERMIT ZONE (invalid permit)
                         Text("Zone \(currentSelectedArea)")
                             .font(.headline)
                             .foregroundColor(.primary)
@@ -333,9 +342,15 @@ private struct AnimatedZoneCard: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else {
+                        // OUT OF PERMIT ZONE (invalid)
                         Text(zoneName)
                             .font(.headline)
                             .foregroundColor(.primary)
+                        if let limit = timeLimitMinutes {
+                            Text("\(limit / 60)hr limit")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
                     }
 
                     // Status badge
@@ -348,10 +363,21 @@ private struct AnimatedZoneCard: View {
         }
     }
 
-    /// Mini card status badge - shows "PERMIT VALID" when valid
+    /// Mini card status badge - state-specific
     private var miniStatusBadge: some View {
         Group {
-            if isValidStyle {
+            if zoneType == .metered {
+                // PAID PARKING - show payment indicator
+                HStack(spacing: 6) {
+                    Image(systemName: "creditcard")
+                        .font(.caption)
+                    Text("Paid Parking")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.blue)
+            } else if isValidStyle {
+                // IN PERMIT ZONE - valid
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.caption)
@@ -361,6 +387,7 @@ private struct AnimatedZoneCard: View {
                 }
                 .foregroundColor(.white.opacity(0.9))
             } else if let parkUntil = parkUntilText {
+                // OUT OF PERMIT - show time limit
                 HStack(spacing: 6) {
                     Image(systemName: "clock")
                         .font(.caption)
@@ -370,6 +397,7 @@ private struct AnimatedZoneCard: View {
                 }
                 .foregroundColor(.orange)
             } else {
+                // Default status
                 HStack(spacing: 6) {
                     Image(systemName: validityStatus.iconName)
                         .font(.caption)
@@ -387,44 +415,20 @@ private struct AnimatedZoneCard: View {
     private var largeContent: some View {
         ZStack {
             if !isFlipped {
-                // Front of card
+                // Front of card - state-specific content
                 VStack(spacing: 8) {
                     // Zone circle centered
                     zoneCircle(size: 160)
 
-                    // Subtitle for metered zones or multi-permit
-                    if let subtitle = displaySubtitle {
-                        Text(subtitle)
-                            .font(.headline)
-                            .foregroundColor(isValidStyle ? .white.opacity(0.9) : .secondary)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.center)
-                    }
+                    // State-specific subtitle and info
+                    largeCardSubtitle
                 }
 
-                // Top row: Permit status badge (left) and Info button (right)
+                // Top row: Status badge (left) and Info button (right)
                 VStack {
                     HStack {
-                        // Permit status badge
-                        if isValidStyle {
-                            Text("PERMIT VALID")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.white.opacity(0.25))
-                                .clipShape(Capsule())
-                        } else if zoneType == .residentialPermit {
-                            Text("PERMIT INVALID")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color(.systemGray5))
-                                .clipShape(Capsule())
-                        }
+                        // State-specific top badge
+                        largeCardTopBadge
 
                         Spacer()
 
@@ -442,7 +446,7 @@ private struct AnimatedZoneCard: View {
                     Spacer()
                 }
 
-                // Validity Badge (positioned at bottom)
+                // Bottom badge
                 VStack {
                     Spacer()
                     ValidityBadgeView(
@@ -486,6 +490,100 @@ private struct AnimatedZoneCard: View {
         if zoneType == .metered { return meteredSubtitle ?? "$2/hr • 2hr max" }
         if isMultiPermitLocation { return formattedZonesList }
         return nil
+    }
+
+    // MARK: - Large Card State-Specific Components
+
+    /// Subtitle content below the zone circle on large card
+    @ViewBuilder
+    private var largeCardSubtitle: some View {
+        if zoneType == .metered {
+            // PAID PARKING STATE
+            VStack(spacing: 4) {
+                Text(meteredSubtitle ?? "$2/hr • 2hr max")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Text("Metered Parking")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary.opacity(0.8))
+            }
+        } else if isValidStyle {
+            // IN PERMIT ZONE (valid) - single or multi
+            VStack(spacing: 4) {
+                if isMultiPermitLocation {
+                    Text(formattedZonesList)
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                Text("No Parking Restrictions")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+            }
+        } else if isMultiPermitLocation {
+            // MULTI-PERMIT ZONE (invalid permit)
+            VStack(spacing: 4) {
+                Text(formattedZonesList)
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                if let limit = timeLimitMinutes {
+                    Text("\(limit / 60)-hour limit without permit")
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
+                }
+            }
+        } else {
+            // OUT OF PERMIT ZONE (single zone, invalid)
+            VStack(spacing: 4) {
+                Text(zoneName)
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                if let limit = timeLimitMinutes {
+                    Text("\(limit / 60)-hour limit without permit")
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
+                }
+            }
+        }
+    }
+
+    /// Top badge on large card (permit status or zone type indicator)
+    @ViewBuilder
+    private var largeCardTopBadge: some View {
+        if zoneType == .metered {
+            // PAID PARKING - show payment badge
+            HStack(spacing: 4) {
+                Image(systemName: "creditcard.fill")
+                    .font(.caption)
+                Text("PAID PARKING")
+                    .font(.caption)
+                    .fontWeight(.bold)
+            }
+            .foregroundColor(.blue)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.blue.opacity(0.15))
+            .clipShape(Capsule())
+        } else if isValidStyle {
+            // IN PERMIT ZONE - valid
+            Text("PERMIT VALID")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.white.opacity(0.25))
+                .clipShape(Capsule())
+        } else if zoneType == .residentialPermit {
+            // OUT OF PERMIT ZONE - invalid
+            Text("PERMIT INVALID")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color(.systemGray5))
+                .clipShape(Capsule())
+        }
     }
 
     // MARK: - Shared Components
