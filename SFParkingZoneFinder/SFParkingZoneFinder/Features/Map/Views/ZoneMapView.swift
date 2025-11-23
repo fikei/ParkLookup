@@ -592,8 +592,8 @@ struct ZoneMapView: UIViewRepresentable {
 
             // Multi-permit polygons get a dashed border and slightly different fill
             if polygon.isMultiPermit {
-                renderer.lineDashPattern = [8, 4]  // Dashed line pattern
-                renderer.lineWidth = isCurrentZone ? 4.0 : 2.5  // Thicker border
+                renderer.lineDashPattern = [4, 2]  // More frequent dashes for multi-permit zones
+                // Use same stroke width as regular zones (no override)
                 // Slightly more saturated fill for multi-permit areas
                 renderer.fillColor = fillColor.withAlphaComponent(0.35)
             }

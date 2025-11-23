@@ -135,9 +135,9 @@ enum ZoneColorProvider {
         return baseColor.withAlphaComponent(alpha)
     }
 
-    /// Stroke width for zone polygon border
+    /// Stroke width for zone polygon border (reduced for less prominence)
     static func strokeWidth(isCurrentZone: Bool) -> CGFloat {
-        isCurrentZone ? 3.0 : 1.5
+        isCurrentZone ? 2.0 : 1.0
     }
 
     /// Get color for a ParkingZone (uses zone type for metered, permit area for RPP)
