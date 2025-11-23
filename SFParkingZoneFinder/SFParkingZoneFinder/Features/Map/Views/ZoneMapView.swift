@@ -785,7 +785,7 @@ struct ZoneMapView: UIViewRepresentable {
                 return nil
             }
 
-            // Handle searched location annotation (red pin)
+            // Handle searched location annotation (blue pin, no label)
             if let searchedAnnotation = annotation as? SearchedLocationAnnotation {
                 let identifier = "SearchedLocation"
                 var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
@@ -793,8 +793,9 @@ struct ZoneMapView: UIViewRepresentable {
                 if annotationView == nil {
                     annotationView = MKMarkerAnnotationView(annotation: searchedAnnotation, reuseIdentifier: identifier)
                     annotationView?.canShowCallout = false
-                    annotationView?.markerTintColor = .systemRed
+                    annotationView?.markerTintColor = .systemBlue
                     annotationView?.glyphImage = UIImage(systemName: "mappin")
+                    annotationView?.titleVisibility = .hidden
                     annotationView?.displayPriority = .required
                 } else {
                     annotationView?.annotation = searchedAnnotation
@@ -921,14 +922,13 @@ class ZoneLabelAnnotation: NSObject, MKAnnotation {
     }
 }
 
-/// Annotation for searched address location (shows a red pin)
+/// Annotation for searched address location (shows a blue pin)
 class SearchedLocationAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
-    let title: String?
+    var title: String? { nil }
 
-    init(coordinate: CLLocationCoordinate2D, title: String? = "Searched Location") {
+    init(coordinate: CLLocationCoordinate2D) {
         self.coordinate = coordinate
-        self.title = title
         super.init()
     }
 }
