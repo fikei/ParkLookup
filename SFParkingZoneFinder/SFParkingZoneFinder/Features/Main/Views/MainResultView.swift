@@ -85,7 +85,9 @@ struct MainResultView: View {
                     // Hide zone overlays on home screen, show when expanded
                     showOverlays: isMapExpanded,
                     // Collapsed: 0.65, Expanded: 0.5
-                    zoomMultiplier: isMapExpanded ? 0.5 : 0.65
+                    zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
+                    // Show pin for searched address
+                    searchedCoordinate: searchedCoordinate
                 )
                 .ignoresSafeArea()
             } else {
@@ -107,7 +109,7 @@ struct MainResultView: View {
                             },
                             onResetToCurrentLocation: {
                                 searchedCoordinate = nil
-                                viewModel.refreshLocation()
+                                viewModel.returnToGPSLocation()
                             },
                             onOutsideCoverage: {
                                 showOutsideCoverageAlert = true
@@ -179,7 +181,7 @@ struct MainResultView: View {
                                     // Reset to current location when minimizing
                                     if searchedCoordinate != nil {
                                         searchedCoordinate = nil
-                                        viewModel.refreshLocation()
+                                        viewModel.returnToGPSLocation()
                                     }
                                 }
                             }

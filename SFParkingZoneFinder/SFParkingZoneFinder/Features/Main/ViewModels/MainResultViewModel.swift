@@ -106,6 +106,24 @@ final class MainResultViewModel: ObservableObject {
         }
     }
 
+    /// Return to GPS location after viewing a searched address
+    /// Uses cached GPS coordinate to avoid timeout issues with GPS cold start
+    func returnToGPSLocation() {
+        logger.info("🔄 returnToGPSLocation called")
+        // Use last known GPS location if available (avoids GPS timeout on cold start)
+        if let gpsCoord = lastKnownGPSCoordinate {
+            logger.info("✅ Using cached GPS: (\(gpsCoord.latitude), \(gpsCoord.longitude))")
+            currentCoordinate = gpsCoord
+            Task {
+                await performLookupAt(gpsCoord)
+            }
+        } else {
+            // No cached GPS - need fresh location
+            logger.info("⚠️ No cached GPS, requesting fresh location")
+            refreshLocation()
+        }
+    }
+
     /// Look up zone at a specific coordinate (for address search)
     func lookupZone(at coordinate: CLLocationCoordinate2D) {
         Task {

@@ -134,6 +134,9 @@ struct ZoneMapView: UIViewRepresentable {
     /// 0.8 = 20% more zoomed in
     var zoomMultiplier: Double = 1.0
 
+    /// Coordinate from address search (shows a pin when set)
+    var searchedCoordinate: CLLocationCoordinate2D? = nil
+
     /// When true, uses convex hull (smoothed envelope). When false, uses actual block boundaries.
     /// Set to false to see the preprocessed polygon data as-is.
     static var useConvexHull: Bool = false
@@ -389,6 +392,9 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.onZoneTapped = onZoneTapped
         context.coordinator.showOverlays = showOverlays
 
+        // Handle searched location annotation
+        updateSearchedAnnotation(mapView: mapView, context: context)
+
         // Load overlays if they haven't been loaded yet but zones are now available
         if !context.coordinator.overlaysLoaded && !zones.isEmpty {
             logger.info("Zones now available (\(zones.count)) - loading overlays")
@@ -518,6 +524,37 @@ struct ZoneMapView: UIViewRepresentable {
             latitude: sumLat / Double(allCoords.count),
             longitude: sumLon / Double(allCoords.count)
         )
+    }
+
+    /// Updates the searched location annotation based on searchedCoordinate
+    private func updateSearchedAnnotation(mapView: MKMapView, context: Context) {
+        let coordinator = context.coordinator
+
+        // Remove existing searched annotation if coordinate changed or cleared
+        if let existingAnnotation = coordinator.searchedAnnotation {
+            // Check if we need to remove it (coordinate cleared or changed)
+            if searchedCoordinate == nil {
+                mapView.removeAnnotation(existingAnnotation)
+                coordinator.searchedAnnotation = nil
+            } else if let newCoord = searchedCoordinate,
+                      abs(existingAnnotation.coordinate.latitude - newCoord.latitude) > 0.000001 ||
+                      abs(existingAnnotation.coordinate.longitude - newCoord.longitude) > 0.000001 {
+                // Coordinate changed - remove old annotation
+                mapView.removeAnnotation(existingAnnotation)
+                coordinator.searchedAnnotation = nil
+            } else {
+                // Same coordinate, nothing to do
+                return
+            }
+        }
+
+        // Add new annotation if we have a searched coordinate
+        if let coord = searchedCoordinate, isValidCoordinate(coord) {
+            let annotation = SearchedLocationAnnotation(coordinate: coord)
+            mapView.addAnnotation(annotation)
+            coordinator.searchedAnnotation = annotation
+            logger.info("📍 Added searched location pin at (\(coord.latitude), \(coord.longitude))")
+        }
     }
 
     // MARK: - Overlay Loading
@@ -694,6 +731,9 @@ struct ZoneMapView: UIViewRepresentable {
         var overlaysLoaded: Bool = false  // Track whether overlays have been loaded
         var lastVerticalBias: Double = 0.0
 
+        // Track the searched location annotation
+        weak var searchedAnnotation: SearchedLocationAnnotation?
+
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone) -> Void)?) {
             self.currentZoneId = currentZoneId
             self.zones = zones
@@ -741,6 +781,29 @@ struct ZoneMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
             // Skip user location annotation
+            if annotation is MKUserLocation {
+                return nil
+            }
+
+            // Handle searched location annotation (red pin)
+            if let searchedAnnotation = annotation as? SearchedLocationAnnotation {
+                let identifier = "SearchedLocation"
+                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+
+                if annotationView == nil {
+                    annotationView = MKMarkerAnnotationView(annotation: searchedAnnotation, reuseIdentifier: identifier)
+                    annotationView?.canShowCallout = false
+                    annotationView?.markerTintColor = .systemRed
+                    annotationView?.glyphImage = UIImage(systemName: "mappin")
+                    annotationView?.displayPriority = .required
+                } else {
+                    annotationView?.annotation = searchedAnnotation
+                }
+
+                return annotationView
+            }
+
+            // Handle zone label annotation
             guard let zoneAnnotation = annotation as? ZoneLabelAnnotation else {
                 return nil
             }
@@ -854,6 +917,18 @@ class ZoneLabelAnnotation: NSObject, MKAnnotation {
         self.zoneCode = zoneCode
         self.zoneId = zoneId
         self.zoneType = zoneType
+        super.init()
+    }
+}
+
+/// Annotation for searched address location (shows a red pin)
+class SearchedLocationAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    let title: String?
+
+    init(coordinate: CLLocationCoordinate2D, title: String? = "Searched Location") {
+        self.coordinate = coordinate
+        self.title = title
         super.init()
     }
 }
