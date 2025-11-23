@@ -383,9 +383,13 @@ private struct AnimatedZoneCard: View {
                             .foregroundColor(.secondary)
                     } else if isValidStyle {
                         // IN PERMIT ZONE (valid) - single or multi
-                        Text("No Parking Restrictions")
-                            .font(.headline)
-                            .foregroundColor(.white)
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.headline)
+                            Text("Unlimited Parking")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.white)
                         Text(isMultiPermitLocation ? formattedZonesList : zoneName)
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.8))
@@ -434,15 +438,8 @@ private struct AnimatedZoneCard: View {
                 }
                 .foregroundColor(.blue)
             } else if isValidStyle {
-                // IN PERMIT ZONE - valid
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.caption)
-                    Text("PERMIT VALID")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                }
-                .foregroundColor(.white.opacity(0.9))
+                // IN PERMIT ZONE - valid (checkmark already in header, zone name in subtitle)
+                EmptyView()
             } else if let parkUntil = parkUntilText {
                 // OUT OF PERMIT - show time limit
                 HStack(spacing: 6) {
@@ -572,7 +569,7 @@ private struct AnimatedZoneCard: View {
                         .font(.headline)
                         .foregroundColor(.white.opacity(0.9))
                 }
-                Text("No Parking Restrictions")
+                Text("Unlimited Parking")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.8))
             }
@@ -622,14 +619,18 @@ private struct AnimatedZoneCard: View {
             .clipShape(Capsule())
         } else if isValidStyle {
             // IN PERMIT ZONE - valid
-            Text("PERMIT VALID")
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.white.opacity(0.25))
-                .clipShape(Capsule())
+            HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.caption)
+                Text("UNLIMITED PARKING")
+                    .font(.caption)
+                    .fontWeight(.bold)
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.white.opacity(0.25))
+            .clipShape(Capsule())
         } else if zoneType == .residentialPermit {
             // OUT OF PERMIT ZONE - invalid
             Text("PERMIT INVALID")
