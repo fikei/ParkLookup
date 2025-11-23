@@ -4,117 +4,6 @@ import os.log
 
 private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "ZoneMapView")
 
-// MARK: - Polygon Simplification (Douglas-Peucker Algorithm)
-
-/// Simplifies a polygon by removing points that don't significantly affect the shape
-/// Uses the Douglas-Peucker algorithm with the given tolerance (in degrees)
-private func simplifyPolygon(_ coords: [CLLocationCoordinate2D], tolerance: Double) -> [CLLocationCoordinate2D] {
-    guard coords.count > 4 else { return coords }  // Need at least 4 points for simplification
-
-    func perpendicularDistance(_ point: CLLocationCoordinate2D, lineStart: CLLocationCoordinate2D, lineEnd: CLLocationCoordinate2D) -> Double {
-        let dx = lineEnd.longitude - lineStart.longitude
-        let dy = lineEnd.latitude - lineStart.latitude
-
-        if dx == 0 && dy == 0 {
-            // Line start and end are the same point
-            let pdx = point.longitude - lineStart.longitude
-            let pdy = point.latitude - lineStart.latitude
-            return sqrt(pdx * pdx + pdy * pdy)
-        }
-
-        let t = max(0, min(1, ((point.longitude - lineStart.longitude) * dx + (point.latitude - lineStart.latitude) * dy) / (dx * dx + dy * dy)))
-        let projX = lineStart.longitude + t * dx
-        let projY = lineStart.latitude + t * dy
-        let pdx = point.longitude - projX
-        let pdy = point.latitude - projY
-        return sqrt(pdx * pdx + pdy * pdy)
-    }
-
-    func douglasPeucker(_ points: [CLLocationCoordinate2D], _ epsilon: Double) -> [CLLocationCoordinate2D] {
-        guard points.count > 2 else { return points }
-
-        var maxDistance = 0.0
-        var maxIndex = 0
-
-        for i in 1..<(points.count - 1) {
-            let distance = perpendicularDistance(points[i], lineStart: points[0], lineEnd: points[points.count - 1])
-            if distance > maxDistance {
-                maxDistance = distance
-                maxIndex = i
-            }
-        }
-
-        if maxDistance > epsilon {
-            let left = douglasPeucker(Array(points[0...maxIndex]), epsilon)
-            let right = douglasPeucker(Array(points[maxIndex...]), epsilon)
-            return Array(left.dropLast()) + right
-        } else {
-            return [points[0], points[points.count - 1]]
-        }
-    }
-
-    let simplified = douglasPeucker(coords, tolerance)
-    // Ensure polygon is closed
-    if simplified.count >= 3 && (simplified.first!.latitude != simplified.last!.latitude || simplified.first!.longitude != simplified.last!.longitude) {
-        return simplified + [simplified[0]]
-    }
-    return simplified
-}
-
-// MARK: - Convex Hull Algorithm (Graham Scan)
-
-/// Computes the convex hull of a set of points using Graham scan algorithm
-/// Returns points in counter-clockwise order forming the hull
-private func convexHull(_ points: [CLLocationCoordinate2D]) -> [CLLocationCoordinate2D] {
-    guard points.count >= 3 else { return points }
-
-    // Find the bottom-most point (or left-most in case of tie)
-    var sorted = points
-    let pivot = sorted.min { a, b in
-        if a.latitude != b.latitude {
-            return a.latitude < b.latitude
-        }
-        return a.longitude < b.longitude
-    }!
-
-    // Sort points by polar angle with respect to pivot
-    sorted.sort { a, b in
-        let angleA = atan2(a.latitude - pivot.latitude, a.longitude - pivot.longitude)
-        let angleB = atan2(b.latitude - pivot.latitude, b.longitude - pivot.longitude)
-        if angleA != angleB {
-            return angleA < angleB
-        }
-        // If same angle, closer point first
-        let distA = (a.latitude - pivot.latitude) * (a.latitude - pivot.latitude) +
-                    (a.longitude - pivot.longitude) * (a.longitude - pivot.longitude)
-        let distB = (b.latitude - pivot.latitude) * (b.latitude - pivot.latitude) +
-                    (b.longitude - pivot.longitude) * (b.longitude - pivot.longitude)
-        return distA < distB
-    }
-
-    // Cross product to determine turn direction
-    func cross(_ o: CLLocationCoordinate2D, _ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> Double {
-        return (a.longitude - o.longitude) * (b.latitude - o.latitude) -
-               (a.latitude - o.latitude) * (b.longitude - o.longitude)
-    }
-
-    // Build hull
-    var hull: [CLLocationCoordinate2D] = []
-    for point in sorted {
-        while hull.count >= 2 && cross(hull[hull.count - 2], hull[hull.count - 1], point) <= 0 {
-            hull.removeLast()
-        }
-        hull.append(point)
-    }
-
-    // Close the hull
-    if hull.count >= 3 {
-        hull.append(hull[0])
-    }
-
-    return hull
-}
-
 /// MKMapView-based map with zone polygon overlays
 /// Uses UIViewRepresentable to enable MKPolygonRenderer (not available in SwiftUI Map)
 struct ZoneMapView: UIViewRepresentable {
@@ -136,10 +25,6 @@ struct ZoneMapView: UIViewRepresentable {
 
     /// Coordinate from address search (shows a pin when set)
     var searchedCoordinate: CLLocationCoordinate2D? = nil
-
-    /// When true, uses convex hull (smoothed envelope). When false, uses actual block boundaries.
-    /// Set to false to see the preprocessed polygon data as-is.
-    static var useConvexHull: Bool = false
 
     /// Validates a coordinate to ensure it won't cause NaN errors
     private func isValidCoordinate(_ coord: CLLocationCoordinate2D?) -> Bool {
@@ -189,16 +74,15 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Load zone overlays in background, add to map on main thread
         let zonesToLoad = self.zones
-        let zoneCount = zonesToLoad.count
-        let useConvexHull = ZoneMapView.useConvexHull
+        let devSettings = DeveloperSettings.shared
 
         DispatchQueue.global(qos: .userInitiated).async {
 
             var polygons: [ZonePolygon] = []
             var annotations: [ZoneLabelAnnotation] = []
             var totalBoundaries = 0
-            var totalPoints = 0
-            var outputPoints = 0
+            var totalInputPoints = 0
+            var totalOutputPoints = 0
 
             // Filter radius for visible zones
             let filterRadius = 0.03   // ~3.3km - visible area
@@ -208,7 +92,7 @@ struct ZoneMapView: UIViewRepresentable {
             let minLon = center.longitude - filterRadius
             let maxLon = center.longitude + filterRadius
 
-            for (index, zone) in zonesToLoad.enumerated() {
+            for zone in zonesToLoad {
                 let zoneBoundaryCount = zone.allBoundaryCoordinates.count
                 totalBoundaries += zoneBoundaryCount
 
@@ -216,7 +100,7 @@ struct ZoneMapView: UIViewRepresentable {
                 var nearbyBoundaries: [[CLLocationCoordinate2D]] = []
 
                 for boundary in zone.allBoundaryCoordinates {
-                    totalPoints += boundary.count
+                    totalInputPoints += boundary.count
 
                     // Check if any point of this boundary is within filter bounds
                     let hasNearbyPoint = boundary.contains { coord in
@@ -229,54 +113,42 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 }
 
-                if useConvexHull {
-                    // CONVEX HULL MODE: Create single smoothed envelope per zone
-                    let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
-                    if allNearbyPoints.count >= 3 {
-                        let hull = convexHull(allNearbyPoints)
-                        if hull.count >= 3 {
-                            let polygon = ZonePolygon(coordinates: hull, count: hull.count)
-                            polygon.zoneId = zone.id
-                            polygon.zoneCode = zone.permitArea
-                            polygon.zoneType = zone.zoneType
-                            polygons.append(polygon)
-                            outputPoints += hull.count
-                        }
-                    }
-                } else {
-                    // ACTUAL BOUNDARIES MODE: Use preprocessed block polygons as-is
-                    // Get multi-permit boundary indices for this zone
-                    let multiPermitIndices = zone.multiPermitBoundaryIndices
+                // Apply simplification pipeline based on DeveloperSettings
+                let multiPermitIndices = zone.multiPermitBoundaryIndices
+                let allBoundaries = zone.allBoundaryCoordinates
 
-                    // Build a lookup from boundary coordinate count to original indices
-                    // for matching nearbyBoundaries back to original indices
-                    let allBoundaries = zone.allBoundaryCoordinates
+                for boundary in nearbyBoundaries {
+                    guard boundary.count >= 3 else { continue }
 
-                    for boundary in nearbyBoundaries {
-                        guard boundary.count >= 3 else { continue }
-                        let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
-                        polygon.zoneId = zone.id
-                        polygon.zoneCode = zone.permitArea
-                        polygon.zoneType = zone.zoneType
+                    // Apply simplification if enabled
+                    let displayBoundary = devSettings.isSimplificationEnabled
+                        ? PolygonSimplifier.simplify(boundary, settings: devSettings)
+                        : boundary
 
-                        // Check if this is a multi-permit boundary by matching coordinates
-                        // Find the original index by comparing first coordinate (unique enough for matching)
-                        if let firstCoord = boundary.first {
-                            for (originalIndex, originalBoundary) in allBoundaries.enumerated() {
-                                if let origFirst = originalBoundary.first,
-                                   abs(origFirst.latitude - firstCoord.latitude) < 0.000001 &&
-                                   abs(origFirst.longitude - firstCoord.longitude) < 0.000001 &&
-                                   multiPermitIndices.contains(originalIndex) {
-                                    polygon.isMultiPermit = true
-                                    polygon.allValidPermitAreas = zone.validPermitAreas(for: originalIndex)
-                                    break
-                                }
+                    guard displayBoundary.count >= 3 else { continue }
+
+                    let polygon = ZonePolygon(coordinates: displayBoundary, count: displayBoundary.count)
+                    polygon.zoneId = zone.id
+                    polygon.zoneCode = zone.permitArea
+                    polygon.zoneType = zone.zoneType
+                    polygon.originalVertexCount = boundary.count  // Store for debug display
+
+                    // Check if this is a multi-permit boundary
+                    if let firstCoord = boundary.first {
+                        for (originalIndex, originalBoundary) in allBoundaries.enumerated() {
+                            if let origFirst = originalBoundary.first,
+                               abs(origFirst.latitude - firstCoord.latitude) < 0.000001 &&
+                               abs(origFirst.longitude - firstCoord.longitude) < 0.000001 &&
+                               multiPermitIndices.contains(originalIndex) {
+                                polygon.isMultiPermit = true
+                                polygon.allValidPermitAreas = zone.validPermitAreas(for: originalIndex)
+                                break
                             }
                         }
-
-                        polygons.append(polygon)
-                        outputPoints += boundary.count
                     }
+
+                    polygons.append(polygon)
+                    totalOutputPoints += displayBoundary.count
                 }
 
                 // Add annotation at zone centroid (from all nearby boundaries)
@@ -561,11 +433,10 @@ struct ZoneMapView: UIViewRepresentable {
 
     private func loadOverlays(mapView: MKMapView, context: Context) {
         let zonesToLoad = self.zones
-        let zoneCount = zonesToLoad.count
         let shouldShowOverlays = self.showOverlays
         let coordinator = context.coordinator
+        let devSettings = DeveloperSettings.shared
 
-        let useConvexHull = ZoneMapView.useConvexHull
         let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
 
@@ -573,8 +444,8 @@ struct ZoneMapView: UIViewRepresentable {
             var polygons: [ZonePolygon] = []
             var annotations: [ZoneLabelAnnotation] = []
             var totalBoundaries = 0
-            var totalPoints = 0
-            var outputPoints = 0
+            var totalInputPoints = 0
+            var totalOutputPoints = 0
 
             // Filter radius for visible zones
             let filterRadius = 0.03   // ~3.3km - visible area
@@ -584,14 +455,14 @@ struct ZoneMapView: UIViewRepresentable {
             let minLon = center.longitude - filterRadius
             let maxLon = center.longitude + filterRadius
 
-            for (index, zone) in zonesToLoad.enumerated() {
+            for zone in zonesToLoad {
                 let zoneBoundaryCount = zone.allBoundaryCoordinates.count
                 totalBoundaries += zoneBoundaryCount
 
                 var nearbyBoundaries: [[CLLocationCoordinate2D]] = []
 
                 for boundary in zone.allBoundaryCoordinates {
-                    totalPoints += boundary.count
+                    totalInputPoints += boundary.count
 
                     let hasNearbyPoint = boundary.contains { coord in
                         coord.latitude >= minLat && coord.latitude <= maxLat &&
@@ -603,38 +474,41 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 }
 
-                if useConvexHull {
-                    let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
-                    if allNearbyPoints.count >= 3 {
-                        let hull = convexHull(allNearbyPoints)
-                        if hull.count >= 3 {
-                            let polygon = ZonePolygon(coordinates: hull, count: hull.count)
-                            polygon.zoneId = zone.id
-                            polygon.zoneCode = zone.permitArea
-                            polygon.zoneType = zone.zoneType
-                            polygons.append(polygon)
-                            outputPoints += hull.count
+                // Apply simplification pipeline based on DeveloperSettings
+                let multiPermitIndices = zone.multiPermitBoundaryIndices
+                let allBoundaries = zone.allBoundaryCoordinates
+
+                for boundary in nearbyBoundaries {
+                    guard boundary.count >= 3 else { continue }
+
+                    // Apply simplification if enabled
+                    let displayBoundary = devSettings.isSimplificationEnabled
+                        ? PolygonSimplifier.simplify(boundary, settings: devSettings)
+                        : boundary
+
+                    guard displayBoundary.count >= 3 else { continue }
+
+                    let polygon = ZonePolygon(coordinates: displayBoundary, count: displayBoundary.count)
+                    polygon.zoneId = zone.id
+                    polygon.zoneCode = zone.permitArea
+                    polygon.zoneType = zone.zoneType
+                    polygon.originalVertexCount = boundary.count
+
+                    // Check if this boundary is multi-permit
+                    if let firstCoord = boundary.first {
+                        for (originalIndex, originalBoundary) in allBoundaries.enumerated() {
+                            if let origFirst = originalBoundary.first,
+                               abs(origFirst.latitude - firstCoord.latitude) < 0.000001 &&
+                               abs(origFirst.longitude - firstCoord.longitude) < 0.000001 &&
+                               multiPermitIndices.contains(originalIndex) {
+                                polygon.isMultiPermit = true
+                                break
+                            }
                         }
                     }
-                } else {
-                    let multiPermitIndices = zone.multiPermitBoundaryIndices
 
-                    for boundary in nearbyBoundaries {
-                        guard boundary.count >= 3 else { continue }
-                        let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
-                        polygon.zoneId = zone.id
-                        polygon.zoneCode = zone.permitArea
-                        polygon.zoneType = zone.zoneType
-
-                        // Check if this boundary is multi-permit
-                        let originalIndex = zone.allBoundaryCoordinates.firstIndex(where: { $0.count == boundary.count && $0.first?.latitude == boundary.first?.latitude })
-                        if let idx = originalIndex, multiPermitIndices.contains(idx) {
-                            polygon.isMultiPermit = true
-                        }
-
-                        polygons.append(polygon)
-                        outputPoints += boundary.count
-                    }
+                    polygons.append(polygon)
+                    totalOutputPoints += displayBoundary.count
                 }
 
                 // Create zone label annotation at centroid
@@ -656,6 +530,12 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 }
 
+            }
+
+            // Log simplification stats if enabled
+            if devSettings.logSimplificationStats && devSettings.isSimplificationEnabled {
+                let reduction = totalInputPoints > 0 ? Double(totalInputPoints - totalOutputPoints) / Double(totalInputPoints) * 100 : 0
+                logger.info("📐 Simplification: \(totalInputPoints) → \(totalOutputPoints) vertices (\(String(format: "%.1f", reduction))% reduction)")
             }
 
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
@@ -904,6 +784,7 @@ class ZonePolygon: MKPolygon {
     var zoneType: ZoneType?
     var isMultiPermit: Bool = false  // True if this polygon accepts multiple permits
     var allValidPermitAreas: [String]?  // All valid permit areas for multi-permit polygons
+    var originalVertexCount: Int = 0  // For debug: original vertex count before simplification
 }
 
 /// Annotation for zone label display
