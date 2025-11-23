@@ -345,26 +345,6 @@ private struct AnimatedZoneCard: View {
                 Spacer()
             }
             .padding()
-
-            // Permit status badge in top right corner
-            if !isValidStyle && zoneType == .residentialPermit {
-                VStack {
-                    HStack {
-                        Spacer()
-                        Text("PERMIT INVALID")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(.systemGray5))
-                            .clipShape(Capsule())
-                            .padding(.top, 8)
-                            .padding(.trailing, 12)
-                    }
-                    Spacer()
-                }
-            }
         }
     }
 
@@ -422,10 +402,10 @@ private struct AnimatedZoneCard: View {
                     }
                 }
 
-                // Top row: PERMIT VALID badge (left) and Info button (right)
+                // Top row: Permit status badge (left) and Info button (right)
                 VStack {
                     HStack {
-                        // PERMIT VALID badge (only when permit is valid)
+                        // Permit status badge
                         if isValidStyle {
                             Text("PERMIT VALID")
                                 .font(.caption)
@@ -434,6 +414,15 @@ private struct AnimatedZoneCard: View {
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
                                 .background(Color.white.opacity(0.25))
+                                .clipShape(Capsule())
+                        } else if zoneType == .residentialPermit {
+                            Text("PERMIT INVALID")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color(.systemGray5))
                                 .clipShape(Capsule())
                         }
 
