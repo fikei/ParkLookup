@@ -40,10 +40,17 @@ final class MainResultViewModel: ObservableObject {
     // Map preferences (read from UserDefaults)
     @Published var showFloatingMap: Bool
     @Published var mapPosition: MapPosition
+    @Published var showMeteredZones: Bool
 
-    /// All loaded zones for map display
+    /// All loaded zones for map display, filtered by user preferences
     var allLoadedZones: [ParkingZone] {
-        zoneService.allLoadedZones
+        let zones = zoneService.allLoadedZones
+        if showMeteredZones {
+            return zones
+        } else {
+            // Filter out metered zones when setting is off
+            return zones.filter { $0.zoneType != .metered }
+        }
     }
 
     // MARK: - Dependencies
@@ -72,6 +79,8 @@ final class MainResultViewModel: ObservableObject {
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
         let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
         self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
+        // Show metered zones is OFF by default
+        self.showMeteredZones = UserDefaults.standard.object(forKey: "showMeteredZones") as? Bool ?? false
 
         setupBindings()
     }
@@ -200,6 +209,7 @@ final class MainResultViewModel: ObservableObject {
                 self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
                 let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
                 self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
+                self.showMeteredZones = UserDefaults.standard.object(forKey: "showMeteredZones") as? Bool ?? false
             }
             .store(in: &cancellables)
 

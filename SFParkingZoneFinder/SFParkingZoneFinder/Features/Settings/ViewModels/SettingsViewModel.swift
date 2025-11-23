@@ -19,6 +19,11 @@ final class SettingsViewModel: ObservableObject {
             UserDefaults.standard.set(mapPosition.rawValue, forKey: "mapPosition")
         }
     }
+    @Published var showMeteredZones: Bool {
+        didSet {
+            UserDefaults.standard.set(showMeteredZones, forKey: "showMeteredZones")
+        }
+    }
 
     // MARK: - Dependencies
 
@@ -52,6 +57,8 @@ final class SettingsViewModel: ObservableObject {
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
         let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
         self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
+        // Show metered zones is OFF by default
+        self.showMeteredZones = UserDefaults.standard.object(forKey: "showMeteredZones") as? Bool ?? false
 
         setupBindings()
     }

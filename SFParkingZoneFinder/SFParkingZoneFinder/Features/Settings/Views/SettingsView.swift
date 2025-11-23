@@ -34,7 +34,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: - Map Preferences Section
-                Section(header: Text("Map")) {
+                Section(header: Text("Map"), footer: Text("Metered zones show paid parking areas on the map.")) {
                     Toggle("Show Floating Map", isOn: $viewModel.showFloatingMap)
 
                     Picker("Map Position", selection: $viewModel.mapPosition) {
@@ -42,6 +42,8 @@ struct SettingsView: View {
                             Text(position.displayName).tag(position)
                         }
                     }
+
+                    Toggle("Show Metered Zones", isOn: $viewModel.showMeteredZones)
                 }
 
                 // MARK: - Help Section

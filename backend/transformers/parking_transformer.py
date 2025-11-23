@@ -374,6 +374,9 @@ class ParkingDataTransformer:
         Split overlapping polygons between different zones by averaging the boundary.
         For each pair of overlapping polygons from different zones, adjust so they
         meet at the midline instead of overlapping.
+
+        IMPORTANT: Multi-permit polygons (same physical block in multiple zones)
+        should NOT be split - they share the same multi-permit signature.
         """
         if len(zones) < 2:
             return zones
@@ -404,8 +407,15 @@ class ParkingDataTransformer:
             except Exception:
                 return None
 
-        # Build spatial index of all polygons with their zone info
-        all_polys: List[Tuple[int, int, Polygon, str]] = []  # (zone_idx, poly_idx, shapely_poly, area_code)
+        def get_multi_permit_sig(zone: RPPZone, poly_idx: int) -> Tuple[str, ...]:
+            """Get the multi-permit signature for a polygon"""
+            if poly_idx in zone.multi_permit_polygons:
+                return tuple(sorted(zone.multi_permit_polygons[poly_idx]))
+            return (zone.area_code,)
+
+        # Build spatial index of all polygons with their zone info and multi-permit signature
+        # (zone_idx, poly_idx, shapely_poly, area_code, multi_permit_sig)
+        all_polys: List[Tuple[int, int, Polygon, str, Tuple[str, ...]]] = []
 
         for zone_idx, zone in enumerate(zones):
             for poly_idx, coords in enumerate(zone.polygon):
@@ -415,7 +425,8 @@ class ParkingDataTransformer:
                     poly = Polygon(coords)
                     poly = fix_polygon(poly)
                     if poly is not None:
-                        all_polys.append((zone_idx, poly_idx, poly, zone.area_code))
+                        sig = get_multi_permit_sig(zone, poly_idx)
+                        all_polys.append((zone_idx, poly_idx, poly, zone.area_code, sig))
                 except Exception:
                     continue
 
@@ -424,13 +435,28 @@ class ParkingDataTransformer:
         # Track modified polygons
         modified: Dict[Tuple[int, int], Polygon] = {}
         overlap_count = 0
+        skipped_multi_permit = 0
         error_count = 0
 
         # Check each pair of polygons from different zones
-        for i, (z_idx1, p_idx1, poly1, area1) in enumerate(all_polys):
-            for j, (z_idx2, p_idx2, poly2, area2) in enumerate(all_polys[i+1:], start=i+1):
+        for i, (z_idx1, p_idx1, poly1, area1, sig1) in enumerate(all_polys):
+            for j, (z_idx2, p_idx2, poly2, area2, sig2) in enumerate(all_polys[i+1:], start=i+1):
                 # Skip same zone
                 if area1 == area2:
+                    continue
+
+                # CRITICAL: Skip if polygons share multi-permit signature
+                # This means they're the same physical block (multi-permit area)
+                # e.g., an I/S block exists in both zone I and zone S - don't split it!
+                if sig1 == sig2 and len(sig1) > 1:
+                    skipped_multi_permit += 1
+                    continue
+
+                # Also skip if one signature contains the other zone
+                # e.g., polygon in zone I with sig ("I",) overlapping polygon in zone S with sig ("I", "S")
+                # The ("I", "S") polygon is a multi-permit block - don't split it
+                if area2 in sig1 or area1 in sig2:
+                    skipped_multi_permit += 1
                     continue
 
                 try:
@@ -504,7 +530,7 @@ class ParkingDataTransformer:
                         logger.debug(f"Failed to process overlap between {area1} and {area2}: {e}")
                     continue
 
-        logger.info(f"Processed {overlap_count} cross-zone overlaps ({error_count} errors skipped)")
+        logger.info(f"Processed {overlap_count} cross-zone overlaps ({skipped_multi_permit} multi-permit skipped, {error_count} errors)")
 
         # Apply modifications to zones
         if not modified:
@@ -907,7 +933,105 @@ class ParkingDataTransformer:
             zones.append(zone)
 
         logger.info(f"Derived {len(zones)} metered zones from {len(meters)} meters")
+
+        # Merge adjacent/overlapping metered zones
+        zones = self._merge_metered_zones(zones)
+
         return zones
+
+    def _merge_metered_zones(self, zones: List[MeteredZone]) -> List[MeteredZone]:
+        """
+        Merge adjacent or overlapping metered zones into larger zones.
+        Since metered zones are simple rectangles, we can union touching polygons.
+        """
+        if not SHAPELY_AVAILABLE or len(zones) < 2:
+            return zones
+
+        logger.info(f"Merging {len(zones)} metered zones...")
+
+        try:
+            # Convert all metered zone polygons to Shapely
+            shapely_polys = []
+            zone_metadata = []  # Parallel list of metadata for each polygon
+
+            for zone in zones:
+                for poly_coords in zone.polygon:
+                    if len(poly_coords) < 4:
+                        continue
+                    try:
+                        poly = Polygon(poly_coords)
+                        if not poly.is_valid:
+                            poly = make_valid(poly)
+                        if poly.is_valid and not poly.is_empty and isinstance(poly, Polygon):
+                            shapely_polys.append(poly)
+                            zone_metadata.append({
+                                "meter_count": zone.meter_count,
+                                "cap_colors": zone.cap_colors,
+                                "time_limits": [zone.avg_time_limit] if zone.avg_time_limit else [],
+                                "rate_area": zone.rate_area,
+                                "name": zone.name
+                            })
+                    except Exception:
+                        continue
+
+            if not shapely_polys:
+                return zones
+
+            # Use unary_union to merge all touching/overlapping polygons
+            merged = unary_union(shapely_polys)
+
+            # Extract merged polygons and create new zones
+            result_zones = []
+            zone_counter = 0
+
+            def extract_polygons(geom):
+                """Extract all polygons from a geometry"""
+                if isinstance(geom, Polygon) and not geom.is_empty:
+                    return [geom]
+                elif isinstance(geom, MultiPolygon):
+                    return [p for p in geom.geoms if not p.is_empty]
+                elif hasattr(geom, 'geoms'):
+                    polys = []
+                    for g in geom.geoms:
+                        polys.extend(extract_polygons(g))
+                    return polys
+                return []
+
+            merged_polys = extract_polygons(merged)
+
+            for poly in merged_polys:
+                zone_counter += 1
+                # Find which original zones contributed to this merged polygon
+                contributing_meta = []
+                for i, orig_poly in enumerate(shapely_polys):
+                    if poly.intersects(orig_poly):
+                        contributing_meta.append(zone_metadata[i])
+
+                # Aggregate metadata from contributing zones
+                total_meters = sum(m["meter_count"] for m in contributing_meta)
+                all_colors = list(set(c for m in contributing_meta for c in m["cap_colors"]))
+                all_times = [t for m in contributing_meta for t in m["time_limits"] if t]
+                avg_time = int(sum(all_times) / len(all_times)) if all_times else None
+                rate_areas = list(set(m["rate_area"] for m in contributing_meta if m["rate_area"]))
+
+                # Create merged zone
+                coords = [(c[0], c[1]) for c in poly.exterior.coords]
+                result_zones.append(MeteredZone(
+                    zone_id=f"METERED_{zone_counter:04d}",
+                    name="Paid Parking",
+                    polygon=[coords],
+                    meter_count=total_meters,
+                    cap_colors=all_colors,
+                    avg_time_limit=avg_time,
+                    rate_area=rate_areas[0] if rate_areas else None
+                ))
+
+            logger.info(f"Merged metered zones: {len(zones)} -> {len(result_zones)}")
+            return result_zones
+
+        except Exception as e:
+            logger.warning(f"Metered zone merging failed: {e}")
+            return zones
 
     def generate_app_data(
         self,
