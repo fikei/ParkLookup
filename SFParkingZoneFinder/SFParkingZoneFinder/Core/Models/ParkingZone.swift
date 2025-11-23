@@ -111,8 +111,15 @@ extension ParkingZone {
     }
 
     /// Time limit for non-permit holders (in minutes)
+    /// Checks permitRequired rules first (which contain the time limit), then any rule with timeLimit
     var nonPermitTimeLimit: Int? {
-        rules.first { $0.ruleType == .timeLimit }?.timeLimit
+        // Check permit required rules first - they contain the non-permit holder time limit
+        if let permitRule = rules.first(where: { $0.ruleType == .permitRequired }),
+           let limit = permitRule.timeLimit {
+            return limit
+        }
+        // Fall back to any rule with a time limit
+        return rules.first { $0.timeLimit != nil }?.timeLimit
     }
 
     /// Enforcement hours description

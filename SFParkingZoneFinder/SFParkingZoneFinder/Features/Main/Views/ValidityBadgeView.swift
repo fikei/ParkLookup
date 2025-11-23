@@ -11,8 +11,9 @@ struct ValidityBadgeView: View {
     var timeLimitMinutes: Int? = nil
 
     /// Calculate "Park until" time based on current time + time limit
+    /// Shows for both .invalid (wrong permit) and .noPermitSet (no permit configured)
     private var parkUntilText: String? {
-        guard status == .invalid, let limit = timeLimitMinutes else { return nil }
+        guard (status == .invalid || status == .noPermitSet), let limit = timeLimitMinutes else { return nil }
 
         let parkUntil = Date().addingTimeInterval(TimeInterval(limit * 60))
         let formatter = DateFormatter()
@@ -31,7 +32,8 @@ struct ValidityBadgeView: View {
     var body: some View {
         HStack(spacing: 12) {
             // Shape indicator (accessibility: not color-only)
-            Image(systemName: status == .invalid && parkUntilText != nil ? "clock" : status.iconName)
+            // Show clock icon when displaying "Park until" time
+            Image(systemName: parkUntilText != nil ? "clock" : status.iconName)
                 .font(.system(size: 20, weight: .semibold))
 
             // Text
