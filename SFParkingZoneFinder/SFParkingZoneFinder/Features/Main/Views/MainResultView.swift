@@ -313,9 +313,12 @@ private struct AnimatedZoneCard: View {
                     .transition(.opacity)
             }
         }
-        .frame(height: isExpanded ? nil : largeCardHeight)
+        .frame(height: isExpanded ? miniCardHeight : largeCardHeight)
         .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isExpanded)
     }
+
+    /// Fixed height for mini card (56pt circle + 16pt padding top/bottom)
+    private var miniCardHeight: CGFloat { 88 }
 
     // MARK: - Mini Content (expanded map mode)
 
