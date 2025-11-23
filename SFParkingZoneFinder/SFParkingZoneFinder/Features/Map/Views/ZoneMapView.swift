@@ -139,8 +139,7 @@ struct ZoneMapView: UIViewRepresentable {
     static var useConvexHull: Bool = false
 
     func makeUIView(context: Context) -> MKMapView {
-        let startTime = CFAbsoluteTimeGetCurrent()
-        logger.info("makeUIView START - zones count: \(self.zones.count), userCoord: \(userCoordinate != nil ? "present" : "nil")")
+        logger.info("ZoneMapView init - \(self.zones.count) zones")
 
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
@@ -172,8 +171,6 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.initialCenter = center
         context.coordinator.initialSpan = desiredSpan
 
-        logger.debug("Map region set in \(String(format: "%.1f", (CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms - center: \(center.latitude), \(center.longitude)")
-
         // Add tap gesture for zone selection
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         mapView.addGestureRecognizer(tapGesture)
@@ -181,12 +178,9 @@ struct ZoneMapView: UIViewRepresentable {
         // Load zone overlays in background, add to map on main thread
         let zonesToLoad = self.zones
         let zoneCount = zonesToLoad.count
-        logger.info("Starting background polygon prep for \(zoneCount) zones")
-
         let useConvexHull = ZoneMapView.useConvexHull
+
         DispatchQueue.global(qos: .userInitiated).async {
-            let bgStartTime = CFAbsoluteTimeGetCurrent()
-            logger.info("Background thread START - useConvexHull: \(useConvexHull)")
 
             var polygons: [ZonePolygon] = []
             var annotations: [ZoneLabelAnnotation] = []
@@ -221,12 +215,6 @@ struct ZoneMapView: UIViewRepresentable {
                     if hasNearbyPoint {
                         nearbyBoundaries.append(boundary)
                     }
-                }
-
-                // Log zone info on first few
-                if index < 3 {
-                    let pointCounts = nearbyBoundaries.map { $0.count }
-                    logger.info("Zone \(index): id=\(zone.id), permitArea=\(zone.permitArea ?? "nil"), boundaries=\(zoneBoundaryCount), nearbyBoundaries=\(nearbyBoundaries.count), pointsPerBoundary=\(pointCounts.prefix(5))")
                 }
 
                 if useConvexHull {
@@ -299,20 +287,11 @@ struct ZoneMapView: UIViewRepresentable {
                     annotations.append(annotation)
                 }
 
-                // Log progress every 10 zones
-                if (index + 1) % 10 == 0 || index == zoneCount - 1 {
-                    logger.debug("Processed \(index + 1)/\(zoneCount) zones, polygons so far: \(polygons.count)")
-                }
             }
-
-            let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
-            let modeStr = useConvexHull ? "convex hull" : "actual boundaries"
-            logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - mode: \(modeStr), \(polygons.count) polygons (\(outputPoints) points from \(totalPoints) original), \(totalBoundaries) total boundaries")
 
             // Separate polygons by zone type - metered zones render below RPP zones
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
             let rppPolygons = polygons.filter { $0.zoneType != .metered }
-            logger.info("Zone layering: \(meteredPolygons.count) metered (bottom), \(rppPolygons.count) RPP (top)")
 
             // Capture the coordinator, initial region, and showOverlays before async block
             let coordinator = context.coordinator
@@ -322,8 +301,6 @@ struct ZoneMapView: UIViewRepresentable {
 
             // Add to map on main thread in batches to keep UI responsive
             DispatchQueue.main.async {
-                let mainStartTime = CFAbsoluteTimeGetCurrent()
-                logger.info("Main thread overlay add START - \(polygons.count) polygons, \(annotations.count) annotations, showOverlays: \(shouldShowOverlays)")
 
                 // Mark setup done immediately so map is interactive
                 coordinator.initialSetupDone = true
@@ -333,7 +310,6 @@ struct ZoneMapView: UIViewRepresentable {
                 if let center = initialCenter, let span = initialSpan {
                     let region = MKCoordinateRegion(center: center, span: span)
                     mapView.setRegion(region, animated: false)
-                    logger.debug("Applied initial region - center: \(center.latitude), \(center.longitude)")
                 }
 
                 // Add annotations immediately (they're lightweight)
@@ -376,11 +352,10 @@ struct ZoneMapView: UIViewRepresentable {
                             addBatch(startIndex: endIndex)
                         }
                     } else {
-                        let totalElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
-                        logger.info("All \(totalPolygons) overlays added in \(String(format: "%.1f", totalElapsed))ms")
                         // Mark overlays as visible/hidden based on initial state
                         coordinator.overlaysCurrentlyVisible = shouldShowOverlays
                         coordinator.overlaysLoaded = true
+                        logger.info("Overlays loaded: \(totalPolygons) polygons")
                     }
                 }
 
@@ -390,21 +365,14 @@ struct ZoneMapView: UIViewRepresentable {
                 } else {
                     coordinator.overlaysCurrentlyVisible = shouldShowOverlays
                     coordinator.overlaysLoaded = true
-                    logger.info("No polygons to load - overlaysLoaded marked true")
                 }
-
-                let setupElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
-                logger.info("Initial setup done in \(String(format: "%.1f", setupElapsed))ms - overlay batching started")
             }
         }
 
-        let elapsed = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
-        logger.info("makeUIView RETURN in \(String(format: "%.1f", elapsed))ms (background work continues)")
         return mapView
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
-        logger.debug("updateUIView called - overlays: \(mapView.overlays.count), annotations: \(mapView.annotations.count), initialSetupDone: \(context.coordinator.initialSetupDone), overlaysLoaded: \(context.coordinator.overlaysLoaded)")
 
         // Update coordinator with current state
         context.coordinator.currentZoneId = currentZoneId
@@ -466,10 +434,7 @@ struct ZoneMapView: UIViewRepresentable {
         }
 
         // Skip re-centering during initial setup (overlays are loading async)
-        guard context.coordinator.initialSetupDone else {
-            logger.debug("Skipping re-center - initial setup not done")
-            return
-        }
+        guard context.coordinator.initialSetupDone else { return }
 
         // Calculate current desired region
         if let coord = userCoordinate {
@@ -493,7 +458,6 @@ struct ZoneMapView: UIViewRepresentable {
                 .distance(from: CLLocation(latitude: currentCenter.latitude - (currentSpan.latitudeDelta * context.coordinator.lastVerticalBias), longitude: currentCenter.longitude))
 
             if spanChanged || biasChanged || distance > 500 {
-                logger.debug("Updating map region - spanChanged: \(spanChanged), biasChanged: \(biasChanged), distance: \(String(format: "%.0f", distance))m")
                 let region = MKCoordinateRegion(center: biasedCenter, span: span)
 
                 // Use slow animation (1.4s) for smooth transition when expanding/collapsing
@@ -555,14 +519,10 @@ struct ZoneMapView: UIViewRepresentable {
         let shouldShowOverlays = self.showOverlays
         let coordinator = context.coordinator
 
-        logger.info("loadOverlays START - \(zoneCount) zones, showOverlays: \(shouldShowOverlays)")
-
         let useConvexHull = ZoneMapView.useConvexHull
         let userCenter = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
 
         DispatchQueue.global(qos: .userInitiated).async {
-            let bgStartTime = CFAbsoluteTimeGetCurrent()
-
             var polygons: [ZonePolygon] = []
             var annotations: [ZoneLabelAnnotation] = []
             var totalBoundaries = 0
@@ -649,20 +609,12 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 }
 
-                if (index + 1) % 100 == 0 {
-                    logger.debug("Processed \(index + 1)/\(zoneCount) zones, polygons so far: \(polygons.count)")
-                }
             }
-
-            let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
-            logger.info("loadOverlays background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) polygons")
 
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
             let rppPolygons = polygons.filter { $0.zoneType != .metered }
 
             DispatchQueue.main.async {
-                let mainStartTime = CFAbsoluteTimeGetCurrent()
-                logger.info("loadOverlays main thread START - \(polygons.count) polygons, \(annotations.count) annotations")
 
                 mapView.addAnnotations(annotations)
 
@@ -696,10 +648,9 @@ struct ZoneMapView: UIViewRepresentable {
                             addBatch(startIndex: endIndex)
                         }
                     } else {
-                        let totalElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
-                        logger.info("loadOverlays: All \(totalPolygons) overlays added in \(String(format: "%.1f", totalElapsed))ms")
                         coordinator.overlaysCurrentlyVisible = shouldShowOverlays
                         coordinator.overlaysLoaded = true
+                        logger.info("Deferred overlays loaded: \(totalPolygons) polygons")
                     }
                 }
 
@@ -708,7 +659,6 @@ struct ZoneMapView: UIViewRepresentable {
                 } else {
                     coordinator.overlaysCurrentlyVisible = shouldShowOverlays
                     coordinator.overlaysLoaded = true
-                    logger.info("loadOverlays: No polygons to load")
                 }
             }
         }
@@ -774,13 +724,6 @@ struct ZoneMapView: UIViewRepresentable {
                 // Use same stroke width as regular zones (no override)
                 // Slightly more saturated fill for multi-permit areas
                 renderer.fillColor = fillColor.withAlphaComponent(0.35)
-            }
-
-            // Log first few and then every 1000th
-            if rendererCallCount <= 5 || rendererCallCount % 1000 == 0 {
-                let typeStr = polygon.zoneType?.rawValue ?? "rpp"
-                let mpStr = polygon.isMultiPermit ? " [multi-permit]" : ""
-                logger.debug("Renderer #\(self.rendererCallCount) - zoneCode: \(polygon.zoneCode ?? "nil"), type: \(typeStr)\(mpStr)")
             }
 
             return renderer
