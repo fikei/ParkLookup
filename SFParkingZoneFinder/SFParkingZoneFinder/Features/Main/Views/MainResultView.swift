@@ -135,7 +135,7 @@ struct MainResultView: View {
                         Spacer()
                         Button {
                             HapticFeedback.light()
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 isMapExpanded.toggle()
                                 if !isMapExpanded {
                                     selectedZone = nil
@@ -174,7 +174,7 @@ struct MainResultView: View {
                 }
             }
         }
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isMapExpanded)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isMapExpanded)
         .animation(.easeInOut(duration: 0.2), value: selectedZone?.id)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: viewModel.isLoading)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: viewModel.error != nil)
@@ -300,7 +300,7 @@ private struct AnimatedZoneCard: View {
             }
         }
         .frame(height: isExpanded ? miniCardHeight : largeCardHeight)
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isExpanded)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isExpanded)
     }
 
     /// Fixed height for mini card (56pt circle + 16pt padding top/bottom)
