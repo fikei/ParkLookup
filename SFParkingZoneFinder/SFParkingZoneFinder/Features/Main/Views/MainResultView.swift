@@ -132,7 +132,10 @@ struct MainResultView: View {
                         allValidPermitAreas: viewModel.allValidPermitAreas,
                         meteredSubtitle: viewModel.meteredSubtitle,
                         timeLimitMinutes: viewModel.timeLimitMinutes,
-                        ruleSummaryLines: viewModel.ruleSummaryLines
+                        ruleSummaryLines: viewModel.ruleSummaryLines,
+                        enforcementStartTime: viewModel.enforcementStartTime,
+                        enforcementEndTime: viewModel.enforcementEndTime,
+                        enforcementDays: viewModel.enforcementDays
                     )
                     .padding(.horizontal)
                     .padding(.top, 8)
@@ -272,6 +275,11 @@ private struct AnimatedZoneCard: View {
     let timeLimitMinutes: Int?
     let ruleSummaryLines: [String]
 
+    // Enforcement hours for "Park Until" calculation
+    let enforcementStartTime: TimeOfDay?
+    let enforcementEndTime: TimeOfDay?
+    let enforcementDays: [DayOfWeek]?
+
     @State private var animationIndex: Int = 0
     @State private var isFlipped: Bool = false
 
@@ -322,9 +330,51 @@ private struct AnimatedZoneCard: View {
     private var parkUntilText: String? {
         guard (validityStatus == .invalid || validityStatus == .noPermitSet),
               let limit = timeLimitMinutes else { return nil }
-        let parkUntil = Date().addingTimeInterval(TimeInterval(limit * 60))
+
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a"
+
+        // Check if enforcement is currently active
+        if let startTime = enforcementStartTime, let endTime = enforcementEndTime {
+            let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+            let startMinutes = startTime.totalMinutes
+            let endMinutes = endTime.totalMinutes
+
+            // Check if today is an enforcement day
+            var isEnforcementDay = true
+            if let days = enforcementDays, !days.isEmpty,
+               let weekday = components.weekday,
+               let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+                isEnforcementDay = days.contains(dayOfWeek)
+            }
+
+            if isEnforcementDay {
+                if currentMinutes < startMinutes {
+                    // Before enforcement starts - can park until enforcement begins
+                    let startDate = calendar.date(bySettingHour: startTime.hour, minute: startTime.minute, second: 0, of: now) ?? now
+                    return "Park until \(formatter.string(from: startDate))"
+                } else if currentMinutes >= endMinutes {
+                    // After enforcement ends - unlimited until tomorrow's enforcement
+                    return "Unlimited until tomorrow"
+                } else {
+                    // During enforcement - normal time limit applies
+                    let parkUntil = now.addingTimeInterval(TimeInterval(limit * 60))
+                    // Cap at enforcement end time if time limit extends beyond it
+                    let endDate = calendar.date(bySettingHour: endTime.hour, minute: endTime.minute, second: 0, of: now) ?? parkUntil
+                    let actualEnd = min(parkUntil, endDate)
+                    return "Park until \(formatter.string(from: actualEnd))"
+                }
+            } else {
+                // Not an enforcement day - unlimited parking
+                return "Unlimited today"
+            }
+        }
+
+        // No enforcement hours defined - just use time limit
+        let parkUntil = now.addingTimeInterval(TimeInterval(limit * 60))
         return "Park until \(formatter.string(from: parkUntil))"
     }
 
@@ -405,14 +455,21 @@ private struct AnimatedZoneCard: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else {
-                        // OUT OF PERMIT ZONE (invalid)
-                        Text(zoneName)
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                        // OUT OF PERMIT ZONE (invalid) - show time limit as title
                         if let limit = timeLimitMinutes {
-                            Text("\(limit / 60)hr limit")
+                            Text("\(limit / 60) Hour Limit")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text(zoneName)
                                 .font(.caption)
-                                .foregroundColor(.orange)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text(zoneName)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text("Permit Required")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                     }
 
@@ -581,11 +638,6 @@ private struct AnimatedZoneCard: View {
                 Text(formattedZonesList)
                     .font(.headline)
                     .foregroundColor(.secondary)
-                if let limit = timeLimitMinutes {
-                    Text("\(limit / 60)-hour limit without permit")
-                        .font(.subheadline)
-                        .foregroundColor(.orange)
-                }
             }
         } else {
             // OUT OF PERMIT ZONE (single zone, invalid)
@@ -593,11 +645,6 @@ private struct AnimatedZoneCard: View {
                 Text(zoneName)
                     .font(.headline)
                     .foregroundColor(.secondary)
-                if let limit = timeLimitMinutes {
-                    Text("\(limit / 60)-hour limit without permit")
-                        .font(.subheadline)
-                        .foregroundColor(.orange)
-                }
             }
         }
     }
@@ -634,15 +681,30 @@ private struct AnimatedZoneCard: View {
             .background(Color.white.opacity(0.25))
             .clipShape(Capsule())
         } else if zoneType == .residentialPermit {
-            // OUT OF PERMIT ZONE - invalid
-            Text("PERMIT INVALID")
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundColor(.secondary)
+            // OUT OF PERMIT ZONE - show time limit
+            if let limit = timeLimitMinutes {
+                HStack(spacing: 4) {
+                    Image(systemName: "clock.fill")
+                        .font(.caption)
+                    Text("\(limit / 60) HOUR LIMIT")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                }
+                .foregroundColor(.orange)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Color(.systemGray5))
+                .background(Color.orange.opacity(0.15))
                 .clipShape(Capsule())
+            } else {
+                Text("PERMIT REQUIRED")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color(.systemGray5))
+                    .clipShape(Capsule())
+            }
         }
     }
 

@@ -25,6 +25,11 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var warnings: [ParkingWarning] = []
     @Published private(set) var conditionalFlags: [ConditionalFlag] = []
 
+    // Enforcement hours (for calculating "Park Until" time)
+    @Published private(set) var enforcementStartTime: TimeOfDay? = nil
+    @Published private(set) var enforcementEndTime: TimeOfDay? = nil
+    @Published private(set) var enforcementDays: [DayOfWeek]? = nil
+
     // Overlapping zones
     @Published private(set) var hasOverlappingZones = false
     @Published private(set) var overlappingZones: [ParkingZone] = []
@@ -391,12 +396,26 @@ final class MainResultViewModel: ObservableObject {
             meteredSubtitle = zone.meteredSubtitle  // "$2/hr • 2hr max" for metered zones
             timeLimitMinutes = zone.nonPermitTimeLimit  // Time limit for non-permit holders
             currentZoneId = zone.id
+
+            // Extract enforcement hours from the zone's rules
+            if let rule = zone.rules.first(where: { $0.enforcementStartTime != nil }) {
+                enforcementStartTime = rule.enforcementStartTime
+                enforcementEndTime = rule.enforcementEndTime
+                enforcementDays = rule.enforcementDays
+            } else {
+                enforcementStartTime = nil
+                enforcementEndTime = nil
+                enforcementDays = nil
+            }
         } else {
             zoneName = "Unknown Zone"
             zoneType = .residentialPermit
             meteredSubtitle = nil
             timeLimitMinutes = nil
             currentZoneId = nil
+            enforcementStartTime = nil
+            enforcementEndTime = nil
+            enforcementDays = nil
         }
 
         // Validity & rules
