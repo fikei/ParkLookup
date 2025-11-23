@@ -100,6 +100,13 @@ final class MainResultViewModel: ObservableObject {
         }
     }
 
+    /// Look up zone at a specific coordinate (for address search)
+    func lookupZone(at coordinate: CLLocationCoordinate2D) {
+        Task {
+            await performLookupAt(coordinate)
+        }
+    }
+
     /// Called when view appears
     func onAppear() {
         // Check location authorization
@@ -265,6 +272,31 @@ final class MainResultViewModel: ObservableObject {
             self.error = .unknown(error.localizedDescription)
         }
 
+        isLoading = false
+    }
+
+    /// Perform lookup at a specific coordinate (for address search)
+    private func performLookupAt(_ coordinate: CLLocationCoordinate2D) async {
+        isLoading = true
+        error = nil
+
+        // Update coordinate
+        currentCoordinate = coordinate
+
+        // Get parking result
+        let result = await zoneService.getParkingResult(
+            at: coordinate,
+            time: Date()
+        )
+
+        // Update UI state
+        updateState(from: result)
+
+        // Get address for the searched location
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        await updateAddress(for: location)
+
+        lastUpdated = Date()
         isLoading = false
     }
 

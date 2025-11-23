@@ -38,9 +38,15 @@ struct MainResultView: View {
     @State private var contentAppeared = false
     @State private var isMapExpanded = false
     @State private var selectedZone: ParkingZone?
+    @State private var searchedCoordinate: CLLocationCoordinate2D?
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// The coordinate to use for map centering (searched or current)
+    private var activeCoordinate: CLLocationCoordinate2D? {
+        searchedCoordinate ?? viewModel.currentCoordinate
+    }
 
     /// Extract permit area code from zone name
     private var currentPermitArea: String? {
@@ -57,7 +63,7 @@ struct MainResultView: View {
                 ZoneMapView(
                     zones: viewModel.allLoadedZones,
                     currentZoneId: viewModel.currentZoneId,
-                    userCoordinate: viewModel.currentCoordinate,
+                    userCoordinate: activeCoordinate,
                     onZoneTapped: { zone in
                         if isMapExpanded {
                             selectedZone = zone
@@ -80,6 +86,25 @@ struct MainResultView: View {
             // Layer 2: Card overlays
             if !viewModel.isLoading && viewModel.error == nil {
                 VStack {
+                    // Address search card (only in expanded mode)
+                    if isMapExpanded {
+                        AddressSearchCard(
+                            currentAddress: viewModel.currentAddress,
+                            onAddressSelected: { coordinate in
+                                searchedCoordinate = coordinate
+                                // Trigger zone lookup for the new coordinate
+                                viewModel.lookupZone(at: coordinate)
+                            },
+                            onResetToCurrentLocation: {
+                                searchedCoordinate = nil
+                                viewModel.refreshLocation()
+                            }
+                        )
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+
                     // Animated zone card that morphs between large and mini states
                     AnimatedZoneCard(
                         isExpanded: isMapExpanded,
@@ -139,6 +164,11 @@ struct MainResultView: View {
                                 isMapExpanded.toggle()
                                 if !isMapExpanded {
                                     selectedZone = nil
+                                    // Reset to current location when minimizing
+                                    if searchedCoordinate != nil {
+                                        searchedCoordinate = nil
+                                        viewModel.refreshLocation()
+                                    }
                                 }
                             }
                         } label: {
