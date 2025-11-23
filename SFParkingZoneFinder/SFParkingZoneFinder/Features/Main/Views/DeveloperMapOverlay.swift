@@ -26,6 +26,7 @@ struct DeveloperMapOverlay: View {
                     }
 
                     // Code button to toggle panel - matches expand/collapse style
+                    // Shows pressed/active state when panel is open
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             isExpanded.toggle()
@@ -33,9 +34,9 @@ struct DeveloperMapOverlay: View {
                     } label: {
                         Image(systemName: isExpanded ? "xmark" : "chevron.left.forwardslash.chevron.right")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(isExpanded ? .black : .white)
                             .frame(width: 44, height: 44)
-                            .background(Color.black.opacity(0.6))
+                            .background(isExpanded ? Color.white : Color.black.opacity(0.6))
                             .clipShape(Circle())
                             .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
