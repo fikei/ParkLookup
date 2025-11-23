@@ -3,6 +3,7 @@ import SwiftUI
 /// Displays the zone name and permit validity status prominently
 struct ZoneStatusCardView: View {
     let zoneName: String
+    let zoneType: ZoneType
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
 
@@ -22,12 +23,33 @@ struct ZoneStatusCardView: View {
         return min(max(availableHeight, 300), 520)
     }
 
+    /// Whether this is a metered/paid parking zone
+    private var isMeteredZone: Bool {
+        zoneType == .metered
+    }
+
     /// Extract just the zone letter/code (removes "Area " prefix)
+    /// For metered zones, returns "$" symbol
     private var zoneCode: String {
+        if isMeteredZone {
+            return "$"
+        }
         if zoneName.hasPrefix("Area ") {
             return String(zoneName.dropFirst(5))
         }
         return zoneName
+    }
+
+    /// Display name shown below the zone code
+    private var displaySubtitle: String? {
+        if isMeteredZone {
+            // For metered zones, show the street name from "Metered - Market St"
+            if zoneName.hasPrefix("Metered - ") {
+                return String(zoneName.dropFirst(10))
+            }
+            return "Paid Parking"
+        }
+        return nil
     }
 
     /// Whether the card should use the "valid" green style
@@ -35,38 +57,57 @@ struct ZoneStatusCardView: View {
         validityStatus == .valid || validityStatus == .multipleApply
     }
 
-    /// Background color based on validity
+    /// Background color based on validity and zone type
     private var cardBackground: Color {
-        isValidStyle ? Color.green : Color(.systemBackground)
+        if isMeteredZone {
+            return Color(.systemBackground)  // Neutral background for metered zones
+        }
+        return isValidStyle ? Color.green : Color(.systemBackground)
     }
 
     /// Circle background color (system background on green, or status color otherwise)
     private var circleBackground: Color {
-        isValidStyle ? Color(.systemBackground) : Color.forValidityStatus(validityStatus).opacity(0.15)
+        if isMeteredZone {
+            return Color.forZoneType(.metered).opacity(0.15)  // Green-tinted for metered
+        }
+        return isValidStyle ? Color(.systemBackground) : Color.forValidityStatus(validityStatus).opacity(0.15)
     }
 
     /// Text color for zone letter
     private var letterColor: Color {
-        Color.forValidityStatus(validityStatus)
+        if isMeteredZone {
+            return Color.forZoneType(.metered)  // Green for metered zones
+        }
+        return Color.forValidityStatus(validityStatus)
     }
 
     var body: some View {
         ZStack {
             // Zone Letter in Circle (truly centered)
-            ZStack {
-                Circle()
-                    .fill(circleBackground)
-                    .frame(width: 200, height: 200)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(circleBackground)
+                        .frame(width: 200, height: 200)
+                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
 
-                Text(zoneCode)
-                    .font(.system(size: 120, weight: .bold))
-                    .foregroundColor(letterColor)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
+                    Text(zoneCode)
+                        .font(.system(size: 120, weight: .bold))
+                        .foregroundColor(letterColor)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                }
+
+                // Subtitle for metered zones (street name)
+                if let subtitle = displaySubtitle {
+                    Text(subtitle)
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
             }
             .accessibilityAddTraits(.isHeader)
-            .accessibilityLabel("Zone \(zoneCode)")
+            .accessibilityLabel(isMeteredZone ? "Paid parking zone at \(displaySubtitle ?? "this location")" : "Zone \(zoneCode)")
 
             // Validity Badge (positioned at bottom)
             VStack {
@@ -93,6 +134,7 @@ struct ZoneStatusCardView: View {
     ScrollView {
         ZoneStatusCardView(
             zoneName: "Area Q",
+            zoneType: .residentialPermit,
             validityStatus: .valid,
             applicablePermits: [
                 ParkingPermit(type: .residential, area: "Q")
@@ -107,6 +149,7 @@ struct ZoneStatusCardView: View {
     ScrollView {
         ZoneStatusCardView(
             zoneName: "Area R",
+            zoneType: .residentialPermit,
             validityStatus: .invalid,
             applicablePermits: []
         )
@@ -119,7 +162,21 @@ struct ZoneStatusCardView: View {
     ScrollView {
         ZoneStatusCardView(
             zoneName: "Area U",
+            zoneType: .residentialPermit,
             validityStatus: .conditional,
+            applicablePermits: []
+        )
+        .padding()
+    }
+    .background(Color(.systemGroupedBackground))
+}
+
+#Preview("Metered Zone") {
+    ScrollView {
+        ZoneStatusCardView(
+            zoneName: "Metered - Market St",
+            zoneType: .metered,
+            validityStatus: .noPermitRequired,
             applicablePermits: []
         )
         .padding()

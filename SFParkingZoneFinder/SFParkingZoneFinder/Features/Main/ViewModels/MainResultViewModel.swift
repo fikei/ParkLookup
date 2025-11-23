@@ -13,6 +13,7 @@ final class MainResultViewModel: ObservableObject {
 
     // Zone & Rules
     @Published private(set) var zoneName: String = "—"
+    @Published private(set) var zoneType: ZoneType = .residentialPermit
     @Published private(set) var validityStatus: PermitValidityStatus = .noPermitRequired
     @Published private(set) var ruleSummary: String = ""
     @Published private(set) var ruleSummaryLines: [String] = []
@@ -278,9 +279,11 @@ final class MainResultViewModel: ObservableObject {
         // Zone info
         if let zone = result.lookupResult.primaryZone {
             zoneName = zone.displayName
+            zoneType = zone.zoneType
             currentZoneId = zone.id
         } else {
             zoneName = "Unknown Zone"
+            zoneType = .residentialPermit
             currentZoneId = nil
         }
 

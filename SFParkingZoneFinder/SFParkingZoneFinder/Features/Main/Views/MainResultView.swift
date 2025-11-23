@@ -53,6 +53,7 @@ struct MainResultView: View {
                     // Zone Status Card (prominent at top)
                     ZoneStatusCardView(
                         zoneName: viewModel.zoneName,
+                        zoneType: viewModel.zoneType,
                         validityStatus: viewModel.validityStatus,
                         applicablePermits: viewModel.applicablePermits
                     )
