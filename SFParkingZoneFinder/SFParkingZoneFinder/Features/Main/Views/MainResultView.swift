@@ -666,7 +666,10 @@ private struct AnimatedZoneCard: View {
                         status: validityStatus,
                         permits: applicablePermits,
                         onColoredBackground: isValidStyle,
-                        timeLimitMinutes: timeLimitMinutes
+                        timeLimitMinutes: timeLimitMinutes,
+                        enforcementStartTime: enforcementStartTime,
+                        enforcementEndTime: enforcementEndTime,
+                        enforcementDays: enforcementDays
                     )
                     .padding(.bottom, 24)
                 }
