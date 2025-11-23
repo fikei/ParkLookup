@@ -57,14 +57,14 @@ For a functional Alpha release with real data, complete these in order:
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
-| S21: Zone Card UI Refinements | In Progress | 15/18 |
+| S21: Zone Card UI Refinements | In Progress | 25/28 |
 | S22: CarPlay Experience Update | Not Started | 0/10 |
 
-**Beta Progress:** 51/126 tasks complete (40%)
+**Beta Progress:** 61/136 tasks complete (45%)
 
 ---
 
-**Overall Progress:** 152/231 tasks complete (66%)
+**Overall Progress:** 162/241 tasks complete (67%)
 
 *Note: Future Enhancement tasks (F-series) not included in progress counts*
 
@@ -866,9 +866,31 @@ For a functional Alpha release with real data, complete these in order:
 
 - [ ] **21.16** Add time-based information (time until restrictions, street cleaning)
 
-- [ ] **21.17** Add enforcement hours display
+- [x] **21.17** Add enforcement hours display and "Park Until" calculation
 
 - [ ] **21.18** Add distance to nearest valid zone (out of permit zone state)
+
+#### Enforcement-Aware Park Until (Nov 2025)
+- [x] **21.19** Add enforcementStartTime, enforcementEndTime, enforcementDays to ViewModel
+
+- [x] **21.20** Calculate Park Until time considering enforcement hours (not just time limit)
+
+- [x] **21.21** Show actual move time including future days (e.g., "Park until Mon 8:00 AM")
+
+- [x] **21.22** Top banner shows "UNLIMITED NOW" when outside enforcement, time limit when active
+
+- [x] **21.23** Mini card title shows "Unlimited Now" or time limit based on enforcement
+
+- [x] **21.24** Hook up ValidityBadgeView on expanded card to use same enforcement-aware logic
+
+#### Address Search Map Pin (Nov 2025)
+- [x] **21.25** Add SearchedLocationAnnotation class for address search pin
+
+- [x] **21.26** Show blue pin on map when address search succeeds
+
+- [x] **21.27** Remove pin when returning to GPS location
+
+- [x] **21.28** Fix location timeout when returning from address search (use cached GPS)
 
 **Story 21 Complete When:**
 - [x] Expanded card has reduced height with proportional elements
@@ -876,6 +898,8 @@ For a functional Alpha release with real data, complete these in order:
 - [x] Permit badges positioned correctly on expanded card
 - [x] Zone circles display zone-specific colors
 - [x] Content design completed for all four parking states
+- [x] Park Until shows enforcement-aware times
+- [x] Address search shows pin marker on map
 
 ---
 
