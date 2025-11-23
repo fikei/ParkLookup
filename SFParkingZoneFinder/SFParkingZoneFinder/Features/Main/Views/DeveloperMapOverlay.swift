@@ -11,40 +11,40 @@ struct DeveloperMapOverlay: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Spacer()
+            Spacer()
 
-                // Developer panel (top right)
-                VStack(alignment: .trailing, spacing: 8) {
-                    // Gear button to toggle panel
+            HStack {
+                // Developer panel (bottom left, aligned with expand/collapse button)
+                VStack(alignment: .leading, spacing: 8) {
+                    // Expanded panel (appears above button)
+                    if isExpanded {
+                        developerPanel
+                            .transition(.asymmetric(
+                                insertion: .opacity.combined(with: .move(edge: .bottom)),
+                                removal: .opacity.combined(with: .scale(scale: 0.9))
+                            ))
+                    }
+
+                    // Code button to toggle panel - matches expand/collapse style
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             isExpanded.toggle()
                         }
                     } label: {
-                        Image(systemName: isExpanded ? "xmark" : "gearshape.fill")
+                        Image(systemName: isExpanded ? "xmark" : "chevron.left.forwardslash.chevron.right")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 40, height: 40)
-                            .background(Color.purple.opacity(0.9))
+                            .frame(width: 44, height: 44)
+                            .background(Color.black.opacity(0.6))
                             .clipShape(Circle())
                             .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
-
-                    // Expanded panel
-                    if isExpanded {
-                        developerPanel
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .move(edge: .top)),
-                                removal: .opacity.combined(with: .scale(scale: 0.9))
-                            ))
-                    }
                 }
-            }
-            .padding(.top, 8)
-            .padding(.trailing, 16)
+                .padding(.leading, 16)
+                .padding(.bottom, 16)
 
-            Spacer()
+                Spacer()
+            }
         }
         .alert("Configuration Saved", isPresented: $showingSaveConfirmation) {
             Button("OK", role: .cancel) { }
@@ -60,7 +60,7 @@ struct DeveloperMapOverlay: View {
             // Header
             HStack {
                 Image(systemName: "slider.horizontal.3")
-                    .foregroundColor(.purple)
+                    .foregroundColor(.secondary)
                 Text("Layer Settings")
                     .font(.headline)
                     .foregroundColor(.primary)
@@ -120,7 +120,7 @@ struct DeveloperMapOverlay: View {
             compactToggle("Convex Hull", isOn: $devSettings.useConvexHull, icon: "pentagon")
 
             if devSettings.useDouglasPeucker {
-                compactToggle("Preserve Curves", isOn: $devSettings.preserveCurves, icon: "point.topleft.down.curvedto.point.bottomright.up")
+                compactToggle("Preserve Curves", isOn: $devSettings.preserveCurves, icon: "point.topleft.down.to.point.bottomright.curvepath")
             }
         }
     }
@@ -198,7 +198,7 @@ struct DeveloperMapOverlay: View {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
-            .background(Color.purple)
+            .background(Color.black.opacity(0.7))
             .cornerRadius(10)
         }
     }
@@ -209,7 +209,7 @@ struct DeveloperMapOverlay: View {
         HStack {
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundColor(isOn.wrappedValue ? .purple : .secondary)
+                .foregroundColor(isOn.wrappedValue ? .accentColor : .secondary)
                 .frame(width: 20)
 
             Text(label)
@@ -244,7 +244,7 @@ struct DeveloperMapOverlay: View {
             }
 
             Slider(value: value, in: range, step: step)
-                .tint(.purple)
+                .tint(.accentColor)
         }
     }
 
