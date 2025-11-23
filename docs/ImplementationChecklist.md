@@ -53,17 +53,17 @@ For a functional Alpha release with real data, complete these in order:
 | S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | **COMPLETE** | 8/10 |
-| S17: Map Zone Boundaries | In Progress | 15/24 |
+| S17: Map Zone Boundaries | In Progress | 15/26 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | Not Started | 0/14 |
 | S21: Zone Card UI Refinements | In Progress | 11/18 |
 
-**Beta Progress:** 47/114 tasks complete (41%)
+**Beta Progress:** 47/116 tasks complete (41%)
 
 ---
 
-**Overall Progress:** 148/219 tasks complete (68%)
+**Overall Progress:** 148/221 tasks complete (67%)
 
 ---
 
@@ -687,6 +687,11 @@ For a functional Alpha release with real data, complete these in order:
 - [x] **17.23** Reduce stroke prominence (3.0/1.5 → 2.0/1.0 line width)
 
 - [x] **17.24** Improve multi-permit zone dash pattern ([8,4] → [4,2], same width as regular)
+
+#### Boundary Geometry Cleanup
+- [ ] **17.25** Make zone boundaries more geometric (simplify irregular edges, straighten block-aligned segments)
+
+- [ ] **17.26** Clean up boundary intersections at corners (resolve overlapping/jagged edges where zones meet)
 
 #### Map Provider Abstraction
 - [ ] **17.14** Create MapProviderProtocol abstraction layer for switching between map providers
