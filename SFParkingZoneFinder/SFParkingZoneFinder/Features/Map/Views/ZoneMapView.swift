@@ -599,7 +599,7 @@ struct ZoneMapView: UIViewRepresentable {
                 if useConvexHull {
                     let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
                     if allNearbyPoints.count >= 3 {
-                        let hull = self.convexHull(allNearbyPoints)
+                        let hull = convexHull(allNearbyPoints)
                         if hull.count >= 3 {
                             let polygon = ZonePolygon(coordinates: hull, count: hull.count)
                             polygon.zoneId = zone.id
