@@ -64,12 +64,21 @@ class ParkingDataPipeline:
             logger.info("\n[Step 2/4] Transforming data...")
             transformed_data = self._transform_data(raw_data, skip_meters)
 
+            # Step 2b: Derive metered zones from meter data
+            metered_zones = []
+            if transformed_data.get("meters"):
+                logger.info("\n[Step 2b] Deriving metered zones from meter locations...")
+                metered_zones = self.transformer.derive_metered_zones_from_meters(
+                    transformed_data["meters"]
+                )
+
             # Step 3: Generate app data bundle
             logger.info("\n[Step 3/4] Generating app data...")
             app_data = self.transformer.generate_app_data(
                 zones=transformed_data["zones"],
                 regulations=transformed_data["regulations"],
-                meters=transformed_data.get("meters", [])
+                meters=transformed_data.get("meters", []),
+                metered_zones=metered_zones
             )
 
             # Step 4: Validate
@@ -98,12 +107,13 @@ class ParkingDataPipeline:
             logger.info("\n" + "=" * 60)
             logger.info("Pipeline completed successfully!")
             logger.info(f"Duration: {duration:.1f} seconds")
-            logger.info(f"Zones: {len(app_data['zones'])}")
+            logger.info(f"RPP Zones: {len(app_data['zones'])}")
+            logger.info(f"Metered Zones: {len(app_data.get('meteredZones', []))}")
             logger.info(f"Meters: {len(app_data['meters'])}")
             logger.info("=" * 60)
 
-            # Zone summary
-            logger.info("\nZone Summary:")
+            # RPP Zone summary
+            logger.info("\nRPP Zone Summary:")
             logger.info("-" * 40)
             total_polygons = 0
             for zone in sorted(app_data['zones'], key=lambda z: z.get('code', '')):
@@ -113,7 +123,31 @@ class ParkingDataPipeline:
                 total_polygons += num_polygons
                 logger.info(f"  {code:4s}: {num_polygons:,} polygons")
             logger.info("-" * 40)
-            logger.info(f"  Total: {total_polygons:,} polygons across {len(app_data['zones'])} zones")
+            logger.info(f"  Total: {total_polygons:,} polygons across {len(app_data['zones'])} RPP zones")
+
+            # Metered Zone summary
+            metered_zones = app_data.get('meteredZones', [])
+            if metered_zones:
+                logger.info("\nMetered Zone Summary:")
+                logger.info("-" * 40)
+                total_metered_polygons = 0
+                total_meters_in_zones = 0
+                for mz in metered_zones[:10]:  # Show first 10
+                    code = mz.get('code', '?')
+                    name = mz.get('name', '?')[:30]
+                    polygon = mz.get('polygon', [])
+                    meter_count = mz.get('meterCount', 0)
+                    num_polygons = len(polygon)
+                    total_metered_polygons += num_polygons
+                    total_meters_in_zones += meter_count
+                    logger.info(f"  {code}: {name} ({meter_count} meters)")
+                if len(metered_zones) > 10:
+                    logger.info(f"  ... and {len(metered_zones) - 10} more zones")
+                    for mz in metered_zones[10:]:
+                        total_metered_polygons += len(mz.get('polygon', []))
+                        total_meters_in_zones += mz.get('meterCount', 0)
+                logger.info("-" * 40)
+                logger.info(f"  Total: {total_metered_polygons:,} polygons, {total_meters_in_zones:,} meters across {len(metered_zones)} metered zones")
 
             # Step 6: Auto-export to iOS (if --export-ios flag or always)
             self._export_to_ios(app_data)

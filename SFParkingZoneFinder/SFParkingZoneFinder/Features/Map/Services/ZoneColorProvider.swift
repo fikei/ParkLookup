@@ -18,9 +18,35 @@ enum ZoneColorProvider {
         return zoneColors[code] ?? colorFromHash(code)
     }
 
+    /// Get the color for a zone by its type
+    static func color(for zoneType: ZoneType) -> UIColor {
+        switch zoneType {
+        case .metered:
+            return meteredZoneColor
+        case .residentialPermit:
+            return .systemBlue
+        case .timeLimited:
+            return .systemOrange
+        case .noParking:
+            return .systemRed
+        case .towAway:
+            return .systemRed
+        case .mixed:
+            return .systemPurple
+        }
+    }
+
+    /// Color for metered/paid parking zones
+    static let meteredZoneColor = UIColor(red: 0.2, green: 0.7, blue: 0.4, alpha: 1.0)  // #33B366 Green
+
     /// SwiftUI Color wrapper
     static func swiftUIColor(for zoneCode: String?) -> Color {
         Color(uiColor: color(for: zoneCode))
+    }
+
+    /// SwiftUI Color wrapper for zone type
+    static func swiftUIColor(for zoneType: ZoneType) -> Color {
+        Color(uiColor: color(for: zoneType))
     }
 
     // MARK: - Curated Color Palette
@@ -88,6 +114,13 @@ enum ZoneColorProvider {
         return baseColor.withAlphaComponent(alpha)
     }
 
+    /// Fill color for zone polygon overlay by zone type
+    static func fillColor(for zoneType: ZoneType, isCurrentZone: Bool) -> UIColor {
+        let baseColor = color(for: zoneType)
+        let alpha: CGFloat = isCurrentZone ? 0.35 : 0.20
+        return baseColor.withAlphaComponent(alpha)
+    }
+
     /// Stroke color for zone polygon border
     static func strokeColor(for zoneCode: String?, isCurrentZone: Bool) -> UIColor {
         let baseColor = color(for: zoneCode)
@@ -95,8 +128,37 @@ enum ZoneColorProvider {
         return baseColor.withAlphaComponent(alpha)
     }
 
+    /// Stroke color for zone polygon border by zone type
+    static func strokeColor(for zoneType: ZoneType, isCurrentZone: Bool) -> UIColor {
+        let baseColor = color(for: zoneType)
+        let alpha: CGFloat = isCurrentZone ? 1.0 : 0.6
+        return baseColor.withAlphaComponent(alpha)
+    }
+
     /// Stroke width for zone polygon border
     static func strokeWidth(isCurrentZone: Bool) -> CGFloat {
         isCurrentZone ? 3.0 : 1.5
+    }
+
+    /// Get color for a ParkingZone (uses zone type for metered, permit area for RPP)
+    static func color(for zone: ParkingZone) -> UIColor {
+        if zone.zoneType == .metered {
+            return meteredZoneColor
+        }
+        return color(for: zone.permitArea)
+    }
+
+    /// Fill color for a ParkingZone
+    static func fillColor(for zone: ParkingZone, isCurrentZone: Bool) -> UIColor {
+        let baseColor = color(for: zone)
+        let alpha: CGFloat = isCurrentZone ? 0.35 : 0.20
+        return baseColor.withAlphaComponent(alpha)
+    }
+
+    /// Stroke color for a ParkingZone
+    static func strokeColor(for zone: ParkingZone, isCurrentZone: Bool) -> UIColor {
+        let baseColor = color(for: zone)
+        let alpha: CGFloat = isCurrentZone ? 1.0 : 0.6
+        return baseColor.withAlphaComponent(alpha)
     }
 }

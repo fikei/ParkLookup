@@ -214,6 +214,7 @@ struct ZoneMapView: UIViewRepresentable {
                             let polygon = ZonePolygon(coordinates: hull, count: hull.count)
                             polygon.zoneId = zone.id
                             polygon.zoneCode = zone.permitArea
+                            polygon.zoneType = zone.zoneType
                             polygons.append(polygon)
                             outputPoints += hull.count
                         }
@@ -225,6 +226,7 @@ struct ZoneMapView: UIViewRepresentable {
                         let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
                         polygon.zoneId = zone.id
                         polygon.zoneCode = zone.permitArea
+                        polygon.zoneType = zone.zoneType
                         polygons.append(polygon)
                         outputPoints += boundary.count
                     }
@@ -239,10 +241,13 @@ struct ZoneMapView: UIViewRepresentable {
                         latitude: sumLat / Double(allNearbyPoints.count),
                         longitude: sumLon / Double(allNearbyPoints.count)
                     )
+                    // For metered zones, use "$" symbol; for RPP use permit area code
+                    let labelCode = zone.zoneType == .metered ? "$" : (zone.permitArea ?? zone.displayName)
                     let annotation = ZoneLabelAnnotation(
                         coordinate: centroid,
-                        zoneCode: zone.permitArea ?? zone.displayName,
-                        zoneId: zone.id
+                        zoneCode: labelCode,
+                        zoneId: zone.id,
+                        zoneType: zone.zoneType
                     )
                     annotations.append(annotation)
                 }
@@ -360,6 +365,7 @@ struct ZoneMapView: UIViewRepresentable {
             let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
             polygon.zoneId = zone.id
             polygon.zoneCode = zone.permitArea
+            polygon.zoneType = zone.zoneType
             mapView.addOverlay(polygon, level: .aboveRoads)
         }
 
@@ -419,8 +425,16 @@ struct ZoneMapView: UIViewRepresentable {
             let renderer = MKPolygonRenderer(polygon: polygon)
             let isCurrentZone = polygon.zoneId == currentZoneId
 
-            let fillColor = ZoneColorProvider.fillColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
-            let strokeColor = ZoneColorProvider.strokeColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
+            // Use zone type-aware coloring for metered zones
+            let fillColor: UIColor
+            let strokeColor: UIColor
+            if let zoneType = polygon.zoneType, zoneType == .metered {
+                fillColor = ZoneColorProvider.fillColor(for: zoneType, isCurrentZone: isCurrentZone)
+                strokeColor = ZoneColorProvider.strokeColor(for: zoneType, isCurrentZone: isCurrentZone)
+            } else {
+                fillColor = ZoneColorProvider.fillColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
+                strokeColor = ZoneColorProvider.strokeColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
+            }
 
             renderer.fillColor = fillColor
             renderer.strokeColor = strokeColor
@@ -428,7 +442,8 @@ struct ZoneMapView: UIViewRepresentable {
 
             // Log first few and then every 1000th
             if rendererCallCount <= 5 || rendererCallCount % 1000 == 0 {
-                logger.debug("Renderer #\(self.rendererCallCount) - zoneCode: \(polygon.zoneCode ?? "nil"), fill: \(fillColor.description), stroke: \(strokeColor.description)")
+                let typeStr = polygon.zoneType?.rawValue ?? "rpp"
+                logger.debug("Renderer #\(self.rendererCallCount) - zoneCode: \(polygon.zoneCode ?? "nil"), type: \(typeStr), fill: \(fillColor.description)")
             }
 
             return renderer
@@ -454,6 +469,7 @@ struct ZoneMapView: UIViewRepresentable {
             let isCurrentZone = zoneAnnotation.zoneId == currentZoneId
             let labelView = createZoneLabelView(
                 code: zoneAnnotation.zoneCode,
+                zoneType: zoneAnnotation.zoneType,
                 isCurrentZone: isCurrentZone
             )
 
@@ -466,7 +482,7 @@ struct ZoneMapView: UIViewRepresentable {
             return annotationView
         }
 
-        private func createZoneLabelView(code: String, isCurrentZone: Bool) -> UIView {
+        private func createZoneLabelView(code: String, zoneType: ZoneType?, isCurrentZone: Bool) -> UIView {
             let label = UILabel()
             label.text = code
             label.font = .systemFont(ofSize: isCurrentZone ? 16 : 12, weight: .bold)
@@ -477,7 +493,12 @@ struct ZoneMapView: UIViewRepresentable {
             label.frame = CGRect(x: 0, y: 0, width: size, height: size)
 
             let containerView = UIView(frame: label.frame)
-            containerView.backgroundColor = ZoneColorProvider.color(for: code)
+            // Use zone type-aware coloring for metered zones
+            if let zType = zoneType, zType == .metered {
+                containerView.backgroundColor = ZoneColorProvider.color(for: zType)
+            } else {
+                containerView.backgroundColor = ZoneColorProvider.color(for: code)
+            }
             containerView.layer.cornerRadius = size / 2
             containerView.layer.borderWidth = isCurrentZone ? 2 : 1
             containerView.layer.borderColor = UIColor.white.cgColor
@@ -526,6 +547,7 @@ struct ZoneMapView: UIViewRepresentable {
 class ZonePolygon: MKPolygon {
     var zoneId: String?
     var zoneCode: String?
+    var zoneType: ZoneType?
 }
 
 /// Annotation for zone label display
@@ -533,11 +555,13 @@ class ZoneLabelAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     let zoneCode: String
     let zoneId: String
+    let zoneType: ZoneType?
 
-    init(coordinate: CLLocationCoordinate2D, zoneCode: String, zoneId: String) {
+    init(coordinate: CLLocationCoordinate2D, zoneCode: String, zoneId: String, zoneType: ZoneType? = nil) {
         self.coordinate = coordinate
         self.zoneCode = zoneCode
         self.zoneId = zoneId
+        self.zoneType = zoneType
         super.init()
     }
 }

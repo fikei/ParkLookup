@@ -15,8 +15,8 @@ final class PersistentZoneCache: ZoneCacheProtocol {
     private let lock = NSLock()
 
     /// Current data version - change this when zone data format changes
-    /// Bumped to 1.4: switched to blockface buffered polygons (street segments, not parcels)
-    private let cacheVersion = "1.4"
+    /// Bumped to 1.5: added support for metered/paid parking zones
+    private let cacheVersion = "1.5"
 
     private(set) var lastUpdated: Date?
 

@@ -58,6 +58,18 @@ class ParkingMeter:
     rate_area: Optional[str]
 
 
+@dataclass
+class MeteredZone:
+    """Represents a paid/metered parking zone derived from meter locations"""
+    zone_id: str
+    name: str
+    polygon: List[List[Tuple[float, float]]]  # List of polygon boundaries
+    meter_count: int
+    cap_colors: List[str]  # Unique cap colors in zone
+    avg_time_limit: Optional[int]  # Average time limit in minutes
+    rate_area: Optional[str]
+
+
 class ParkingDataTransformer:
     """
     Transforms raw data from multiple sources into a unified format
@@ -473,11 +485,144 @@ class ParkingDataTransformer:
         logger.info(f"Transformed {len(meters)} parking meters")
         return meters
 
+    def derive_metered_zones_from_meters(self, meters: List[ParkingMeter]) -> List[MeteredZone]:
+        """
+        Derive paid parking zones from meter locations by clustering nearby meters.
+
+        Uses a grid-based clustering approach:
+        - Divides the city into grid cells (~100m)
+        - Groups meters by grid cell
+        - Creates buffered polygons for meter clusters
+        """
+        logger.info(f"Deriving metered zones from {len(meters)} meters")
+
+        if not meters:
+            return []
+
+        if not SHAPELY_AVAILABLE:
+            logger.warning("Shapely not available - skipping metered zone derivation")
+            return []
+
+        from shapely.geometry import Point, MultiPoint
+        from shapely.ops import unary_union
+
+        # Grid cell size in degrees (~100m at SF latitude)
+        GRID_SIZE = 0.001  # ~111m
+        # Buffer distance for meter points (~15m)
+        BUFFER_DISTANCE = 0.00015
+
+        # Group meters by grid cell
+        grid_cells: Dict[Tuple[int, int], List[ParkingMeter]] = {}
+
+        for meter in meters:
+            grid_x = int(meter.longitude / GRID_SIZE)
+            grid_y = int(meter.latitude / GRID_SIZE)
+            cell_key = (grid_x, grid_y)
+
+            if cell_key not in grid_cells:
+                grid_cells[cell_key] = []
+            grid_cells[cell_key].append(meter)
+
+        logger.info(f"Grouped meters into {len(grid_cells)} grid cells")
+
+        # Merge adjacent grid cells into zones
+        zones = []
+        processed_cells = set()
+        zone_counter = 0
+
+        for cell_key in grid_cells:
+            if cell_key in processed_cells:
+                continue
+
+            # Flood fill to find connected cells
+            connected_cells = []
+            to_process = [cell_key]
+
+            while to_process:
+                current = to_process.pop()
+                if current in processed_cells:
+                    continue
+                if current not in grid_cells:
+                    continue
+
+                processed_cells.add(current)
+                connected_cells.append(current)
+
+                # Check adjacent cells (4-connected)
+                x, y = current
+                for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                    neighbor = (x + dx, y + dy)
+                    if neighbor in grid_cells and neighbor not in processed_cells:
+                        to_process.append(neighbor)
+
+            # Collect all meters in connected cells
+            zone_meters = []
+            for cell in connected_cells:
+                zone_meters.extend(grid_cells[cell])
+
+            if len(zone_meters) < 3:  # Skip tiny clusters
+                continue
+
+            # Create polygon from meter points
+            points = [Point(m.longitude, m.latitude) for m in zone_meters]
+            multi_point = MultiPoint(points)
+
+            # Buffer and simplify to create zone polygon
+            buffered = multi_point.buffer(BUFFER_DISTANCE)
+            if buffered.is_empty:
+                continue
+
+            # Extract polygon coordinates
+            polygon_coords = []
+            if hasattr(buffered, 'exterior'):
+                coords = [(c[0], c[1]) for c in buffered.exterior.coords]
+                polygon_coords.append(coords)
+            elif hasattr(buffered, 'geoms'):
+                for geom in buffered.geoms:
+                    if hasattr(geom, 'exterior'):
+                        coords = [(c[0], c[1]) for c in geom.exterior.coords]
+                        polygon_coords.append(coords)
+
+            if not polygon_coords:
+                continue
+
+            # Calculate zone statistics
+            cap_colors = list(set(m.cap_color for m in zone_meters if m.cap_color))
+            time_limits = [m.time_limit for m in zone_meters if m.time_limit]
+            avg_time = int(sum(time_limits) / len(time_limits)) if time_limits else None
+            rate_areas = list(set(m.rate_area for m in zone_meters if m.rate_area))
+
+            zone_counter += 1
+            zone_id = f"METERED_{zone_counter:04d}"
+
+            # Determine zone name from predominant street or rate area
+            street_counts: Dict[str, int] = {}
+            for m in zone_meters:
+                if m.street_name:
+                    street_counts[m.street_name] = street_counts.get(m.street_name, 0) + 1
+            primary_street = max(street_counts, key=street_counts.get) if street_counts else "Unknown"
+            zone_name = f"Metered - {primary_street}"
+
+            zone = MeteredZone(
+                zone_id=zone_id,
+                name=zone_name,
+                polygon=polygon_coords,
+                meter_count=len(zone_meters),
+                cap_colors=cap_colors,
+                avg_time_limit=avg_time,
+                rate_area=rate_areas[0] if rate_areas else None
+            )
+            zones.append(zone)
+
+        logger.info(f"Derived {len(zones)} metered zones from {len(meters)} meters")
+        return zones
+
     def generate_app_data(
         self,
         zones: List[RPPZone],
         regulations: List[ParkingRegulation],
-        meters: List[ParkingMeter]
+        meters: List[ParkingMeter],
+        metered_zones: Optional[List[MeteredZone]] = None
     ) -> Dict[str, Any]:
         """
         Generate the final data structure for the iOS app.
@@ -502,7 +647,7 @@ class ParkingDataTransformer:
                     "days": reg.days,
                 })
 
-        # Build zones data
+        # Build RPP zones data
         zones_data = []
         for zone in zones:
             zones_data.append({
@@ -511,13 +656,31 @@ class ParkingDataTransformer:
                 "polygon": zone.polygon,
                 "neighborhoods": zone.neighborhoods,
                 "blockCount": len(regulations_by_area.get(zone.area_code, [])),
+                "zoneType": "rpp",  # Residential Permit Parking
             })
+
+        # Build metered zones data
+        metered_zones_data = []
+        if metered_zones:
+            for mz in metered_zones:
+                metered_zones_data.append({
+                    "code": mz.zone_id,
+                    "name": mz.name,
+                    "polygon": mz.polygon,
+                    "meterCount": mz.meter_count,
+                    "capColors": mz.cap_colors,
+                    "avgTimeLimit": mz.avg_time_limit,
+                    "rateArea": mz.rate_area,
+                    "zoneType": "metered",  # Paid parking
+                })
+            logger.info(f"Added {len(metered_zones_data)} metered zones to app data")
 
         # Build output
         return {
             "version": datetime.utcnow().strftime("%Y%m%d"),
             "generated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "zones": zones_data,
+            "meteredZones": metered_zones_data,
             "meters": [
                 {
                     "id": m.post_id,
@@ -531,6 +694,7 @@ class ParkingDataTransformer:
             ],
             "stats": {
                 "totalZones": len(zones),
+                "totalMeteredZones": len(metered_zones_data),
                 "totalMeters": len(meters),
                 "totalRegulations": len(regulations),
             }
