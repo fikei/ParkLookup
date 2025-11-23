@@ -792,9 +792,9 @@ class ParkingDataTransformer:
         """
         Derive paid parking zones from meter locations by clustering nearby meters.
 
-        Uses a grid-based clustering approach:
-        - Divides the city into grid cells (~100m)
-        - Groups meters by grid cell
+        Uses a grid-based approach WITHOUT flood fill to prevent huge merged zones:
+        - Divides the city into grid cells (~50m)
+        - Each grid cell with meters becomes a separate zone
         - Creates axis-aligned rectangular polygons (right angles only)
         """
         logger.info(f"Deriving metered zones from {len(meters)} meters")
@@ -802,10 +802,11 @@ class ParkingDataTransformer:
         if not meters:
             return []
 
-        # Grid cell size in degrees (~100m at SF latitude)
-        GRID_SIZE = 0.001  # ~111m
-        # Padding for bounding box (~15m)
-        PADDING = 0.00015
+        # Grid cell size in degrees (~50m at SF latitude)
+        # Smaller cells = more granular zones, prevents mega-zones
+        GRID_SIZE = 0.0005  # ~55m
+        # Padding for bounding box (~10m)
+        PADDING = 0.0001
 
         # Group meters by grid cell
         grid_cells: Dict[Tuple[int, int], List[ParkingMeter]] = {}
@@ -821,42 +822,12 @@ class ParkingDataTransformer:
 
         logger.info(f"Grouped meters into {len(grid_cells)} grid cells")
 
-        # Merge adjacent grid cells into zones
+        # Create a zone for each grid cell (no flood fill - each cell is separate)
         zones = []
-        processed_cells = set()
         zone_counter = 0
 
-        for cell_key in grid_cells:
-            if cell_key in processed_cells:
-                continue
-
-            # Flood fill to find connected cells
-            connected_cells = []
-            to_process = [cell_key]
-
-            while to_process:
-                current = to_process.pop()
-                if current in processed_cells:
-                    continue
-                if current not in grid_cells:
-                    continue
-
-                processed_cells.add(current)
-                connected_cells.append(current)
-
-                # Check adjacent cells (4-connected)
-                x, y = current
-                for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-                    neighbor = (x + dx, y + dy)
-                    if neighbor in grid_cells and neighbor not in processed_cells:
-                        to_process.append(neighbor)
-
-            # Collect all meters in connected cells
-            zone_meters = []
-            for cell in connected_cells:
-                zone_meters.extend(grid_cells[cell])
-
-            if len(zone_meters) < 3:  # Skip tiny clusters
+        for cell_key, zone_meters in grid_cells.items():
+            if len(zone_meters) < 2:  # Skip cells with only 1 meter
                 continue
 
             # Create axis-aligned bounding box (rectangle with right angles)
