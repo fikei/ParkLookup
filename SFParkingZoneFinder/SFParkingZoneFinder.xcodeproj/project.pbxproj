@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C3D50FB2ED26CAC002208EF /* ZoneColorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50F92ED26CAC002208EF /* ZoneColorProvider.swift */; };
+		3C3D50FD2ED26CCA002208EF /* ZoneMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */; };
+		3C3D50FF2ED26CDA002208EF /* PersistentZoneCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50FE2ED26CDA002208EF /* PersistentZoneCache.swift */; };
+		3C3D51012ED26CFC002208EF /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D51002ED26CFC002208EF /* PrivacyPolicyView.swift */; };
+		3C3D51032ED26D3C002208EF /* MapCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D51022ED26D3C002208EF /* MapCardView.swift */; };
+		3C3D51052ED2EBE5002208EF /* AddressSearchCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D51042ED2EBE5002208EF /* AddressSearchCard.swift */; };
 		3C4145E52ED14A6F001BDE61 /* ZoneCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145B12ED14A6F001BDE61 /* ZoneCache.swift */; };
 		3C4145E62ED14A6F001BDE61 /* LocalZoneDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145B32ED14A6F001BDE61 /* LocalZoneDataSource.swift */; };
 		3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145B52ED14A6F001BDE61 /* ZoneRepository.swift */; };
@@ -58,6 +64,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3C3D50F92ED26CAC002208EF /* ZoneColorProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneColorProvider.swift; sourceTree = "<group>"; };
+		3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneMapView.swift; sourceTree = "<group>"; };
+		3C3D50FE2ED26CDA002208EF /* PersistentZoneCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersistentZoneCache.swift; sourceTree = "<group>"; };
+		3C3D51002ED26CFC002208EF /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		3C3D51022ED26D3C002208EF /* MapCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapCardView.swift; sourceTree = "<group>"; };
+		3C3D51042ED2EBE5002208EF /* AddressSearchCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressSearchCard.swift; sourceTree = "<group>"; };
 		3C4144FB2ED1413F001BDE61 /* SFParkingZoneFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SFParkingZoneFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C4145B12ED14A6F001BDE61 /* ZoneCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneCache.swift; sourceTree = "<group>"; };
 		3C4145B32ED14A6F001BDE61 /* LocalZoneDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalZoneDataSource.swift; sourceTree = "<group>"; };
@@ -121,6 +133,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C3D50FA2ED26CAC002208EF /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				3C3D50F92ED26CAC002208EF /* ZoneColorProvider.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		3C4144F22ED1413F001BDE61 = {
 			isa = PBXGroup;
 			children = (
@@ -145,6 +165,7 @@
 		3C4145B22ED14A6F001BDE61 /* Cache */ = {
 			isa = PBXGroup;
 			children = (
+				3C3D50FE2ED26CDA002208EF /* PersistentZoneCache.swift */,
 				3C4145B12ED14A6F001BDE61 /* ZoneCache.swift */,
 			);
 			path = Cache;
@@ -262,6 +283,7 @@
 		3C4145DF2ED14A6F001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3C3D51042ED2EBE5002208EF /* AddressSearchCard.swift */,
 				3C4145DA2ED14A6F001BDE61 /* AdditionalInfoView.swift */,
 				3C4145DB2ED14A6F001BDE61 /* MainResultView.swift */,
 				3C4145DC2ED14A6F001BDE61 /* RulesSummaryView.swift */,
@@ -291,6 +313,7 @@
 		3C4145E32ED14A6F001BDE61 /* Map */ = {
 			isa = PBXGroup;
 			children = (
+				3C3D50FA2ED26CAC002208EF /* Services */,
 				3C41461F2ED15702001BDE61 /* Views */,
 				3C4145E22ED14A6F001BDE61 /* Adapters */,
 			);
@@ -351,6 +374,8 @@
 		3C41461F2ED15702001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3C3D51022ED26D3C002208EF /* MapCardView.swift */,
+				3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */,
 				3C41461E2ED15702001BDE61 /* ExpandedMapView.swift */,
 			);
 			path = Views;
@@ -367,6 +392,7 @@
 		3C4146252ED16803001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3C3D51002ED26CFC002208EF /* PrivacyPolicyView.swift */,
 				3C4146232ED16803001BDE61 /* AddPermitView.swift */,
 				3C4146242ED16803001BDE61 /* SettingsView.swift */,
 			);
@@ -454,11 +480,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C4145FA2ED14A70001BDE61 /* ZoneLookupEngineProtocol.swift in Sources */,
+				3C3D51012ED26CFC002208EF /* PrivacyPolicyView.swift in Sources */,
 				3C4145EE2ED14A6F001BDE61 /* Coordinate.swift in Sources */,
 				3C4145F02ED14A6F001BDE61 /* ParkingRule.swift in Sources */,
 				3C4145FE2ED14A70001BDE61 /* ReverseGeocodingService.swift in Sources */,
+				3C3D50FB2ED26CAC002208EF /* ZoneColorProvider.swift in Sources */,
+				3C3D51052ED2EBE5002208EF /* AddressSearchCard.swift in Sources */,
+				3C3D50FF2ED26CDA002208EF /* PersistentZoneCache.swift in Sources */,
 				3C4145F12ED14A70001BDE61 /* ParkingZone.swift in Sources */,
 				3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */,
+				3C3D51032ED26D3C002208EF /* MapCardView.swift in Sources */,
 				3C4146192ED1559C001BDE61 /* OnboardingViewModel.swift in Sources */,
 				3C4145FD2ED14A70001BDE61 /* PermitService.swift in Sources */,
 				3C4145E62ED14A6F001BDE61 /* LocalZoneDataSource.swift in Sources */,
@@ -487,6 +518,7 @@
 				3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */,
 				3C4145F92ED14A70001BDE61 /* ZoneDataSourceProtocol.swift in Sources */,
 				3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */,
+				3C3D50FD2ED26CCA002208EF /* ZoneMapView.swift in Sources */,
 				3C4145FB2ED14A70001BDE61 /* ZoneServiceProtocol.swift in Sources */,
 				3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */,
 				3C4145E52ED14A6F001BDE61 /* ZoneCache.swift in Sources */,
