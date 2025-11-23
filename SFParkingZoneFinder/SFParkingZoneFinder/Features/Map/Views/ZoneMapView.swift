@@ -123,6 +123,10 @@ struct ZoneMapView: UIViewRepresentable {
     let userCoordinate: CLLocationCoordinate2D?
     let onZoneTapped: ((ParkingZone) -> Void)?
 
+    /// Vertical bias for user location position (0.0 = center, positive = user appears lower on screen)
+    /// A value of 0.25 means the user appears at 75% from top (25% from bottom)
+    var verticalBias: Double = 0.0
+
     /// When true, uses convex hull (smoothed envelope). When false, uses actual block boundaries.
     /// Set to false to see the preprocessed polygon data as-is.
     static var useConvexHull: Bool = false
@@ -139,8 +143,17 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Set initial region centered on user (zoomed to ~10-15 blocks)
         // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks
-        let center = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        let userCenter = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         let desiredSpan = MKCoordinateSpan(latitudeDelta: 0.006, longitudeDelta: 0.006)
+
+        // Apply vertical bias: offset center northward to push user location down on screen
+        // verticalBias of 0.25 means user appears at 75% from top (halfway between center and bottom)
+        let latOffset = desiredSpan.latitudeDelta * verticalBias
+        let center = CLLocationCoordinate2D(
+            latitude: userCenter.latitude + latOffset,
+            longitude: userCenter.longitude
+        )
+
         let region = MKCoordinateRegion(center: center, span: desiredSpan)
         mapView.setRegion(region, animated: false)
 
@@ -376,7 +389,13 @@ struct ZoneMapView: UIViewRepresentable {
                 logger.debug("Re-centering map (moved \(String(format: "%.0f", distance))m)")
                 // Use stored initial span to maintain zoom level
                 let span = context.coordinator.initialSpan ?? mapView.region.span
-                let region = MKCoordinateRegion(center: coord, span: span)
+                // Apply vertical bias when re-centering
+                let latOffset = span.latitudeDelta * verticalBias
+                let biasedCenter = CLLocationCoordinate2D(
+                    latitude: coord.latitude + latOffset,
+                    longitude: coord.longitude
+                )
+                let region = MKCoordinateRegion(center: biasedCenter, span: span)
                 mapView.setRegion(region, animated: true)
             }
         }

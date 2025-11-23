@@ -62,7 +62,10 @@ struct MainResultView: View {
                         if isMapExpanded {
                             selectedZone = zone
                         }
-                    }
+                    },
+                    // When collapsed, shift user location to 50% between card bottom and screen bottom
+                    // A bias of ~0.25 places the user indicator in the visible map area below the card
+                    verticalBias: isMapExpanded ? 0.0 : 0.25
                 )
                 .ignoresSafeArea()
             } else {
@@ -116,30 +119,6 @@ struct MainResultView: View {
 
                     // Bottom section
                     VStack(spacing: 12) {
-                        // Collapsed mode: Center location button
-                        if !isMapExpanded {
-                            Button {
-                                HapticFeedback.light()
-                                viewModel.refreshLocation()
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "location.fill")
-                                        .font(.system(size: 14, weight: .semibold))
-                                    Text("Center on Location")
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                }
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 12)
-                                .background(Color.black.opacity(0.6))
-                                .clipShape(Capsule())
-                                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-                            }
-                            .padding(.bottom, 24)
-                            .transition(.opacity)
-                        }
-
                         // Tapped zone info (only in expanded mode)
                         if isMapExpanded, let selected = selectedZone {
                             TappedZoneInfoCard(zone: selected) {
