@@ -156,6 +156,7 @@ final class MainResultViewModel: ObservableObject {
     private func startContinuousLocationUpdates() {
         // Start tracking location
         locationService.startUpdatingLocation()
+        isLoading = true  // Show loading until first location
 
         // Subscribe to location updates with debouncing
         locationService.locationPublisher
@@ -168,14 +169,29 @@ final class MainResultViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Also do an immediate lookup
-        refreshLocation()
+        // Use a longer timeout for initial location (GPS cold start can be slow)
+        // Don't block on immediate lookup - let continuous updates handle it
+        Task {
+            do {
+                // Wait up to 30 seconds for first location from continuous updates
+                try await Task.sleep(nanoseconds: 30_000_000_000)
+                // If still loading after 30s and no location, show timeout
+                if isLoading && lastKnownGPSCoordinate == nil {
+                    error = .locationUnavailable
+                    isLoading = false
+                }
+            } catch {
+                // Task cancelled, ignore
+            }
+        }
     }
 
     /// Process a location update from continuous tracking
     private func processLocationUpdate(_ location: CLLocation) async {
-        // Skip if we're already loading
-        guard !isLoading else { return }
+        // For initial location, allow processing even if loading
+        // For subsequent updates, skip if already loading
+        let isInitialLocation = lastKnownGPSCoordinate == nil
+        if !isInitialLocation && isLoading { return }
 
         // Skip if location hasn't changed significantly (backup check, LocationService already filters at 10m)
         if let current = currentCoordinate {
@@ -203,6 +219,7 @@ final class MainResultViewModel: ObservableObject {
         await updateAddress(for: location)
 
         lastUpdated = Date()
+        isLoading = false  // Done loading (handles initial load case)
     }
 
     /// Report an issue with zone data
