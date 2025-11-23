@@ -34,6 +34,7 @@ enum HapticFeedback {
 /// Primary view showing fullscreen map with zone card overlay
 struct MainResultView: View {
     @StateObject private var viewModel = MainResultViewModel()
+    @ObservedObject private var devSettings = DeveloperSettings.shared
     @State private var showingSettings = false
     @State private var contentAppeared = false
     @State private var isMapExpanded = false
@@ -79,6 +80,7 @@ struct MainResultView: View {
                             selectedZone = zone
                         }
                     },
+                    devSettingsHash: devSettings.settingsHash,
                     // When collapsed, shift user location below the card
                     // A bias of 0.5 places the user indicator well below the large card
                     verticalBias: isMapExpanded ? 0.0 : 0.5,

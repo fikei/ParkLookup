@@ -157,6 +157,22 @@ final class DeveloperSettings: ObservableObject {
         useConvexHull || useDouglasPeucker || useGridSnapping
     }
 
+    /// Settings hash for detecting changes (triggers map refresh)
+    var settingsHash: Int {
+        var hasher = Hasher()
+        hasher.combine(useConvexHull)
+        hasher.combine(useDouglasPeucker)
+        hasher.combine(douglasPeuckerTolerance)
+        hasher.combine(useGridSnapping)
+        hasher.combine(gridSnapSize)
+        hasher.combine(preserveCurves)
+        hasher.combine(curveAngleThreshold)
+        hasher.combine(showLookupBoundaries)
+        hasher.combine(showOriginalOverlay)
+        hasher.combine(showVertexCounts)
+        return hasher.finalize()
+    }
+
     /// Get a human-readable description of current simplification pipeline
     var simplificationDescription: String {
         var steps: [String] = []

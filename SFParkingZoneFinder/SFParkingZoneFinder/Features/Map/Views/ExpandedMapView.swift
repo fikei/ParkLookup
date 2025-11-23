@@ -16,6 +16,7 @@ struct ExpandedMapView: View {
     let currentZoneId: String?
 
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var devSettings = DeveloperSettings.shared
     @State private var selectedZone: ParkingZone?
 
     init(
@@ -60,7 +61,8 @@ struct ExpandedMapView: View {
                     userCoordinate: coordinate,
                     onZoneTapped: { zone in
                         selectedZone = zone
-                    }
+                    },
+                    devSettingsHash: devSettings.settingsHash
                 )
                 .ignoresSafeArea()
 

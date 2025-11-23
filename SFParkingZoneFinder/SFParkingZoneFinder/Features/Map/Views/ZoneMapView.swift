@@ -12,6 +12,9 @@ struct ZoneMapView: UIViewRepresentable {
     let userCoordinate: CLLocationCoordinate2D?
     let onZoneTapped: ((ParkingZone) -> Void)?
 
+    /// Developer settings hash - when this changes, overlays reload with new simplification
+    var devSettingsHash: Int = DeveloperSettings.shared.settingsHash
+
     /// Vertical bias for user location position (0.0 = center, positive = user appears lower on screen)
     /// A value of 0.25 means the user appears at 75% from top (25% from bottom)
     var verticalBias: Double = 0.0
@@ -266,6 +269,27 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Handle searched location annotation
         updateSearchedAnnotation(mapView: mapView, context: context)
+
+        // Check if developer settings changed - reload overlays if so
+        let currentSettingsHash = DeveloperSettings.shared.settingsHash
+        if context.coordinator.overlaysLoaded && currentSettingsHash != context.coordinator.lastSettingsHash {
+            logger.info("🔄 Developer settings changed - reloading overlays")
+            context.coordinator.lastSettingsHash = currentSettingsHash
+
+            // Clear existing overlays and annotations (except user location and searched pin)
+            let overlaysToRemove = mapView.overlays
+            let annotationsToRemove = mapView.annotations.filter { annotation in
+                !(annotation is MKUserLocation) && !(annotation is SearchedLocationAnnotation)
+            }
+            mapView.removeOverlays(overlaysToRemove)
+            mapView.removeAnnotations(annotationsToRemove)
+
+            // Reset overlay state and reload
+            context.coordinator.overlaysLoaded = false
+            context.coordinator.overlaysCurrentlyVisible = false
+            loadOverlays(mapView: mapView, context: context)
+            return
+        }
 
         // Load overlays if they haven't been loaded yet but zones are now available
         if !context.coordinator.overlaysLoaded && !zones.isEmpty {
@@ -614,10 +638,14 @@ struct ZoneMapView: UIViewRepresentable {
         // Track the searched location annotation
         weak var searchedAnnotation: SearchedLocationAnnotation?
 
+        // Track developer settings hash to detect changes and refresh overlays
+        var lastSettingsHash: Int = 0
+
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone) -> Void)?) {
             self.currentZoneId = currentZoneId
             self.zones = zones
             self.onZoneTapped = onZoneTapped
+            self.lastSettingsHash = DeveloperSettings.shared.settingsHash
         }
 
         // MARK: - MKMapViewDelegate
