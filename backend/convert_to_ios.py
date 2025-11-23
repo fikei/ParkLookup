@@ -114,7 +114,7 @@ def generate_default_rule(area_code: str) -> Dict[str, Any]:
     return {
         "id": f"{area_code.lower()}_rule_001",
         "ruleType": "permit_required",
-        "description": f"Residential Permit Area {area_code} only",
+        "description": f"Residential permit Zone {area_code} only",
         "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
         "enforcementStartTime": {"hour": 8, "minute": 0},
         "enforcementEndTime": {"hour": 18, "minute": 0},
@@ -179,7 +179,7 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
     return {
         "id": generate_zone_id(code, index),
         "cityCode": "sf",
-        "displayName": f"Area {code}",
+        "displayName": f"Zone {code}",
         "zoneType": "rpp",
         "permitArea": code,
         "validPermitAreas": [code],
@@ -201,7 +201,6 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
 def convert_metered_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, Any]]:
     """Convert a metered zone from pipeline to iOS format"""
     code = zone_data.get("code", "")
-    name = zone_data.get("name", "Metered Parking")
     if not code:
         return None
 
@@ -213,12 +212,20 @@ def convert_metered_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict
         return None
 
     meter_count = zone_data.get("meterCount", 0)
-    avg_time_limit = zone_data.get("avgTimeLimit")
+    avg_time_limit = zone_data.get("avgTimeLimit") or 120  # Default 2hr
+    rate_area = zone_data.get("rateArea")
+
+    # Determine hourly rate based on rate area (SF meter rates vary by area)
+    hourly_rate = 2.0  # Default rate
+    if rate_area:
+        # SF has different rate areas with varying prices
+        rate_map = {"1": 3.0, "2": 2.5, "3": 2.0, "4": 1.5, "5": 1.0}
+        hourly_rate = rate_map.get(str(rate_area), 2.0)
 
     return {
         "id": f"sf_metered_{code.lower()}_{index:03d}",
         "cityCode": "sf",
-        "displayName": name,
+        "displayName": "Paid Parking",
         "zoneType": "metered",
         "permitArea": None,  # No permit required for metered zones
         "validPermitAreas": [],
@@ -232,7 +239,8 @@ def convert_metered_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict
             "accuracy": "medium",
             "polygonCount": len(boundaries),
             "meterCount": meter_count,
-            "avgTimeLimit": avg_time_limit
+            "avgTimeLimit": avg_time_limit,
+            "hourlyRate": hourly_rate
         }
     }
 
@@ -248,7 +256,7 @@ def build_permit_areas(zones: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             seen_codes.add(code)
             permit_areas.append({
                 "code": code,
-                "name": f"Area {code}",
+                "name": f"Zone {code}",
                 "neighborhoods": PERMIT_AREA_NEIGHBORHOODS.get(code, [])
             })
 

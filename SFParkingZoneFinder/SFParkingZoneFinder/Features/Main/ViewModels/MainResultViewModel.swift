@@ -14,6 +14,7 @@ final class MainResultViewModel: ObservableObject {
     // Zone & Rules
     @Published private(set) var zoneName: String = "—"
     @Published private(set) var zoneType: ZoneType = .residentialPermit
+    @Published private(set) var meteredSubtitle: String? = nil  // "$2/hr • 2hr max" for metered zones
     @Published private(set) var validityStatus: PermitValidityStatus = .noPermitRequired
     @Published private(set) var ruleSummary: String = ""
     @Published private(set) var ruleSummaryLines: [String] = []
@@ -281,10 +282,12 @@ final class MainResultViewModel: ObservableObject {
         if let zone = result.lookupResult.primaryZone {
             zoneName = zone.displayName
             zoneType = zone.zoneType
+            meteredSubtitle = zone.meteredSubtitle  // "$2/hr • 2hr max" for metered zones
             currentZoneId = zone.id
         } else {
             zoneName = "Unknown Zone"
             zoneType = .residentialPermit
+            meteredSubtitle = nil
             currentZoneId = nil
         }
 

@@ -15,8 +15,8 @@ final class PersistentZoneCache: ZoneCacheProtocol {
     private let lock = NSLock()
 
     /// Current data version - change this when zone data format changes
-    /// Bumped to 1.6: added multi-permit boundary support, metered zone z-layer, rectangular metered polygons
-    private let cacheVersion = "1.6"
+    /// Bumped to 1.7: renamed Area->Zone, Paid Parking title, metered metadata (rate/time)
+    private let cacheVersion = "1.7"
 
     private(set) var lastUpdated: Date?
 

@@ -221,7 +221,7 @@ class ParkingDataTransformer:
 
             zone = RPPZone(
                 area_code=area_code,
-                name=f"Area {area_code}",
+                name=f"Zone {area_code}",
                 polygon=polygons,
                 total_blocks=len(polygons),
                 multi_permit_polygons=multi_permit_polygons

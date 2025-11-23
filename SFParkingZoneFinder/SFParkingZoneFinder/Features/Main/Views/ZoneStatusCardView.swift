@@ -7,6 +7,7 @@ struct ZoneStatusCardView: View {
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
     let allValidPermitAreas: [String]  // All valid permits from overlapping zones
+    let meteredSubtitle: String?  // For metered zones: "$2/hr • 2hr max"
 
     /// Responsive card height based on screen size
     /// Calculated to show: zone card + map card (120pt) + rules header peek (~20pt)
@@ -48,20 +49,20 @@ struct ZoneStatusCardView: View {
         if zoneName.hasPrefix("Area ") {
             return String(zoneName.dropFirst(5))
         }
+        if zoneName.hasPrefix("Zone ") {
+            return String(zoneName.dropFirst(5))
+        }
         return zoneName
     }
 
     /// Display name shown below the zone code
     private var displaySubtitle: String? {
         if isMeteredZone {
-            // For metered zones, show the street name from "Metered - Market St"
-            if zoneName.hasPrefix("Metered - ") {
-                return String(zoneName.dropFirst(10))
-            }
-            return "Paid Parking"
+            // Show hourly cost & max time for metered zones
+            return meteredSubtitle ?? "$2/hr • 2hr max"
         }
         if isMultiPermitLocation {
-            return "Multi-permit area"
+            return "Multi-permit zone"
         }
         return nil
     }
@@ -147,13 +148,14 @@ struct ZoneStatusCardView: View {
 #Preview("Valid Permit") {
     ScrollView {
         ZoneStatusCardView(
-            zoneName: "Area Q",
+            zoneName: "Zone Q",
             zoneType: .residentialPermit,
             validityStatus: .valid,
             applicablePermits: [
                 ParkingPermit(type: .residential, area: "Q")
             ],
-            allValidPermitAreas: ["Q"]
+            allValidPermitAreas: ["Q"],
+            meteredSubtitle: nil
         )
         .padding()
     }
@@ -163,27 +165,29 @@ struct ZoneStatusCardView: View {
 #Preview("Invalid Permit") {
     ScrollView {
         ZoneStatusCardView(
-            zoneName: "Area R",
+            zoneName: "Zone R",
             zoneType: .residentialPermit,
             validityStatus: .invalid,
             applicablePermits: [],
-            allValidPermitAreas: ["R"]
+            allValidPermitAreas: ["R"],
+            meteredSubtitle: nil
         )
         .padding()
     }
     .background(Color(.systemGroupedBackground))
 }
 
-#Preview("Multi-Permit Area") {
+#Preview("Multi-Permit Zone") {
     ScrollView {
         ZoneStatusCardView(
-            zoneName: "Area A",
+            zoneName: "Zone A",
             zoneType: .residentialPermit,
             validityStatus: .valid,
             applicablePermits: [
                 ParkingPermit(type: .residential, area: "A")
             ],
-            allValidPermitAreas: ["A", "B"]
+            allValidPermitAreas: ["A", "B"],
+            meteredSubtitle: nil
         )
         .padding()
     }
@@ -193,25 +197,27 @@ struct ZoneStatusCardView: View {
 #Preview("Conditional") {
     ScrollView {
         ZoneStatusCardView(
-            zoneName: "Area U",
+            zoneName: "Zone U",
             zoneType: .residentialPermit,
             validityStatus: .conditional,
             applicablePermits: [],
-            allValidPermitAreas: ["U"]
+            allValidPermitAreas: ["U"],
+            meteredSubtitle: nil
         )
         .padding()
     }
     .background(Color(.systemGroupedBackground))
 }
 
-#Preview("Metered Zone") {
+#Preview("Paid Parking") {
     ScrollView {
         ZoneStatusCardView(
-            zoneName: "Metered - Market St",
+            zoneName: "Paid Parking",
             zoneType: .metered,
             validityStatus: .noPermitRequired,
             applicablePermits: [],
-            allValidPermitAreas: []
+            allValidPermitAreas: [],
+            meteredSubtitle: "$3/hr • 2hr max"
         )
         .padding()
     }

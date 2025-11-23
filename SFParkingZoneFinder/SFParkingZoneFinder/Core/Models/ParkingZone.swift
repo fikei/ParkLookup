@@ -155,6 +155,28 @@ extension ParkingZone {
     var multiPermitBoundaryIndices: Set<Int> {
         Set(multiPermitBoundaries.map { $0.boundaryIndex })
     }
+
+    /// Formatted subtitle for metered zones (e.g., "$2/hr • 2hr max")
+    var meteredSubtitle: String? {
+        guard zoneType == .metered else { return nil }
+
+        let rate = metadata.hourlyRate ?? 2.0
+        let timeLimit = metadata.avgTimeLimit ?? 120
+
+        let rateStr = rate.truncatingRemainder(dividingBy: 1) == 0
+            ? "$\(Int(rate))/hr"
+            : String(format: "$%.2f/hr", rate)
+
+        let timeStr: String
+        if timeLimit >= 60 {
+            let hours = timeLimit / 60
+            timeStr = "\(hours)hr max"
+        } else {
+            timeStr = "\(timeLimit)min max"
+        }
+
+        return "\(rateStr) • \(timeStr)"
+    }
 }
 
 // MARK: - Zone Type
@@ -197,6 +219,11 @@ struct ZoneMetadata: Codable, Hashable {
     let lastUpdatedString: String  // Store as string for flexible parsing
     let accuracy: DataAccuracy
 
+    // Metered zone specific data
+    let hourlyRate: Double?  // Hourly rate in dollars (e.g., 2.0 = $2/hr)
+    let avgTimeLimit: Int?   // Average time limit in minutes (e.g., 120 = 2hr max)
+    let meterCount: Int?     // Number of meters in zone
+
     /// Computed Date property with flexible parsing
     var lastUpdated: Date {
         ZoneMetadata.parseDate(lastUpdatedString) ?? Date()
@@ -206,6 +233,9 @@ struct ZoneMetadata: Codable, Hashable {
         case dataSource
         case lastUpdatedString = "lastUpdated"
         case accuracy
+        case hourlyRate
+        case avgTimeLimit
+        case meterCount
     }
 
     // Simple date parser for metadata dates

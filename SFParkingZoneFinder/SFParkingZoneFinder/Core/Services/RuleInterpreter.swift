@@ -122,10 +122,10 @@ final class RuleInterpreter: RuleInterpreterProtocol {
                     // "Valid permits" means any of these permits will work on this block
                     lines.append("Valid permits: \(allAreas.joined(separator: " or "))")
                 } else {
-                    lines.append("Residential Permit Area \(area) only")
+                    lines.append("Residential permit Zone \(area) only")
                 }
             } else {
-                lines.append("Residential Permit Area \(area) only")
+                lines.append("Residential permit Zone \(area) only")
             }
         }
 
