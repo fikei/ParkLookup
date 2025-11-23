@@ -506,13 +506,13 @@ private struct AnimatedZoneCard: View {
         } else {
             ZStack {
                 Circle()
-                    .fill(isExpanded ? circleBackground : (isValidStyle ? Color(.systemBackground) : Color.forValidityStatus(validityStatus).opacity(0.15)))
+                    .fill(circleBackground)
                     .frame(width: size, height: size)
                     .shadow(color: .black.opacity(0.1), radius: size > 100 ? 4 : 2, x: 0, y: 2)
 
                 Text(singleZoneCode)
                     .font(.system(size: size * (isExpanded ? 0.5 : 0.6), weight: .bold))
-                    .foregroundColor(isExpanded ? .white : (zoneType == .metered ? Color.forZoneType(.metered) : Color.forValidityStatus(validityStatus)))
+                    .foregroundColor(.white)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
             }
