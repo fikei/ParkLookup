@@ -24,7 +24,12 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
     func reloadZones() async throws {
         zones = try await repository.getZones(for: .sanFrancisco)
         isReady = true
-        logger.info("Loaded \(self.zones.count) zones")
+
+        // Log zone breakdown by type
+        let rppCount = zones.filter { $0.zoneType == .residentialPermit }.count
+        let meteredCount = zones.filter { $0.zoneType == .metered }.count
+        let otherCount = zones.count - rppCount - meteredCount
+        logger.info("✅ Loaded \(self.zones.count) zones: \(rppCount) RPP, \(meteredCount) metered, \(otherCount) other")
     }
 
     func findZone(at coordinate: CLLocationCoordinate2D) async -> ZoneLookupResult {
@@ -71,6 +76,7 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
 
         // No zones found - but we're in SF, so status is unknown (not "outside coverage")
         if matchingZones.isEmpty {
+            logger.warning("⚠️ No zone found at (\(coordinate.latitude), \(coordinate.longitude)) - returning unknownArea")
             return .unknownArea(coordinate: coordinate)
         }
 

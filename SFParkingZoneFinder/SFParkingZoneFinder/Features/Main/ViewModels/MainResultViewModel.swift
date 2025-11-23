@@ -1,6 +1,9 @@
 import Foundation
 import CoreLocation
 import Combine
+import os.log
+
+private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
 
 /// ViewModel for the main parking result view
 @MainActor
@@ -298,6 +301,7 @@ final class MainResultViewModel: ObservableObject {
 
     /// Perform lookup at a specific coordinate (for address search)
     private func performLookupAt(_ coordinate: CLLocationCoordinate2D) async {
+        logger.info("🔍 performLookupAt: (\(coordinate.latitude), \(coordinate.longitude))")
         isLoading = true
         error = nil
 
@@ -309,6 +313,15 @@ final class MainResultViewModel: ObservableObject {
             at: coordinate,
             time: Date()
         )
+
+        // Log the result
+        if let zone = result.lookupResult.primaryZone {
+            logger.info("✅ Zone found: \(zone.displayName) (type: \(zone.zoneType.rawValue))")
+        } else if result.lookupResult.isUnknownArea {
+            logger.warning("⚠️ Unknown area - no zone found at coordinate")
+        } else if result.lookupResult.isOutsideCoverage {
+            logger.warning("⚠️ Outside coverage area")
+        }
 
         // Update UI state
         updateState(from: result)

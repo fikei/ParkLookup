@@ -166,13 +166,16 @@ struct AddressSearchCard: View {
 
         search.start { response, error in
             if let coordinate = response?.mapItems.first?.placemark.coordinate {
+                // Log the exact coordinate returned by MKLocalSearch
+                logger.info("📍 MKLocalSearch returned: (\(coordinate.latitude), \(coordinate.longitude)) for '\(result.title)'")
+
                 // Validate coordinate is within SF coverage area
                 if isWithinSF(coordinate) {
-                    logger.info("Selected address: \(result.title)")
+                    logger.info("✅ Selected address within SF: \(result.title)")
                     onAddressSelected(coordinate)
                     cancelSearch()
                 } else {
-                    logger.warning("Selected address outside SF coverage: \(result.title)")
+                    logger.warning("❌ Selected address outside SF coverage: \(result.title)")
                     onOutsideCoverage?()
                     cancelSearch()
                 }
