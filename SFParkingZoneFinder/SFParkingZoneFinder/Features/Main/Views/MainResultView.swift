@@ -40,6 +40,7 @@ struct MainResultView: View {
     @State private var isMapExpanded = false
     @State private var selectedZone: ParkingZone?
 
+    @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Extract permit area code from zone name
@@ -80,44 +81,24 @@ struct MainResultView: View {
             // Layer 2: Card overlays
             if !viewModel.isLoading && viewModel.error == nil {
                 VStack {
-                    if isMapExpanded {
-                        // Expanded mode: Mini card at top
-                        MiniZoneCardView(
-                            zoneName: viewModel.zoneName,
-                            zoneCode: currentPermitArea,
-                            zoneType: viewModel.zoneType,
-                            validityStatus: viewModel.validityStatus,
-                            applicablePermits: viewModel.applicablePermits,
-                            allValidPermitAreas: viewModel.allValidPermitAreas,
-                            timeLimitMinutes: viewModel.timeLimitMinutes
-                        )
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .top).combined(with: .opacity),
-                            removal: .move(edge: .top).combined(with: .opacity)
-                        ))
-                    } else {
-                        // Collapsed mode: Large zone card
-                        ZoneStatusCardView(
-                            zoneName: viewModel.zoneName,
-                            zoneType: viewModel.zoneType,
-                            validityStatus: viewModel.validityStatus,
-                            applicablePermits: viewModel.applicablePermits,
-                            allValidPermitAreas: viewModel.allValidPermitAreas,
-                            meteredSubtitle: viewModel.meteredSubtitle,
-                            timeLimitMinutes: viewModel.timeLimitMinutes,
-                            ruleSummaryLines: viewModel.ruleSummaryLines
-                        )
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                        .opacity(contentAppeared ? 1 : 0)
-                        .offset(y: contentAppeared ? 0 : 20)
-                        .transition(.asymmetric(
-                            insertion: .scale(scale: 0.8).combined(with: .opacity),
-                            removal: .scale(scale: 0.8).combined(with: .opacity)
-                        ))
-                    }
+                    // Animated zone card that morphs between large and mini states
+                    AnimatedZoneCard(
+                        isExpanded: isMapExpanded,
+                        namespace: cardAnimation,
+                        zoneName: viewModel.zoneName,
+                        zoneCode: currentPermitArea,
+                        zoneType: viewModel.zoneType,
+                        validityStatus: viewModel.validityStatus,
+                        applicablePermits: viewModel.applicablePermits,
+                        allValidPermitAreas: viewModel.allValidPermitAreas,
+                        meteredSubtitle: viewModel.meteredSubtitle,
+                        timeLimitMinutes: viewModel.timeLimitMinutes,
+                        ruleSummaryLines: viewModel.ruleSummaryLines
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .opacity(contentAppeared ? 1 : 0)
+                    .offset(y: contentAppeared ? 0 : 20)
 
                     Spacer()
 
@@ -231,7 +212,368 @@ struct MainResultView: View {
     }
 }
 
-// MARK: - Mini Zone Card (compact version for expanded map)
+// MARK: - Animated Zone Card (morphs between large and mini states)
+
+private struct AnimatedZoneCard: View {
+    let isExpanded: Bool
+    var namespace: Namespace.ID
+    let zoneName: String
+    let zoneCode: String?
+    let zoneType: ZoneType
+    let validityStatus: PermitValidityStatus
+    let applicablePermits: [ParkingPermit]
+    let allValidPermitAreas: [String]
+    let meteredSubtitle: String?
+    let timeLimitMinutes: Int?
+    let ruleSummaryLines: [String]
+
+    @State private var animationIndex: Int = 0
+    @State private var isFlipped: Bool = false
+
+    private var isMultiPermitLocation: Bool {
+        allValidPermitAreas.count > 1
+    }
+
+    private var orderedPermitAreas: [String] {
+        guard isMultiPermitLocation else {
+            return allValidPermitAreas.isEmpty ? [singleZoneCode] : allValidPermitAreas
+        }
+        var areas = allValidPermitAreas
+        if let userPermitArea = applicablePermits.first?.area,
+           let index = areas.firstIndex(of: userPermitArea) {
+            areas.remove(at: index)
+            areas.insert(userPermitArea, at: 0)
+        }
+        return areas
+    }
+
+    private var singleZoneCode: String {
+        if zoneType == .metered { return "$" }
+        if zoneName.hasPrefix("Area ") { return String(zoneName.dropFirst(5)) }
+        if zoneName.hasPrefix("Zone ") { return String(zoneName.dropFirst(5)) }
+        return zoneName
+    }
+
+    private var isValidStyle: Bool {
+        validityStatus == .valid || validityStatus == .multipleApply
+    }
+
+    private var cardBackground: Color {
+        if zoneType == .metered { return Color(.systemBackground) }
+        return isValidStyle ? Color.green : Color(.systemBackground)
+    }
+
+    private var circleBackground: Color {
+        ZoneColorProvider.swiftUIColor(for: zoneCode)
+    }
+
+    private var currentSelectedArea: String {
+        guard isMultiPermitLocation, animationIndex < orderedPermitAreas.count else {
+            return zoneCode ?? singleZoneCode
+        }
+        return orderedPermitAreas[animationIndex]
+    }
+
+    private var parkUntilText: String? {
+        guard (validityStatus == .invalid || validityStatus == .noPermitSet),
+              let limit = timeLimitMinutes else { return nil }
+        let parkUntil = Date().addingTimeInterval(TimeInterval(limit * 60))
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return "Park until \(formatter.string(from: parkUntil))"
+    }
+
+    /// Responsive card height for large mode
+    private var largeCardHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.height
+        let safeAreaTop: CGFloat = 59
+        let safeAreaBottom: CGFloat = 34
+        let padding: CGFloat = 32
+        let mapCardHeight: CGFloat = 120
+        let rulesHeaderPeek: CGFloat = 20
+        let spacing: CGFloat = 32
+        let availableHeight = screenHeight - safeAreaTop - safeAreaBottom - padding - mapCardHeight - rulesHeaderPeek - spacing
+        return min(max(availableHeight, 300), 520)
+    }
+
+    var body: some View {
+        ZStack {
+            // Animated background that morphs between sizes
+            RoundedRectangle(cornerRadius: 16)
+                .fill(cardBackground)
+                .matchedGeometryEffect(id: "cardBackground", in: namespace)
+                .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+
+            // Content changes based on expanded state
+            if isExpanded {
+                miniContent
+                    .transition(.opacity)
+            } else {
+                largeContent
+                    .transition(.opacity)
+            }
+        }
+        .frame(height: isExpanded ? nil : largeCardHeight)
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isExpanded)
+    }
+
+    // MARK: - Mini Content (expanded map mode)
+
+    private var miniContent: some View {
+        HStack(spacing: 16) {
+            // Zone circle
+            zoneCircle(size: 56)
+
+            // Zone info
+            VStack(alignment: .leading, spacing: 4) {
+                if isMultiPermitLocation {
+                    Text("Zone \(currentSelectedArea)")
+                        .font(.headline)
+                        .foregroundColor(isValidStyle ? .white : .primary)
+                        .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                    Text("Multi Permit Zone")
+                        .font(.caption)
+                        .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                } else {
+                    Text(zoneName)
+                        .font(.headline)
+                        .foregroundColor(isValidStyle ? .white : .primary)
+                }
+
+                // Status or Park Until
+                statusBadge
+            }
+
+            Spacer()
+        }
+        .padding()
+    }
+
+    // MARK: - Large Content (home screen mode)
+
+    private var largeContent: some View {
+        ZStack {
+            if !isFlipped {
+                // Front of card
+                VStack(spacing: 8) {
+                    // Zone circle centered
+                    zoneCircle(size: 160)
+
+                    // Subtitle for metered zones or multi-permit
+                    if let subtitle = displaySubtitle {
+                        Text(subtitle)
+                            .font(.headline)
+                            .foregroundColor(isValidStyle ? .white.opacity(0.9) : .secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+
+                // Info button (top right)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                isFlipped = true
+                            }
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .font(.title2)
+                                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                        }
+                        .padding(16)
+                    }
+                    Spacer()
+                }
+
+                // Validity Badge (positioned at bottom)
+                VStack {
+                    Spacer()
+                    ValidityBadgeView(
+                        status: validityStatus,
+                        permits: applicablePermits,
+                        onColoredBackground: isValidStyle,
+                        timeLimitMinutes: timeLimitMinutes
+                    )
+                    .padding(.bottom, 24)
+                }
+            } else {
+                // Back of card (rules)
+                rulesContent
+            }
+        }
+        .rotation3DEffect(
+            .degrees(isFlipped ? 180 : 0),
+            axis: (x: 0, y: 1, z: 0),
+            perspective: 0.8
+        )
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isFlipped)
+    }
+
+    private var displaySubtitle: String? {
+        if zoneType == .metered { return meteredSubtitle ?? "$2/hr • 2hr max" }
+        if isMultiPermitLocation { return "Multi Permit Zone" }
+        return nil
+    }
+
+    // MARK: - Shared Components
+
+    @ViewBuilder
+    private func zoneCircle(size: CGFloat) -> some View {
+        if isMultiPermitLocation {
+            LargeMultiPermitCircleView(
+                permitAreas: orderedPermitAreas,
+                animationIndex: animationIndex,
+                size: size
+            )
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    animationIndex = (animationIndex + 1) % orderedPermitAreas.count
+                }
+            }
+        } else {
+            ZStack {
+                Circle()
+                    .fill(isExpanded ? circleBackground : (isValidStyle ? Color(.systemBackground) : Color.forValidityStatus(validityStatus).opacity(0.15)))
+                    .frame(width: size, height: size)
+                    .shadow(color: .black.opacity(0.1), radius: size > 100 ? 4 : 2, x: 0, y: 2)
+
+                Text(singleZoneCode)
+                    .font(.system(size: size * (isExpanded ? 0.5 : 0.6), weight: .bold))
+                    .foregroundColor(isExpanded ? .white : (zoneType == .metered ? Color.forZoneType(.metered) : Color.forValidityStatus(validityStatus)))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private var statusBadge: some View {
+        Group {
+            if let parkUntil = parkUntilText {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                    Text(parkUntil)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(isValidStyle ? .white.opacity(0.9) : .orange)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: validityStatus.iconName)
+                        .font(.caption)
+                    Text(validityStatus.displayText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(isValidStyle ? .white.opacity(0.9) : Color.forValidityStatus(validityStatus))
+            }
+        }
+    }
+
+    private var rulesContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Parking Rules")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(isValidStyle ? .white : .primary)
+
+                Spacer()
+
+                Button {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        isFlipped = false
+                    }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(ruleSummaryLines, id: \.self) { rule in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "circle.fill")
+                                .font(.system(size: 6))
+                                .foregroundColor(isValidStyle ? .white.opacity(0.7) : .secondary)
+                                .padding(.top, 6)
+
+                            Text(rule)
+                                .font(.body)
+                                .foregroundColor(isValidStyle ? .white : .primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+
+                    if ruleSummaryLines.isEmpty {
+                        Text("No specific rules available")
+                            .font(.body)
+                            .foregroundColor(isValidStyle ? .white.opacity(0.7) : .secondary)
+                            .italic()
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+
+            Spacer()
+        }
+        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+    }
+}
+
+// MARK: - Large Multi-Permit Circle View
+
+private struct LargeMultiPermitCircleView: View {
+    let permitAreas: [String]
+    let animationIndex: Int
+    let size: CGFloat
+
+    private var offset: CGFloat { size * 0.35 }
+    private var totalWidth: CGFloat { size + (CGFloat(permitAreas.count - 1) * offset) }
+
+    private var reorderedAreas: [(area: String, index: Int)] {
+        var areas = permitAreas.enumerated().map { (area: $1, index: $0) }
+        if let animatedItem = areas.first(where: { $0.index == animationIndex }) {
+            areas.removeAll { $0.index == animationIndex }
+            areas.append(animatedItem)
+        }
+        return areas
+    }
+
+    var body: some View {
+        ZStack(alignment: .center) {
+            ForEach(reorderedAreas, id: \.index) { item in
+                let isActive = item.index == animationIndex
+                let xOffset = CGFloat(item.index) * offset - (totalWidth - size) / 2
+
+                ZStack {
+                    Circle()
+                        .fill(ZoneColorProvider.swiftUIColor(for: item.area))
+                        .frame(width: size, height: size)
+                        .shadow(color: isActive ? .black.opacity(0.3) : .black.opacity(0.15),
+                                radius: isActive ? 8 : 4, x: 0, y: isActive ? 4 : 2)
+
+                    Text(item.area)
+                        .font(.system(size: size * 0.5, weight: .bold))
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.5)
+                }
+                .offset(x: xOffset)
+                .scaleEffect(isActive ? 1.15 : 1.0)
+                .zIndex(isActive ? 1 : 0)
+            }
+        }
+        .frame(width: totalWidth, height: size * 1.2)
+    }
+}
+
+// MARK: - Mini Zone Card (compact version for expanded map) - DEPRECATED, kept for reference
 
 private struct MiniZoneCardView: View {
     let zoneName: String
