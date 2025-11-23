@@ -224,19 +224,30 @@ struct ZoneMapView: UIViewRepresentable {
                     // Get multi-permit boundary indices for this zone
                     let multiPermitIndices = zone.multiPermitBoundaryIndices
 
-                    for (boundaryIndex, boundary) in nearbyBoundaries.enumerated() {
+                    // Build a lookup from boundary coordinate count to original indices
+                    // for matching nearbyBoundaries back to original indices
+                    let allBoundaries = zone.allBoundaryCoordinates
+
+                    for boundary in nearbyBoundaries {
                         guard boundary.count >= 3 else { continue }
                         let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
                         polygon.zoneId = zone.id
                         polygon.zoneCode = zone.permitArea
                         polygon.zoneType = zone.zoneType
 
-                        // Check if this is a multi-permit boundary
-                        // Note: boundaryIndex here is relative to nearbyBoundaries, need to track original index
-                        if let originalIndex = zone.allBoundaryCoordinates.firstIndex(where: { $0 == boundary }),
-                           multiPermitIndices.contains(originalIndex) {
-                            polygon.isMultiPermit = true
-                            polygon.allValidPermitAreas = zone.validPermitAreas(for: originalIndex)
+                        // Check if this is a multi-permit boundary by matching coordinates
+                        // Find the original index by comparing first coordinate (unique enough for matching)
+                        if let firstCoord = boundary.first {
+                            for (originalIndex, originalBoundary) in allBoundaries.enumerated() {
+                                if let origFirst = originalBoundary.first,
+                                   abs(origFirst.latitude - firstCoord.latitude) < 0.000001 &&
+                                   abs(origFirst.longitude - firstCoord.longitude) < 0.000001 &&
+                                   multiPermitIndices.contains(originalIndex) {
+                                    polygon.isMultiPermit = true
+                                    polygon.allValidPermitAreas = zone.validPermitAreas(for: originalIndex)
+                                    break
+                                }
+                            }
                         }
 
                         polygons.append(polygon)
