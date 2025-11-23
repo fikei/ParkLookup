@@ -40,17 +40,11 @@ final class MainResultViewModel: ObservableObject {
     // Map preferences (read from UserDefaults)
     @Published var showFloatingMap: Bool
     @Published var mapPosition: MapPosition
-    @Published var showMeteredZones: Bool
+    @Published var showParkingMeters: Bool  // Individual meter pins (not zone polygons)
 
-    /// All loaded zones for map display, filtered by user preferences
+    /// All loaded zones for map display (metered zone polygons always shown)
     var allLoadedZones: [ParkingZone] {
-        let zones = zoneService.allLoadedZones
-        if showMeteredZones {
-            return zones
-        } else {
-            // Filter out metered zones when setting is off
-            return zones.filter { $0.zoneType != .metered }
-        }
+        zoneService.allLoadedZones
     }
 
     // MARK: - Dependencies
@@ -79,8 +73,8 @@ final class MainResultViewModel: ObservableObject {
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
         let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
         self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
-        // Show metered zones is OFF by default
-        self.showMeteredZones = UserDefaults.standard.object(forKey: "showMeteredZones") as? Bool ?? false
+        // Show parking meters (individual pins) is OFF by default
+        self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
 
         setupBindings()
     }
@@ -209,7 +203,7 @@ final class MainResultViewModel: ObservableObject {
                 self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
                 let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
                 self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
-                self.showMeteredZones = UserDefaults.standard.object(forKey: "showMeteredZones") as? Bool ?? false
+                self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
             }
             .store(in: &cancellables)
 

@@ -174,6 +174,7 @@ struct MainResultView: View {
                 zoneName: viewModel.zoneName,
                 validityStatus: viewModel.validityStatus,
                 applicablePermits: viewModel.applicablePermits,
+                allValidPermitAreas: viewModel.allValidPermitAreas,
                 zones: viewModel.allLoadedZones,
                 currentZoneId: viewModel.currentZoneId
             )

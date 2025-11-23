@@ -168,6 +168,8 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
     # multi_permit_polygons: Dict[polygon_index -> List[all_valid_areas]]
     multi_permit_polygons = zone_data.get("multiPermitPolygons", {})
     multi_permit_boundaries = []
+    all_valid_areas = {code}  # Start with zone's own permit area
+
     for idx_str, valid_areas in multi_permit_polygons.items():
         idx = int(idx_str)
         if idx < len(boundaries):
@@ -175,6 +177,8 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
                 "boundaryIndex": idx,
                 "validPermitAreas": valid_areas
             })
+            # Collect all valid permit areas from multi-permit boundaries
+            all_valid_areas.update(valid_areas)
 
     return {
         "id": generate_zone_id(code, index),
@@ -182,7 +186,7 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         "displayName": f"Zone {code}",
         "zoneType": "rpp",
         "permitArea": code,
-        "validPermitAreas": [code],
+        "validPermitAreas": sorted(list(all_valid_areas)),  # All valid permits for this zone
         "requiresPermit": True,
         "restrictiveness": 8,  # RPP zones are moderately restrictive
         "boundaries": boundaries,  # MultiPolygon: list of polygon boundaries

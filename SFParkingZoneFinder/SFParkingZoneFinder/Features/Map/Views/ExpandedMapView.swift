@@ -11,6 +11,7 @@ struct ExpandedMapView: View {
     let zoneName: String?
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
+    let allValidPermitAreas: [String]  // All valid permits in current location
     let zones: [ParkingZone]
     let currentZoneId: String?
 
@@ -22,6 +23,7 @@ struct ExpandedMapView: View {
         zoneName: String?,
         validityStatus: PermitValidityStatus = .noPermitRequired,
         applicablePermits: [ParkingPermit] = [],
+        allValidPermitAreas: [String] = [],
         zones: [ParkingZone] = [],
         currentZoneId: String? = nil
     ) {
@@ -29,6 +31,7 @@ struct ExpandedMapView: View {
         self.zoneName = zoneName
         self.validityStatus = validityStatus
         self.applicablePermits = applicablePermits
+        self.allValidPermitAreas = allValidPermitAreas
         self.zones = zones
         self.currentZoneId = currentZoneId
 
@@ -68,7 +71,8 @@ struct ExpandedMapView: View {
                         zoneName: zoneName,
                         zoneCode: currentPermitArea,
                         validityStatus: validityStatus,
-                        applicablePermits: applicablePermits
+                        applicablePermits: applicablePermits,
+                        allValidPermitAreas: allValidPermitAreas
                     )
                     .padding(.horizontal)
                     .padding(.top, 8)
@@ -105,8 +109,29 @@ private struct TappedZoneCard: View {
     let zone: ParkingZone
     let onDismiss: () -> Void
 
+    @State private var animationIndex: Int = 0
+    private let animationTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
+
     private var zoneCode: String {
         zone.permitArea ?? zone.displayName
+    }
+
+    /// Whether this zone accepts multiple permits
+    private var isMultiPermitZone: Bool {
+        zone.validPermitAreas.count > 1 && zone.zoneType == .residentialPermit
+    }
+
+    /// All valid permit areas for multi-permit zones
+    private var allPermitAreas: [String] {
+        zone.validPermitAreas.isEmpty ? [zone.permitArea ?? zoneCode] : zone.validPermitAreas
+    }
+
+    /// Combined zone code for multi-permit (e.g., "A/B")
+    private var combinedZoneCode: String {
+        if isMultiPermitZone {
+            return allPermitAreas.joined(separator: "/")
+        }
+        return zoneCode
     }
 
     var body: some View {
@@ -114,24 +139,49 @@ private struct TappedZoneCard: View {
             // Header with dismiss button
             HStack {
                 HStack(spacing: 12) {
-                    // Zone circle with color
-                    ZStack {
-                        Circle()
-                            .fill(ZoneColorProvider.swiftUIColor(for: zone.permitArea))
-                            .frame(width: 44, height: 44)
+                    // Zone circle(s) - overlapping for multi-permit
+                    if isMultiPermitZone {
+                        MultiPermitCircleView(
+                            permitAreas: allPermitAreas,
+                            animationIndex: animationIndex,
+                            size: 44
+                        )
+                        .onReceive(animationTimer) { _ in
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                animationIndex = (animationIndex + 1) % allPermitAreas.count
+                            }
+                        }
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                animationIndex = (animationIndex + 1) % allPermitAreas.count
+                            }
+                        }
+                    } else {
+                        // Single zone circle
+                        ZStack {
+                            Circle()
+                                .fill(ZoneColorProvider.swiftUIColor(for: zone.permitArea))
+                                .frame(width: 44, height: 44)
 
-                        Text(zoneCode)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                            .minimumScaleFactor(0.5)
+                            Text(zoneCode)
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.white)
+                                .minimumScaleFactor(0.5)
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(zone.displayName)
+                        Text(isMultiPermitZone ? "Multi-Permit Zone" : zone.displayName)
                             .font(.headline)
-                        Text(zone.zoneType.displayName)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        if isMultiPermitZone {
+                            Text("Valid: \(allPermitAreas.joined(separator: ", "))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text(zone.zoneType.displayName)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
 
@@ -161,11 +211,79 @@ private struct TappedZoneCard: View {
                 }
                 .foregroundColor(.secondary)
             }
+
+            // Multi-permit hint
+            if isMultiPermitZone {
+                HStack(spacing: 6) {
+                    Image(systemName: "info.circle")
+                        .font(.caption)
+                    Text("Tap circles to cycle through permits")
+                        .font(.caption)
+                        .italic()
+                }
+                .foregroundColor(.secondary.opacity(0.8))
+            }
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+    }
+}
+
+// MARK: - Multi-Permit Circle View
+
+/// Displays overlapping circles for multi-permit zones with animation
+private struct MultiPermitCircleView: View {
+    let permitAreas: [String]
+    let animationIndex: Int
+    let size: CGFloat
+
+    /// Offset between circles for overlap effect
+    private var offset: CGFloat {
+        size * 0.25
+    }
+
+    /// Total width needed for overlapping circles
+    private var totalWidth: CGFloat {
+        size + (CGFloat(permitAreas.count - 1) * offset)
+    }
+
+    /// Reorder permit areas to put the current animated one on top
+    private var reorderedAreas: [(area: String, index: Int)] {
+        var areas = permitAreas.enumerated().map { (area: $1, index: $0) }
+        // Move the animated index to the end so it renders on top
+        if let animatedItem = areas.first(where: { $0.index == animationIndex }) {
+            areas.removeAll { $0.index == animationIndex }
+            areas.append(animatedItem)
+        }
+        return areas
+    }
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            ForEach(reorderedAreas, id: \.index) { item in
+                let isActive = item.index == animationIndex
+
+                ZStack {
+                    Circle()
+                        .fill(ZoneColorProvider.swiftUIColor(for: item.area))
+                        .frame(width: size, height: size)
+                        .shadow(color: isActive ? .black.opacity(0.3) : .black.opacity(0.1),
+                                radius: isActive ? 4 : 2,
+                                x: 0, y: isActive ? 2 : 1)
+
+                    Text(item.area)
+                        .font(.system(size: size * 0.4, weight: .bold))
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.5)
+                }
+                .offset(x: CGFloat(item.index) * offset)
+                .scaleEffect(isActive ? 1.1 : 1.0)
+                .zIndex(isActive ? 1 : 0)
+            }
+        }
+        .frame(width: totalWidth, height: size * 1.1)
     }
 }
 
@@ -176,6 +294,30 @@ private struct MiniZoneCard: View {
     let zoneCode: String?
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
+    let allValidPermitAreas: [String]
+
+    @State private var animationIndex: Int = 0
+    private let animationTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
+
+    /// Whether this is a multi-permit location
+    private var isMultiPermitLocation: Bool {
+        allValidPermitAreas.count > 1
+    }
+
+    /// Permit areas ordered with user's permit first
+    private var orderedPermitAreas: [String] {
+        guard isMultiPermitLocation else {
+            return [zoneCode ?? "?"]
+        }
+        var areas = allValidPermitAreas
+        // Move user's permit to front if they have one
+        if let userPermitArea = applicablePermits.first?.area,
+           let index = areas.firstIndex(of: userPermitArea) {
+            areas.remove(at: index)
+            areas.insert(userPermitArea, at: 0)
+        }
+        return areas
+    }
 
     /// Whether to use the "valid" green style
     private var isValidStyle: Bool {
@@ -209,26 +351,54 @@ private struct MiniZoneCard: View {
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 
+    @ViewBuilder
     private var zoneCircle: some View {
-        ZStack {
-            Circle()
-                .fill(circleBackground)
-                .frame(width: 56, height: 56)
-                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        if isMultiPermitLocation {
+            MultiPermitCircleView(
+                permitAreas: orderedPermitAreas,
+                animationIndex: animationIndex,
+                size: 56
+            )
+            .onReceive(animationTimer) { _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    animationIndex = (animationIndex + 1) % orderedPermitAreas.count
+                }
+            }
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    animationIndex = (animationIndex + 1) % orderedPermitAreas.count
+                }
+            }
+        } else {
+            ZStack {
+                Circle()
+                    .fill(circleBackground)
+                    .frame(width: 56, height: 56)
+                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
 
-            Text(zoneCode ?? "?")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(letterColor)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
+                Text(zoneCode ?? "?")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(letterColor)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+            }
         }
     }
 
     private var zoneInfo: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(zoneName ?? "Unknown Zone")
-                .font(.headline)
-                .foregroundColor(isValidStyle ? .white : .primary)
+            if isMultiPermitLocation {
+                Text("Multi-Permit Zone")
+                    .font(.headline)
+                    .foregroundColor(isValidStyle ? .white : .primary)
+                Text("Valid: \(orderedPermitAreas.joined(separator: ", "))")
+                    .font(.caption)
+                    .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+            } else {
+                Text(zoneName ?? "Unknown Zone")
+                    .font(.headline)
+                    .foregroundColor(isValidStyle ? .white : .primary)
+            }
 
             // Validity badge inline
             HStack(spacing: 6) {
