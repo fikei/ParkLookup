@@ -4,7 +4,14 @@ import os.log
 
 private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "ZoneLookup")
 
+/// Grid cell identifier for spatial indexing
+struct GridCell: Hashable {
+    let row: Int
+    let col: Int
+}
+
 /// Engine for looking up parking zones by coordinate
+/// Optimized with bounding box pre-filtering and cached spatial data
 final class ZoneLookupEngine: ZoneLookupEngineProtocol {
 
     private let repository: ZoneRepository
@@ -17,22 +24,81 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
     /// Threshold in meters for boundary detection
     private let boundaryThreshold: Double = 10.0
 
+    // MARK: - Spatial Index Cache
+
+    /// Cached bounding boxes for all zones (computed once on load)
+    private var boundingBoxCache: [String: BoundingBox] = [:]
+
+    /// Grid-based spatial index: maps grid cells to zones that intersect them
+    /// Grid cell size ~0.01 degrees ≈ 1.1km at SF latitude
+    private var spatialGrid: [GridCell: [ParkingZone]] = [:]
+    private let gridCellSize: Double = 0.01
+
+    /// Performance metrics
+    private var lookupCount: Int = 0
+    private var totalLookupTimeMs: Double = 0
+    private var boundingBoxHits: Int = 0
+    private var boundingBoxMisses: Int = 0
+
     init(repository: ZoneRepository) {
         self.repository = repository
     }
 
     func reloadZones() async throws {
+        let startTime = CFAbsoluteTimeGetCurrent()
+
         zones = try await repository.getZones(for: .sanFrancisco)
+
+        // Build spatial index
+        buildSpatialIndex()
+
         isReady = true
+
+        let loadTime = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
 
         // Log zone breakdown by type
         let rppCount = zones.filter { $0.zoneType == .residentialPermit }.count
         let meteredCount = zones.filter { $0.zoneType == .metered }.count
         let otherCount = zones.count - rppCount - meteredCount
-        logger.info("✅ Loaded \(self.zones.count) zones: \(rppCount) RPP, \(meteredCount) metered, \(otherCount) other")
+        logger.info("✅ Loaded \(self.zones.count) zones in \(String(format: "%.1f", loadTime))ms: \(rppCount) RPP, \(meteredCount) metered, \(otherCount) other")
+        logger.info("📊 Spatial index: \(self.boundingBoxCache.count) bounding boxes, \(self.spatialGrid.count) grid cells")
+    }
+
+    /// Build spatial index for fast zone lookup
+    private func buildSpatialIndex() {
+        boundingBoxCache.removeAll()
+        spatialGrid.removeAll()
+
+        for zone in zones {
+            // Cache bounding box
+            let bbox = zone.boundingBox
+            boundingBoxCache[zone.id] = bbox
+
+            // Add to grid cells that this zone intersects
+            if bbox.isValid {
+                let minCell = gridCell(for: CLLocationCoordinate2D(latitude: bbox.minLatitude, longitude: bbox.minLongitude))
+                let maxCell = gridCell(for: CLLocationCoordinate2D(latitude: bbox.maxLatitude, longitude: bbox.maxLongitude))
+
+                for row in minCell.row...maxCell.row {
+                    for col in minCell.col...maxCell.col {
+                        let cell = GridCell(row: row, col: col)
+                        spatialGrid[cell, default: []].append(zone)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Get grid cell for a coordinate
+    private func gridCell(for coordinate: CLLocationCoordinate2D) -> GridCell {
+        GridCell(
+            row: Int(floor(coordinate.latitude / gridCellSize)),
+            col: Int(floor(coordinate.longitude / gridCellSize))
+        )
     }
 
     func findZone(at coordinate: CLLocationCoordinate2D) async -> ZoneLookupResult {
+        let lookupStart = CFAbsoluteTimeGetCurrent()
 
         // Ensure zones are loaded
         if !isReady {
@@ -59,12 +125,28 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
             return .outsideCoverage(coordinate: coordinate)
         }
 
+        // Use spatial index to get candidate zones (fast)
+        let cell = gridCell(for: coordinate)
+        let candidateZones = spatialGrid[cell] ?? zones  // Fall back to all zones if grid empty
+
         // Find all zones containing this point
         var matchingZones: [ParkingZone] = []
         var nearestDistance: Double = .infinity
         var nearestZone: ParkingZone?
+        var bboxChecks = 0
+        var pipChecks = 0
 
-        for zone in zones {
+        for zone in candidateZones {
+            bboxChecks += 1
+
+            // OPTIMIZATION: Check bounding box first (fast O(1) rejection)
+            if let bbox = boundingBoxCache[zone.id], !bbox.contains(coordinate) {
+                boundingBoxMisses += 1
+                continue  // Skip expensive point-in-polygon test
+            }
+            boundingBoxHits += 1
+
+            pipChecks += 1
             // Check if point is inside ANY of the zone's boundaries (MultiPolygon)
             if isPointInsideZone(coordinate, zone: zone) {
                 matchingZones.append(zone)
@@ -76,6 +158,19 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
                 nearestDistance = distance
                 nearestZone = zone
             }
+        }
+
+        // Log performance metrics
+        let lookupTimeMs = (CFAbsoluteTimeGetCurrent() - lookupStart) * 1000
+        lookupCount += 1
+        totalLookupTimeMs += lookupTimeMs
+
+        if lookupCount % 10 == 0 {
+            let avgTime = totalLookupTimeMs / Double(lookupCount)
+            let hitRate = boundingBoxHits + boundingBoxMisses > 0
+                ? Double(boundingBoxMisses) / Double(boundingBoxHits + boundingBoxMisses) * 100
+                : 0
+            logger.info("⏱️ Lookup #\(self.lookupCount): \(String(format: "%.1f", lookupTimeMs))ms (avg: \(String(format: "%.1f", avgTime))ms), bbox rejection: \(String(format: "%.0f", hitRate))%, candidates: \(candidateZones.count)/\(self.zones.count)")
         }
 
         // No zones found - check if we're very close to a zone (handles gaps in metered zones)

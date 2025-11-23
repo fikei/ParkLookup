@@ -193,6 +193,67 @@ extension ParkingZone {
         let standardLimits = [15, 30, 60, 120, 240]
         return standardLimits.min(by: { abs($0 - minutes) < abs($1 - minutes) }) ?? 60
     }
+
+    /// Compute bounding box for all boundaries in this zone
+    /// Used for fast spatial pre-filtering before expensive point-in-polygon tests
+    var boundingBox: BoundingBox {
+        var minLat = Double.infinity
+        var maxLat = -Double.infinity
+        var minLon = Double.infinity
+        var maxLon = -Double.infinity
+
+        for boundary in boundaries {
+            for coord in boundary {
+                minLat = min(minLat, coord.latitude)
+                maxLat = max(maxLat, coord.latitude)
+                minLon = min(minLon, coord.longitude)
+                maxLon = max(maxLon, coord.longitude)
+            }
+        }
+
+        return BoundingBox(
+            minLatitude: minLat,
+            maxLatitude: maxLat,
+            minLongitude: minLon,
+            maxLongitude: maxLon
+        )
+    }
+}
+
+// MARK: - Bounding Box
+
+/// Axis-aligned bounding box for fast spatial queries
+struct BoundingBox {
+    let minLatitude: Double
+    let maxLatitude: Double
+    let minLongitude: Double
+    let maxLongitude: Double
+
+    /// Check if a coordinate is within this bounding box
+    /// This is a fast O(1) check used to filter candidates before expensive point-in-polygon
+    func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
+        coordinate.latitude >= minLatitude &&
+        coordinate.latitude <= maxLatitude &&
+        coordinate.longitude >= minLongitude &&
+        coordinate.longitude <= maxLongitude
+    }
+
+    /// Check if this bounding box is valid (has been properly initialized)
+    var isValid: Bool {
+        minLatitude.isFinite && maxLatitude.isFinite &&
+        minLongitude.isFinite && maxLongitude.isFinite &&
+        minLatitude <= maxLatitude && minLongitude <= maxLongitude
+    }
+
+    /// Expand bounding box by a margin (in degrees)
+    func expanded(by margin: Double) -> BoundingBox {
+        BoundingBox(
+            minLatitude: minLatitude - margin,
+            maxLatitude: maxLatitude + margin,
+            minLongitude: minLongitude - margin,
+            maxLongitude: maxLongitude + margin
+        )
+    }
 }
 
 // MARK: - Zone Type
