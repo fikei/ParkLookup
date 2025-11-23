@@ -62,6 +62,7 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
         // Find all zones containing this point
         var matchingZones: [ParkingZone] = []
         var nearestDistance: Double = .infinity
+        var nearestZone: ParkingZone?
 
         for zone in zones {
             // Check if point is inside ANY of the zone's boundaries (MultiPolygon)
@@ -71,11 +72,27 @@ final class ZoneLookupEngine: ZoneLookupEngineProtocol {
 
             // Track distance to nearest boundary across all polygons
             let distance = distanceToZoneBoundary(coordinate, zone: zone)
-            nearestDistance = min(nearestDistance, distance)
+            if distance < nearestDistance {
+                nearestDistance = distance
+                nearestZone = zone
+            }
         }
 
-        // No zones found - but we're in SF, so status is unknown (not "outside coverage")
+        // No zones found - check if we're very close to a zone (handles gaps in metered zones)
         if matchingZones.isEmpty {
+            // If within 75 meters of a zone, use it with low confidence
+            // This handles gaps in metered zone polygons where meters don't exist
+            if let nearest = nearestZone, nearestDistance < 75 {
+                logger.info("📍 No exact match, using nearest zone '\(nearest.displayName)' at \(Int(nearestDistance))m")
+                return ZoneLookupResult(
+                    primaryZone: nearest,
+                    overlappingZones: [nearest],
+                    confidence: .low,
+                    coordinate: coordinate,
+                    nearestBoundaryDistance: nearestDistance
+                )
+            }
+
             logger.warning("⚠️ No zone found at (\(coordinate.latitude), \(coordinate.longitude)) - returning unknownArea")
             return .unknownArea(coordinate: coordinate)
         }
