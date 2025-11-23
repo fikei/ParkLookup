@@ -10,6 +10,7 @@ struct ParkingZone: Identifiable, Hashable {
     let permitArea: String?
     let validPermitAreas: [String]
     let boundaries: [[Coordinate]]  // MultiPolygon: array of polygon boundaries
+    let multiPermitBoundaries: [MultiPermitBoundary]  // Boundaries that accept multiple permits
     let rules: [ParkingRule]
     let requiresPermit: Bool
     let restrictiveness: Int  // 1-10 scale, higher = more restrictive
@@ -26,6 +27,14 @@ struct ParkingZone: Identifiable, Hashable {
     }
 }
 
+// MARK: - Multi-Permit Boundary
+
+/// Represents a boundary that accepts multiple parking permits
+struct MultiPermitBoundary: Codable, Hashable {
+    let boundaryIndex: Int
+    let validPermitAreas: [String]
+}
+
 // MARK: - Custom Codable (backward compatible with "boundary" and "boundaries")
 
 extension ParkingZone: Codable {
@@ -33,6 +42,7 @@ extension ParkingZone: Codable {
         case id, cityCode, displayName, zoneType, permitArea, validPermitAreas
         case boundaries  // New MultiPolygon format
         case boundary    // Old single polygon format (for backward compatibility)
+        case multiPermitBoundaries
         case rules, requiresPermit, restrictiveness, metadata
     }
 
@@ -59,6 +69,9 @@ extension ParkingZone: Codable {
         } else {
             boundaries = []
         }
+
+        // Load multi-permit boundaries (optional, may not exist in older data)
+        multiPermitBoundaries = (try? container.decode([MultiPermitBoundary].self, forKey: .multiPermitBoundaries)) ?? []
     }
 
     func encode(to encoder: Encoder) throws {
@@ -71,6 +84,7 @@ extension ParkingZone: Codable {
         try container.encodeIfPresent(permitArea, forKey: .permitArea)
         try container.encode(validPermitAreas, forKey: .validPermitAreas)
         try container.encode(boundaries, forKey: .boundaries)
+        try container.encode(multiPermitBoundaries, forKey: .multiPermitBoundaries)
         try container.encode(rules, forKey: .rules)
         try container.encode(requiresPermit, forKey: .requiresPermit)
         try container.encode(restrictiveness, forKey: .restrictiveness)
@@ -125,6 +139,21 @@ extension ParkingZone {
             return "No time restrictions"
         }
         return rule.enforcementHoursDescription ?? "Time restrictions apply"
+    }
+
+    /// Check if a boundary at the given index is a multi-permit boundary
+    func isMultiPermitBoundary(at index: Int) -> Bool {
+        multiPermitBoundaries.contains { $0.boundaryIndex == index }
+    }
+
+    /// Get all valid permit areas for a boundary at the given index
+    func validPermitAreas(for boundaryIndex: Int) -> [String]? {
+        multiPermitBoundaries.first { $0.boundaryIndex == boundaryIndex }?.validPermitAreas
+    }
+
+    /// Set of multi-permit boundary indices for quick lookup
+    var multiPermitBoundaryIndices: Set<Int> {
+        Set(multiPermitBoundaries.map { $0.boundaryIndex })
     }
 }
 

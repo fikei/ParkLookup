@@ -164,6 +164,18 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         print(f"  Warning: Zone {code} has no boundaries, skipping")
         return None
 
+    # Process multi-permit polygon data
+    # multi_permit_polygons: Dict[polygon_index -> List[all_valid_areas]]
+    multi_permit_polygons = zone_data.get("multiPermitPolygons", {})
+    multi_permit_boundaries = []
+    for idx_str, valid_areas in multi_permit_polygons.items():
+        idx = int(idx_str)
+        if idx < len(boundaries):
+            multi_permit_boundaries.append({
+                "boundaryIndex": idx,
+                "validPermitAreas": valid_areas
+            })
+
     return {
         "id": generate_zone_id(code, index),
         "cityCode": "sf",
@@ -174,12 +186,14 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         "requiresPermit": True,
         "restrictiveness": 8,  # RPP zones are moderately restrictive
         "boundaries": boundaries,  # MultiPolygon: list of polygon boundaries
+        "multiPermitBoundaries": multi_permit_boundaries,  # Boundaries that accept multiple permits
         "rules": [generate_default_rule(code)],
         "metadata": {
             "dataSource": "datasf_sfmta",
             "lastUpdated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "accuracy": "high",
-            "polygonCount": len(boundaries)
+            "polygonCount": len(boundaries),
+            "multiPermitCount": len(multi_permit_boundaries)
         }
     }
 

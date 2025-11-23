@@ -221,12 +221,24 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 } else {
                     // ACTUAL BOUNDARIES MODE: Use preprocessed block polygons as-is
-                    for boundary in nearbyBoundaries {
+                    // Get multi-permit boundary indices for this zone
+                    let multiPermitIndices = zone.multiPermitBoundaryIndices
+
+                    for (boundaryIndex, boundary) in nearbyBoundaries.enumerated() {
                         guard boundary.count >= 3 else { continue }
                         let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
                         polygon.zoneId = zone.id
                         polygon.zoneCode = zone.permitArea
                         polygon.zoneType = zone.zoneType
+
+                        // Check if this is a multi-permit boundary
+                        // Note: boundaryIndex here is relative to nearbyBoundaries, need to track original index
+                        if let originalIndex = zone.allBoundaryCoordinates.firstIndex(where: { $0 == boundary }),
+                           multiPermitIndices.contains(originalIndex) {
+                            polygon.isMultiPermit = true
+                            polygon.allValidPermitAreas = zone.validPermitAreas(for: originalIndex)
+                        }
+
                         polygons.append(polygon)
                         outputPoints += boundary.count
                     }
@@ -262,6 +274,11 @@ struct ZoneMapView: UIViewRepresentable {
             let modeStr = useConvexHull ? "convex hull" : "actual boundaries"
             logger.info("Background prep DONE in \(String(format: "%.1f", bgElapsed))ms - mode: \(modeStr), \(polygons.count) polygons (\(outputPoints) points from \(totalPoints) original), \(totalBoundaries) total boundaries")
 
+            // Separate polygons by zone type - metered zones render below RPP zones
+            let meteredPolygons = polygons.filter { $0.zoneType == .metered }
+            let rppPolygons = polygons.filter { $0.zoneType != .metered }
+            logger.info("Zone layering: \(meteredPolygons.count) metered (bottom), \(rppPolygons.count) RPP (top)")
+
             // Capture the coordinator and initial region before async block
             let coordinator = context.coordinator
             let initialCenter = coordinator.initialCenter
@@ -285,13 +302,16 @@ struct ZoneMapView: UIViewRepresentable {
                 // Add annotations immediately (they're lightweight)
                 mapView.addAnnotations(annotations)
 
-                // Add overlays in batches to keep UI responsive
+                // Add overlays in batches - metered zones first (bottom layer), then RPP zones (top layer)
                 let batchSize = 500
-                let totalPolygons = polygons.count
+
+                // Ordered polygons: metered first, then RPP (later additions render on top)
+                let orderedPolygons = meteredPolygons + rppPolygons
+                let totalPolygons = orderedPolygons.count
 
                 func addBatch(startIndex: Int) {
                     let endIndex = min(startIndex + batchSize, totalPolygons)
-                    let batch = Array(polygons[startIndex..<endIndex])
+                    let batch = Array(orderedPolygons[startIndex..<endIndex])
 
                     mapView.addOverlays(batch, level: .aboveRoads)
 
@@ -307,7 +327,7 @@ struct ZoneMapView: UIViewRepresentable {
                 }
 
                 // Start adding batches
-                if !polygons.isEmpty {
+                if !orderedPolygons.isEmpty {
                     addBatch(startIndex: 0)
                 }
 
@@ -426,8 +446,8 @@ struct ZoneMapView: UIViewRepresentable {
             let isCurrentZone = polygon.zoneId == currentZoneId
 
             // Use zone type-aware coloring for metered zones
-            let fillColor: UIColor
-            let strokeColor: UIColor
+            var fillColor: UIColor
+            var strokeColor: UIColor
             if let zoneType = polygon.zoneType, zoneType == .metered {
                 fillColor = ZoneColorProvider.fillColor(for: zoneType, isCurrentZone: isCurrentZone)
                 strokeColor = ZoneColorProvider.strokeColor(for: zoneType, isCurrentZone: isCurrentZone)
@@ -440,10 +460,19 @@ struct ZoneMapView: UIViewRepresentable {
             renderer.strokeColor = strokeColor
             renderer.lineWidth = ZoneColorProvider.strokeWidth(isCurrentZone: isCurrentZone)
 
+            // Multi-permit polygons get a dashed border and slightly different fill
+            if polygon.isMultiPermit {
+                renderer.lineDashPattern = [8, 4]  // Dashed line pattern
+                renderer.lineWidth = isCurrentZone ? 4.0 : 2.5  // Thicker border
+                // Slightly more saturated fill for multi-permit areas
+                renderer.fillColor = fillColor.withAlphaComponent(0.35)
+            }
+
             // Log first few and then every 1000th
             if rendererCallCount <= 5 || rendererCallCount % 1000 == 0 {
                 let typeStr = polygon.zoneType?.rawValue ?? "rpp"
-                logger.debug("Renderer #\(self.rendererCallCount) - zoneCode: \(polygon.zoneCode ?? "nil"), type: \(typeStr), fill: \(fillColor.description)")
+                let mpStr = polygon.isMultiPermit ? " [multi-permit]" : ""
+                logger.debug("Renderer #\(self.rendererCallCount) - zoneCode: \(polygon.zoneCode ?? "nil"), type: \(typeStr)\(mpStr)")
             }
 
             return renderer
@@ -548,6 +577,8 @@ class ZonePolygon: MKPolygon {
     var zoneId: String?
     var zoneCode: String?
     var zoneType: ZoneType?
+    var isMultiPermit: Bool = false  // True if this polygon accepts multiple permits
+    var allValidPermitAreas: [String]?  // All valid permit areas for multi-permit polygons
 }
 
 /// Annotation for zone label display

@@ -24,6 +24,7 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var hasOverlappingZones = false
     @Published private(set) var overlappingZones: [ParkingZone] = []
     @Published private(set) var currentZoneId: String?
+    @Published private(set) var allValidPermitAreas: [String] = []  // All valid permits from overlapping zones
 
     // Location
     @Published private(set) var currentAddress: String = "Locating..."
@@ -309,6 +310,12 @@ final class MainResultViewModel: ObservableObject {
         // Overlapping zones
         overlappingZones = result.lookupResult.overlappingZones
         hasOverlappingZones = overlappingZones.count > 1
+
+        // Collect all valid permit areas from overlapping RPP zones
+        allValidPermitAreas = overlappingZones
+            .filter { $0.zoneType == .residentialPermit }
+            .compactMap { $0.permitArea }
+            .sorted()
 
         // Confidence
         lookupConfidence = result.lookupResult.confidence

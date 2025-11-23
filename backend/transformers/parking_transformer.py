@@ -28,6 +28,8 @@ class RPPZone:
     polygon: List[List[Tuple[float, float]]]  # List of rings, each ring is list of (lon, lat)
     neighborhoods: List[str] = field(default_factory=list)
     total_blocks: int = 0
+    # Track which polygons are multi-permit (index -> list of all valid permit areas)
+    multi_permit_polygons: Dict[int, List[str]] = field(default_factory=dict)
 
 
 @dataclass
@@ -138,6 +140,7 @@ class ParkingDataTransformer:
         - Buffers line strings into actual block-face polygons (~10m width)
         - Handles overlapping zones via rpparea1, rpparea2, rpparea3
         - Keeps each block face as separate polygon (no convex hull)
+        - Tracks multi-permit polygons for special map rendering
         """
         logger.info(f"Deriving zones from {len(raw_blockfaces)} blockface records")
 
@@ -149,13 +152,14 @@ class ParkingDataTransformer:
         # 1 degree latitude ≈ 111km, so 10m ≈ 0.00009
         BUFFER_DISTANCE = 0.00009
 
-        # Group buffered polygons by RPP area
-        # A single block face can belong to multiple zones (rpparea1, rpparea2, rpparea3)
-        areas_polygons: Dict[str, List[List[Tuple[float, float]]]] = {}
+        # Store polygon data with multi-permit tracking
+        # areas_polygons: Dict[area_code -> List of (polygon, all_valid_areas)]
+        areas_polygons: Dict[str, List[Tuple[List[Tuple[float, float]], List[str]]]] = {}
 
         processed = 0
         skipped_no_geom = 0
         skipped_no_area = 0
+        multi_permit_count = 0
 
         for record in raw_blockfaces:
             # Get ALL RPP areas for this block face (supports overlapping zones)
@@ -183,32 +187,48 @@ class ParkingDataTransformer:
                 skipped_no_geom += 1
                 continue
 
+            # Track if this is a multi-permit blockface
+            is_multi_permit = len(rpp_areas) > 1
+            if is_multi_permit:
+                multi_permit_count += 1
+
             # Add this polygon to ALL its RPP areas (handles overlapping zones)
+            # Store tuple of (polygon, all_valid_areas) for multi-permit tracking
             for area_code in rpp_areas:
                 if area_code not in areas_polygons:
                     areas_polygons[area_code] = []
-                areas_polygons[area_code].append(buffered_polygon)
+                areas_polygons[area_code].append((buffered_polygon, sorted(rpp_areas)))
 
             processed += 1
 
         logger.info(f"Processed {processed} blockfaces, skipped {skipped_no_area} (no RPP area), {skipped_no_geom} (no geometry)")
+        logger.info(f"Found {multi_permit_count} multi-permit blockfaces")
 
         # Create zones from collected polygons
         zones = []
         total_polygons = 0
 
         for area_code in sorted(areas_polygons.keys()):
-            polygons = areas_polygons[area_code]
+            polygon_data = areas_polygons[area_code]
+            polygons = [p[0] for p in polygon_data]  # Extract just the polygons
             total_polygons += len(polygons)
+
+            # Build multi-permit polygon index (polygon_index -> all valid areas)
+            multi_permit_polygons = {}
+            for idx, (_, all_areas) in enumerate(polygon_data):
+                if len(all_areas) > 1:
+                    multi_permit_polygons[idx] = all_areas
 
             zone = RPPZone(
                 area_code=area_code,
                 name=f"Area {area_code}",
                 polygon=polygons,
-                total_blocks=len(polygons)
+                total_blocks=len(polygons),
+                multi_permit_polygons=multi_permit_polygons
             )
             zones.append(zone)
-            logger.debug(f"Zone {area_code}: {len(polygons)} block faces")
+            mp_count = len(multi_permit_polygons)
+            logger.debug(f"Zone {area_code}: {len(polygons)} block faces ({mp_count} multi-permit)")
 
         logger.info(f"Derived {len(zones)} zones with {total_polygons} total block face polygons")
         return zones
@@ -492,24 +512,17 @@ class ParkingDataTransformer:
         Uses a grid-based clustering approach:
         - Divides the city into grid cells (~100m)
         - Groups meters by grid cell
-        - Creates buffered polygons for meter clusters
+        - Creates axis-aligned rectangular polygons (right angles only)
         """
         logger.info(f"Deriving metered zones from {len(meters)} meters")
 
         if not meters:
             return []
 
-        if not SHAPELY_AVAILABLE:
-            logger.warning("Shapely not available - skipping metered zone derivation")
-            return []
-
-        from shapely.geometry import Point, MultiPoint
-        from shapely.ops import unary_union
-
         # Grid cell size in degrees (~100m at SF latitude)
         GRID_SIZE = 0.001  # ~111m
-        # Buffer distance for meter points (~15m)
-        BUFFER_DISTANCE = 0.00015
+        # Padding for bounding box (~15m)
+        PADDING = 0.00015
 
         # Group meters by grid cell
         grid_cells: Dict[Tuple[int, int], List[ParkingMeter]] = {}
@@ -563,28 +576,23 @@ class ParkingDataTransformer:
             if len(zone_meters) < 3:  # Skip tiny clusters
                 continue
 
-            # Create polygon from meter points
-            points = [Point(m.longitude, m.latitude) for m in zone_meters]
-            multi_point = MultiPoint(points)
+            # Create axis-aligned bounding box (rectangle with right angles)
+            min_lon = min(m.longitude for m in zone_meters) - PADDING
+            max_lon = max(m.longitude for m in zone_meters) + PADDING
+            min_lat = min(m.latitude for m in zone_meters) - PADDING
+            max_lat = max(m.latitude for m in zone_meters) + PADDING
 
-            # Buffer and simplify to create zone polygon
-            buffered = multi_point.buffer(BUFFER_DISTANCE)
-            if buffered.is_empty:
-                continue
+            # Create rectangular polygon (4 corners, closed ring)
+            # Order: bottom-left, bottom-right, top-right, top-left, close
+            rect_coords = [
+                (min_lon, min_lat),  # bottom-left
+                (max_lon, min_lat),  # bottom-right
+                (max_lon, max_lat),  # top-right
+                (min_lon, max_lat),  # top-left
+                (min_lon, min_lat),  # close the ring
+            ]
 
-            # Extract polygon coordinates
-            polygon_coords = []
-            if hasattr(buffered, 'exterior'):
-                coords = [(c[0], c[1]) for c in buffered.exterior.coords]
-                polygon_coords.append(coords)
-            elif hasattr(buffered, 'geoms'):
-                for geom in buffered.geoms:
-                    if hasattr(geom, 'exterior'):
-                        coords = [(c[0], c[1]) for c in geom.exterior.coords]
-                        polygon_coords.append(coords)
-
-            if not polygon_coords:
-                continue
+            polygon_coords = [rect_coords]
 
             # Calculate zone statistics
             cap_colors = list(set(m.cap_color for m in zone_meters if m.cap_color))
@@ -649,7 +657,11 @@ class ParkingDataTransformer:
 
         # Build RPP zones data
         zones_data = []
+        total_multi_permit = 0
         for zone in zones:
+            # Convert multi_permit_polygons dict keys to strings for JSON
+            mp_polygons = {str(k): v for k, v in zone.multi_permit_polygons.items()}
+            total_multi_permit += len(mp_polygons)
             zones_data.append({
                 "code": zone.area_code,
                 "name": zone.name,
@@ -657,7 +669,9 @@ class ParkingDataTransformer:
                 "neighborhoods": zone.neighborhoods,
                 "blockCount": len(regulations_by_area.get(zone.area_code, [])),
                 "zoneType": "rpp",  # Residential Permit Parking
+                "multiPermitPolygons": mp_polygons,  # Index -> list of valid permit areas
             })
+        logger.info(f"Total multi-permit polygons across all zones: {total_multi_permit}")
 
         # Build metered zones data
         metered_zones_data = []

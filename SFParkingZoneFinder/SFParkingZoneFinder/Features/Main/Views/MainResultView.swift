@@ -55,7 +55,8 @@ struct MainResultView: View {
                         zoneName: viewModel.zoneName,
                         zoneType: viewModel.zoneType,
                         validityStatus: viewModel.validityStatus,
-                        applicablePermits: viewModel.applicablePermits
+                        applicablePermits: viewModel.applicablePermits,
+                        allValidPermitAreas: viewModel.allValidPermitAreas
                     )
                     .opacity(contentAppeared ? 1 : 0)
                     .offset(y: contentAppeared ? 0 : 20)
