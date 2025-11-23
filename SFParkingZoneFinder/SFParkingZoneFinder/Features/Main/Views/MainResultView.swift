@@ -214,10 +214,11 @@ struct MainResultView: View {
                         viewModel.refreshLocation()
                     },
                     onDismiss: {
-                        // Reset to current location and clear searched coordinate
+                        // Clear searched coordinate and use last known location
+                        // This avoids requiring a fresh GPS fix which may timeout
                         HapticFeedback.light()
                         searchedCoordinate = nil
-                        viewModel.refreshLocation()
+                        viewModel.clearErrorAndUseLastLocation()
                     }
                 )
                 .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))

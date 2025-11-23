@@ -34,6 +34,9 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var lookupConfidence: LookupConfidence = .high
     @Published private(set) var currentCoordinate: CLLocationCoordinate2D?
 
+    /// Last known GPS location (separate from searched coordinates)
+    private var lastKnownGPSCoordinate: CLLocationCoordinate2D?
+
     // User permits
     @Published private(set) var applicablePermits: [ParkingPermit] = []
     @Published private(set) var userPermits: [ParkingPermit] = []
@@ -107,6 +110,22 @@ final class MainResultViewModel: ObservableObject {
         }
     }
 
+    /// Clear error and use last known GPS location (for "Back to Map" after area errors)
+    /// This avoids requiring a fresh GPS fix which may timeout
+    func clearErrorAndUseLastLocation() {
+        error = nil
+        // Use last known GPS location (not searched location) if available
+        if let gpsCoord = lastKnownGPSCoordinate {
+            currentCoordinate = gpsCoord
+            Task {
+                await performLookupAt(gpsCoord)
+            }
+        } else {
+            // Fall back to fresh location request
+            refreshLocation()
+        }
+    }
+
     /// Called when view appears
     func onAppear() {
         // Check location authorization
@@ -165,6 +184,7 @@ final class MainResultViewModel: ObservableObject {
 
         // Perform the lookup
         currentCoordinate = location.coordinate
+        lastKnownGPSCoordinate = location.coordinate  // Save GPS location
         error = nil
 
         // Get parking result
@@ -251,6 +271,7 @@ final class MainResultViewModel: ObservableObject {
             // Get current location
             let location = try await locationService.requestSingleLocation()
             currentCoordinate = location.coordinate
+            lastKnownGPSCoordinate = location.coordinate  // Save GPS location
 
             // Get parking result
             let result = await zoneService.getParkingResult(
