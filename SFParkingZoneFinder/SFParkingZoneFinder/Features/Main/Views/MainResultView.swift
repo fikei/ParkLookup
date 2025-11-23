@@ -327,15 +327,39 @@ private struct AnimatedZoneCard: View {
         return orderedPermitAreas[animationIndex]
     }
 
-    private var parkUntilText: String? {
-        guard (validityStatus == .invalid || validityStatus == .noPermitSet),
-              let limit = timeLimitMinutes else { return nil }
+    /// Whether we're currently outside enforcement hours (for banner display)
+    private var isOutsideEnforcement: Bool {
+        guard let startTime = enforcementStartTime, let endTime = enforcementEndTime else {
+            return false
+        }
 
         let now = Date()
         let calendar = Calendar.current
         let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.totalMinutes
+        let endMinutes = endTime.totalMinutes
+
+        // Check if today is an enforcement day
+        if let days = enforcementDays, !days.isEmpty,
+           let weekday = components.weekday,
+           let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+            if !days.contains(dayOfWeek) {
+                return true // Not an enforcement day
+            }
+        }
+
+        // Check if outside enforcement hours
+        return currentMinutes < startMinutes || currentMinutes >= endMinutes
+    }
+
+    private var parkUntilText: String? {
+        guard (validityStatus == .invalid || validityStatus == .noPermitSet),
+              let _ = timeLimitMinutes else { return nil }
+
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
 
         // Check if enforcement is currently active
         if let startTime = enforcementStartTime, let endTime = enforcementEndTime {
@@ -345,36 +369,103 @@ private struct AnimatedZoneCard: View {
 
             // Check if today is an enforcement day
             var isEnforcementDay = true
+            var currentDayOfWeek: DayOfWeek?
             if let days = enforcementDays, !days.isEmpty,
                let weekday = components.weekday,
                let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+                currentDayOfWeek = dayOfWeek
                 isEnforcementDay = days.contains(dayOfWeek)
             }
 
             if isEnforcementDay {
                 if currentMinutes < startMinutes {
-                    // Before enforcement starts - can park until enforcement begins
-                    let startDate = calendar.date(bySettingHour: startTime.hour, minute: startTime.minute, second: 0, of: now) ?? now
-                    return "Park until \(formatter.string(from: startDate))"
+                    // Before enforcement starts today - can park until enforcement begins
+                    return formatParkUntil(hour: startTime.hour, minute: startTime.minute, on: now)
                 } else if currentMinutes >= endMinutes {
-                    // After enforcement ends - unlimited until tomorrow's enforcement
-                    return "Unlimited until tomorrow"
+                    // After enforcement ends today - find next enforcement start
+                    return findNextEnforcementStart(from: now, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
                 } else {
                     // During enforcement - normal time limit applies
-                    let parkUntil = now.addingTimeInterval(TimeInterval(limit * 60))
-                    // Cap at enforcement end time if time limit extends beyond it
-                    let endDate = calendar.date(bySettingHour: endTime.hour, minute: endTime.minute, second: 0, of: now) ?? parkUntil
-                    let actualEnd = min(parkUntil, endDate)
-                    return "Park until \(formatter.string(from: actualEnd))"
+                    return calculateTimeLimitEnd(from: now, endTime: endTime)
                 }
             } else {
-                // Not an enforcement day - unlimited parking
-                return "Unlimited today"
+                // Not an enforcement day - find next enforcement start
+                return findNextEnforcementStart(from: now, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
             }
         }
 
         // No enforcement hours defined - just use time limit
+        return calculateTimeLimitEnd(from: now, endTime: nil)
+    }
+
+    /// Format "Park until" with day if not today
+    private func formatParkUntil(hour: Int, minute: Int, on date: Date) -> String {
+        let calendar = Calendar.current
+        guard let targetDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date) else {
+            return "Park until \(hour):\(String(format: "%02d", minute))"
+        }
+
+        let formatter = DateFormatter()
+        if calendar.isDateInToday(targetDate) {
+            formatter.dateFormat = "h:mm a"
+            return "Park until \(formatter.string(from: targetDate))"
+        } else {
+            formatter.dateFormat = "EEE h:mm a"
+            return "Park until \(formatter.string(from: targetDate))"
+        }
+    }
+
+    /// Find the next enforcement start time
+    private func findNextEnforcementStart(from now: Date, startTime: TimeOfDay, days: [DayOfWeek]?, currentDay: DayOfWeek?) -> String {
+        let calendar = Calendar.current
+
+        // If no specific days, enforcement is daily - next enforcement is tomorrow
+        guard let enforcementDays = days, !enforcementDays.isEmpty, let current = currentDay else {
+            if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) {
+                return formatParkUntil(hour: startTime.hour, minute: startTime.minute, on: tomorrow)
+            }
+            return "Park until tomorrow"
+        }
+
+        // Find the next enforcement day
+        let allDays: [DayOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        guard let currentIndex = allDays.firstIndex(of: current) else {
+            return "Park until tomorrow"
+        }
+
+        // Look for the next enforcement day (starting from tomorrow)
+        for offset in 1...7 {
+            let nextIndex = (currentIndex + offset) % 7
+            let nextDay = allDays[nextIndex]
+            if enforcementDays.contains(nextDay) {
+                if let targetDate = calendar.date(byAdding: .day, value: offset, to: now) {
+                    return formatParkUntil(hour: startTime.hour, minute: startTime.minute, on: targetDate)
+                }
+                break
+            }
+        }
+
+        return "Park until tomorrow"
+    }
+
+    /// Calculate when time limit expires (capped at enforcement end if applicable)
+    private func calculateTimeLimitEnd(from now: Date, endTime: TimeOfDay?) -> String {
+        guard let limit = timeLimitMinutes else { return nil ?? "Check posted signs" }
+
+        let calendar = Calendar.current
         let parkUntil = now.addingTimeInterval(TimeInterval(limit * 60))
+
+        // Cap at enforcement end time if provided
+        if let end = endTime,
+           let endDate = calendar.date(bySettingHour: end.hour, minute: end.minute, second: 0, of: now) {
+            let actualEnd = min(parkUntil, endDate)
+            return formatParkUntil(hour: calendar.component(.hour, from: actualEnd),
+                                   minute: calendar.component(.minute, from: actualEnd),
+                                   on: actualEnd)
+        }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
         return "Park until \(formatter.string(from: parkUntil))"
     }
 
@@ -455,8 +546,17 @@ private struct AnimatedZoneCard: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else {
-                        // OUT OF PERMIT ZONE (invalid) - show time limit as title
-                        if let limit = timeLimitMinutes {
+                        // OUT OF PERMIT ZONE (invalid) - show status as title, zone on line 2
+                        if isOutsideEnforcement {
+                            // Outside enforcement - show unlimited
+                            Text("Unlimited Now")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text(zoneName)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else if let limit = timeLimitMinutes {
+                            // During enforcement - show time limit
                             Text("\(limit / 60) Hour Limit")
                                 .font(.headline)
                                 .foregroundColor(.primary)
@@ -681,8 +781,23 @@ private struct AnimatedZoneCard: View {
             .background(Color.white.opacity(0.25))
             .clipShape(Capsule())
         } else if zoneType == .residentialPermit {
-            // OUT OF PERMIT ZONE - show time limit
-            if let limit = timeLimitMinutes {
+            // OUT OF PERMIT ZONE - show the better status (unlimited if outside enforcement, otherwise time limit)
+            if isOutsideEnforcement {
+                // Outside enforcement hours - show unlimited
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                    Text("UNLIMITED NOW")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                }
+                .foregroundColor(.green)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.green.opacity(0.15))
+                .clipShape(Capsule())
+            } else if let limit = timeLimitMinutes {
+                // During enforcement - show time limit
                 HStack(spacing: 4) {
                     Image(systemName: "clock.fill")
                         .font(.caption)
