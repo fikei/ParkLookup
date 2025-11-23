@@ -178,7 +178,7 @@ private struct TappedZoneCard: View {
                             Text("Zone \(currentSelectedArea)")
                                 .font(.headline)
                                 .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                            Text("Tap to cycle • Valid: \(allPermitAreas.joined(separator: ", "))")
+                            Text("Multi Permit Zone")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         } else {
@@ -390,8 +390,7 @@ private struct MiniZoneCard: View {
                     .font(.headline)
                     .foregroundColor(isValidStyle ? .white : .primary)
                     .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                // Show all valid areas and hint to tap
-                Text("Tap to cycle • Valid: \(orderedPermitAreas.joined(separator: ", "))")
+                Text("Multi Permit Zone")
                     .font(.caption)
                     .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
             } else {

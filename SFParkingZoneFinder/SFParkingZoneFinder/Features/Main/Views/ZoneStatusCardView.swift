@@ -73,7 +73,7 @@ struct ZoneStatusCardView: View {
             return meteredSubtitle ?? "$2/hr • 2hr max"
         }
         if isMultiPermitLocation {
-            return "Tap to cycle • Valid: \(allValidPermitAreas.joined(separator: ", "))"
+            return "Multi Permit Zone"
         }
         return nil
     }
