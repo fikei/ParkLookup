@@ -380,6 +380,7 @@ struct ZoneMapView: UIViewRepresentable {
                         logger.info("All \(totalPolygons) overlays added in \(String(format: "%.1f", totalElapsed))ms")
                         // Mark overlays as visible/hidden based on initial state
                         coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                        coordinator.overlaysLoaded = true
                     }
                 }
 
@@ -388,6 +389,8 @@ struct ZoneMapView: UIViewRepresentable {
                     addBatch(startIndex: 0)
                 } else {
                     coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                    coordinator.overlaysLoaded = true
+                    logger.info("No polygons to load - overlaysLoaded marked true")
                 }
 
                 let setupElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
@@ -401,13 +404,20 @@ struct ZoneMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
-        logger.debug("updateUIView called - overlays: \(mapView.overlays.count), annotations: \(mapView.annotations.count), initialSetupDone: \(context.coordinator.initialSetupDone)")
+        logger.debug("updateUIView called - overlays: \(mapView.overlays.count), annotations: \(mapView.annotations.count), initialSetupDone: \(context.coordinator.initialSetupDone), overlaysLoaded: \(context.coordinator.overlaysLoaded)")
 
         // Update coordinator with current state
         context.coordinator.currentZoneId = currentZoneId
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
         context.coordinator.showOverlays = showOverlays
+
+        // Load overlays if they haven't been loaded yet but zones are now available
+        if !context.coordinator.overlaysLoaded && !zones.isEmpty {
+            logger.info("Zones now available (\(zones.count)) - loading overlays")
+            loadOverlays(mapView: mapView, context: context)
+            return
+        }
 
         // Handle overlay visibility changes
         let overlaysVisible = context.coordinator.overlaysCurrentlyVisible
@@ -537,6 +547,173 @@ struct ZoneMapView: UIViewRepresentable {
         )
     }
 
+    // MARK: - Overlay Loading
+
+    private func loadOverlays(mapView: MKMapView, context: Context) {
+        let zonesToLoad = self.zones
+        let zoneCount = zonesToLoad.count
+        let shouldShowOverlays = self.showOverlays
+        let coordinator = context.coordinator
+
+        logger.info("loadOverlays START - \(zoneCount) zones, showOverlays: \(shouldShowOverlays)")
+
+        let useConvexHull = ZoneMapView.useConvexHull
+        let userCenter = userCoordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            let bgStartTime = CFAbsoluteTimeGetCurrent()
+
+            var polygons: [ZonePolygon] = []
+            var annotations: [ZoneLabelAnnotation] = []
+            var totalBoundaries = 0
+            var totalPoints = 0
+            var outputPoints = 0
+
+            // Filter radius for visible zones
+            let filterRadius = 0.03   // ~3.3km - visible area
+            let center = userCenter
+            let minLat = center.latitude - filterRadius
+            let maxLat = center.latitude + filterRadius
+            let minLon = center.longitude - filterRadius
+            let maxLon = center.longitude + filterRadius
+
+            for (index, zone) in zonesToLoad.enumerated() {
+                let zoneBoundaryCount = zone.allBoundaryCoordinates.count
+                totalBoundaries += zoneBoundaryCount
+
+                var nearbyBoundaries: [[CLLocationCoordinate2D]] = []
+
+                for boundary in zone.allBoundaryCoordinates {
+                    totalPoints += boundary.count
+
+                    let hasNearbyPoint = boundary.contains { coord in
+                        coord.latitude >= minLat && coord.latitude <= maxLat &&
+                        coord.longitude >= minLon && coord.longitude <= maxLon
+                    }
+
+                    if hasNearbyPoint {
+                        nearbyBoundaries.append(boundary)
+                    }
+                }
+
+                if useConvexHull {
+                    let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
+                    if allNearbyPoints.count >= 3 {
+                        let hull = self.convexHull(allNearbyPoints)
+                        if hull.count >= 3 {
+                            let polygon = ZonePolygon(coordinates: hull, count: hull.count)
+                            polygon.zoneId = zone.id
+                            polygon.zoneCode = zone.permitArea
+                            polygon.zoneType = zone.zoneType
+                            polygons.append(polygon)
+                            outputPoints += hull.count
+                        }
+                    }
+                } else {
+                    let multiPermitIndices = zone.multiPermitBoundaryIndices
+
+                    for boundary in nearbyBoundaries {
+                        guard boundary.count >= 3 else { continue }
+                        let polygon = ZonePolygon(coordinates: boundary, count: boundary.count)
+                        polygon.zoneId = zone.id
+                        polygon.zoneCode = zone.permitArea
+                        polygon.zoneType = zone.zoneType
+
+                        // Check if this boundary is multi-permit
+                        let originalIndex = zone.allBoundaryCoordinates.firstIndex(where: { $0.count == boundary.count && $0.first?.latitude == boundary.first?.latitude })
+                        if let idx = originalIndex, multiPermitIndices.contains(idx) {
+                            polygon.isMultiPermit = true
+                        }
+
+                        polygons.append(polygon)
+                        outputPoints += boundary.count
+                    }
+                }
+
+                // Create zone label annotation at centroid
+                if !nearbyBoundaries.isEmpty {
+                    let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
+                    if !allNearbyPoints.isEmpty {
+                        let sumLat = allNearbyPoints.reduce(0.0) { $0 + $1.latitude }
+                        let sumLon = allNearbyPoints.reduce(0.0) { $0 + $1.longitude }
+                        let centroid = CLLocationCoordinate2D(
+                            latitude: sumLat / Double(allNearbyPoints.count),
+                            longitude: sumLon / Double(allNearbyPoints.count)
+                        )
+                        let annotation = ZoneLabelAnnotation(
+                            coordinate: centroid,
+                            zoneCode: zone.permitArea ?? zone.displayName,
+                            zoneId: zone.id
+                        )
+                        annotations.append(annotation)
+                    }
+                }
+
+                if (index + 1) % 100 == 0 {
+                    logger.debug("Processed \(index + 1)/\(zoneCount) zones, polygons so far: \(polygons.count)")
+                }
+            }
+
+            let bgElapsed = (CFAbsoluteTimeGetCurrent() - bgStartTime) * 1000
+            logger.info("loadOverlays background prep DONE in \(String(format: "%.1f", bgElapsed))ms - \(polygons.count) polygons")
+
+            let meteredPolygons = polygons.filter { $0.zoneType == .metered }
+            let rppPolygons = polygons.filter { $0.zoneType != .metered }
+
+            DispatchQueue.main.async {
+                let mainStartTime = CFAbsoluteTimeGetCurrent()
+                logger.info("loadOverlays main thread START - \(polygons.count) polygons, \(annotations.count) annotations")
+
+                mapView.addAnnotations(annotations)
+
+                // Set initial alpha based on showOverlays
+                let initialAlpha: CGFloat = shouldShowOverlays ? 1.0 : 0.0
+                for annotation in annotations {
+                    if let view = mapView.view(for: annotation) {
+                        view.alpha = initialAlpha
+                    }
+                }
+
+                let batchSize = 500
+                let orderedPolygons = meteredPolygons + rppPolygons
+                let totalPolygons = orderedPolygons.count
+
+                func addBatch(startIndex: Int) {
+                    let endIndex = min(startIndex + batchSize, totalPolygons)
+                    let batch = Array(orderedPolygons[startIndex..<endIndex])
+
+                    mapView.addOverlays(batch, level: .aboveRoads)
+
+                    // Set initial alpha
+                    for overlay in batch {
+                        if let renderer = mapView.renderer(for: overlay) {
+                            renderer.alpha = initialAlpha
+                        }
+                    }
+
+                    if endIndex < totalPolygons {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                            addBatch(startIndex: endIndex)
+                        }
+                    } else {
+                        let totalElapsed = (CFAbsoluteTimeGetCurrent() - mainStartTime) * 1000
+                        logger.info("loadOverlays: All \(totalPolygons) overlays added in \(String(format: "%.1f", totalElapsed))ms")
+                        coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                        coordinator.overlaysLoaded = true
+                    }
+                }
+
+                if !orderedPolygons.isEmpty {
+                    addBatch(startIndex: 0)
+                } else {
+                    coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                    coordinator.overlaysLoaded = true
+                    logger.info("loadOverlays: No polygons to load")
+                }
+            }
+        }
+    }
+
     // MARK: - Coordinator
 
     class Coordinator: NSObject, MKMapViewDelegate {
@@ -554,6 +731,7 @@ struct ZoneMapView: UIViewRepresentable {
         // Track overlay visibility state
         var showOverlays: Bool = true
         var overlaysCurrentlyVisible: Bool = false  // Start hidden, will be set true after initial load if showOverlays is true
+        var overlaysLoaded: Bool = false  // Track whether overlays have been loaded
         var lastVerticalBias: Double = 0.0
 
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone) -> Void)?) {
