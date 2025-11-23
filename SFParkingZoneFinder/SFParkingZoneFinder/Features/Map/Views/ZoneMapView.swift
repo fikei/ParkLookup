@@ -424,7 +424,7 @@ struct ZoneMapView: UIViewRepresentable {
                         view.alpha = 0
                     }
                 }
-                UIView.animate(withDuration: 0.3) {
+                UIView.animate(withDuration: 0.6, delay: 0.2, options: [.curveEaseOut]) {
                     for overlay in mapView.overlays {
                         if let renderer = mapView.renderer(for: overlay) {
                             renderer.alpha = 1
@@ -438,7 +438,7 @@ struct ZoneMapView: UIViewRepresentable {
                 }
             } else {
                 // Hide overlays
-                UIView.animate(withDuration: 0.3) {
+                UIView.animate(withDuration: 0.4, delay: 0, options: [.curveEaseIn]) {
                     for overlay in mapView.overlays {
                         if let renderer = mapView.renderer(for: overlay) {
                             renderer.alpha = 0
@@ -477,13 +477,19 @@ struct ZoneMapView: UIViewRepresentable {
             let currentSpan = mapView.region.span
             let currentCenter = mapView.centerCoordinate
             let spanChanged = abs(currentSpan.latitudeDelta - span.latitudeDelta) > 0.0001
+            let biasChanged = abs(context.coordinator.lastVerticalBias - verticalBias) > 0.01
             let distance = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
                 .distance(from: CLLocation(latitude: currentCenter.latitude - (currentSpan.latitudeDelta * context.coordinator.lastVerticalBias), longitude: currentCenter.longitude))
 
-            if spanChanged || distance > 500 {
-                logger.debug("Updating map region - spanChanged: \(spanChanged), distance: \(String(format: "%.0f", distance))m")
+            if spanChanged || biasChanged || distance > 500 {
+                logger.debug("Updating map region - spanChanged: \(spanChanged), biasChanged: \(biasChanged), distance: \(String(format: "%.0f", distance))m")
                 let region = MKCoordinateRegion(center: biasedCenter, span: span)
-                mapView.setRegion(region, animated: true)
+
+                // Use slower animation (0.8s) for smooth transition when expanding/collapsing
+                UIView.animate(withDuration: 0.8, delay: 0, options: [.curveEaseInOut]) {
+                    mapView.setRegion(region, animated: false)
+                }
+
                 context.coordinator.lastVerticalBias = verticalBias
             }
         }
