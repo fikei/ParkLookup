@@ -290,6 +290,213 @@ enum PolygonClipper {
         }
         return abs(sum) / 2.0
     }
+
+    // MARK: - Polygon Merging
+
+    /// Merge overlapping polygons that belong to the same zone (same zoneCode)
+    /// Returns merged polygons grouped by zone code
+    static func mergeOverlappingSameZone(
+        _ polygonInfos: [(coords: [CLLocationCoordinate2D], zoneCode: String?, zoneId: String)],
+        tolerance: Double
+    ) -> [[CLLocationCoordinate2D]] {
+        // Group by zone code
+        var byZoneCode: [String: [(coords: [CLLocationCoordinate2D], zoneId: String)]] = [:]
+
+        for info in polygonInfos {
+            let key = info.zoneCode ?? info.zoneId
+            if byZoneCode[key] == nil {
+                byZoneCode[key] = []
+            }
+            byZoneCode[key]?.append((info.coords, info.zoneId))
+        }
+
+        var result: [[CLLocationCoordinate2D]] = []
+
+        for (_, polygons) in byZoneCode {
+            // For each group, find overlapping polygons and merge them
+            let mergedGroup = mergeOverlappingPolygons(polygons.map { $0.coords }, tolerance: tolerance)
+            result.append(contentsOf: mergedGroup)
+        }
+
+        return result
+    }
+
+    /// Merge a list of polygons that overlap with each other
+    private static func mergeOverlappingPolygons(
+        _ polygons: [[CLLocationCoordinate2D]],
+        tolerance: Double
+    ) -> [[CLLocationCoordinate2D]] {
+        guard polygons.count > 1 else { return polygons }
+
+        var merged: [[CLLocationCoordinate2D]] = []
+        var used = Set<Int>()
+
+        for i in 0..<polygons.count {
+            guard !used.contains(i) else { continue }
+
+            var currentMerge = polygons[i]
+            used.insert(i)
+
+            // Find all polygons that overlap with current and merge them
+            var changed = true
+            while changed {
+                changed = false
+                for j in 0..<polygons.count {
+                    guard !used.contains(j) else { continue }
+
+                    if boundingBoxesOverlap(currentMerge, polygons[j], tolerance: tolerance) {
+                        // Merge by taking convex hull of both polygons
+                        let combined = currentMerge + polygons[j]
+                        currentMerge = convexHull(of: combined)
+                        used.insert(j)
+                        changed = true
+                    }
+                }
+            }
+
+            merged.append(currentMerge)
+        }
+
+        return merged
+    }
+
+    /// Check if two polygons are within a certain distance (in meters) of each other
+    static func areWithinDistance(
+        _ coords1: [CLLocationCoordinate2D],
+        _ coords2: [CLLocationCoordinate2D],
+        meters: Double
+    ) -> Bool {
+        // Convert meters to approximate degrees at SF latitude
+        let degreeTolerance = meters / 111000.0
+
+        for p1 in coords1 {
+            for p2 in coords2 {
+                let latDiff = abs(p1.latitude - p2.latitude)
+                let lonDiff = abs(p1.longitude - p2.longitude) * 0.79  // Adjust for latitude
+                let distance = sqrt(latDiff * latDiff + lonDiff * lonDiff)
+
+                if distance < degreeTolerance {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    /// Merge polygons within proximity distance (same zone only)
+    static func mergeByProximity(
+        _ polygonInfos: [(coords: [CLLocationCoordinate2D], zoneCode: String?, zoneId: String)],
+        distanceMeters: Double
+    ) -> [[CLLocationCoordinate2D]] {
+        // Group by zone code
+        var byZoneCode: [String: [[CLLocationCoordinate2D]]] = [:]
+
+        for info in polygonInfos {
+            let key = info.zoneCode ?? info.zoneId
+            if byZoneCode[key] == nil {
+                byZoneCode[key] = []
+            }
+            byZoneCode[key]?.append(info.coords)
+        }
+
+        var result: [[CLLocationCoordinate2D]] = []
+
+        for (_, polygons) in byZoneCode {
+            let mergedGroup = mergePolygonsByProximity(polygons, distanceMeters: distanceMeters)
+            result.append(contentsOf: mergedGroup)
+        }
+
+        return result
+    }
+
+    /// Merge polygons that are within proximity distance
+    private static func mergePolygonsByProximity(
+        _ polygons: [[CLLocationCoordinate2D]],
+        distanceMeters: Double
+    ) -> [[CLLocationCoordinate2D]] {
+        guard polygons.count > 1 else { return polygons }
+
+        var merged: [[CLLocationCoordinate2D]] = []
+        var used = Set<Int>()
+
+        for i in 0..<polygons.count {
+            guard !used.contains(i) else { continue }
+
+            var currentMerge = polygons[i]
+            used.insert(i)
+
+            // Find all polygons within proximity and merge them
+            var changed = true
+            while changed {
+                changed = false
+                for j in 0..<polygons.count {
+                    guard !used.contains(j) else { continue }
+
+                    if areWithinDistance(currentMerge, polygons[j], meters: distanceMeters) {
+                        // Merge by taking convex hull
+                        let combined = currentMerge + polygons[j]
+                        currentMerge = convexHull(of: combined)
+                        used.insert(j)
+                        changed = true
+                    }
+                }
+            }
+
+            merged.append(currentMerge)
+        }
+
+        return merged
+    }
+
+    /// Compute convex hull of points (Graham scan)
+    private static func convexHull(of points: [CLLocationCoordinate2D]) -> [CLLocationCoordinate2D] {
+        guard points.count >= 3 else { return points }
+
+        // Find the bottom-most point
+        var sorted = points
+        let pivot = sorted.min { a, b in
+            if a.latitude != b.latitude {
+                return a.latitude < b.latitude
+            }
+            return a.longitude < b.longitude
+        }!
+
+        // Sort by polar angle
+        sorted.sort { a, b in
+            let angleA = atan2(a.latitude - pivot.latitude, a.longitude - pivot.longitude)
+            let angleB = atan2(b.latitude - pivot.latitude, b.longitude - pivot.longitude)
+            if angleA != angleB {
+                return angleA < angleB
+            }
+            let distA = pow(a.latitude - pivot.latitude, 2) + pow(a.longitude - pivot.longitude, 2)
+            let distB = pow(b.latitude - pivot.latitude, 2) + pow(b.longitude - pivot.longitude, 2)
+            return distA < distB
+        }
+
+        // Build hull
+        var hull: [CLLocationCoordinate2D] = []
+        for point in sorted {
+            while hull.count >= 2 {
+                let o = hull[hull.count - 2]
+                let a = hull[hull.count - 1]
+                let cross = (a.longitude - o.longitude) * (point.latitude - o.latitude) -
+                           (a.latitude - o.latitude) * (point.longitude - o.longitude)
+                if cross <= 0 {
+                    hull.removeLast()
+                } else {
+                    break
+                }
+            }
+            hull.append(point)
+        }
+
+        // Close the hull
+        if hull.count >= 3 {
+            hull.append(hull[0])
+        }
+
+        return hull
+    }
 }
 
 // MARK: - Supporting Types

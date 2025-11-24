@@ -139,6 +139,8 @@ struct DeveloperMapOverlay: View {
             compactToggle("Corner Rounding", isOn: $devSettings.useCornerRounding, icon: "circle.bottomhalf.filled")
             compactToggle("Convex Hull", isOn: $devSettings.useConvexHull, icon: "pentagon")
             compactToggle("Overlap Clipping", isOn: $devSettings.useOverlapClipping, icon: "square.on.square.intersection.dashed")
+            compactToggle("Merge Overlapping", isOn: $devSettings.mergeOverlappingSameZone, icon: "arrow.triangle.merge")
+            compactToggle("Proximity Merge", isOn: $devSettings.useProximityMerging, icon: "arrow.left.and.right.righttriangle.left.righttriangle.right")
 
             if devSettings.useDouglasPeucker {
                 compactToggle("Preserve Curves", isOn: $devSettings.preserveCurves, icon: "point.topleft.down.to.point.bottomright.curvepath")
@@ -204,6 +206,17 @@ struct DeveloperMapOverlay: View {
                 step: 0.000001,
                 formatter: { String(format: "%.6f° (~%.1fm)", $0, $0 * 111000) }
             )
+
+            // Proximity merge distance (only shown when proximity merge is enabled)
+            if devSettings.useProximityMerging {
+                sliderControl(
+                    label: "Merge Distance",
+                    value: $devSettings.proximityMergeDistance,
+                    range: 0.0...10.0,
+                    step: 0.5,
+                    formatter: { String(format: "%.1fm", $0) }
+                )
+            }
         }
     }
 

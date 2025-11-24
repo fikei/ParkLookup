@@ -185,6 +185,17 @@ struct ZoneMapView: UIViewRepresentable {
                 polygons = Self.applyOverlapClipping(polygons, tolerance: devSettings.overlapTolerance)
             }
 
+            // Apply polygon merging if enabled (visual only)
+            if devSettings.mergeOverlappingSameZone || devSettings.useProximityMerging {
+                polygons = Self.applyPolygonMerging(
+                    polygons,
+                    mergeOverlapping: devSettings.mergeOverlappingSameZone,
+                    useProximity: devSettings.useProximityMerging,
+                    proximityMeters: devSettings.proximityMergeDistance,
+                    tolerance: devSettings.overlapTolerance
+                )
+            }
+
             // Separate polygons by zone type - metered zones render below RPP zones
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
             let rppPolygons = polygons.filter { $0.zoneType != .metered }
@@ -466,6 +477,75 @@ struct ZoneMapView: UIViewRepresentable {
             newPolygon.originalVertexCount = original.originalVertexCount
 
             result.append(newPolygon)
+        }
+
+        return result
+    }
+
+    /// Apply polygon merging for same-zone polygons (visual only)
+    private static func applyPolygonMerging(
+        _ polygons: [ZonePolygon],
+        mergeOverlapping: Bool,
+        useProximity: Bool,
+        proximityMeters: Double,
+        tolerance: Double
+    ) -> [ZonePolygon] {
+        guard polygons.count > 1 else { return polygons }
+
+        // Group polygons by zone code for merging
+        var byZoneCode: [String: [ZonePolygon]] = [:]
+        for polygon in polygons {
+            let key = polygon.zoneCode ?? polygon.zoneId ?? "unknown"
+            if byZoneCode[key] == nil {
+                byZoneCode[key] = []
+            }
+            byZoneCode[key]?.append(polygon)
+        }
+
+        var result: [ZonePolygon] = []
+
+        for (_, zonePolygons) in byZoneCode {
+            // If only one polygon in this zone, no merging needed
+            guard zonePolygons.count > 1 else {
+                result.append(contentsOf: zonePolygons)
+                continue
+            }
+
+            // Build info for merging
+            let polygonInfos: [(coords: [CLLocationCoordinate2D], zoneCode: String?, zoneId: String)] =
+                zonePolygons.map { (coords: $0.coordinates, zoneCode: $0.zoneCode, zoneId: $0.zoneId ?? "") }
+
+            var mergedCoords: [[CLLocationCoordinate2D]]
+
+            if useProximity {
+                // Use proximity-based merging
+                mergedCoords = PolygonClipper.mergeByProximity(polygonInfos, distanceMeters: proximityMeters)
+            } else if mergeOverlapping {
+                // Use overlap-based merging
+                mergedCoords = PolygonClipper.mergeOverlappingSameZone(polygonInfos, tolerance: tolerance)
+            } else {
+                // No merging - keep original
+                result.append(contentsOf: zonePolygons)
+                continue
+            }
+
+            // Create new polygons from merged coordinates
+            // Use the first original polygon as a template for metadata
+            let template = zonePolygons[0]
+
+            for coords in mergedCoords {
+                guard coords.count >= 3 else { continue }
+
+                let newPolygon = ZonePolygon(coordinates: coords, count: coords.count)
+                newPolygon.zoneId = template.zoneId
+                newPolygon.zoneCode = template.zoneCode
+                newPolygon.zoneType = template.zoneType
+                newPolygon.isMultiPermit = template.isMultiPermit
+                newPolygon.allValidPermitAreas = template.allValidPermitAreas
+                newPolygon.originalVertexCount = coords.count
+
+                result.append(newPolygon)
+            }
         }
 
         return result

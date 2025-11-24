@@ -80,6 +80,21 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(useOverlapClipping, forKey: Keys.useOverlapClipping) }
     }
 
+    /// Enable merging of overlapping polygons within the same permit zone
+    @Published var mergeOverlappingSameZone: Bool {
+        didSet { UserDefaults.standard.set(mergeOverlappingSameZone, forKey: Keys.mergeOverlappingSameZone) }
+    }
+
+    /// Enable distance-based merging of polygons within the same permit zone
+    @Published var useProximityMerging: Bool {
+        didSet { UserDefaults.standard.set(useProximityMerging, forKey: Keys.useProximityMerging) }
+    }
+
+    /// Distance threshold for proximity-based polygon merging (in meters)
+    @Published var proximityMergeDistance: Double {
+        didSet { UserDefaults.standard.set(proximityMergeDistance, forKey: Keys.proximityMergeDistance) }
+    }
+
     // MARK: - Zone Colors (hex strings without #)
 
     /// Color for user's valid permit zones (default: green 33B366)
@@ -173,6 +188,9 @@ final class DeveloperSettings: ObservableObject {
         static let useCornerRounding = "dev.useCornerRounding"
         static let overlapTolerance = "dev.overlapTolerance"
         static let useOverlapClipping = "dev.useOverlapClipping"
+        static let mergeOverlappingSameZone = "dev.mergeOverlappingSameZone"
+        static let useProximityMerging = "dev.useProximityMerging"
+        static let proximityMergeDistance = "dev.proximityMergeDistance"
         static let userZoneColorHex = "dev.userZoneColorHex"
         static let rppZoneColorHex = "dev.rppZoneColorHex"
         static let meteredZoneColorHex = "dev.meteredZoneColorHex"
@@ -202,6 +220,9 @@ final class DeveloperSettings: ObservableObject {
         static let useCornerRounding = false
         static let overlapTolerance = 0.00001  // ~1m tolerance for overlap detection
         static let useOverlapClipping = false  // Visual-only overlap clipping
+        static let mergeOverlappingSameZone = false  // Merge overlapping polygons in same zone
+        static let useProximityMerging = false  // Distance-based polygon merging
+        static let proximityMergeDistance = 5.0  // Default 5 meters
         static let userZoneColorHex = "33B366"  // Green
         static let rppZoneColorHex = "F29933"   // Orange
         static let meteredZoneColorHex = "808080"  // Grey
@@ -234,6 +255,9 @@ final class DeveloperSettings: ObservableObject {
         useCornerRounding = defaults.object(forKey: Keys.useCornerRounding) as? Bool ?? Defaults.useCornerRounding
         overlapTolerance = defaults.object(forKey: Keys.overlapTolerance) as? Double ?? Defaults.overlapTolerance
         useOverlapClipping = defaults.object(forKey: Keys.useOverlapClipping) as? Bool ?? Defaults.useOverlapClipping
+        mergeOverlappingSameZone = defaults.object(forKey: Keys.mergeOverlappingSameZone) as? Bool ?? Defaults.mergeOverlappingSameZone
+        useProximityMerging = defaults.object(forKey: Keys.useProximityMerging) as? Bool ?? Defaults.useProximityMerging
+        proximityMergeDistance = defaults.object(forKey: Keys.proximityMergeDistance) as? Double ?? Defaults.proximityMergeDistance
         userZoneColorHex = defaults.object(forKey: Keys.userZoneColorHex) as? String ?? Defaults.userZoneColorHex
         rppZoneColorHex = defaults.object(forKey: Keys.rppZoneColorHex) as? String ?? Defaults.rppZoneColorHex
         meteredZoneColorHex = defaults.object(forKey: Keys.meteredZoneColorHex) as? String ?? Defaults.meteredZoneColorHex
@@ -270,6 +294,9 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(cornerRoundingRadius)
         hasher.combine(overlapTolerance)
         hasher.combine(useOverlapClipping)
+        hasher.combine(mergeOverlappingSameZone)
+        hasher.combine(useProximityMerging)
+        hasher.combine(proximityMergeDistance)
         hasher.combine(userZoneColorHex)
         hasher.combine(rppZoneColorHex)
         hasher.combine(meteredZoneColorHex)
@@ -329,6 +356,9 @@ final class DeveloperSettings: ObservableObject {
         cornerRoundingRadius = Defaults.cornerRoundingRadius
         overlapTolerance = Defaults.overlapTolerance
         useOverlapClipping = Defaults.useOverlapClipping
+        mergeOverlappingSameZone = Defaults.mergeOverlappingSameZone
+        useProximityMerging = Defaults.useProximityMerging
+        proximityMergeDistance = Defaults.proximityMergeDistance
         userZoneColorHex = Defaults.userZoneColorHex
         rppZoneColorHex = Defaults.rppZoneColorHex
         meteredZoneColorHex = Defaults.meteredZoneColorHex
