@@ -196,6 +196,9 @@ struct ZoneMapView: UIViewRepresentable {
                 )
             }
 
+            // Remove near-duplicate polygons (95%+ overlap) to prevent double-rendering
+            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: 0.95)
+
             // Separate polygons by zone type and permit status for proper layering
             // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
@@ -583,6 +586,86 @@ struct ZoneMapView: UIViewRepresentable {
         return result
     }
 
+    /// Remove near-duplicate polygons that have high overlap (e.g., 95%+)
+    /// Prevents double-rendering of essentially the same polygon
+    private static func deduplicateOverlappingPolygons(
+        _ polygons: [ZonePolygon],
+        overlapThreshold: Double = 0.95
+    ) -> [ZonePolygon] {
+        guard polygons.count > 1 else { return polygons }
+
+        var result: [ZonePolygon] = []
+        var toRemove = Set<Int>()
+
+        // Check each pair of polygons for high overlap
+        for i in 0..<polygons.count {
+            guard !toRemove.contains(i) else { continue }
+
+            let poly1 = polygons[i]
+            let coords1 = poly1.coordinates
+            guard coords1.count >= 3 else { continue }
+
+            for j in (i + 1)..<polygons.count {
+                guard !toRemove.contains(j) else { continue }
+
+                let poly2 = polygons[j]
+                let coords2 = poly2.coordinates
+                guard coords2.count >= 3 else { continue }
+
+                // Only check polygons from the same zone
+                guard poly1.zoneId == poly2.zoneId || poly1.zoneCode == poly2.zoneCode else {
+                    continue
+                }
+
+                // Calculate bounding box overlap as a fast approximation
+                let box1 = PolygonClipper.boundingBox(of: coords1)
+                let box2 = PolygonClipper.boundingBox(of: coords2)
+
+                // Calculate overlap area (intersection of bounding boxes)
+                let overlapMinLat = max(box1.minLat, box2.minLat)
+                let overlapMaxLat = min(box1.maxLat, box2.maxLat)
+                let overlapMinLon = max(box1.minLon, box2.minLon)
+                let overlapMaxLon = min(box1.maxLon, box2.maxLon)
+
+                // Check if bounding boxes overlap
+                guard overlapMinLat < overlapMaxLat && overlapMinLon < overlapMaxLon else {
+                    continue
+                }
+
+                // Calculate areas
+                let overlapArea = (overlapMaxLat - overlapMinLat) * (overlapMaxLon - overlapMinLon)
+                let area1 = (box1.maxLat - box1.minLat) * (box1.maxLon - box1.minLon)
+                let area2 = (box2.maxLat - box2.minLat) * (box2.maxLon - box2.minLon)
+                let minArea = min(area1, area2)
+
+                // If overlap is >= threshold of the smaller polygon, mark as duplicate
+                if minArea > 0 && (overlapArea / minArea) >= overlapThreshold {
+                    // Keep the one with fewer vertices (more simplified) or smaller area
+                    if coords2.count < coords1.count || area2 < area1 {
+                        toRemove.insert(i)
+                        break  // poly1 is marked for removal, move to next i
+                    } else {
+                        toRemove.insert(j)
+                    }
+                }
+            }
+        }
+
+        // Build result excluding removed polygons
+        for i in 0..<polygons.count {
+            if !toRemove.contains(i) {
+                result.append(polygons[i])
+            }
+        }
+
+        let removedCount = polygons.count - result.count
+        if removedCount > 0 {
+            logger.info("🔍 Removed \(removedCount) near-duplicate polygon(s) (≥\(Int(overlapThreshold * 100))% overlap)")
+        }
+
+        return result
+    }
+
     // MARK: - Private Helpers
 
     private func addZoneOverlays(_ zone: ParkingZone, to mapView: MKMapView, context: Context) {
@@ -775,6 +858,9 @@ struct ZoneMapView: UIViewRepresentable {
                     tolerance: devSettings.overlapTolerance
                 )
             }
+
+            // Remove near-duplicate polygons (95%+ overlap) to prevent double-rendering
+            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: 0.95)
 
             // Separate polygons by zone type and permit status for proper layering
             // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
