@@ -101,60 +101,81 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(deduplicationThreshold, forKey: Keys.deduplicationThreshold) }
     }
 
-    // MARK: - Zone Colors (hex strings without #)
+    // MARK: - In Zone (Current Zone Override)
 
-    /// Color for user's valid permit zones (default: green 33B366)
-    @Published var userZoneColorHex: String {
-        didSet { UserDefaults.standard.set(userZoneColorHex, forKey: Keys.userZoneColorHex) }
-    }
-
-    /// Color for other RPP zones (default: orange F29933)
-    @Published var rppZoneColorHex: String {
-        didSet { UserDefaults.standard.set(rppZoneColorHex, forKey: Keys.rppZoneColorHex) }
-    }
-
-    /// Color for metered zones (default: grey 808080)
-    @Published var meteredZoneColorHex: String {
-        didSet { UserDefaults.standard.set(meteredZoneColorHex, forKey: Keys.meteredZoneColorHex) }
-    }
-
-    // MARK: - Zone Opacity
-
-    /// Fill opacity for current zone (0.0 - 1.0)
+    /// Fill opacity for current zone (user is in this zone) - 0.0 to 1.0
+    /// Overrides other zone fill opacity when user is inside
     @Published var currentZoneFillOpacity: Double {
         didSet { UserDefaults.standard.set(currentZoneFillOpacity, forKey: Keys.currentZoneFillOpacity) }
     }
 
-    /// Fill opacity for other zones (0.0 - 1.0)
-    @Published var otherZoneFillOpacity: Double {
-        didSet { UserDefaults.standard.set(otherZoneFillOpacity, forKey: Keys.otherZoneFillOpacity) }
-    }
-
-    /// Stroke opacity for current zone (0.0 - 1.0)
+    /// Stroke opacity for current zone (user is in this zone) - 0.0 to 1.0
+    /// Overrides other zone stroke opacity when user is inside
     @Published var currentZoneStrokeOpacity: Double {
         didSet { UserDefaults.standard.set(currentZoneStrokeOpacity, forKey: Keys.currentZoneStrokeOpacity) }
     }
 
-    /// Stroke opacity for other zones (0.0 - 1.0)
-    @Published var otherZoneStrokeOpacity: Double {
-        didSet { UserDefaults.standard.set(otherZoneStrokeOpacity, forKey: Keys.otherZoneStrokeOpacity) }
+    // MARK: - My Permit Zones
+
+    /// Color for zones where user has a permit (default: green 33B366)
+    @Published var myPermitZonesColorHex: String {
+        didSet { UserDefaults.standard.set(myPermitZonesColorHex, forKey: Keys.myPermitZonesColorHex) }
     }
 
-    // MARK: - Stroke Width
-
-    /// Stroke width for permitted zones (user has permit) - 0.0 to 5.0
-    @Published var permittedZoneStrokeWidth: Double {
-        didSet { UserDefaults.standard.set(permittedZoneStrokeWidth, forKey: Keys.permittedZoneStrokeWidth) }
+    /// Fill opacity for my permit zones (0.0 - 1.0)
+    @Published var myPermitZonesFillOpacity: Double {
+        didSet { UserDefaults.standard.set(myPermitZonesFillOpacity, forKey: Keys.myPermitZonesFillOpacity) }
     }
 
-    /// Stroke width for non-permitted zones (no permit held) - 0.0 to 5.0
-    @Published var nonPermittedZoneStrokeWidth: Double {
-        didSet { UserDefaults.standard.set(nonPermittedZoneStrokeWidth, forKey: Keys.nonPermittedZoneStrokeWidth) }
+    /// Stroke opacity for my permit zones (0.0 - 1.0)
+    @Published var myPermitZonesStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(myPermitZonesStrokeOpacity, forKey: Keys.myPermitZonesStrokeOpacity) }
     }
 
-    /// Stroke width for metered/paid zones - 0.0 to 5.0
-    @Published var meteredZoneStrokeWidth: Double {
-        didSet { UserDefaults.standard.set(meteredZoneStrokeWidth, forKey: Keys.meteredZoneStrokeWidth) }
+    // MARK: - Free Timed Zones
+
+    /// Color for free parking zones with time limits (RPP zones without permit) (default: orange F29933)
+    @Published var freeTimedZonesColorHex: String {
+        didSet { UserDefaults.standard.set(freeTimedZonesColorHex, forKey: Keys.freeTimedZonesColorHex) }
+    }
+
+    /// Fill opacity for free timed zones (0.0 - 1.0)
+    @Published var freeTimedZonesFillOpacity: Double {
+        didSet { UserDefaults.standard.set(freeTimedZonesFillOpacity, forKey: Keys.freeTimedZonesFillOpacity) }
+    }
+
+    /// Stroke opacity for free timed zones (0.0 - 1.0)
+    @Published var freeTimedZonesStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(freeTimedZonesStrokeOpacity, forKey: Keys.freeTimedZonesStrokeOpacity) }
+    }
+
+    // MARK: - Paid Zones
+
+    /// Color for paid/metered zones (default: grey 808080)
+    @Published var paidZonesColorHex: String {
+        didSet { UserDefaults.standard.set(paidZonesColorHex, forKey: Keys.paidZonesColorHex) }
+    }
+
+    /// Fill opacity for paid zones (0.0 - 1.0)
+    @Published var paidZonesFillOpacity: Double {
+        didSet { UserDefaults.standard.set(paidZonesFillOpacity, forKey: Keys.paidZonesFillOpacity) }
+    }
+
+    /// Stroke opacity for paid zones (0.0 - 1.0)
+    @Published var paidZonesStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(paidZonesStrokeOpacity, forKey: Keys.paidZonesStrokeOpacity) }
+    }
+
+    // MARK: - Global Stroke Settings
+
+    /// Global stroke width for all zones - 0.0 to 5.0
+    @Published var strokeWidth: Double {
+        didSet { UserDefaults.standard.set(strokeWidth, forKey: Keys.strokeWidth) }
+    }
+
+    /// Dash length for dashed lines (0 = solid line) - 0.0 to 10.0
+    @Published var dashLength: Double {
+        didSet { UserDefaults.standard.set(dashLength, forKey: Keys.dashLength) }
     }
 
     // MARK: - Debug Visualization
@@ -223,16 +244,19 @@ final class DeveloperSettings: ObservableObject {
         static let useProximityMerging = "dev.useProximityMerging"
         static let proximityMergeDistance = "dev.proximityMergeDistance"
         static let deduplicationThreshold = "dev.deduplicationThreshold"
-        static let userZoneColorHex = "dev.userZoneColorHex"
-        static let rppZoneColorHex = "dev.rppZoneColorHex"
-        static let meteredZoneColorHex = "dev.meteredZoneColorHex"
         static let currentZoneFillOpacity = "dev.currentZoneFillOpacity"
-        static let otherZoneFillOpacity = "dev.otherZoneFillOpacity"
         static let currentZoneStrokeOpacity = "dev.currentZoneStrokeOpacity"
-        static let otherZoneStrokeOpacity = "dev.otherZoneStrokeOpacity"
-        static let permittedZoneStrokeWidth = "dev.permittedZoneStrokeWidth"
-        static let nonPermittedZoneStrokeWidth = "dev.nonPermittedZoneStrokeWidth"
-        static let meteredZoneStrokeWidth = "dev.meteredZoneStrokeWidth"
+        static let myPermitZonesColorHex = "dev.myPermitZonesColorHex"
+        static let myPermitZonesFillOpacity = "dev.myPermitZonesFillOpacity"
+        static let myPermitZonesStrokeOpacity = "dev.myPermitZonesStrokeOpacity"
+        static let freeTimedZonesColorHex = "dev.freeTimedZonesColorHex"
+        static let freeTimedZonesFillOpacity = "dev.freeTimedZonesFillOpacity"
+        static let freeTimedZonesStrokeOpacity = "dev.freeTimedZonesStrokeOpacity"
+        static let paidZonesColorHex = "dev.paidZonesColorHex"
+        static let paidZonesFillOpacity = "dev.paidZonesFillOpacity"
+        static let paidZonesStrokeOpacity = "dev.paidZonesStrokeOpacity"
+        static let strokeWidth = "dev.strokeWidth"
+        static let dashLength = "dev.dashLength"
         static let showLookupBoundaries = "dev.showLookupBoundaries"
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
@@ -259,16 +283,19 @@ final class DeveloperSettings: ObservableObject {
         static let useProximityMerging = false  // Distance-based polygon merging
         static let proximityMergeDistance = 5.0  // Default 5 meters
         static let deduplicationThreshold = 0.95  // Default 95% overlap threshold
-        static let userZoneColorHex = "33B366"  // Green
-        static let rppZoneColorHex = "F29933"   // Orange
-        static let meteredZoneColorHex = "808080"  // Grey
-        static let currentZoneFillOpacity = 0.35
-        static let otherZoneFillOpacity = 0.20
-        static let currentZoneStrokeOpacity = 1.0
-        static let otherZoneStrokeOpacity = 0.6
-        static let permittedZoneStrokeWidth = 1.0
-        static let nonPermittedZoneStrokeWidth = 1.0
-        static let meteredZoneStrokeWidth = 1.0
+        static let currentZoneFillOpacity = 0.35  // In Zone fill opacity
+        static let currentZoneStrokeOpacity = 1.0  // In Zone stroke opacity
+        static let myPermitZonesColorHex = "33B366"  // Green
+        static let myPermitZonesFillOpacity = 0.20
+        static let myPermitZonesStrokeOpacity = 0.6
+        static let freeTimedZonesColorHex = "F29933"  // Orange
+        static let freeTimedZonesFillOpacity = 0.20
+        static let freeTimedZonesStrokeOpacity = 0.6
+        static let paidZonesColorHex = "808080"  // Grey
+        static let paidZonesFillOpacity = 0.20
+        static let paidZonesStrokeOpacity = 0.6
+        static let strokeWidth = 1.0  // Global stroke width
+        static let dashLength = 0.0  // 0 = solid line
         static let showLookupBoundaries = false
         static let showOriginalOverlay = false
         static let showVertexCounts = false
@@ -298,16 +325,19 @@ final class DeveloperSettings: ObservableObject {
         useProximityMerging = defaults.object(forKey: Keys.useProximityMerging) as? Bool ?? Defaults.useProximityMerging
         proximityMergeDistance = defaults.object(forKey: Keys.proximityMergeDistance) as? Double ?? Defaults.proximityMergeDistance
         deduplicationThreshold = defaults.object(forKey: Keys.deduplicationThreshold) as? Double ?? Defaults.deduplicationThreshold
-        userZoneColorHex = defaults.object(forKey: Keys.userZoneColorHex) as? String ?? Defaults.userZoneColorHex
-        rppZoneColorHex = defaults.object(forKey: Keys.rppZoneColorHex) as? String ?? Defaults.rppZoneColorHex
-        meteredZoneColorHex = defaults.object(forKey: Keys.meteredZoneColorHex) as? String ?? Defaults.meteredZoneColorHex
         currentZoneFillOpacity = defaults.object(forKey: Keys.currentZoneFillOpacity) as? Double ?? Defaults.currentZoneFillOpacity
-        otherZoneFillOpacity = defaults.object(forKey: Keys.otherZoneFillOpacity) as? Double ?? Defaults.otherZoneFillOpacity
         currentZoneStrokeOpacity = defaults.object(forKey: Keys.currentZoneStrokeOpacity) as? Double ?? Defaults.currentZoneStrokeOpacity
-        otherZoneStrokeOpacity = defaults.object(forKey: Keys.otherZoneStrokeOpacity) as? Double ?? Defaults.otherZoneStrokeOpacity
-        permittedZoneStrokeWidth = defaults.object(forKey: Keys.permittedZoneStrokeWidth) as? Double ?? Defaults.permittedZoneStrokeWidth
-        nonPermittedZoneStrokeWidth = defaults.object(forKey: Keys.nonPermittedZoneStrokeWidth) as? Double ?? Defaults.nonPermittedZoneStrokeWidth
-        meteredZoneStrokeWidth = defaults.object(forKey: Keys.meteredZoneStrokeWidth) as? Double ?? Defaults.meteredZoneStrokeWidth
+        myPermitZonesColorHex = defaults.object(forKey: Keys.myPermitZonesColorHex) as? String ?? Defaults.myPermitZonesColorHex
+        myPermitZonesFillOpacity = defaults.object(forKey: Keys.myPermitZonesFillOpacity) as? Double ?? Defaults.myPermitZonesFillOpacity
+        myPermitZonesStrokeOpacity = defaults.object(forKey: Keys.myPermitZonesStrokeOpacity) as? Double ?? Defaults.myPermitZonesStrokeOpacity
+        freeTimedZonesColorHex = defaults.object(forKey: Keys.freeTimedZonesColorHex) as? String ?? Defaults.freeTimedZonesColorHex
+        freeTimedZonesFillOpacity = defaults.object(forKey: Keys.freeTimedZonesFillOpacity) as? Double ?? Defaults.freeTimedZonesFillOpacity
+        freeTimedZonesStrokeOpacity = defaults.object(forKey: Keys.freeTimedZonesStrokeOpacity) as? Double ?? Defaults.freeTimedZonesStrokeOpacity
+        paidZonesColorHex = defaults.object(forKey: Keys.paidZonesColorHex) as? String ?? Defaults.paidZonesColorHex
+        paidZonesFillOpacity = defaults.object(forKey: Keys.paidZonesFillOpacity) as? Double ?? Defaults.paidZonesFillOpacity
+        paidZonesStrokeOpacity = defaults.object(forKey: Keys.paidZonesStrokeOpacity) as? Double ?? Defaults.paidZonesStrokeOpacity
+        strokeWidth = defaults.object(forKey: Keys.strokeWidth) as? Double ?? Defaults.strokeWidth
+        dashLength = defaults.object(forKey: Keys.dashLength) as? Double ?? Defaults.dashLength
         showLookupBoundaries = defaults.object(forKey: Keys.showLookupBoundaries) as? Bool ?? Defaults.showLookupBoundaries
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
@@ -340,17 +370,41 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(mergeOverlappingSameZone)
         hasher.combine(useProximityMerging)
         hasher.combine(proximityMergeDistance)
-        hasher.combine(userZoneColorHex)
-        hasher.combine(rppZoneColorHex)
-        hasher.combine(meteredZoneColorHex)
+        hasher.combine(deduplicationThreshold)
         hasher.combine(currentZoneFillOpacity)
-        hasher.combine(otherZoneFillOpacity)
         hasher.combine(currentZoneStrokeOpacity)
-        hasher.combine(otherZoneStrokeOpacity)
+        hasher.combine(myPermitZonesColorHex)
+        hasher.combine(myPermitZonesFillOpacity)
+        hasher.combine(myPermitZonesStrokeOpacity)
+        hasher.combine(freeTimedZonesColorHex)
+        hasher.combine(freeTimedZonesFillOpacity)
+        hasher.combine(freeTimedZonesStrokeOpacity)
+        hasher.combine(paidZonesColorHex)
+        hasher.combine(paidZonesFillOpacity)
+        hasher.combine(paidZonesStrokeOpacity)
+        hasher.combine(strokeWidth)
+        hasher.combine(dashLength)
         hasher.combine(showLookupBoundaries)
         hasher.combine(showOriginalOverlay)
         hasher.combine(showVertexCounts)
         return hasher.finalize()
+    }
+
+    // MARK: - UIColor Conversions
+
+    /// UIColor for my permit zones
+    var myPermitZonesColor: UIColor {
+        UIColor(hex: myPermitZonesColorHex) ?? UIColor(red: 0.2, green: 0.7, blue: 0.4, alpha: 1.0)
+    }
+
+    /// UIColor for free timed zones
+    var freeTimedZonesColor: UIColor {
+        UIColor(hex: freeTimedZonesColorHex) ?? UIColor(red: 0.95, green: 0.6, blue: 0.2, alpha: 1.0)
+    }
+
+    /// UIColor for paid zones
+    var paidZonesColor: UIColor {
+        UIColor(hex: paidZonesColorHex) ?? UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
     }
 
     /// Get a human-readable description of current simplification pipeline
@@ -402,13 +456,20 @@ final class DeveloperSettings: ObservableObject {
         mergeOverlappingSameZone = Defaults.mergeOverlappingSameZone
         useProximityMerging = Defaults.useProximityMerging
         proximityMergeDistance = Defaults.proximityMergeDistance
-        userZoneColorHex = Defaults.userZoneColorHex
-        rppZoneColorHex = Defaults.rppZoneColorHex
-        meteredZoneColorHex = Defaults.meteredZoneColorHex
+        deduplicationThreshold = Defaults.deduplicationThreshold
         currentZoneFillOpacity = Defaults.currentZoneFillOpacity
-        otherZoneFillOpacity = Defaults.otherZoneFillOpacity
         currentZoneStrokeOpacity = Defaults.currentZoneStrokeOpacity
-        otherZoneStrokeOpacity = Defaults.otherZoneStrokeOpacity
+        myPermitZonesColorHex = Defaults.myPermitZonesColorHex
+        myPermitZonesFillOpacity = Defaults.myPermitZonesFillOpacity
+        myPermitZonesStrokeOpacity = Defaults.myPermitZonesStrokeOpacity
+        freeTimedZonesColorHex = Defaults.freeTimedZonesColorHex
+        freeTimedZonesFillOpacity = Defaults.freeTimedZonesFillOpacity
+        freeTimedZonesStrokeOpacity = Defaults.freeTimedZonesStrokeOpacity
+        paidZonesColorHex = Defaults.paidZonesColorHex
+        paidZonesFillOpacity = Defaults.paidZonesFillOpacity
+        paidZonesStrokeOpacity = Defaults.paidZonesStrokeOpacity
+        strokeWidth = Defaults.strokeWidth
+        dashLength = Defaults.dashLength
         showLookupBoundaries = Defaults.showLookupBoundaries
         showOriginalOverlay = Defaults.showOriginalOverlay
         showVertexCounts = Defaults.showVertexCounts
@@ -432,31 +493,6 @@ final class DeveloperSettings: ObservableObject {
         let b = CGFloat(rgb & 0x0000FF) / 255.0
 
         return UIColor(red: r, green: g, blue: b, alpha: 1.0)
-    }
-
-    /// Get user zone color from hex setting
-    var userZoneColor: UIColor {
-        Self.colorFromHex(userZoneColorHex)
-    }
-
-    /// Get RPP zone color from hex setting
-    var rppZoneColor: UIColor {
-        Self.colorFromHex(rppZoneColorHex)
-    }
-
-    /// Get metered zone color from hex setting
-    var meteredZoneColor: UIColor {
-        Self.colorFromHex(meteredZoneColorHex)
-    }
-
-    /// Get fill opacity based on whether zone is current
-    func fillOpacity(isCurrentZone: Bool) -> CGFloat {
-        CGFloat(isCurrentZone ? currentZoneFillOpacity : otherZoneFillOpacity)
-    }
-
-    /// Get stroke opacity based on whether zone is current
-    func strokeOpacity(isCurrentZone: Bool) -> CGFloat {
-        CGFloat(isCurrentZone ? currentZoneStrokeOpacity : otherZoneStrokeOpacity)
     }
 
     // MARK: - Descriptions (for UI)

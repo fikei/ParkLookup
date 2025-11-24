@@ -979,47 +979,64 @@ struct ZoneMapView: UIViewRepresentable {
             let isCurrentZone = polygon.zoneId == currentZoneId
             let devSettings = DeveloperSettings.shared
 
-            // Determine base color using user permit-aware logic and developer settings
+            // Determine zone category and get appropriate color/opacity
             var baseColor: UIColor
+            var fillOpacity: Double
+            var strokeOpacity: Double
             let zoneType = polygon.zoneType ?? .residentialPermit
 
             if zoneType == .metered {
-                // Metered zones use developer settings color (default: grey)
-                baseColor = devSettings.meteredZoneColor
+                // Paid Zones (metered parking)
+                baseColor = devSettings.paidZonesColor
+                fillOpacity = devSettings.paidZonesFillOpacity
+                strokeOpacity = devSettings.paidZonesStrokeOpacity
             } else if let zoneCode = polygon.zoneCode?.uppercased(),
                       userPermitAreas.contains(zoneCode) {
-                // User's valid permit zones use developer settings color (default: green)
-                baseColor = devSettings.userZoneColor
+                // My Permit Zones (user has permit)
+                baseColor = devSettings.myPermitZonesColor
+                fillOpacity = devSettings.myPermitZonesFillOpacity
+                strokeOpacity = devSettings.myPermitZonesStrokeOpacity
             } else if zoneType == .residentialPermit {
-                // Other RPP zones use developer settings color (default: orange)
-                baseColor = devSettings.rppZoneColor
+                // Free Timed Zones (RPP zones without permit)
+                baseColor = devSettings.freeTimedZonesColor
+                fillOpacity = devSettings.freeTimedZonesFillOpacity
+                strokeOpacity = devSettings.freeTimedZonesStrokeOpacity
             } else {
                 // Fallback
                 baseColor = ZoneColorProvider.color(for: zoneType)
+                fillOpacity = 0.20
+                strokeOpacity = 0.6
             }
 
-            // Apply fill and stroke with developer settings opacity
-            let fillAlpha = devSettings.fillOpacity(isCurrentZone: isCurrentZone)
-            let strokeAlpha = devSettings.strokeOpacity(isCurrentZone: isCurrentZone)
+            // Override opacity if this is the current zone (user is inside)
+            if isCurrentZone {
+                fillOpacity = devSettings.currentZoneFillOpacity
+                strokeOpacity = devSettings.currentZoneStrokeOpacity
+            }
 
-            renderer.fillColor = baseColor.withAlphaComponent(fillAlpha)
-            renderer.strokeColor = baseColor.withAlphaComponent(strokeAlpha)
-            renderer.lineWidth = ZoneColorProvider.strokeWidth(isCurrentZone: isCurrentZone)
+            // Apply fill and stroke colors with opacity
+            renderer.fillColor = baseColor.withAlphaComponent(CGFloat(fillOpacity))
+            renderer.strokeColor = baseColor.withAlphaComponent(CGFloat(strokeOpacity))
+            renderer.lineWidth = CGFloat(devSettings.strokeWidth)
 
-            // Multi-permit polygons get a dashed border
-            // If user has permit for this multi-permit zone, use user zone color with dashed edge
+            // Multi-permit polygons get a dashed border if dash length is set
+            // If user has permit for this multi-permit zone, use my permit zones color
             if polygon.isMultiPermit {
-                renderer.lineDashPattern = [4, 2]  // Dashed border for multi-permit zones
-                renderer.fillColor = baseColor.withAlphaComponent(devSettings.fillOpacity(isCurrentZone: true))
+                // Apply dash pattern if dashLength > 0
+                if devSettings.dashLength > 0 {
+                    renderer.lineDashPattern = [NSNumber(value: devSettings.dashLength), NSNumber(value: devSettings.dashLength * 0.5)]
+                }
 
                 // Check if any of the multi-permit areas match user's permits
                 if let multiPermitAreas = polygon.allValidPermitAreas {
                     let matchesUserPermit = multiPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
                     if matchesUserPermit {
-                        // User has a valid permit for this multi-permit zone - use user zone color
-                        let userColor = devSettings.userZoneColor
-                        renderer.fillColor = userColor.withAlphaComponent(devSettings.fillOpacity(isCurrentZone: true))
-                        renderer.strokeColor = userColor.withAlphaComponent(strokeAlpha)
+                        // User has a valid permit for this multi-permit zone
+                        let userColor = devSettings.myPermitZonesColor
+                        let userFillOpacity = isCurrentZone ? devSettings.currentZoneFillOpacity : devSettings.myPermitZonesFillOpacity
+                        let userStrokeOpacity = isCurrentZone ? devSettings.currentZoneStrokeOpacity : devSettings.myPermitZonesStrokeOpacity
+                        renderer.fillColor = userColor.withAlphaComponent(CGFloat(userFillOpacity))
+                        renderer.strokeColor = userColor.withAlphaComponent(CGFloat(userStrokeOpacity))
                     }
                 }
             }

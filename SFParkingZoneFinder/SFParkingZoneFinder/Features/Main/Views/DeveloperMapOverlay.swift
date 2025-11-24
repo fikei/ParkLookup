@@ -276,43 +276,13 @@ struct DeveloperMapOverlay: View {
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
 
-            // Permitted Zone (user has permit)
-            zoneColorGroup(
-                label: "Permitted Zone",
-                colorHex: $devSettings.userZoneColorHex,
-                previewColor: devSettings.userZoneColor,
-                fillOpacity: $devSettings.otherZoneFillOpacity,
-                strokeOpacity: $devSettings.otherZoneStrokeOpacity,
-                strokeWidth: $devSettings.permittedZoneStrokeWidth
-            )
-
-            // Non-Permitted Zone (no permit held)
-            zoneColorGroup(
-                label: "Non-Permitted Zone",
-                colorHex: $devSettings.rppZoneColorHex,
-                previewColor: devSettings.rppZoneColor,
-                fillOpacity: $devSettings.otherZoneFillOpacity,
-                strokeOpacity: $devSettings.otherZoneStrokeOpacity,
-                strokeWidth: $devSettings.nonPermittedZoneStrokeWidth
-            )
-
-            // Metered/Paid Zones
-            zoneColorGroup(
-                label: "Metered/Paid Zones",
-                colorHex: $devSettings.meteredZoneColorHex,
-                previewColor: devSettings.meteredZoneColor,
-                fillOpacity: $devSettings.otherZoneFillOpacity,
-                strokeOpacity: $devSettings.otherZoneStrokeOpacity,
-                strokeWidth: $devSettings.meteredZoneStrokeWidth
-            )
-
-            // In Zone opacity (current zone only)
+            // In Zone (current zone - opacity override only)
             Text("In Zone")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
-                .padding(.top, 8)
+                .padding(.top, 4)
 
             sliderControl(
                 label: "Fill Opacity",
@@ -328,6 +298,69 @@ struct DeveloperMapOverlay: View {
                 range: 0.0...1.0,
                 step: 0.05,
                 formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
+
+            Divider()
+                .padding(.vertical, 4)
+
+            // My Permit Zones (zones where user has permit)
+            zoneColorGroup(
+                label: "My Permit Zones",
+                colorHex: $devSettings.myPermitZonesColorHex,
+                previewColor: devSettings.myPermitZonesColor,
+                fillOpacity: $devSettings.myPermitZonesFillOpacity,
+                strokeOpacity: $devSettings.myPermitZonesStrokeOpacity
+            )
+
+            Divider()
+                .padding(.vertical, 4)
+
+            // Free Timed Zones (RPP zones without permit)
+            zoneColorGroup(
+                label: "Free Timed Zones",
+                colorHex: $devSettings.freeTimedZonesColorHex,
+                previewColor: devSettings.freeTimedZonesColor,
+                fillOpacity: $devSettings.freeTimedZonesFillOpacity,
+                strokeOpacity: $devSettings.freeTimedZonesStrokeOpacity
+            )
+
+            Divider()
+                .padding(.vertical, 4)
+
+            // Paid Zones (metered parking)
+            zoneColorGroup(
+                label: "Paid Zones",
+                colorHex: $devSettings.paidZonesColorHex,
+                previewColor: devSettings.paidZonesColor,
+                fillOpacity: $devSettings.paidZonesFillOpacity,
+                strokeOpacity: $devSettings.paidZonesStrokeOpacity
+            )
+
+            Divider()
+                .padding(.vertical, 4)
+
+            // Global Stroke Settings
+            Text("Global Stroke")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+                .padding(.top, 4)
+
+            sliderControl(
+                label: "Stroke Width",
+                value: $devSettings.strokeWidth,
+                range: 0.0...5.0,
+                step: 0.25,
+                formatter: { String(format: "%.2f", $0) }
+            )
+
+            sliderControl(
+                label: "Dash Length",
+                value: $devSettings.dashLength,
+                range: 0.0...10.0,
+                step: 0.5,
+                formatter: { $0 == 0.0 ? "Solid" : String(format: "%.1f", $0) }
             )
         }
     }
@@ -450,8 +483,7 @@ struct DeveloperMapOverlay: View {
         colorHex: Binding<String>,
         previewColor: UIColor,
         fillOpacity: Binding<Double>,
-        strokeOpacity: Binding<Double>,
-        strokeWidth: Binding<Double>
+        strokeOpacity: Binding<Double>
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             // Color header
@@ -473,15 +505,6 @@ struct DeveloperMapOverlay: View {
                 range: 0.0...1.0,
                 step: 0.05,
                 formatter: { String(format: "%.0f%%", $0 * 100) }
-            )
-
-            // Stroke width
-            sliderControl(
-                label: "Width",
-                value: strokeWidth,
-                range: 0.0...5.0,
-                step: 0.25,
-                formatter: { String(format: "%.2f", $0) }
             )
         }
         .padding(.vertical, 4)
