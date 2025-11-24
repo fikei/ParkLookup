@@ -94,17 +94,22 @@ struct MainResultView: View {
                         // When collapsed, shift user location below the card
                         // A bias of 0.5 places the user indicator well below the large card
                         verticalBias: isMapExpanded ? 0.0 : 0.5,
-                        // Hide zone overlays on home screen, show when expanded
-                        showOverlays: isMapExpanded,
+                        // Show zone overlays when expanded OR when developer panel is open
+                        showOverlays: isMapExpanded || developerPanelExpanded,
                         // Collapsed: 0.65, Expanded: 0.5
                         zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
                         // Show pin for searched address
                         searchedCoordinate: searchedCoordinate
                     )
 
-                    // Developer overlay (only in expanded map mode when developer mode is unlocked)
-                    if isMapExpanded && devSettings.developerModeUnlocked && developerPanelExpanded {
-                        DeveloperMapOverlay(devSettings: devSettings, isPanelExpanded: $developerPanelExpanded, showToggleButton: false)
+                    // Developer overlay (when developer mode is unlocked and panel is open)
+                    // Works on both minimized and expanded map views
+                    if devSettings.developerModeUnlocked && developerPanelExpanded {
+                        DeveloperMapOverlay(
+                            devSettings: devSettings,
+                            isPanelExpanded: $developerPanelExpanded,
+                            showToggleButton: false
+                        )
                     }
                 }
                 .ignoresSafeArea()

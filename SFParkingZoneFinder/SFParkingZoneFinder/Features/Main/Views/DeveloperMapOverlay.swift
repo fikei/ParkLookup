@@ -52,7 +52,7 @@ struct DeveloperMapOverlay: View {
                     }
                 }
                 .padding(.leading, 16)
-                .padding(.bottom, showToggleButton ? 16 : 80) // Extra padding when no toggle button to avoid bottom nav
+                .padding(.bottom, showToggleButton ? 16 : 100) // Extra padding when no toggle button to avoid bottom nav overlap
 
                 Spacer()
             }
