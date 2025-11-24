@@ -196,9 +196,19 @@ struct ZoneMapView: UIViewRepresentable {
                 )
             }
 
-            // Separate polygons by zone type - metered zones render below RPP zones
+            // Separate polygons by zone type and permit status for proper layering
+            // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
-            let rppPolygons = polygons.filter { $0.zoneType != .metered }
+            let nonPermittedPolygons = polygons.filter { polygon in
+                guard polygon.zoneType != .metered else { return false }
+                guard let zoneCode = polygon.zoneCode?.uppercased() else { return true }
+                return !self.userPermitAreas.contains(zoneCode)
+            }
+            let permittedPolygons = polygons.filter { polygon in
+                guard polygon.zoneType != .metered else { return false }
+                guard let zoneCode = polygon.zoneCode?.uppercased() else { return false }
+                return self.userPermitAreas.contains(zoneCode)
+            }
 
             // Capture the coordinator, initial region, and showOverlays before async block
             let coordinator = context.coordinator
@@ -231,11 +241,12 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 }
 
-                // Add overlays in batches - metered zones first (bottom layer), then RPP zones (top layer)
+                // Add overlays in batches with proper layering:
+                // Metered (bottom) → Non-Permitted RPP (middle) → Permitted RPP (top)
                 let batchSize = 500
 
-                // Ordered polygons: metered first, then RPP (later additions render on top)
-                let orderedPolygons = meteredPolygons + rppPolygons
+                // Ordered polygons: metered first, then non-permitted, then permitted (later additions render on top)
+                let orderedPolygons = meteredPolygons + nonPermittedPolygons + permittedPolygons
                 let totalPolygons = orderedPolygons.count
 
                 func addBatch(startIndex: Int) {
@@ -765,8 +776,19 @@ struct ZoneMapView: UIViewRepresentable {
                 )
             }
 
+            // Separate polygons by zone type and permit status for proper layering
+            // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
-            let rppPolygons = polygons.filter { $0.zoneType != .metered }
+            let nonPermittedPolygons = polygons.filter { polygon in
+                guard polygon.zoneType != .metered else { return false }
+                guard let zoneCode = polygon.zoneCode?.uppercased() else { return true }
+                return !userPermitAreas.contains(zoneCode)
+            }
+            let permittedPolygons = polygons.filter { polygon in
+                guard polygon.zoneType != .metered else { return false }
+                guard let zoneCode = polygon.zoneCode?.uppercased() else { return false }
+                return userPermitAreas.contains(zoneCode)
+            }
 
             DispatchQueue.main.async {
 
@@ -781,7 +803,8 @@ struct ZoneMapView: UIViewRepresentable {
                 }
 
                 let batchSize = 500
-                let orderedPolygons = meteredPolygons + rppPolygons
+                // Ordered polygons: metered first, then non-permitted, then permitted (later additions render on top)
+                let orderedPolygons = meteredPolygons + nonPermittedPolygons + permittedPolygons
                 let totalPolygons = orderedPolygons.count
 
                 func addBatch(startIndex: Int) {
