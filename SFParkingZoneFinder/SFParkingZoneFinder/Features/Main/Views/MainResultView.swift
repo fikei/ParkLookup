@@ -101,7 +101,8 @@ struct MainResultView: View {
                         // Show pin for searched address
                         searchedCoordinate: searchedCoordinate
                     )
-                    .id("zoneMapView") // Stable identity to prevent recreation on UI changes
+                    // Use zone count in ID to allow updates when zones load, but prevent recreation on UI-only changes
+                    .id("zoneMapView-\(viewModel.allLoadedZones.count)")
 
                     // Developer overlay (when developer mode is unlocked and panel is open)
                     // Works on both minimized and expanded map views
