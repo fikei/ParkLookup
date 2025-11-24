@@ -362,9 +362,10 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Handle overlay visibility changes
         let overlaysVisible = context.coordinator.overlaysCurrentlyVisible
+        logger.debug("🔍 Visibility check: showOverlays=\(showOverlays), overlaysVisible=\(overlaysVisible), overlays.count=\(mapView.overlays.count)")
         if showOverlays != overlaysVisible {
             if showOverlays {
-                logger.info("👁️ Showing overlays with fade-in animation (1.6s total)")
+                logger.info("👁️ Showing overlays with fade-in animation (1.6s total), overlay count=\(mapView.overlays.count)")
                 // Show overlays with slow fade animation when maximizing
                 for overlay in mapView.overlays {
                     if let renderer = mapView.renderer(for: overlay) {
@@ -752,6 +753,8 @@ struct ZoneMapView: UIViewRepresentable {
         let coordinator = context.coordinator
         let devSettings = DeveloperSettings.shared
 
+        logger.debug("🔧 loadOverlays called with shouldShowOverlays=\(shouldShowOverlays)")
+
         // Mark as loaded immediately to prevent race condition (multiple simultaneous loads)
         coordinator.overlaysLoaded = true
 
@@ -926,7 +929,7 @@ struct ZoneMapView: UIViewRepresentable {
                     } else {
                         coordinator.overlaysCurrentlyVisible = shouldShowOverlays
                         coordinator.overlaysLoaded = true
-                        logger.info("Deferred overlays loaded: \(totalPolygons) polygons")
+                        logger.info("Deferred overlays loaded: \(totalPolygons) polygons, overlaysCurrentlyVisible set to \(shouldShowOverlays)")
                     }
                 }
 
