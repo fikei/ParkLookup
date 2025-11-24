@@ -10,6 +10,7 @@
 		3C3898E92ED3F68D006C780C /* DeveloperMapOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */; };
 		3C3898EC2ED3F696006C780C /* PolygonSimplifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */; };
 		3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */; };
+		3C3898F02ED405C4006C780C /* PolygonClipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EF2ED405C4006C780C /* PolygonClipper.swift */; };
 		3C3D50FB2ED26CAC002208EF /* ZoneColorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50F92ED26CAC002208EF /* ZoneColorProvider.swift */; };
 		3C3D50FD2ED26CCA002208EF /* ZoneMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */; };
 		3C3D50FF2ED26CDA002208EF /* PersistentZoneCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50FE2ED26CDA002208EF /* PersistentZoneCache.swift */; };
@@ -70,6 +71,7 @@
 		3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperMapOverlay.swift; sourceTree = "<group>"; };
 		3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolygonSimplifier.swift; sourceTree = "<group>"; };
 		3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperSettings.swift; sourceTree = "<group>"; };
+		3C3898EF2ED405C4006C780C /* PolygonClipper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolygonClipper.swift; sourceTree = "<group>"; };
 		3C3D50F92ED26CAC002208EF /* ZoneColorProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneColorProvider.swift; sourceTree = "<group>"; };
 		3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneMapView.swift; sourceTree = "<group>"; };
 		3C3D50FE2ED26CDA002208EF /* PersistentZoneCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersistentZoneCache.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 		3C3898EB2ED3F696006C780C /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				3C3898EF2ED405C4006C780C /* PolygonClipper.swift */,
 				3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */,
 			);
 			path = Utilities;
@@ -538,6 +541,7 @@
 				3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */,
 				3C4145F92ED14A70001BDE61 /* ZoneDataSourceProtocol.swift in Sources */,
 				3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */,
+				3C3898F02ED405C4006C780C /* PolygonClipper.swift in Sources */,
 				3C3D50FD2ED26CCA002208EF /* ZoneMapView.swift in Sources */,
 				3C4145FB2ED14A70001BDE61 /* ZoneServiceProtocol.swift in Sources */,
 				3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */,
