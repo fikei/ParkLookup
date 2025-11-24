@@ -101,6 +101,7 @@ struct MainResultView: View {
                         // Show pin for searched address
                         searchedCoordinate: searchedCoordinate
                     )
+                    .id("zoneMapView") // Stable identity to prevent recreation on UI changes
 
                     // Developer overlay (when developer mode is unlocked and panel is open)
                     // Works on both minimized and expanded map views

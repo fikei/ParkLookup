@@ -349,9 +349,14 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Load overlays if they haven't been loaded yet but zones are now available
         if !context.coordinator.overlaysLoaded && !zones.isEmpty {
-            logger.info("Zones now available (\(zones.count)) - loading overlays")
+            logger.info("🎬 Initial overlay load: \(zones.count) zones (overlaysLoaded=\(context.coordinator.overlaysLoaded))")
             loadOverlays(mapView: mapView, context: context)
             return
+        }
+
+        // Log if this is just a parameter update (no overlay reload needed)
+        if context.coordinator.overlaysLoaded {
+            logger.debug("✓ Overlay parameters updated (no reload needed)")
         }
 
         // Handle overlay visibility changes
