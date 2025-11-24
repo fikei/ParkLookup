@@ -1,38 +1,43 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/516A2E9D-5836-4AB0-96F3-A86211987410/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/1274F319-C4C6-4251-8C49-6867E51E2C9A/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 247.5ms
+Loaded 421 zones from disk cache in 649.9ms
 ✓ Returning 421 zones from cache
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 ZoneMapView init - 0 zones
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 11.2ms: 33 RPP, 388 metered, 0 other
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
+✅ Loaded 421 zones in 5.1ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 📍 No exact match, using nearest zone 'Zone Z' at 7m
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 ZoneMapView init - 421 zones
 🎬 Initial overlay load: 421 zones (overlaysLoaded=false)
-Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile debug info: (Key: 10481.25334.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 85, PendingMaterial count: 85, Invisible MeshInstances count: 0 | Key: 10481.25333.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 54, PendingMaterial count: 54, Invisible MeshInstances count: 0 | Key: 10481.25335.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 77, PendingMaterial count: 77, Invisible MeshInstances count: 0)
+Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile debug info: (Key: 10481.25335.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 77, PendingMaterial count: 77, Invisible MeshInstances count: 0 | Key: 10481.25333.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 54, PendingMaterial count: 54, Invisible MeshInstances count: 0 | Key: 10481.25334.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 85, PendingMaterial count: 85, Invisible MeshInstances count: 0)
 🔧 DEBUG: Developer button tapped! Panel will expand
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
 ✓ Overlay parameters updated (no reload needed)
+👁️ Showing overlays with fade-in animation (1.6s total)
+✅ Fade-in animation complete - overlays should be visible
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
 ✓ Overlay parameters updated (no reload needed)
 🔧 DEBUG: Developer button tapped! Panel will expand
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 ✓ Overlay parameters updated (no reload needed)
+🙈 Hiding overlays with fade-out animation
 🔧 DEBUG: Developer button tapped! Panel will expand
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
 ✓ Overlay parameters updated (no reload needed)
+👁️ Showing overlays with fade-in animation (1.6s total)
+✅ Fade-in animation complete - overlays should be visible
 🔍 Removed 44 near-duplicate polygon(s) (≥100% overlap)
 🎨 Rendering overlay #1: zoneId=sf_metered_metered_0109_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
@@ -174,6 +179,7 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #70: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🔍 Removed 44 near-duplicate polygon(s) (≥100% overlap)
 🎨 Rendering overlay #71: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #72: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -380,7 +386,6 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #173: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
-🔍 Removed 44 near-duplicate polygon(s) (≥100% overlap)
 🎨 Rendering overlay #174: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #175: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
@@ -887,6 +892,7 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #426: zoneId=sf_rpp_w_001, zoneCode=W, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false
 🎨 Rendering overlay #427: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
@@ -1358,27 +1364,8 @@ Deferred overlays loaded: 617 polygons
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #620: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false
 Overlays loaded: 626 polygons
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
 Wrapped around the polygon without finishing... :-(
 List has 3 nodes:
 	7 8 1 
