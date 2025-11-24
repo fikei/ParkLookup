@@ -522,7 +522,6 @@ enum PolygonClipper {
             result.append(current)
 
             let nextIdx = (currentIdx + 1) % poly().count
-            let currentEdge = currentPoly == 1 ? currentIdx : currentIdx
 
             // Check if there's an intersection on this edge
             let relevantIntersections = intersections.filter { intersection in
