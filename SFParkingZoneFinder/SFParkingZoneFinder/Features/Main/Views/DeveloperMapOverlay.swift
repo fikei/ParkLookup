@@ -9,6 +9,7 @@ struct DeveloperMapOverlay: View {
     @State private var showingSaveConfirmation = false
     @State private var savedCandidateName: String = ""
     var onRefreshLayers: (() -> Void)?  // Callback to trigger layer refresh
+    var showToggleButton: Bool = true  // Whether to show the toggle button (default true for backward compatibility)
 
     /// Panel height as fraction of screen
     private var panelHeight: CGFloat {
@@ -33,22 +34,25 @@ struct DeveloperMapOverlay: View {
 
                     // Code button to toggle panel - matches expand/collapse style
                     // Shows pressed/active state when panel is open
-                    Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            isPanelExpanded.toggle()
+                    // Only shown when showToggleButton is true (hidden when using bottom navigation)
+                    if showToggleButton {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                isPanelExpanded.toggle()
+                            }
+                        } label: {
+                            Image(systemName: isPanelExpanded ? "xmark" : "chevron.left.forwardslash.chevron.right")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(isPanelExpanded ? .black : .white)
+                                .frame(width: 44, height: 44)
+                                .background(isPanelExpanded ? Color.white : Color.black.opacity(0.6))
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                         }
-                    } label: {
-                        Image(systemName: isPanelExpanded ? "xmark" : "chevron.left.forwardslash.chevron.right")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(isPanelExpanded ? .black : .white)
-                            .frame(width: 44, height: 44)
-                            .background(isPanelExpanded ? Color.white : Color.black.opacity(0.6))
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
                 }
                 .padding(.leading, 16)
-                .padding(.bottom, 16)
+                .padding(.bottom, showToggleButton ? 16 : 80) // Extra padding when no toggle button to avoid bottom nav
 
                 Spacer()
             }

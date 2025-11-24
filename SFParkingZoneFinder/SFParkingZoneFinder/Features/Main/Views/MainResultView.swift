@@ -102,8 +102,8 @@ struct MainResultView: View {
                     )
 
                     // Developer overlay (only in expanded map mode when developer mode is unlocked)
-                    if isMapExpanded && devSettings.developerModeUnlocked {
-                        DeveloperMapOverlay(devSettings: devSettings, isPanelExpanded: $developerPanelExpanded)
+                    if isMapExpanded && devSettings.developerModeUnlocked && developerPanelExpanded {
+                        DeveloperMapOverlay(devSettings: devSettings, isPanelExpanded: $developerPanelExpanded, showToggleButton: false)
                     }
                 }
                 .ignoresSafeArea()
@@ -161,43 +161,38 @@ struct MainResultView: View {
 
                     Spacer()
 
-                    // Bottom section
-                    VStack(spacing: 12) {
-                        // Tapped zone info (only in expanded mode)
-                        if isMapExpanded, let selected = selectedZone {
-                            TappedZoneInfoCard(zone: selected) {
-                                selectedZone = nil
-                            }
-                            .padding(.horizontal)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    // Bottom section - Tapped zone info (only in expanded mode)
+                    if isMapExpanded, let selected = selectedZone {
+                        TappedZoneInfoCard(zone: selected) {
+                            selectedZone = nil
                         }
-
-                        // Bottom info card (only in expanded mode)
-                        if isMapExpanded {
-                            ExpandedBottomCard(
-                                onSettingsTap: {
-                                    HapticFeedback.selection()
-                                    showingSettings = true
-                                }
-                            )
-                            .padding(.horizontal)
-                            .padding(.bottom, 16)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
-                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 80) // Padding to avoid overlap with bottom navigation
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
+            }
 
-                // Expand/Collapse button (bottom right)
+            // Layer 3: Bottom Navigation Bar (always visible when not loading/error)
+            if !viewModel.isLoading && viewModel.error == nil {
                 VStack {
                     Spacer()
-                    HStack {
-                        Spacer()
-                        Button {
-                            HapticFeedback.light()
+                    BottomNavigationBar(
+                        isDeveloperModeActive: devSettings.developerModeUnlocked && isMapExpanded,
+                        onDeveloperTap: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                developerPanelExpanded.toggle()
+                            }
+                        },
+                        onSettingsTap: {
+                            showingSettings = true
+                        },
+                        onExpandTap: {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 isMapExpanded.toggle()
                                 if !isMapExpanded {
                                     selectedZone = nil
+                                    developerPanelExpanded = false
                                     // Reset to current location when minimizing
                                     if searchedCoordinate != nil {
                                         searchedCoordinate = nil
@@ -205,18 +200,9 @@ struct MainResultView: View {
                                     }
                                 }
                             }
-                        } label: {
-                            Image(systemName: isMapExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(width: 44, height: 44)
-                                .background(Color.black.opacity(0.6))
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-                        }
-                        .padding(.trailing, 16)
-                        .padding(.bottom, isMapExpanded ? 180 : 16)
-                    }
+                        },
+                        isExpanded: isMapExpanded
+                    )
                 }
             }
 
@@ -1574,6 +1560,70 @@ struct OverlappingZonesSheet: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Bottom Navigation Bar
+
+/// Fixed bottom navigation with three evenly distributed buttons
+private struct BottomNavigationBar: View {
+    let isDeveloperModeActive: Bool
+    let onDeveloperTap: () -> Void
+    let onSettingsTap: () -> Void
+    let onExpandTap: () -> Void
+    let isExpanded: Bool
+
+    var body: some View {
+        HStack(spacing: 0) {
+            // Left: Developer tools button (only when developer mode is unlocked)
+            Button {
+                HapticFeedback.selection()
+                onDeveloperTap()
+            } label: {
+                Image(systemName: "chevron.left.forwardslash.chevron.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.6))
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+            .opacity(isDeveloperModeActive ? 1.0 : 0.0)
+            .disabled(!isDeveloperModeActive)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Center: Settings button
+            Button {
+                HapticFeedback.selection()
+                onSettingsTap()
+            } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.6))
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+
+            // Right: Expand/collapse button
+            Button {
+                HapticFeedback.light()
+                onExpandTap()
+            } label: {
+                Image(systemName: isExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.6))
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
     }
 }
 
