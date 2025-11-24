@@ -250,6 +250,15 @@ struct DeveloperMapOverlay: View {
                     formatter: { String(format: "%.1fm", $0) }
                 )
             }
+
+            // Deduplication overlap threshold (always shown for filtering duplicate polygons)
+            sliderControl(
+                label: "Dedup Threshold",
+                value: $devSettings.deduplicationThreshold,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
         }
     }
 

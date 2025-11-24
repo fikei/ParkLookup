@@ -196,8 +196,8 @@ struct ZoneMapView: UIViewRepresentable {
                 )
             }
 
-            // Remove near-duplicate polygons (95%+ overlap) to prevent double-rendering
-            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: 0.95)
+            // Remove near-duplicate polygons to prevent double-rendering
+            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: devSettings.deduplicationThreshold)
 
             // Separate polygons by zone type and permit status for proper layering
             // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
@@ -859,8 +859,8 @@ struct ZoneMapView: UIViewRepresentable {
                 )
             }
 
-            // Remove near-duplicate polygons (95%+ overlap) to prevent double-rendering
-            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: 0.95)
+            // Remove near-duplicate polygons to prevent double-rendering
+            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: devSettings.deduplicationThreshold)
 
             // Separate polygons by zone type and permit status for proper layering
             // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
