@@ -122,10 +122,11 @@ enum PolygonSimplifier {
         preserveIndices: Set<Int>,
         offset: Int = 0
     ) -> [CLLocationCoordinate2D] {
+        // Base case: can't simplify further
         guard coords.count > 2 else { return coords }
 
         var maxDistance = 0.0
-        var maxIndex = 0
+        var maxIndex = 1  // Start at 1, not 0, to avoid infinite recursion
 
         // Find the point with maximum perpendicular distance
         for i in 1..<(coords.count - 1) {
@@ -144,40 +145,33 @@ enum PolygonSimplifier {
         let absoluteMaxIndex = offset + maxIndex
         let mustPreserve = preserveIndices.contains(absoluteMaxIndex)
 
-        if maxDistance > tolerance || mustPreserve {
-            // Also check if any preserved points exist in the ranges we're about to simplify
-            let leftPreserved = preserveIndices.filter { $0 > offset && $0 < absoluteMaxIndex }
-            let rightPreserved = preserveIndices.filter { $0 > absoluteMaxIndex && $0 < offset + coords.count - 1 }
+        // Also check if any preserved points exist in the ranges we're about to simplify
+        let leftPreserved = preserveIndices.contains { $0 > offset && $0 < absoluteMaxIndex }
+        let rightPreserved = preserveIndices.contains { $0 > absoluteMaxIndex && $0 < offset + coords.count - 1 }
 
-            if !leftPreserved.isEmpty || !rightPreserved.isEmpty || mustPreserve {
-                let left = douglasPeuckerPreserving(
-                    Array(coords[0...maxIndex]),
-                    tolerance: tolerance,
-                    preserveIndices: preserveIndices,
-                    offset: offset
-                )
-                let right = douglasPeuckerPreserving(
-                    Array(coords[maxIndex...]),
-                    tolerance: tolerance,
-                    preserveIndices: preserveIndices,
-                    offset: offset + maxIndex
-                )
-                return Array(left.dropLast()) + right
-            } else if maxDistance > tolerance {
-                let left = douglasPeuckerPreserving(
-                    Array(coords[0...maxIndex]),
-                    tolerance: tolerance,
-                    preserveIndices: preserveIndices,
-                    offset: offset
-                )
-                let right = douglasPeuckerPreserving(
-                    Array(coords[maxIndex...]),
-                    tolerance: tolerance,
-                    preserveIndices: preserveIndices,
-                    offset: offset + maxIndex
-                )
-                return Array(left.dropLast()) + right
+        if maxDistance > tolerance || mustPreserve || leftPreserved || rightPreserved {
+            // Ensure we're actually making progress (arrays must be smaller)
+            let leftArray = Array(coords[0...maxIndex])
+            let rightArray = Array(coords[maxIndex...])
+
+            // Safety check: avoid infinite recursion
+            guard leftArray.count < coords.count && rightArray.count < coords.count else {
+                return [coords[0], coords[coords.count - 1]]
             }
+
+            let left = douglasPeuckerPreserving(
+                leftArray,
+                tolerance: tolerance,
+                preserveIndices: preserveIndices,
+                offset: offset
+            )
+            let right = douglasPeuckerPreserving(
+                rightArray,
+                tolerance: tolerance,
+                preserveIndices: preserveIndices,
+                offset: offset + maxIndex
+            )
+            return Array(left.dropLast()) + right
         }
 
         return [coords[0], coords[coords.count - 1]]
