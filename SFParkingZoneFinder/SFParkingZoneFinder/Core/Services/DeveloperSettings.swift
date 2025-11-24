@@ -1,0 +1,509 @@
+import Foundation
+import Combine
+import UIKit
+
+/// Singleton managing developer/debug settings for polygon display
+/// Access via hidden gesture in Settings (5-tap on version)
+final class DeveloperSettings: ObservableObject {
+    static let shared = DeveloperSettings()
+
+    // MARK: - Display Simplification (affects map rendering only)
+
+    /// Use convex hull (smoothed envelope) instead of actual boundaries
+    /// Most aggressive - creates a simple outline around all zone parcels
+    @Published var useConvexHull: Bool {
+        didSet { UserDefaults.standard.set(useConvexHull, forKey: Keys.useConvexHull) }
+    }
+
+    /// Apply Douglas-Peucker simplification to reduce vertex count
+    /// Removes points that don't significantly affect the polygon shape
+    @Published var useDouglasPeucker: Bool {
+        didSet { UserDefaults.standard.set(useDouglasPeucker, forKey: Keys.useDouglasPeucker) }
+    }
+
+    /// Douglas-Peucker tolerance in degrees (smaller = more detail preserved)
+    /// Range: 0.00001 (~1m) to 0.001 (~110m)
+    @Published var douglasPeuckerTolerance: Double {
+        didSet { UserDefaults.standard.set(douglasPeuckerTolerance, forKey: Keys.douglasPeuckerTolerance) }
+    }
+
+    /// Snap vertices to a regular grid for cleaner block-aligned edges
+    /// Best for straightening SF's grid streets
+    @Published var useGridSnapping: Bool {
+        didSet { UserDefaults.standard.set(useGridSnapping, forKey: Keys.useGridSnapping) }
+    }
+
+    /// Grid snap size in degrees (smaller = finer grid)
+    /// 0.0001 ≈ 11m, 0.00005 ≈ 5.5m
+    @Published var gridSnapSize: Double {
+        didSet { UserDefaults.standard.set(gridSnapSize, forKey: Keys.gridSnapSize) }
+    }
+
+    // MARK: - Curve Handling
+
+    /// Preserve curved street segments (don't over-simplify winding roads)
+    /// Important for Twin Peaks, Portola, hillside areas
+    @Published var preserveCurves: Bool {
+        didSet { UserDefaults.standard.set(preserveCurves, forKey: Keys.preserveCurves) }
+    }
+
+    /// Angle threshold for curve detection (degrees)
+    /// Segments with angle deviation > threshold are "curves" and preserved
+    /// Lower = more points preserved, Higher = more aggressive simplification
+    @Published var curveAngleThreshold: Double {
+        didSet { UserDefaults.standard.set(curveAngleThreshold, forKey: Keys.curveAngleThreshold) }
+    }
+
+    /// Corner rounding radius in degrees
+    /// Smooths sharp corners by adding arc segments
+    /// 0 = no rounding, higher = more rounded corners
+    @Published var cornerRoundingRadius: Double {
+        didSet { UserDefaults.standard.set(cornerRoundingRadius, forKey: Keys.cornerRoundingRadius) }
+    }
+
+    /// Enable corner rounding
+    @Published var useCornerRounding: Bool {
+        didSet { UserDefaults.standard.set(useCornerRounding, forKey: Keys.useCornerRounding) }
+    }
+
+    /// Error tolerance for overlap detection (degrees)
+    /// Used to detect and clean up small overlaps/gaps between polygons
+    /// Smaller = more precise, larger = more aggressive cleanup
+    @Published var overlapTolerance: Double {
+        didSet { UserDefaults.standard.set(overlapTolerance, forKey: Keys.overlapTolerance) }
+    }
+
+    /// Enable overlap clipping (visual only)
+    /// Clips overlapping polygons so they don't stack visually
+    /// Priority: Metered > RPP, Vertical (N-S) > Horizontal (E-W)
+    @Published var useOverlapClipping: Bool {
+        didSet { UserDefaults.standard.set(useOverlapClipping, forKey: Keys.useOverlapClipping) }
+    }
+
+    /// Enable merging of overlapping polygons within the same permit zone
+    @Published var mergeOverlappingSameZone: Bool {
+        didSet { UserDefaults.standard.set(mergeOverlappingSameZone, forKey: Keys.mergeOverlappingSameZone) }
+    }
+
+    /// Enable distance-based merging of polygons within the same permit zone
+    @Published var useProximityMerging: Bool {
+        didSet { UserDefaults.standard.set(useProximityMerging, forKey: Keys.useProximityMerging) }
+    }
+
+    /// Distance threshold for proximity-based polygon merging (in meters)
+    @Published var proximityMergeDistance: Double {
+        didSet { UserDefaults.standard.set(proximityMergeDistance, forKey: Keys.proximityMergeDistance) }
+    }
+
+    /// Deduplication threshold for removing near-duplicate polygons (0.0 - 1.0)
+    /// Polygons with overlap >= this threshold are considered duplicates
+    @Published var deduplicationThreshold: Double {
+        didSet { UserDefaults.standard.set(deduplicationThreshold, forKey: Keys.deduplicationThreshold) }
+    }
+
+    // MARK: - In Zone (Current Zone Override)
+
+    /// Fill opacity for current zone (user is in this zone) - 0.0 to 1.0
+    /// Overrides other zone fill opacity when user is inside
+    @Published var currentZoneFillOpacity: Double {
+        didSet { UserDefaults.standard.set(currentZoneFillOpacity, forKey: Keys.currentZoneFillOpacity) }
+    }
+
+    /// Stroke opacity for current zone (user is in this zone) - 0.0 to 1.0
+    /// Overrides other zone stroke opacity when user is inside
+    @Published var currentZoneStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(currentZoneStrokeOpacity, forKey: Keys.currentZoneStrokeOpacity) }
+    }
+
+    // MARK: - My Permit Zones
+
+    /// Color for zones where user has a permit (default: green 33B366)
+    @Published var myPermitZonesColorHex: String {
+        didSet { UserDefaults.standard.set(myPermitZonesColorHex, forKey: Keys.myPermitZonesColorHex) }
+    }
+
+    /// Fill opacity for my permit zones (0.0 - 1.0)
+    @Published var myPermitZonesFillOpacity: Double {
+        didSet { UserDefaults.standard.set(myPermitZonesFillOpacity, forKey: Keys.myPermitZonesFillOpacity) }
+    }
+
+    /// Stroke opacity for my permit zones (0.0 - 1.0)
+    @Published var myPermitZonesStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(myPermitZonesStrokeOpacity, forKey: Keys.myPermitZonesStrokeOpacity) }
+    }
+
+    // MARK: - Free Timed Zones
+
+    /// Color for free parking zones with time limits (RPP zones without permit) (default: orange F29933)
+    @Published var freeTimedZonesColorHex: String {
+        didSet { UserDefaults.standard.set(freeTimedZonesColorHex, forKey: Keys.freeTimedZonesColorHex) }
+    }
+
+    /// Fill opacity for free timed zones (0.0 - 1.0)
+    @Published var freeTimedZonesFillOpacity: Double {
+        didSet { UserDefaults.standard.set(freeTimedZonesFillOpacity, forKey: Keys.freeTimedZonesFillOpacity) }
+    }
+
+    /// Stroke opacity for free timed zones (0.0 - 1.0)
+    @Published var freeTimedZonesStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(freeTimedZonesStrokeOpacity, forKey: Keys.freeTimedZonesStrokeOpacity) }
+    }
+
+    // MARK: - Paid Zones
+
+    /// Color for paid/metered zones (default: grey 808080)
+    @Published var paidZonesColorHex: String {
+        didSet { UserDefaults.standard.set(paidZonesColorHex, forKey: Keys.paidZonesColorHex) }
+    }
+
+    /// Fill opacity for paid zones (0.0 - 1.0)
+    @Published var paidZonesFillOpacity: Double {
+        didSet { UserDefaults.standard.set(paidZonesFillOpacity, forKey: Keys.paidZonesFillOpacity) }
+    }
+
+    /// Stroke opacity for paid zones (0.0 - 1.0)
+    @Published var paidZonesStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(paidZonesStrokeOpacity, forKey: Keys.paidZonesStrokeOpacity) }
+    }
+
+    // MARK: - Global Stroke Settings
+
+    /// Global stroke width for all zones - 0.0 to 5.0
+    @Published var strokeWidth: Double {
+        didSet { UserDefaults.standard.set(strokeWidth, forKey: Keys.strokeWidth) }
+    }
+
+    /// Dash length for dashed lines (0 = solid line) - 0.0 to 10.0
+    @Published var dashLength: Double {
+        didSet { UserDefaults.standard.set(dashLength, forKey: Keys.dashLength) }
+    }
+
+    // MARK: - Debug Visualization
+
+    /// Show lookup boundaries as semi-transparent overlay
+    /// Lookup uses original accurate boundaries (red outline)
+    /// Display uses simplified boundaries (normal zone colors)
+    @Published var showLookupBoundaries: Bool {
+        didSet { UserDefaults.standard.set(showLookupBoundaries, forKey: Keys.showLookupBoundaries) }
+    }
+
+    /// Show original (unsimplified) boundaries as comparison overlay
+    /// Renders with dashed outline to compare against simplified display
+    @Published var showOriginalOverlay: Bool {
+        didSet { UserDefaults.standard.set(showOriginalOverlay, forKey: Keys.showOriginalOverlay) }
+    }
+
+    /// Show polygon vertex count on zone labels
+    /// Useful for measuring simplification effectiveness
+    @Published var showVertexCounts: Bool {
+        didSet { UserDefaults.standard.set(showVertexCounts, forKey: Keys.showVertexCounts) }
+    }
+
+    // MARK: - Performance Logging
+
+    /// Log polygon simplification stats (input/output vertex counts)
+    @Published var logSimplificationStats: Bool {
+        didSet { UserDefaults.standard.set(logSimplificationStats, forKey: Keys.logSimplificationStats) }
+    }
+
+    /// Log zone lookup performance timing
+    @Published var logLookupPerformance: Bool {
+        didSet { UserDefaults.standard.set(logLookupPerformance, forKey: Keys.logLookupPerformance) }
+    }
+
+    // MARK: - Developer Mode
+
+    /// Whether developer settings section is unlocked
+    @Published var developerModeUnlocked: Bool {
+        didSet { UserDefaults.standard.set(developerModeUnlocked, forKey: Keys.developerModeUnlocked) }
+    }
+
+    /// Reload trigger - increment this to force overlay reload (not persisted)
+    @Published var reloadTrigger: Int = 0
+
+    /// Force reload of map overlays
+    func forceReloadOverlays() {
+        reloadTrigger += 1
+    }
+
+    // MARK: - Keys
+
+    private enum Keys {
+        static let useConvexHull = "dev.useConvexHull"
+        static let useDouglasPeucker = "dev.useDouglasPeucker"
+        static let douglasPeuckerTolerance = "dev.douglasPeuckerTolerance"
+        static let useGridSnapping = "dev.useGridSnapping"
+        static let gridSnapSize = "dev.gridSnapSize"
+        static let preserveCurves = "dev.preserveCurves"
+        static let curveAngleThreshold = "dev.curveAngleThreshold"
+        static let cornerRoundingRadius = "dev.cornerRoundingRadius"
+        static let useCornerRounding = "dev.useCornerRounding"
+        static let overlapTolerance = "dev.overlapTolerance"
+        static let useOverlapClipping = "dev.useOverlapClipping"
+        static let mergeOverlappingSameZone = "dev.mergeOverlappingSameZone"
+        static let useProximityMerging = "dev.useProximityMerging"
+        static let proximityMergeDistance = "dev.proximityMergeDistance"
+        static let deduplicationThreshold = "dev.deduplicationThreshold"
+        static let currentZoneFillOpacity = "dev.currentZoneFillOpacity"
+        static let currentZoneStrokeOpacity = "dev.currentZoneStrokeOpacity"
+        static let myPermitZonesColorHex = "dev.myPermitZonesColorHex"
+        static let myPermitZonesFillOpacity = "dev.myPermitZonesFillOpacity"
+        static let myPermitZonesStrokeOpacity = "dev.myPermitZonesStrokeOpacity"
+        static let freeTimedZonesColorHex = "dev.freeTimedZonesColorHex"
+        static let freeTimedZonesFillOpacity = "dev.freeTimedZonesFillOpacity"
+        static let freeTimedZonesStrokeOpacity = "dev.freeTimedZonesStrokeOpacity"
+        static let paidZonesColorHex = "dev.paidZonesColorHex"
+        static let paidZonesFillOpacity = "dev.paidZonesFillOpacity"
+        static let paidZonesStrokeOpacity = "dev.paidZonesStrokeOpacity"
+        static let strokeWidth = "dev.strokeWidth"
+        static let dashLength = "dev.dashLength"
+        static let showLookupBoundaries = "dev.showLookupBoundaries"
+        static let showOriginalOverlay = "dev.showOriginalOverlay"
+        static let showVertexCounts = "dev.showVertexCounts"
+        static let logSimplificationStats = "dev.logSimplificationStats"
+        static let logLookupPerformance = "dev.logLookupPerformance"
+        static let developerModeUnlocked = "dev.developerModeUnlocked"
+    }
+
+    // MARK: - Defaults
+
+    private enum Defaults {
+        static let useConvexHull = false
+        static let useDouglasPeucker = false
+        static let douglasPeuckerTolerance = 0.0001  // ~11m - moderate simplification
+        static let useGridSnapping = false
+        static let gridSnapSize = 0.00005  // ~5.5m grid
+        static let preserveCurves = true
+        static let curveAngleThreshold = 15.0  // degrees - angles > 15° are "curves"
+        static let cornerRoundingRadius = 0.00005  // ~5.5m radius
+        static let useCornerRounding = false
+        static let overlapTolerance = 0.00001  // ~1m tolerance for overlap detection
+        static let useOverlapClipping = false  // Visual-only overlap clipping
+        static let mergeOverlappingSameZone = false  // Merge overlapping polygons in same zone
+        static let useProximityMerging = false  // Distance-based polygon merging
+        static let proximityMergeDistance = 5.0  // Default 5 meters
+        static let deduplicationThreshold = 0.95  // Default 95% overlap threshold
+        static let currentZoneFillOpacity = 0.35  // In Zone fill opacity
+        static let currentZoneStrokeOpacity = 1.0  // In Zone stroke opacity
+        static let myPermitZonesColorHex = "33B366"  // Green
+        static let myPermitZonesFillOpacity = 0.20
+        static let myPermitZonesStrokeOpacity = 0.6
+        static let freeTimedZonesColorHex = "F29933"  // Orange
+        static let freeTimedZonesFillOpacity = 0.20
+        static let freeTimedZonesStrokeOpacity = 0.6
+        static let paidZonesColorHex = "808080"  // Grey
+        static let paidZonesFillOpacity = 0.20
+        static let paidZonesStrokeOpacity = 0.6
+        static let strokeWidth = 1.0  // Global stroke width
+        static let dashLength = 0.0  // 0 = solid line
+        static let showLookupBoundaries = false
+        static let showOriginalOverlay = false
+        static let showVertexCounts = false
+        static let logSimplificationStats = false
+        static let logLookupPerformance = true  // Default on for perf monitoring
+        static let developerModeUnlocked = false
+    }
+
+    // MARK: - Initialization
+
+    private init() {
+        let defaults = UserDefaults.standard
+
+        // Load persisted values or use defaults
+        useConvexHull = defaults.object(forKey: Keys.useConvexHull) as? Bool ?? Defaults.useConvexHull
+        useDouglasPeucker = defaults.object(forKey: Keys.useDouglasPeucker) as? Bool ?? Defaults.useDouglasPeucker
+        douglasPeuckerTolerance = defaults.object(forKey: Keys.douglasPeuckerTolerance) as? Double ?? Defaults.douglasPeuckerTolerance
+        useGridSnapping = defaults.object(forKey: Keys.useGridSnapping) as? Bool ?? Defaults.useGridSnapping
+        gridSnapSize = defaults.object(forKey: Keys.gridSnapSize) as? Double ?? Defaults.gridSnapSize
+        preserveCurves = defaults.object(forKey: Keys.preserveCurves) as? Bool ?? Defaults.preserveCurves
+        curveAngleThreshold = defaults.object(forKey: Keys.curveAngleThreshold) as? Double ?? Defaults.curveAngleThreshold
+        cornerRoundingRadius = defaults.object(forKey: Keys.cornerRoundingRadius) as? Double ?? Defaults.cornerRoundingRadius
+        useCornerRounding = defaults.object(forKey: Keys.useCornerRounding) as? Bool ?? Defaults.useCornerRounding
+        overlapTolerance = defaults.object(forKey: Keys.overlapTolerance) as? Double ?? Defaults.overlapTolerance
+        useOverlapClipping = defaults.object(forKey: Keys.useOverlapClipping) as? Bool ?? Defaults.useOverlapClipping
+        mergeOverlappingSameZone = defaults.object(forKey: Keys.mergeOverlappingSameZone) as? Bool ?? Defaults.mergeOverlappingSameZone
+        useProximityMerging = defaults.object(forKey: Keys.useProximityMerging) as? Bool ?? Defaults.useProximityMerging
+        proximityMergeDistance = defaults.object(forKey: Keys.proximityMergeDistance) as? Double ?? Defaults.proximityMergeDistance
+        deduplicationThreshold = defaults.object(forKey: Keys.deduplicationThreshold) as? Double ?? Defaults.deduplicationThreshold
+        currentZoneFillOpacity = defaults.object(forKey: Keys.currentZoneFillOpacity) as? Double ?? Defaults.currentZoneFillOpacity
+        currentZoneStrokeOpacity = defaults.object(forKey: Keys.currentZoneStrokeOpacity) as? Double ?? Defaults.currentZoneStrokeOpacity
+        myPermitZonesColorHex = defaults.object(forKey: Keys.myPermitZonesColorHex) as? String ?? Defaults.myPermitZonesColorHex
+        myPermitZonesFillOpacity = defaults.object(forKey: Keys.myPermitZonesFillOpacity) as? Double ?? Defaults.myPermitZonesFillOpacity
+        myPermitZonesStrokeOpacity = defaults.object(forKey: Keys.myPermitZonesStrokeOpacity) as? Double ?? Defaults.myPermitZonesStrokeOpacity
+        freeTimedZonesColorHex = defaults.object(forKey: Keys.freeTimedZonesColorHex) as? String ?? Defaults.freeTimedZonesColorHex
+        freeTimedZonesFillOpacity = defaults.object(forKey: Keys.freeTimedZonesFillOpacity) as? Double ?? Defaults.freeTimedZonesFillOpacity
+        freeTimedZonesStrokeOpacity = defaults.object(forKey: Keys.freeTimedZonesStrokeOpacity) as? Double ?? Defaults.freeTimedZonesStrokeOpacity
+        paidZonesColorHex = defaults.object(forKey: Keys.paidZonesColorHex) as? String ?? Defaults.paidZonesColorHex
+        paidZonesFillOpacity = defaults.object(forKey: Keys.paidZonesFillOpacity) as? Double ?? Defaults.paidZonesFillOpacity
+        paidZonesStrokeOpacity = defaults.object(forKey: Keys.paidZonesStrokeOpacity) as? Double ?? Defaults.paidZonesStrokeOpacity
+        strokeWidth = defaults.object(forKey: Keys.strokeWidth) as? Double ?? Defaults.strokeWidth
+        dashLength = defaults.object(forKey: Keys.dashLength) as? Double ?? Defaults.dashLength
+        showLookupBoundaries = defaults.object(forKey: Keys.showLookupBoundaries) as? Bool ?? Defaults.showLookupBoundaries
+        showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
+        showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
+        logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
+        logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
+        developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
+    }
+
+    // MARK: - Computed Properties
+
+    /// Whether any simplification is enabled
+    var isSimplificationEnabled: Bool {
+        useConvexHull || useDouglasPeucker || useGridSnapping || useCornerRounding
+    }
+
+    /// Settings hash for detecting changes (triggers map refresh)
+    var settingsHash: Int {
+        var hasher = Hasher()
+        hasher.combine(useConvexHull)
+        hasher.combine(useDouglasPeucker)
+        hasher.combine(douglasPeuckerTolerance)
+        hasher.combine(useGridSnapping)
+        hasher.combine(gridSnapSize)
+        hasher.combine(preserveCurves)
+        hasher.combine(curveAngleThreshold)
+        hasher.combine(useCornerRounding)
+        hasher.combine(cornerRoundingRadius)
+        hasher.combine(overlapTolerance)
+        hasher.combine(useOverlapClipping)
+        hasher.combine(mergeOverlappingSameZone)
+        hasher.combine(useProximityMerging)
+        hasher.combine(proximityMergeDistance)
+        hasher.combine(deduplicationThreshold)
+        hasher.combine(currentZoneFillOpacity)
+        hasher.combine(currentZoneStrokeOpacity)
+        hasher.combine(myPermitZonesColorHex)
+        hasher.combine(myPermitZonesFillOpacity)
+        hasher.combine(myPermitZonesStrokeOpacity)
+        hasher.combine(freeTimedZonesColorHex)
+        hasher.combine(freeTimedZonesFillOpacity)
+        hasher.combine(freeTimedZonesStrokeOpacity)
+        hasher.combine(paidZonesColorHex)
+        hasher.combine(paidZonesFillOpacity)
+        hasher.combine(paidZonesStrokeOpacity)
+        hasher.combine(strokeWidth)
+        hasher.combine(dashLength)
+        hasher.combine(showLookupBoundaries)
+        hasher.combine(showOriginalOverlay)
+        hasher.combine(showVertexCounts)
+        return hasher.finalize()
+    }
+
+    // MARK: - UIColor Conversions
+
+    /// UIColor for my permit zones
+    var myPermitZonesColor: UIColor {
+        UIColor(hex: myPermitZonesColorHex) ?? UIColor(red: 0.2, green: 0.7, blue: 0.4, alpha: 1.0)
+    }
+
+    /// UIColor for free timed zones
+    var freeTimedZonesColor: UIColor {
+        UIColor(hex: freeTimedZonesColorHex) ?? UIColor(red: 0.95, green: 0.6, blue: 0.2, alpha: 1.0)
+    }
+
+    /// UIColor for paid zones
+    var paidZonesColor: UIColor {
+        UIColor(hex: paidZonesColorHex) ?? UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+    }
+
+    /// Get a human-readable description of current simplification pipeline
+    var simplificationDescription: String {
+        var steps: [String] = []
+
+        if useDouglasPeucker {
+            let toleranceStr = String(format: "%.5f", douglasPeuckerTolerance)
+            steps.append("D-P (\(toleranceStr)°)")
+        }
+        if useGridSnapping {
+            let gridStr = String(format: "%.5f", gridSnapSize)
+            steps.append("Grid (\(gridStr)°)")
+        }
+        if useCornerRounding {
+            let radiusStr = String(format: "%.5f", cornerRoundingRadius)
+            steps.append("Round (\(radiusStr)°)")
+        }
+        if useConvexHull {
+            steps.append("Hull")
+        }
+
+        if steps.isEmpty {
+            return "Original boundaries (no simplification)"
+        }
+
+        var desc = "Pipeline: " + steps.joined(separator: " → ")
+        if preserveCurves && useDouglasPeucker {
+            desc += " [curves >\(Int(curveAngleThreshold))° preserved]"
+        }
+        return desc
+    }
+
+    // MARK: - Actions
+
+    /// Reset all settings to defaults
+    func resetToDefaults() {
+        useConvexHull = Defaults.useConvexHull
+        useDouglasPeucker = Defaults.useDouglasPeucker
+        douglasPeuckerTolerance = Defaults.douglasPeuckerTolerance
+        useGridSnapping = Defaults.useGridSnapping
+        gridSnapSize = Defaults.gridSnapSize
+        preserveCurves = Defaults.preserveCurves
+        curveAngleThreshold = Defaults.curveAngleThreshold
+        useCornerRounding = Defaults.useCornerRounding
+        cornerRoundingRadius = Defaults.cornerRoundingRadius
+        overlapTolerance = Defaults.overlapTolerance
+        useOverlapClipping = Defaults.useOverlapClipping
+        mergeOverlappingSameZone = Defaults.mergeOverlappingSameZone
+        useProximityMerging = Defaults.useProximityMerging
+        proximityMergeDistance = Defaults.proximityMergeDistance
+        deduplicationThreshold = Defaults.deduplicationThreshold
+        currentZoneFillOpacity = Defaults.currentZoneFillOpacity
+        currentZoneStrokeOpacity = Defaults.currentZoneStrokeOpacity
+        myPermitZonesColorHex = Defaults.myPermitZonesColorHex
+        myPermitZonesFillOpacity = Defaults.myPermitZonesFillOpacity
+        myPermitZonesStrokeOpacity = Defaults.myPermitZonesStrokeOpacity
+        freeTimedZonesColorHex = Defaults.freeTimedZonesColorHex
+        freeTimedZonesFillOpacity = Defaults.freeTimedZonesFillOpacity
+        freeTimedZonesStrokeOpacity = Defaults.freeTimedZonesStrokeOpacity
+        paidZonesColorHex = Defaults.paidZonesColorHex
+        paidZonesFillOpacity = Defaults.paidZonesFillOpacity
+        paidZonesStrokeOpacity = Defaults.paidZonesStrokeOpacity
+        strokeWidth = Defaults.strokeWidth
+        dashLength = Defaults.dashLength
+        showLookupBoundaries = Defaults.showLookupBoundaries
+        showOriginalOverlay = Defaults.showOriginalOverlay
+        showVertexCounts = Defaults.showVertexCounts
+        logSimplificationStats = Defaults.logSimplificationStats
+        logLookupPerformance = Defaults.logLookupPerformance
+        // Don't reset developerModeUnlocked
+    }
+
+    // MARK: - Color Helpers
+
+    /// Parse hex string to UIColor
+    static func colorFromHex(_ hex: String) -> UIColor {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let b = CGFloat(rgb & 0x0000FF) / 255.0
+
+        return UIColor(red: r, green: g, blue: b, alpha: 1.0)
+    }
+
+    // MARK: - Descriptions (for UI)
+
+    enum SettingInfo {
+        static let convexHull = "Creates smoothed envelope around zone. Most aggressive - loses all interior detail."
+        static let douglasPeucker = "Removes redundant vertices while preserving shape. Good balance of simplification."
+        static let gridSnapping = "Aligns vertices to grid. Best for SF's straight block edges."
+        static let preserveCurves = "Prevents over-simplification of winding hillside streets."
+        static let showLookupBoundaries = "Shows exact boundaries used for zone detection (red dashed)."
+        static let showOriginalOverlay = "Shows unsimplified boundaries for comparison (dashed)."
+        static let showVertexCounts = "Displays vertex count on zone labels to measure simplification."
+    }
+}

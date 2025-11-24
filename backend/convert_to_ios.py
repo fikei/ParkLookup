@@ -109,18 +109,57 @@ def generate_zone_id(area_code: str, index: int = 1) -> str:
     return f"sf_rpp_{area_code.lower()}_{index:03d}"
 
 
-def generate_default_rule(area_code: str) -> Dict[str, Any]:
-    """Generate a default RPP rule for a zone"""
+def generate_default_rule(area_code: str, time_limit: int = 120) -> Dict[str, Any]:
+    """Generate a default RPP rule for a zone
+
+    Args:
+        area_code: The permit area code
+        time_limit: Non-permit holder time limit in minutes (from blockface data)
+    """
+    # Format time limit for description
+    if time_limit >= 60:
+        hours = time_limit // 60
+        time_str = f"{hours}-hour" if hours == 1 else f"{hours}-hour"
+    else:
+        time_str = f"{time_limit}-minute"
+
     return {
         "id": f"{area_code.lower()}_rule_001",
         "ruleType": "permit_required",
-        "description": f"Residential Permit Area {area_code} only",
+        "description": f"Residential permit Zone {area_code} only",
         "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
         "enforcementStartTime": {"hour": 8, "minute": 0},
         "enforcementEndTime": {"hour": 18, "minute": 0},
-        "timeLimit": 120,
+        "timeLimit": time_limit,
         "meterRate": None,
-        "specialConditions": "2-hour limit for non-permit holders"
+        "specialConditions": f"{time_str} limit for non-permit holders"
+    }
+
+
+def generate_metered_rule(zone_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate a metered parking rule for a zone"""
+    zone_id = zone_data.get("code", "unknown")
+    time_limit = zone_data.get("avgTimeLimit") or 60
+    cap_colors = zone_data.get("capColors", [])
+
+    # Determine description based on cap colors
+    if "GREEN" in cap_colors:
+        description = "Short-term metered parking (15-30 min)"
+    elif "YELLOW" in cap_colors:
+        description = "Commercial loading zone"
+    else:
+        description = f"Metered parking ({time_limit} min limit)"
+
+    return {
+        "id": f"{zone_id.lower()}_rule_001",
+        "ruleType": "metered",
+        "description": description,
+        "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+        "enforcementStartTime": {"hour": 9, "minute": 0},
+        "enforcementEndTime": {"hour": 18, "minute": 0},
+        "timeLimit": time_limit,
+        "meterRate": 2.0,  # Default rate, varies by area
+        "specialConditions": "Pay at meter or via app"
     }
 
 
@@ -137,22 +176,93 @@ def convert_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, An
         print(f"  Warning: Zone {code} has no boundaries, skipping")
         return None
 
+    # Process multi-permit polygon data
+    # multi_permit_polygons: Dict[polygon_index -> List[all_valid_areas]]
+    # Note: We do NOT aggregate multi-permit areas into zone's validPermitAreas.
+    # The zone's validPermitAreas should only contain its own permit area.
+    # Multi-permit info is per-boundary and stored in multiPermitBoundaries.
+    # The iOS app determines valid permit areas at lookup time based on
+    # overlapping zones at the user's location.
+    multi_permit_polygons = zone_data.get("multiPermitPolygons", {})
+    multi_permit_boundaries = []
+
+    for idx_str, valid_areas in multi_permit_polygons.items():
+        idx = int(idx_str)
+        if idx < len(boundaries):
+            multi_permit_boundaries.append({
+                "boundaryIndex": idx,
+                "validPermitAreas": valid_areas
+            })
+
+    # Get time limit from pipeline data (defaults to 120 min / 2 hours)
+    time_limit = zone_data.get("nonPermitTimeLimit", 120)
+
     return {
         "id": generate_zone_id(code, index),
         "cityCode": "sf",
-        "displayName": f"Area {code}",
+        "displayName": f"Zone {code}",
         "zoneType": "rpp",
         "permitArea": code,
-        "validPermitAreas": [code],
+        "validPermitAreas": [code],  # Zone's own permit area only; multi-permit handled per-boundary
         "requiresPermit": True,
         "restrictiveness": 8,  # RPP zones are moderately restrictive
         "boundaries": boundaries,  # MultiPolygon: list of polygon boundaries
-        "rules": [generate_default_rule(code)],
+        "multiPermitBoundaries": multi_permit_boundaries,  # Boundaries that accept multiple permits
+        "rules": [generate_default_rule(code, time_limit)],
         "metadata": {
             "dataSource": "datasf_sfmta",
             "lastUpdated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "accuracy": "high",
-            "polygonCount": len(boundaries)
+            "polygonCount": len(boundaries),
+            "multiPermitCount": len(multi_permit_boundaries),
+            "nonPermitTimeLimit": time_limit  # Minutes
+        }
+    }
+
+
+def convert_metered_zone(zone_data: Dict[str, Any], index: int) -> Optional[Dict[str, Any]]:
+    """Convert a metered zone from pipeline to iOS format"""
+    code = zone_data.get("code", "")
+    if not code:
+        return None
+
+    polygon = zone_data.get("polygon", [])
+    boundaries = convert_polygon_to_boundary(polygon)
+
+    if not boundaries:
+        print(f"  Warning: Metered zone {code} has no boundaries, skipping")
+        return None
+
+    meter_count = zone_data.get("meterCount", 0)
+    avg_time_limit = zone_data.get("avgTimeLimit") or 120  # Default 2hr
+    rate_area = zone_data.get("rateArea")
+
+    # Determine hourly rate based on rate area (SF meter rates vary by area)
+    hourly_rate = 2.0  # Default rate
+    if rate_area:
+        # SF has different rate areas with varying prices
+        rate_map = {"1": 3.0, "2": 2.5, "3": 2.0, "4": 1.5, "5": 1.0}
+        hourly_rate = rate_map.get(str(rate_area), 2.0)
+
+    return {
+        "id": f"sf_metered_{code.lower()}_{index:03d}",
+        "cityCode": "sf",
+        "displayName": "Paid Parking",
+        "zoneType": "metered",
+        "permitArea": None,  # No permit required for metered zones
+        "validPermitAreas": [],
+        "requiresPermit": False,
+        "restrictiveness": 5,  # Metered zones are less restrictive than RPP
+        "boundaries": boundaries,
+        "rules": [generate_metered_rule(zone_data)],
+        "metadata": {
+            "dataSource": "datasf_meters",
+            "lastUpdated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "accuracy": "medium",
+            "polygonCount": len(boundaries),
+            "meterCount": meter_count,
+            "avgTimeLimit": avg_time_limit,
+            "hourlyRate": hourly_rate
         }
     }
 
@@ -168,7 +278,7 @@ def build_permit_areas(zones: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             seen_codes.add(code)
             permit_areas.append({
                 "code": code,
-                "name": f"Area {code}",
+                "name": f"Zone {code}",
                 "neighborhoods": PERMIT_AREA_NEIGHBORHOODS.get(code, [])
             })
 
@@ -185,11 +295,13 @@ def convert_pipeline_to_ios(input_data: Dict[str, Any]) -> Dict[str, Any]:
     pipeline_version = input_data.get("version", datetime.utcnow().strftime("%Y%m%d"))
     generated = input_data.get("generated", datetime.utcnow().isoformat())
     raw_zones = input_data.get("zones", [])
+    raw_metered_zones = input_data.get("meteredZones", [])
 
     print(f"  Pipeline version: {pipeline_version}")
-    print(f"  Raw zones count: {len(raw_zones)}")
+    print(f"  Raw RPP zones count: {len(raw_zones)}")
+    print(f"  Raw metered zones count: {len(raw_metered_zones)}")
 
-    # Convert zones
+    # Convert RPP zones
     ios_zones = []
     zone_counts = {}  # Track count per area code
 
@@ -201,18 +313,31 @@ def convert_pipeline_to_ios(input_data: Dict[str, Any]) -> Dict[str, Any]:
         if ios_zone:
             ios_zones.append(ios_zone)
 
-    print(f"  Converted zones: {len(ios_zones)}")
+    print(f"  Converted RPP zones: {len(ios_zones)}")
 
-    # Build permit areas from zones
-    permit_areas = build_permit_areas(ios_zones)
+    # Convert metered zones
+    metered_zone_counts = {}
+    for raw_mz in raw_metered_zones:
+        code = raw_mz.get("code", "")
+        metered_zone_counts[code] = metered_zone_counts.get(code, 0) + 1
+
+        ios_mz = convert_metered_zone(raw_mz, metered_zone_counts[code])
+        if ios_mz:
+            ios_zones.append(ios_mz)
+
+    print(f"  Total zones (RPP + metered): {len(ios_zones)}")
+
+    # Build permit areas from zones (only from RPP zones)
+    rpp_zones = [z for z in ios_zones if z.get('zoneType') == 'rpp']
+    permit_areas = build_permit_areas(rpp_zones)
     print(f"  Permit areas: {len(permit_areas)}")
 
-    # Zone summary
-    print("\nZone Summary:")
+    # RPP Zone summary
+    print("\nRPP Zone Summary:")
     print("-" * 50)
     total_boundaries = 0
     total_points = 0
-    for zone in sorted(ios_zones, key=lambda z: z.get('permitArea', '')):
+    for zone in sorted(rpp_zones, key=lambda z: z.get('permitArea', '') or ''):
         code = zone.get('permitArea', '?')
         boundaries = zone.get('boundaries', [])
         num_boundaries = len(boundaries)
@@ -221,7 +346,29 @@ def convert_pipeline_to_ios(input_data: Dict[str, Any]) -> Dict[str, Any]:
         total_points += num_points
         print(f"  {code:4s}: {num_boundaries:,} parcels, {num_points:,} points")
     print("-" * 50)
-    print(f"  Total: {total_boundaries:,} parcels, {total_points:,} points across {len(ios_zones)} zones")
+    print(f"  Total: {total_boundaries:,} parcels, {total_points:,} points across {len(rpp_zones)} RPP zones")
+
+    # Metered Zone summary
+    metered_zones = [z for z in ios_zones if z.get('zoneType') == 'metered']
+    if metered_zones:
+        print("\nMetered Zone Summary:")
+        print("-" * 50)
+        metered_boundaries = 0
+        metered_points = 0
+        for zone in metered_zones[:5]:  # Show first 5
+            name = zone.get('displayName', '?')[:35]
+            boundaries = zone.get('boundaries', [])
+            num_boundaries = len(boundaries)
+            meter_count = zone.get('metadata', {}).get('meterCount', 0)
+            print(f"  {name}: {num_boundaries} polys, {meter_count} meters")
+        if len(metered_zones) > 5:
+            print(f"  ... and {len(metered_zones) - 5} more metered zones")
+        for zone in metered_zones:
+            boundaries = zone.get('boundaries', [])
+            metered_boundaries += len(boundaries)
+            metered_points += sum(len(b) for b in boundaries)
+        print("-" * 50)
+        print(f"  Total: {metered_boundaries:,} polygons, {metered_points:,} points across {len(metered_zones)} metered zones")
 
     # Build iOS output structure
     return {

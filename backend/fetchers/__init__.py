@@ -2,6 +2,5 @@
 from .blockface_fetcher import BlockfaceFetcher
 from .meters_fetcher import MetersFetcher
 from .rpp_areas_fetcher import RPPAreasFetcher
-from .rpp_parcels_fetcher import RPPParcelsFetcher
 
-__all__ = ["BlockfaceFetcher", "MetersFetcher", "RPPAreasFetcher", "RPPParcelsFetcher"]
+__all__ = ["BlockfaceFetcher", "MetersFetcher", "RPPAreasFetcher"]

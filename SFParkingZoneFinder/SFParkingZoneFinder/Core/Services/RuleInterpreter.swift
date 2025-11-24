@@ -21,13 +21,18 @@ final class RuleInterpreter: RuleInterpreterProtocol {
 
         // Determine validity status
         let status: PermitValidityStatus
-        switch matchingPermits.count {
-        case 0:
-            status = .invalid
-        case 1:
-            status = .valid
-        default:
-            status = .multipleApply
+        if userPermits.isEmpty {
+            // User has no permits configured - show neutral status
+            status = .noPermitSet
+        } else {
+            switch matchingPermits.count {
+            case 0:
+                status = .invalid
+            case 1:
+                status = .valid
+            default:
+                status = .multipleApply
+            }
         }
 
         // Check for conditional rules (flag but don't enforce)
@@ -105,14 +110,17 @@ final class RuleInterpreter: RuleInterpreterProtocol {
 
         // Permit requirement
         if zone.requiresPermit, let area = zone.permitArea {
-            lines.append("Residential Permit Area \(area) only")
+            lines.append("Residential permit Zone \(area) required")
         }
 
-        // Time limits
+        // Time limits - permit holders have no limit in their zone
         if let limit = zone.nonPermitTimeLimit {
             let hours = limit / 60
             let limitText = hours > 0 ? "\(hours)-hour" : "\(limit)-minute"
-            lines.append("\(limitText) limit for non-permit holders")
+            lines.append("\(limitText) limit without permit")
+            if let area = zone.permitArea {
+                lines.append("No limit with Zone \(area) permit")
+            }
         }
 
         // Enforcement hours

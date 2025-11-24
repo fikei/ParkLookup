@@ -1,6 +1,24 @@
 import Foundation
 import CoreLocation
 import Combine
+import os.log
+
+private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
+
+// MARK: - Future Feature TODOs
+// TODO: Support time-limited parking zones (non-RPP areas with time restrictions)
+//       - Display time limit warnings and "Park Until" time
+//       - Handle zones that are time-limited during certain hours only
+//
+// TODO: Support street cleaning restrictions
+//       - Show street cleaning schedule for current location
+//       - Warn user if parked during upcoming street cleaning
+//       - Calculate "Move by" time based on cleaning schedule
+//
+// TODO: Support no-parking zones and unlimited parking areas
+//       - Handle zones with no parking restrictions (infinity = unlimited)
+//       - Show "Unlimited Parking" for truly unrestricted areas
+//       - Differentiate from RPP "unlimited" (which means permit holder unlimited)
 
 /// ViewModel for the main parking result view
 @MainActor
@@ -13,22 +31,34 @@ final class MainResultViewModel: ObservableObject {
 
     // Zone & Rules
     @Published private(set) var zoneName: String = "—"
+    @Published private(set) var zoneType: ZoneType = .residentialPermit
+    @Published private(set) var meteredSubtitle: String? = nil  // "$2/hr • 2hr max" for metered zones
+    @Published private(set) var timeLimitMinutes: Int? = nil  // Time limit in minutes for non-permit holders
     @Published private(set) var validityStatus: PermitValidityStatus = .noPermitRequired
     @Published private(set) var ruleSummary: String = ""
     @Published private(set) var ruleSummaryLines: [String] = []
     @Published private(set) var warnings: [ParkingWarning] = []
     @Published private(set) var conditionalFlags: [ConditionalFlag] = []
 
+    // Enforcement hours (for calculating "Park Until" time)
+    @Published private(set) var enforcementStartTime: TimeOfDay? = nil
+    @Published private(set) var enforcementEndTime: TimeOfDay? = nil
+    @Published private(set) var enforcementDays: [DayOfWeek]? = nil
+
     // Overlapping zones
     @Published private(set) var hasOverlappingZones = false
     @Published private(set) var overlappingZones: [ParkingZone] = []
     @Published private(set) var currentZoneId: String?
+    @Published private(set) var allValidPermitAreas: [String] = []  // All valid permits from overlapping zones
 
     // Location
     @Published private(set) var currentAddress: String = "Locating..."
     @Published private(set) var lastUpdated: Date?
     @Published private(set) var lookupConfidence: LookupConfidence = .high
     @Published private(set) var currentCoordinate: CLLocationCoordinate2D?
+
+    /// Last known GPS location (separate from searched coordinates)
+    private var lastKnownGPSCoordinate: CLLocationCoordinate2D?
 
     // User permits
     @Published private(set) var applicablePermits: [ParkingPermit] = []
@@ -37,8 +67,9 @@ final class MainResultViewModel: ObservableObject {
     // Map preferences (read from UserDefaults)
     @Published var showFloatingMap: Bool
     @Published var mapPosition: MapPosition
+    @Published var showParkingMeters: Bool  // Individual meter pins (not zone polygons)
 
-    /// All loaded zones for map display
+    /// All loaded zones for map display (metered zone polygons always shown)
     var allLoadedZones: [ParkingZone] {
         zoneService.allLoadedZones
     }
@@ -69,6 +100,8 @@ final class MainResultViewModel: ObservableObject {
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
         let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
         self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
+        // Show parking meters (individual pins) is OFF by default
+        self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
 
         setupBindings()
     }
@@ -90,6 +123,47 @@ final class MainResultViewModel: ObservableObject {
     func refreshLocation() {
         Task {
             await performLookup()
+        }
+    }
+
+    /// Return to GPS location after viewing a searched address
+    /// Uses cached GPS coordinate to avoid timeout issues with GPS cold start
+    func returnToGPSLocation() {
+        logger.info("🔄 returnToGPSLocation called")
+        // Use last known GPS location if available (avoids GPS timeout on cold start)
+        if let gpsCoord = lastKnownGPSCoordinate {
+            logger.info("✅ Using cached GPS: (\(gpsCoord.latitude), \(gpsCoord.longitude))")
+            currentCoordinate = gpsCoord
+            Task {
+                await performLookupAt(gpsCoord)
+            }
+        } else {
+            // No cached GPS - need fresh location
+            logger.info("⚠️ No cached GPS, requesting fresh location")
+            refreshLocation()
+        }
+    }
+
+    /// Look up zone at a specific coordinate (for address search)
+    func lookupZone(at coordinate: CLLocationCoordinate2D) {
+        Task {
+            await performLookupAt(coordinate)
+        }
+    }
+
+    /// Clear error and use last known GPS location (for "Back to Map" after area errors)
+    /// This avoids requiring a fresh GPS fix which may timeout
+    func clearErrorAndUseLastLocation() {
+        error = nil
+        // Use last known GPS location (not searched location) if available
+        if let gpsCoord = lastKnownGPSCoordinate {
+            currentCoordinate = gpsCoord
+            Task {
+                await performLookupAt(gpsCoord)
+            }
+        } else {
+            // Fall back to fresh location request
+            refreshLocation()
         }
     }
 
@@ -120,6 +194,7 @@ final class MainResultViewModel: ObservableObject {
     private func startContinuousLocationUpdates() {
         // Start tracking location
         locationService.startUpdatingLocation()
+        isLoading = true  // Show loading until first location
 
         // Subscribe to location updates with debouncing
         locationService.locationPublisher
@@ -132,14 +207,29 @@ final class MainResultViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Also do an immediate lookup
-        refreshLocation()
+        // Use a longer timeout for initial location (GPS cold start can be slow)
+        // Don't block on immediate lookup - let continuous updates handle it
+        Task {
+            do {
+                // Wait up to 30 seconds for first location from continuous updates
+                try await Task.sleep(nanoseconds: 30_000_000_000)
+                // If still loading after 30s and no location, show timeout
+                if isLoading && lastKnownGPSCoordinate == nil {
+                    error = .locationUnavailable
+                    isLoading = false
+                }
+            } catch {
+                // Task cancelled, ignore
+            }
+        }
     }
 
     /// Process a location update from continuous tracking
     private func processLocationUpdate(_ location: CLLocation) async {
-        // Skip if we're already loading
-        guard !isLoading else { return }
+        // For initial location, allow processing even if loading
+        // For subsequent updates, skip if already loading
+        let isInitialLocation = lastKnownGPSCoordinate == nil
+        if !isInitialLocation && isLoading { return }
 
         // Skip if location hasn't changed significantly (backup check, LocationService already filters at 10m)
         if let current = currentCoordinate {
@@ -151,6 +241,7 @@ final class MainResultViewModel: ObservableObject {
 
         // Perform the lookup
         currentCoordinate = location.coordinate
+        lastKnownGPSCoordinate = location.coordinate  // Save GPS location
         error = nil
 
         // Get parking result
@@ -166,6 +257,7 @@ final class MainResultViewModel: ObservableObject {
         await updateAddress(for: location)
 
         lastUpdated = Date()
+        isLoading = false  // Done loading (handles initial load case)
     }
 
     /// Report an issue with zone data
@@ -197,6 +289,7 @@ final class MainResultViewModel: ObservableObject {
                 self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
                 let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
                 self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
+                self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
             }
             .store(in: &cancellables)
 
@@ -236,6 +329,7 @@ final class MainResultViewModel: ObservableObject {
             // Get current location
             let location = try await locationService.requestSingleLocation()
             currentCoordinate = location.coordinate
+            lastKnownGPSCoordinate = location.coordinate  // Save GPS location
 
             // Get parking result
             let result = await zoneService.getParkingResult(
@@ -260,6 +354,41 @@ final class MainResultViewModel: ObservableObject {
         isLoading = false
     }
 
+    /// Perform lookup at a specific coordinate (for address search)
+    private func performLookupAt(_ coordinate: CLLocationCoordinate2D) async {
+        logger.info("🔍 performLookupAt: (\(coordinate.latitude), \(coordinate.longitude))")
+        isLoading = true
+        error = nil
+
+        // Update coordinate
+        currentCoordinate = coordinate
+
+        // Get parking result
+        let result = await zoneService.getParkingResult(
+            at: coordinate,
+            time: Date()
+        )
+
+        // Log the result
+        if let zone = result.lookupResult.primaryZone {
+            logger.info("✅ Zone found: \(zone.displayName) (type: \(zone.zoneType.rawValue))")
+        } else if result.lookupResult.isUnknownArea {
+            logger.warning("⚠️ Unknown area - no zone found at coordinate")
+        } else if result.lookupResult.isOutsideCoverage {
+            logger.warning("⚠️ Outside coverage area")
+        }
+
+        // Update UI state
+        updateState(from: result)
+
+        // Get address for the searched location
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        await updateAddress(for: location)
+
+        lastUpdated = Date()
+        isLoading = false
+    }
+
     private func updateState(from result: ParkingResult) {
         // Check for data loading errors first
         if let dataError = result.lookupResult.dataError {
@@ -278,10 +407,30 @@ final class MainResultViewModel: ObservableObject {
         // Zone info
         if let zone = result.lookupResult.primaryZone {
             zoneName = zone.displayName
+            zoneType = zone.zoneType
+            meteredSubtitle = zone.meteredSubtitle  // "$2/hr • 2hr max" for metered zones
+            timeLimitMinutes = zone.nonPermitTimeLimit  // Time limit for non-permit holders
             currentZoneId = zone.id
+
+            // Extract enforcement hours from the zone's rules
+            if let rule = zone.rules.first(where: { $0.enforcementStartTime != nil }) {
+                enforcementStartTime = rule.enforcementStartTime
+                enforcementEndTime = rule.enforcementEndTime
+                enforcementDays = rule.enforcementDays
+            } else {
+                enforcementStartTime = nil
+                enforcementEndTime = nil
+                enforcementDays = nil
+            }
         } else {
             zoneName = "Unknown Zone"
+            zoneType = .residentialPermit
+            meteredSubtitle = nil
+            timeLimitMinutes = nil
             currentZoneId = nil
+            enforcementStartTime = nil
+            enforcementEndTime = nil
+            enforcementDays = nil
         }
 
         // Validity & rules
@@ -306,6 +455,12 @@ final class MainResultViewModel: ObservableObject {
         // Overlapping zones
         overlappingZones = result.lookupResult.overlappingZones
         hasOverlappingZones = overlappingZones.count > 1
+
+        // Collect all valid permit areas from overlapping RPP zones
+        allValidPermitAreas = overlappingZones
+            .filter { $0.zoneType == .residentialPermit }
+            .compactMap { $0.permitArea }
+            .sorted()
 
         // Confidence
         lookupConfidence = result.lookupResult.confidence

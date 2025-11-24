@@ -10,6 +10,7 @@ struct ParkingZone: Identifiable, Hashable {
     let permitArea: String?
     let validPermitAreas: [String]
     let boundaries: [[Coordinate]]  // MultiPolygon: array of polygon boundaries
+    let multiPermitBoundaries: [MultiPermitBoundary]  // Boundaries that accept multiple permits
     let rules: [ParkingRule]
     let requiresPermit: Bool
     let restrictiveness: Int  // 1-10 scale, higher = more restrictive
@@ -26,6 +27,14 @@ struct ParkingZone: Identifiable, Hashable {
     }
 }
 
+// MARK: - Multi-Permit Boundary
+
+/// Represents a boundary that accepts multiple parking permits
+struct MultiPermitBoundary: Codable, Hashable {
+    let boundaryIndex: Int
+    let validPermitAreas: [String]
+}
+
 // MARK: - Custom Codable (backward compatible with "boundary" and "boundaries")
 
 extension ParkingZone: Codable {
@@ -33,6 +42,7 @@ extension ParkingZone: Codable {
         case id, cityCode, displayName, zoneType, permitArea, validPermitAreas
         case boundaries  // New MultiPolygon format
         case boundary    // Old single polygon format (for backward compatibility)
+        case multiPermitBoundaries
         case rules, requiresPermit, restrictiveness, metadata
     }
 
@@ -59,6 +69,9 @@ extension ParkingZone: Codable {
         } else {
             boundaries = []
         }
+
+        // Load multi-permit boundaries (optional, may not exist in older data)
+        multiPermitBoundaries = (try? container.decode([MultiPermitBoundary].self, forKey: .multiPermitBoundaries)) ?? []
     }
 
     func encode(to encoder: Encoder) throws {
@@ -71,6 +84,7 @@ extension ParkingZone: Codable {
         try container.encodeIfPresent(permitArea, forKey: .permitArea)
         try container.encode(validPermitAreas, forKey: .validPermitAreas)
         try container.encode(boundaries, forKey: .boundaries)
+        try container.encode(multiPermitBoundaries, forKey: .multiPermitBoundaries)
         try container.encode(rules, forKey: .rules)
         try container.encode(requiresPermit, forKey: .requiresPermit)
         try container.encode(restrictiveness, forKey: .restrictiveness)
@@ -97,8 +111,15 @@ extension ParkingZone {
     }
 
     /// Time limit for non-permit holders (in minutes)
+    /// Checks permitRequired rules first (which contain the time limit), then any rule with timeLimit
     var nonPermitTimeLimit: Int? {
-        rules.first { $0.ruleType == .timeLimit }?.timeLimit
+        // Check permit required rules first - they contain the non-permit holder time limit
+        if let permitRule = rules.first(where: { $0.ruleType == .permitRequired }),
+           let limit = permitRule.timeLimit {
+            return limit
+        }
+        // Fall back to any rule with a time limit
+        return rules.first { $0.timeLimit != nil }?.timeLimit
     }
 
     /// Enforcement hours description
@@ -125,6 +146,113 @@ extension ParkingZone {
             return "No time restrictions"
         }
         return rule.enforcementHoursDescription ?? "Time restrictions apply"
+    }
+
+    /// Check if a boundary at the given index is a multi-permit boundary
+    func isMultiPermitBoundary(at index: Int) -> Bool {
+        multiPermitBoundaries.contains { $0.boundaryIndex == index }
+    }
+
+    /// Get all valid permit areas for a boundary at the given index
+    func validPermitAreas(for boundaryIndex: Int) -> [String]? {
+        multiPermitBoundaries.first { $0.boundaryIndex == boundaryIndex }?.validPermitAreas
+    }
+
+    /// Set of multi-permit boundary indices for quick lookup
+    var multiPermitBoundaryIndices: Set<Int> {
+        Set(multiPermitBoundaries.map { $0.boundaryIndex })
+    }
+
+    /// Formatted subtitle for metered zones (e.g., "$2/hr • 2hr max")
+    var meteredSubtitle: String? {
+        guard zoneType == .metered else { return nil }
+
+        let rate = metadata.hourlyRate ?? 2.0
+        let rawTimeLimit = metadata.avgTimeLimit ?? 120
+
+        // Round to standard meter time limits (15, 30, 60, 120, 240 minutes)
+        let timeLimit = Self.roundToStandardTimeLimit(rawTimeLimit)
+
+        let rateStr = rate.truncatingRemainder(dividingBy: 1) == 0
+            ? "$\(Int(rate))/hr"
+            : String(format: "$%.2f/hr", rate)
+
+        let timeStr: String
+        if timeLimit >= 60 {
+            let hours = timeLimit / 60
+            timeStr = "\(hours)hr max"
+        } else {
+            timeStr = "\(timeLimit)min max"
+        }
+
+        return "\(rateStr) • \(timeStr)"
+    }
+
+    /// Round a time limit to the nearest standard meter time limit
+    private static func roundToStandardTimeLimit(_ minutes: Int) -> Int {
+        let standardLimits = [15, 30, 60, 120, 240]
+        return standardLimits.min(by: { abs($0 - minutes) < abs($1 - minutes) }) ?? 60
+    }
+
+    /// Compute bounding box for all boundaries in this zone
+    /// Used for fast spatial pre-filtering before expensive point-in-polygon tests
+    var boundingBox: BoundingBox {
+        var minLat = Double.infinity
+        var maxLat = -Double.infinity
+        var minLon = Double.infinity
+        var maxLon = -Double.infinity
+
+        for boundary in boundaries {
+            for coord in boundary {
+                minLat = min(minLat, coord.latitude)
+                maxLat = max(maxLat, coord.latitude)
+                minLon = min(minLon, coord.longitude)
+                maxLon = max(maxLon, coord.longitude)
+            }
+        }
+
+        return BoundingBox(
+            minLatitude: minLat,
+            maxLatitude: maxLat,
+            minLongitude: minLon,
+            maxLongitude: maxLon
+        )
+    }
+}
+
+// MARK: - Bounding Box
+
+/// Axis-aligned bounding box for fast spatial queries
+struct BoundingBox {
+    let minLatitude: Double
+    let maxLatitude: Double
+    let minLongitude: Double
+    let maxLongitude: Double
+
+    /// Check if a coordinate is within this bounding box
+    /// This is a fast O(1) check used to filter candidates before expensive point-in-polygon
+    func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
+        coordinate.latitude >= minLatitude &&
+        coordinate.latitude <= maxLatitude &&
+        coordinate.longitude >= minLongitude &&
+        coordinate.longitude <= maxLongitude
+    }
+
+    /// Check if this bounding box is valid (has been properly initialized)
+    var isValid: Bool {
+        minLatitude.isFinite && maxLatitude.isFinite &&
+        minLongitude.isFinite && maxLongitude.isFinite &&
+        minLatitude <= maxLatitude && minLongitude <= maxLongitude
+    }
+
+    /// Expand bounding box by a margin (in degrees)
+    func expanded(by margin: Double) -> BoundingBox {
+        BoundingBox(
+            minLatitude: minLatitude - margin,
+            maxLatitude: maxLatitude + margin,
+            minLongitude: minLongitude - margin,
+            maxLongitude: maxLongitude + margin
+        )
     }
 }
 
@@ -168,6 +296,11 @@ struct ZoneMetadata: Codable, Hashable {
     let lastUpdatedString: String  // Store as string for flexible parsing
     let accuracy: DataAccuracy
 
+    // Metered zone specific data
+    let hourlyRate: Double?  // Hourly rate in dollars (e.g., 2.0 = $2/hr)
+    let avgTimeLimit: Int?   // Average time limit in minutes (e.g., 120 = 2hr max)
+    let meterCount: Int?     // Number of meters in zone
+
     /// Computed Date property with flexible parsing
     var lastUpdated: Date {
         ZoneMetadata.parseDate(lastUpdatedString) ?? Date()
@@ -177,6 +310,9 @@ struct ZoneMetadata: Codable, Hashable {
         case dataSource
         case lastUpdatedString = "lastUpdated"
         case accuracy
+        case hourlyRate
+        case avgTimeLimit
+        case meterCount
     }
 
     // Simple date parser for metadata dates

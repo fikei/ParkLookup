@@ -18,9 +18,8 @@ LOGS_DIR.mkdir(exist_ok=True)
 
 # DataSF API endpoints
 DATASF_BASE_URL = "https://data.sfgov.org/resource"
-BLOCKFACE_DATASET_ID = "hi6h-neyh"  # Parking regulations (except non-metered color curb)
+BLOCKFACE_DATASET_ID = "hi6h-neyh"  # Parking regulations by block face (primary source)
 METERS_DATASET_ID = "8vzz-qzz9"     # Parking Meters
-RPP_PARCELS_DATASET_ID = "i886-hxz9"  # Residential Parking Permit Eligibility Parcels (polygons!)
 
 # SFMTA ArcGIS endpoints - SF Gov Enterprise GIS
 # Note: RPP boundaries may not be published as a separate layer

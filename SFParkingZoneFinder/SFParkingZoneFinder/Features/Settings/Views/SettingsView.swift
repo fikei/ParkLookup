@@ -3,9 +3,11 @@ import SwiftUI
 /// Main Settings screen
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var devSettings = DeveloperSettings.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showingAddPermit = false
     @State private var showingPrivacyPolicy = false
+    @State private var versionTapCount = 0
 
     var body: some View {
         NavigationStack {
@@ -34,7 +36,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: - Map Preferences Section
-                Section(header: Text("Map")) {
+                Section(header: Text("Map"), footer: Text("Parking meters show individual meter locations on the map. Paid parking zones are always visible.")) {
                     Toggle("Show Floating Map", isOn: $viewModel.showFloatingMap)
 
                     Picker("Map Position", selection: $viewModel.mapPosition) {
@@ -42,6 +44,8 @@ struct SettingsView: View {
                             Text(position.displayName).tag(position)
                         }
                     }
+
+                    Toggle("Show Parking Meters", isOn: $viewModel.showParkingMeters)
                 }
 
                 // MARK: - Help Section
@@ -68,6 +72,17 @@ struct SettingsView: View {
                         Spacer()
                         Text("\(viewModel.appVersion) (\(viewModel.buildNumber))")
                             .foregroundColor(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        versionTapCount += 1
+                        if versionTapCount >= 5 {
+                            devSettings.developerModeUnlocked = true
+                            versionTapCount = 0
+                            // Haptic feedback
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.success)
+                        }
                     }
 
                     HStack {
@@ -108,6 +123,85 @@ struct SettingsView: View {
                     .foregroundColor(.red)
                 }
                 #endif
+
+                // MARK: - Developer Settings Sections (Hidden)
+                if devSettings.developerModeUnlocked {
+                    // Simplification Algorithms
+                    Section(header: Text("Display Simplification"), footer: Text(DeveloperSettings.SettingInfo.douglasPeucker)) {
+                        Toggle("Douglas-Peucker", isOn: $devSettings.useDouglasPeucker)
+                        if devSettings.useDouglasPeucker {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Tolerance: \(String(format: "%.5f", devSettings.douglasPeuckerTolerance))° (~\(Int(devSettings.douglasPeuckerTolerance * 111000))m)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Slider(
+                                    value: $devSettings.douglasPeuckerTolerance,
+                                    in: 0.00001...0.001,
+                                    step: 0.00001
+                                )
+                            }
+                        }
+
+                        Toggle("Grid Snapping", isOn: $devSettings.useGridSnapping)
+                        if devSettings.useGridSnapping {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Grid: \(String(format: "%.5f", devSettings.gridSnapSize))° (~\(Int(devSettings.gridSnapSize * 111000))m)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Slider(
+                                    value: $devSettings.gridSnapSize,
+                                    in: 0.00001...0.0005,
+                                    step: 0.00001
+                                )
+                            }
+                        }
+
+                        Toggle("Convex Hull", isOn: $devSettings.useConvexHull)
+                    }
+
+                    // Curve Handling
+                    Section(header: Text("Curve Handling"), footer: Text(DeveloperSettings.SettingInfo.preserveCurves)) {
+                        Toggle("Preserve Curves", isOn: $devSettings.preserveCurves)
+                        if devSettings.preserveCurves {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Angle Threshold: \(Int(devSettings.curveAngleThreshold))°")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Slider(
+                                    value: $devSettings.curveAngleThreshold,
+                                    in: 5...45,
+                                    step: 1
+                                )
+                            }
+                        }
+                    }
+
+                    // Debug Visualization
+                    Section(header: Text("Debug Visualization"), footer: Text(devSettings.simplificationDescription)) {
+                        Toggle("Show Lookup Boundaries", isOn: $devSettings.showLookupBoundaries)
+                        Toggle("Show Original Overlay", isOn: $devSettings.showOriginalOverlay)
+                        Toggle("Show Vertex Counts", isOn: $devSettings.showVertexCounts)
+                    }
+
+                    // Performance Logging
+                    Section(header: Text("Performance Logging")) {
+                        Toggle("Log Simplification Stats", isOn: $devSettings.logSimplificationStats)
+                        Toggle("Log Lookup Performance", isOn: $devSettings.logLookupPerformance)
+                    }
+
+                    // Actions
+                    Section {
+                        Button("Reset to Defaults") {
+                            devSettings.resetToDefaults()
+                        }
+                        .foregroundColor(.orange)
+
+                        Button("Hide Developer Settings") {
+                            devSettings.developerModeUnlocked = false
+                        }
+                        .foregroundColor(.red)
+                    }
+                }
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Settings")

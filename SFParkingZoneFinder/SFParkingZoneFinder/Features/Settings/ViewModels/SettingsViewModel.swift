@@ -19,6 +19,11 @@ final class SettingsViewModel: ObservableObject {
             UserDefaults.standard.set(mapPosition.rawValue, forKey: "mapPosition")
         }
     }
+    @Published var showParkingMeters: Bool {
+        didSet {
+            UserDefaults.standard.set(showParkingMeters, forKey: "showParkingMeters")
+        }
+    }
 
     // MARK: - Dependencies
 
@@ -52,6 +57,8 @@ final class SettingsViewModel: ObservableObject {
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
         let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
         self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
+        // Show parking meters (individual pins) is OFF by default
+        self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
 
         setupBindings()
     }

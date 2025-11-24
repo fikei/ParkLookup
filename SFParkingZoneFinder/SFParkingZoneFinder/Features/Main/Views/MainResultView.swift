@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import MapKit
 
 // MARK: - Haptic Feedback Helper
 
@@ -30,94 +31,179 @@ enum HapticFeedback {
     }
 }
 
-/// Primary text-first view showing parking zone status and rules
+/// Primary view showing fullscreen map with zone card overlay
 struct MainResultView: View {
     @StateObject private var viewModel = MainResultViewModel()
-    @State private var showingFullRules = false
-    @State private var showingOverlappingZones = false
-    @State private var showingExpandedMap = false
+    @ObservedObject private var devSettings = DeveloperSettings.shared
     @State private var showingSettings = false
     @State private var contentAppeared = false
+    @State private var isMapExpanded = false
+    @State private var selectedZone: ParkingZone?
+    @State private var searchedCoordinate: CLLocationCoordinate2D?
+    @State private var showOutsideCoverageAlert = false
+    @State private var developerPanelExpanded = false
 
+    @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// The coordinate to use for map centering (searched or current)
+    /// Validates coordinates to prevent NaN errors in CoreGraphics
+    private var activeCoordinate: CLLocationCoordinate2D? {
+        let coord = searchedCoordinate ?? viewModel.currentCoordinate
+        // Validate coordinate to prevent NaN errors
+        guard let c = coord,
+              c.latitude.isFinite && c.longitude.isFinite,
+              c.latitude >= -90 && c.latitude <= 90,
+              c.longitude >= -180 && c.longitude <= 180 else {
+            return nil
+        }
+        return c
+    }
+
+    /// Extract permit area code from zone name
+    private var currentPermitArea: String? {
+        guard viewModel.zoneName.hasPrefix("Area ") else {
+            return viewModel.zoneName
+        }
+        return String(viewModel.zoneName.dropFirst(5))
+    }
+
+    /// User's valid permit area codes (uppercase) for map coloring
+    /// Uses ALL user permits (not just applicable ones) so all matching zones are colored green
+    private var userPermitAreaCodes: Set<String> {
+        Set(viewModel.userPermits.map { $0.area.uppercased() })
+    }
 
     var body: some View {
         ZStack {
-            // Background
-            Color(.systemGroupedBackground)
-                .ignoresSafeArea()
-
-            // Main content
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Zone Status Card (prominent at top)
-                    ZoneStatusCardView(
-                        zoneName: viewModel.zoneName,
-                        validityStatus: viewModel.validityStatus,
-                        applicablePermits: viewModel.applicablePermits
-                    )
-                    .opacity(contentAppeared ? 1 : 0)
-                    .offset(y: contentAppeared ? 0 : 20)
-
-                    // Map Card (full-width below zone card)
-                    if viewModel.error == nil && !viewModel.isLoading {
-                        MapCardView(
-                            coordinate: viewModel.currentCoordinate,
-                            zoneName: viewModel.zoneName,
-                            onTap: {
-                                HapticFeedback.light()
-                                showingExpandedMap = true
+            // Layer 1: Fullscreen Map (always visible as background)
+            if viewModel.error == nil && !viewModel.isLoading {
+                ZStack {
+                    ZoneMapView(
+                        zones: viewModel.allLoadedZones,
+                        currentZoneId: viewModel.currentZoneId,
+                        userCoordinate: activeCoordinate,
+                        onZoneTapped: { zone in
+                            if isMapExpanded {
+                                selectedZone = zone
                             }
-                        )
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                    }
-
-                    // Rules Summary
-                    RulesSummaryView(
-                        summaryLines: viewModel.ruleSummaryLines,
-                        warnings: viewModel.warnings,
-                        onViewFullRules: {
-                            HapticFeedback.light()
-                            showingFullRules = true
-                        }
-                    )
-                    .opacity(contentAppeared ? 1 : 0)
-                    .offset(y: contentAppeared ? 0 : 20)
-
-                    // Overlapping zones indicator
-                    if viewModel.hasOverlappingZones {
-                        OverlappingZonesButton(
-                            zoneCount: viewModel.overlappingZones.count,
-                            onTap: {
-                                HapticFeedback.light()
-                                showingOverlappingZones = true
-                            }
-                        )
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                    }
-
-                    // Additional info (address, refresh, report, settings)
-                    AdditionalInfoView(
-                        address: viewModel.currentAddress,
-                        lastUpdated: viewModel.lastUpdated,
-                        confidence: viewModel.lookupConfidence,
-                        onRefresh: {
-                            HapticFeedback.medium()
-                            viewModel.refreshLocation()
                         },
-                        onReportIssue: {
-                            HapticFeedback.light()
-                            viewModel.reportIssue()
-                        },
-                        onSettings: {
-                            HapticFeedback.selection()
-                            showingSettings = true
-                        }
+                        userPermitAreas: userPermitAreaCodes,
+                        devSettingsHash: devSettings.settingsHash,
+                        // When collapsed, shift user location below the card
+                        // A bias of 0.5 places the user indicator well below the large card
+                        verticalBias: isMapExpanded ? 0.0 : 0.5,
+                        // Hide zone overlays on home screen, show when expanded
+                        showOverlays: isMapExpanded,
+                        // Collapsed: 0.65, Expanded: 0.5
+                        zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
+                        // Show pin for searched address
+                        searchedCoordinate: searchedCoordinate
                     )
-                    .opacity(contentAppeared ? 1 : 0)
+
+                    // Developer overlay (only in expanded map mode when developer mode is unlocked)
+                    if isMapExpanded && devSettings.developerModeUnlocked && developerPanelExpanded {
+                        DeveloperMapOverlay(devSettings: devSettings, isPanelExpanded: $developerPanelExpanded, showToggleButton: false)
+                    }
                 }
-                .padding()
-                .animation(reduceMotion ? nil : .easeOut(duration: 0.3), value: viewModel.hasOverlappingZones)
+                .ignoresSafeArea()
+            } else {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+            }
+
+            // Layer 2: Card overlays (hidden when developer panel is open)
+            if !viewModel.isLoading && viewModel.error == nil && !developerPanelExpanded {
+                VStack {
+                    // Address search card (only in expanded mode)
+                    if isMapExpanded {
+                        AddressSearchCard(
+                            currentAddress: viewModel.currentAddress,
+                            onAddressSelected: { coordinate in
+                                searchedCoordinate = coordinate
+                                // Trigger zone lookup for the new coordinate
+                                viewModel.lookupZone(at: coordinate)
+                            },
+                            onResetToCurrentLocation: {
+                                searchedCoordinate = nil
+                                viewModel.returnToGPSLocation()
+                            },
+                            onOutsideCoverage: {
+                                showOutsideCoverageAlert = true
+                            }
+                        )
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+
+                    // Animated zone card that morphs between large and mini states
+                    AnimatedZoneCard(
+                        isExpanded: isMapExpanded,
+                        namespace: cardAnimation,
+                        zoneName: viewModel.zoneName,
+                        zoneCode: currentPermitArea,
+                        zoneType: viewModel.zoneType,
+                        validityStatus: viewModel.validityStatus,
+                        applicablePermits: viewModel.applicablePermits,
+                        allValidPermitAreas: viewModel.allValidPermitAreas,
+                        meteredSubtitle: viewModel.meteredSubtitle,
+                        timeLimitMinutes: viewModel.timeLimitMinutes,
+                        ruleSummaryLines: viewModel.ruleSummaryLines,
+                        enforcementStartTime: viewModel.enforcementStartTime,
+                        enforcementEndTime: viewModel.enforcementEndTime,
+                        enforcementDays: viewModel.enforcementDays
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .opacity(contentAppeared ? 1 : 0)
+                    .offset(y: contentAppeared ? 0 : 20)
+
+                    Spacer()
+
+                    // Bottom section - Tapped zone info (only in expanded mode)
+                    if isMapExpanded, let selected = selectedZone {
+                        TappedZoneInfoCard(zone: selected) {
+                            selectedZone = nil
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 80) // Padding to avoid overlap with bottom navigation
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+            }
+
+            // Layer 3: Bottom Navigation Bar (always visible when not loading/error)
+            if !viewModel.isLoading && viewModel.error == nil {
+                VStack {
+                    Spacer()
+                    BottomNavigationBar(
+                        isDeveloperModeActive: devSettings.developerModeUnlocked,
+                        onDeveloperTap: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                developerPanelExpanded.toggle()
+                            }
+                        },
+                        onSettingsTap: {
+                            showingSettings = true
+                        },
+                        onExpandTap: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                isMapExpanded.toggle()
+                                if !isMapExpanded {
+                                    selectedZone = nil
+                                    developerPanelExpanded = false
+                                    // Reset to current location when minimizing
+                                    if searchedCoordinate != nil {
+                                        searchedCoordinate = nil
+                                        viewModel.returnToGPSLocation()
+                                    }
+                                }
+                            }
+                        },
+                        isExpanded: isMapExpanded
+                    )
+                }
             }
 
             // Loading overlay
@@ -128,21 +214,32 @@ struct MainResultView: View {
 
             // Error state
             if let error = viewModel.error {
-                ErrorView(error: error) {
-                    HapticFeedback.medium()
-                    viewModel.refreshLocation()
-                }
+                ErrorView(
+                    error: error,
+                    onRetry: {
+                        HapticFeedback.medium()
+                        viewModel.refreshLocation()
+                    },
+                    onDismiss: {
+                        // Clear searched coordinate and use last known location
+                        // This avoids requiring a fresh GPS fix which may timeout
+                        HapticFeedback.light()
+                        searchedCoordinate = nil
+                        viewModel.clearErrorAndUseLastLocation()
+                    }
+                )
                 .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                 .onAppear {
                     HapticFeedback.error()
                 }
             }
         }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isMapExpanded)
+        .animation(.easeInOut(duration: 0.2), value: selectedZone?.id)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: viewModel.isLoading)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: viewModel.error != nil)
         .onAppear {
             viewModel.onAppear()
-            // Animate content in
             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.1)) {
                 contentAppeared = true
             }
@@ -151,37 +248,1086 @@ struct MainResultView: View {
             viewModel.onDisappear()
         }
         .onChange(of: viewModel.zoneName) { _, _ in
-            // Haptic when zone changes (user moved to new zone)
             if !viewModel.isLoading && viewModel.error == nil {
                 HapticFeedback.success()
             }
         }
-        .sheet(isPresented: $showingFullRules) {
-            FullRulesSheet(
-                zoneName: viewModel.zoneName,
-                ruleSummaryLines: viewModel.ruleSummaryLines
-            )
-        }
-        .sheet(isPresented: $showingOverlappingZones) {
-            OverlappingZonesSheet(zones: viewModel.overlappingZones)
-        }
-        .sheet(isPresented: $showingExpandedMap) {
-            ExpandedMapView(
-                coordinate: viewModel.currentCoordinate,
-                zoneName: viewModel.zoneName,
-                validityStatus: viewModel.validityStatus,
-                applicablePermits: viewModel.applicablePermits,
-                zones: viewModel.allLoadedZones,
-                currentZoneId: viewModel.currentZoneId
-            )
-        }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+        }
+        .alert("Outside Coverage Area", isPresented: $showOutsideCoverageAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("That address is outside San Francisco. We currently only support SF parking zones.")
         }
     }
 }
 
-// MARK: - Overlapping Zones Button
+// MARK: - Animated Zone Card (morphs between large and mini states)
+
+private struct AnimatedZoneCard: View {
+    let isExpanded: Bool
+    var namespace: Namespace.ID
+    let zoneName: String
+    let zoneCode: String?
+    let zoneType: ZoneType
+    let validityStatus: PermitValidityStatus
+    let applicablePermits: [ParkingPermit]
+    let allValidPermitAreas: [String]
+    let meteredSubtitle: String?
+    let timeLimitMinutes: Int?
+    let ruleSummaryLines: [String]
+
+    // Enforcement hours for "Park Until" calculation
+    let enforcementStartTime: TimeOfDay?
+    let enforcementEndTime: TimeOfDay?
+    let enforcementDays: [DayOfWeek]?
+
+    @State private var animationIndex: Int = 0
+    @State private var isFlipped: Bool = false
+
+    private var isMultiPermitLocation: Bool {
+        allValidPermitAreas.count > 1
+    }
+
+    private var orderedPermitAreas: [String] {
+        guard isMultiPermitLocation else {
+            return allValidPermitAreas.isEmpty ? [singleZoneCode] : allValidPermitAreas
+        }
+        var areas = allValidPermitAreas
+        if let userPermitArea = applicablePermits.first?.area,
+           let index = areas.firstIndex(of: userPermitArea) {
+            areas.remove(at: index)
+            areas.insert(userPermitArea, at: 0)
+        }
+        return areas
+    }
+
+    private var singleZoneCode: String {
+        if zoneType == .metered { return "$" }
+        if zoneName.hasPrefix("Area ") { return String(zoneName.dropFirst(5)) }
+        if zoneName.hasPrefix("Zone ") { return String(zoneName.dropFirst(5)) }
+        return zoneName
+    }
+
+    private var isValidStyle: Bool {
+        validityStatus == .valid || validityStatus == .multipleApply
+    }
+
+    private var cardBackground: Color {
+        if zoneType == .metered { return Color(.systemBackground) }
+        return isValidStyle ? Color.green : Color(.systemBackground)
+    }
+
+    private var circleBackground: Color {
+        ZoneColorProvider.swiftUIColor(for: zoneCode)
+    }
+
+    private var currentSelectedArea: String {
+        guard isMultiPermitLocation, animationIndex < orderedPermitAreas.count else {
+            return zoneCode ?? singleZoneCode
+        }
+        return orderedPermitAreas[animationIndex]
+    }
+
+    /// Whether we're currently outside enforcement hours (for banner display)
+    private var isOutsideEnforcement: Bool {
+        guard let startTime = enforcementStartTime, let endTime = enforcementEndTime else {
+            return false
+        }
+
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.totalMinutes
+        let endMinutes = endTime.totalMinutes
+
+        // Check if today is an enforcement day
+        if let days = enforcementDays, !days.isEmpty,
+           let weekday = components.weekday,
+           let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+            if !days.contains(dayOfWeek) {
+                return true // Not an enforcement day
+            }
+        }
+
+        // Check if outside enforcement hours
+        return currentMinutes < startMinutes || currentMinutes >= endMinutes
+    }
+
+    private var parkUntilText: String? {
+        guard (validityStatus == .invalid || validityStatus == .noPermitSet),
+              let _ = timeLimitMinutes else { return nil }
+
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
+
+        // Check if enforcement is currently active
+        if let startTime = enforcementStartTime, let endTime = enforcementEndTime {
+            let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+            let startMinutes = startTime.totalMinutes
+            let endMinutes = endTime.totalMinutes
+
+            // Check if today is an enforcement day
+            var isEnforcementDay = true
+            var currentDayOfWeek: DayOfWeek?
+            if let days = enforcementDays, !days.isEmpty,
+               let weekday = components.weekday,
+               let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+                currentDayOfWeek = dayOfWeek
+                isEnforcementDay = days.contains(dayOfWeek)
+            }
+
+            if isEnforcementDay {
+                if currentMinutes < startMinutes {
+                    // Before enforcement starts today - can park until enforcement begins
+                    return formatParkUntil(hour: startTime.hour, minute: startTime.minute, on: now)
+                } else if currentMinutes >= endMinutes {
+                    // After enforcement ends today - find next enforcement start
+                    return findNextEnforcementStart(from: now, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
+                } else {
+                    // During enforcement - normal time limit applies
+                    return calculateTimeLimitEnd(from: now, endTime: endTime)
+                }
+            } else {
+                // Not an enforcement day - find next enforcement start
+                return findNextEnforcementStart(from: now, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
+            }
+        }
+
+        // No enforcement hours defined - just use time limit
+        return calculateTimeLimitEnd(from: now, endTime: nil)
+    }
+
+    /// Format "Park until" with day if not today
+    private func formatParkUntil(hour: Int, minute: Int, on date: Date) -> String {
+        let calendar = Calendar.current
+        guard let targetDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date) else {
+            return "Park until \(hour):\(String(format: "%02d", minute))"
+        }
+
+        let formatter = DateFormatter()
+        if calendar.isDateInToday(targetDate) {
+            formatter.dateFormat = "h:mm a"
+            return "Park until \(formatter.string(from: targetDate))"
+        } else {
+            formatter.dateFormat = "EEE h:mm a"
+            return "Park until \(formatter.string(from: targetDate))"
+        }
+    }
+
+    /// Find the next enforcement start time
+    private func findNextEnforcementStart(from now: Date, startTime: TimeOfDay, days: [DayOfWeek]?, currentDay: DayOfWeek?) -> String {
+        let calendar = Calendar.current
+
+        // If no specific days, enforcement is daily - next enforcement is tomorrow
+        guard let enforcementDays = days, !enforcementDays.isEmpty, let current = currentDay else {
+            if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) {
+                return formatParkUntil(hour: startTime.hour, minute: startTime.minute, on: tomorrow)
+            }
+            return "Park until tomorrow"
+        }
+
+        // Find the next enforcement day
+        let allDays: [DayOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        guard let currentIndex = allDays.firstIndex(of: current) else {
+            return "Park until tomorrow"
+        }
+
+        // Look for the next enforcement day (starting from tomorrow)
+        for offset in 1...7 {
+            let nextIndex = (currentIndex + offset) % 7
+            let nextDay = allDays[nextIndex]
+            if enforcementDays.contains(nextDay) {
+                if let targetDate = calendar.date(byAdding: .day, value: offset, to: now) {
+                    return formatParkUntil(hour: startTime.hour, minute: startTime.minute, on: targetDate)
+                }
+                break
+            }
+        }
+
+        return "Park until tomorrow"
+    }
+
+    /// Calculate when time limit expires (capped at enforcement end if applicable)
+    private func calculateTimeLimitEnd(from now: Date, endTime: TimeOfDay?) -> String {
+        guard let limit = timeLimitMinutes else { return nil ?? "Check posted signs" }
+
+        let calendar = Calendar.current
+        let parkUntil = now.addingTimeInterval(TimeInterval(limit * 60))
+
+        // Cap at enforcement end time if provided
+        if let end = endTime,
+           let endDate = calendar.date(bySettingHour: end.hour, minute: end.minute, second: 0, of: now) {
+            let actualEnd = min(parkUntil, endDate)
+            return formatParkUntil(hour: calendar.component(.hour, from: actualEnd),
+                                   minute: calendar.component(.minute, from: actualEnd),
+                                   on: actualEnd)
+        }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return "Park until \(formatter.string(from: parkUntil))"
+    }
+
+    /// Responsive card height for large mode
+    private var largeCardHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.height
+        let safeAreaTop: CGFloat = 59
+        let safeAreaBottom: CGFloat = 34
+        let padding: CGFloat = 32
+        let mapCardHeight: CGFloat = 120
+        let rulesHeaderPeek: CGFloat = 20
+        let spacing: CGFloat = 32
+        let availableHeight = screenHeight - safeAreaTop - safeAreaBottom - padding - mapCardHeight - rulesHeaderPeek - spacing
+        return min(max(availableHeight, 300), 520)
+    }
+
+    var body: some View {
+        ZStack {
+            // Animated background that morphs between sizes
+            RoundedRectangle(cornerRadius: 16)
+                .fill(cardBackground)
+                .matchedGeometryEffect(id: "cardBackground", in: namespace)
+                .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+
+            // Content changes based on expanded state
+            if isExpanded {
+                miniContent
+                    .transition(.opacity)
+            } else {
+                largeContent
+                    .transition(.opacity)
+            }
+        }
+        .frame(height: isExpanded ? miniCardHeight : largeCardHeight)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isExpanded)
+    }
+
+    /// Fixed height for mini card (reduced by 20%)
+    private var miniCardHeight: CGFloat { 70 }
+
+    // MARK: - Mini Content (expanded map mode)
+
+    private var miniContent: some View {
+        ZStack {
+            HStack(spacing: 12) {
+                // Zone circle (scaled down to fit reduced card height)
+                zoneCircle(size: 44)
+
+                // Zone info - state-specific content
+                VStack(alignment: .leading, spacing: 4) {
+                    if zoneType == .metered {
+                        // PAID PARKING STATE
+                        Text(zoneName)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(meteredSubtitle ?? "$2/hr • 2hr max")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else if isValidStyle {
+                        // IN PERMIT ZONE (valid) - single or multi
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.headline)
+                            Text("Unlimited Parking")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.white)
+                        Text(isMultiPermitLocation ? formattedZonesList : zoneName)
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.8))
+                    } else if isMultiPermitLocation {
+                        // MULTI-PERMIT ZONE (invalid permit)
+                        Text("Zone \(currentSelectedArea)")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                            .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                        Text(formattedZonesList)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        // OUT OF PERMIT ZONE (invalid) - show status as title, zone on line 2
+                        if isOutsideEnforcement {
+                            // Outside enforcement - show unlimited
+                            Text("Unlimited Now")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text(zoneName)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else if let limit = timeLimitMinutes {
+                            // During enforcement - show time limit
+                            Text("\(limit / 60) Hour Limit")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text(zoneName)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text(zoneName)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text("Permit Required")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    // Status badge
+                    miniStatusBadge
+                }
+
+                Spacer()
+            }
+            .padding()
+        }
+    }
+
+    /// Mini card status badge - state-specific
+    private var miniStatusBadge: some View {
+        Group {
+            if zoneType == .metered {
+                // PAID PARKING - show payment indicator
+                HStack(spacing: 6) {
+                    Image(systemName: "creditcard")
+                        .font(.caption)
+                    Text("Paid Parking")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.blue)
+            } else if isValidStyle {
+                // IN PERMIT ZONE - valid (checkmark already in header, zone name in subtitle)
+                EmptyView()
+            } else if let parkUntil = parkUntilText {
+                // OUT OF PERMIT - show time limit
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                    Text(parkUntil)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.orange)
+            } else {
+                // Default status
+                HStack(spacing: 6) {
+                    Image(systemName: validityStatus.iconName)
+                        .font(.caption)
+                    Text(validityStatus.displayText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(Color.forValidityStatus(validityStatus))
+            }
+        }
+    }
+
+    // MARK: - Large Content (home screen mode)
+
+    private var largeContent: some View {
+        ZStack {
+            if !isFlipped {
+                // Front of card - state-specific content
+                VStack(spacing: 8) {
+                    // Zone circle centered
+                    zoneCircle(size: 160)
+
+                    // State-specific subtitle and info
+                    largeCardSubtitle
+                }
+
+                // Top row: Status badge (left) and Info button (right)
+                VStack {
+                    HStack {
+                        // State-specific top badge
+                        largeCardTopBadge
+
+                        Spacer()
+
+                        Button {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                isFlipped = true
+                            }
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .font(.title2)
+                                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                        }
+                    }
+                    .padding(16)
+                    Spacer()
+                }
+
+                // Bottom badge
+                VStack {
+                    Spacer()
+                    ValidityBadgeView(
+                        status: validityStatus,
+                        permits: applicablePermits,
+                        onColoredBackground: isValidStyle,
+                        timeLimitMinutes: timeLimitMinutes,
+                        enforcementStartTime: enforcementStartTime,
+                        enforcementEndTime: enforcementEndTime,
+                        enforcementDays: enforcementDays
+                    )
+                    .padding(.bottom, 24)
+                }
+            } else {
+                // Back of card (rules)
+                rulesContent
+            }
+        }
+        .rotation3DEffect(
+            .degrees(isFlipped ? 180 : 0),
+            axis: (x: 0, y: 1, z: 0),
+            perspective: 0.8
+        )
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isFlipped)
+    }
+
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = orderedPermitAreas
+        switch areas.count {
+        case 0:
+            return "Zone"
+        case 1:
+            return "Zone \(areas[0])"
+        case 2:
+            return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
+    private var displaySubtitle: String? {
+        if zoneType == .metered { return meteredSubtitle ?? "$2/hr • 2hr max" }
+        if isMultiPermitLocation { return formattedZonesList }
+        return nil
+    }
+
+    // MARK: - Large Card State-Specific Components
+
+    /// Subtitle content below the zone circle on large card
+    @ViewBuilder
+    private var largeCardSubtitle: some View {
+        if zoneType == .metered {
+            // PAID PARKING STATE
+            VStack(spacing: 4) {
+                Text(meteredSubtitle ?? "$2/hr • 2hr max")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Text("Metered Parking")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary.opacity(0.8))
+            }
+        } else if isValidStyle {
+            // IN PERMIT ZONE (valid) - single or multi
+            VStack(spacing: 4) {
+                if isMultiPermitLocation {
+                    Text(formattedZonesList)
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                Text("Unlimited Parking")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+            }
+        } else if isMultiPermitLocation {
+            // MULTI-PERMIT ZONE (invalid permit)
+            VStack(spacing: 4) {
+                Text(formattedZonesList)
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+            }
+        } else {
+            // OUT OF PERMIT ZONE (single zone, invalid)
+            VStack(spacing: 4) {
+                Text(zoneName)
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    /// Top badge on large card (permit status or zone type indicator)
+    @ViewBuilder
+    private var largeCardTopBadge: some View {
+        if zoneType == .metered {
+            // PAID PARKING - show payment badge
+            HStack(spacing: 4) {
+                Image(systemName: "creditcard.fill")
+                    .font(.caption)
+                Text("PAID PARKING")
+                    .font(.caption)
+                    .fontWeight(.bold)
+            }
+            .foregroundColor(.blue)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.blue.opacity(0.15))
+            .clipShape(Capsule())
+        } else if isValidStyle {
+            // IN PERMIT ZONE - valid
+            HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.caption)
+                Text("UNLIMITED PARKING")
+                    .font(.caption)
+                    .fontWeight(.bold)
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.white.opacity(0.25))
+            .clipShape(Capsule())
+        } else if zoneType == .residentialPermit {
+            // OUT OF PERMIT ZONE - show the better status (unlimited if outside enforcement, otherwise time limit)
+            if isOutsideEnforcement {
+                // Outside enforcement hours - show unlimited
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                    Text("UNLIMITED NOW")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                }
+                .foregroundColor(.green)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.green.opacity(0.15))
+                .clipShape(Capsule())
+            } else if let limit = timeLimitMinutes {
+                // During enforcement - show time limit
+                HStack(spacing: 4) {
+                    Image(systemName: "clock.fill")
+                        .font(.caption)
+                    Text("\(limit / 60) HOUR LIMIT")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                }
+                .foregroundColor(.orange)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.orange.opacity(0.15))
+                .clipShape(Capsule())
+            } else {
+                Text("PERMIT REQUIRED")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color(.systemGray5))
+                    .clipShape(Capsule())
+            }
+        }
+    }
+
+    // MARK: - Shared Components
+
+    @ViewBuilder
+    private func zoneCircle(size: CGFloat) -> some View {
+        if isMultiPermitLocation {
+            LargeMultiPermitCircleView(
+                permitAreas: orderedPermitAreas,
+                animationIndex: animationIndex,
+                size: size
+            )
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    animationIndex = (animationIndex + 1) % orderedPermitAreas.count
+                }
+            }
+        } else {
+            ZStack {
+                Circle()
+                    .fill(circleBackground)
+                    .frame(width: size, height: size)
+                    .shadow(color: .black.opacity(0.1), radius: size > 100 ? 4 : 2, x: 0, y: 2)
+
+                Text(singleZoneCode)
+                    .font(.system(size: size * (isExpanded ? 0.5 : 0.6), weight: .bold))
+                    .foregroundColor(.white)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private var statusBadge: some View {
+        Group {
+            if let parkUntil = parkUntilText {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                    Text(parkUntil)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(isValidStyle ? .white.opacity(0.9) : .orange)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: validityStatus.iconName)
+                        .font(.caption)
+                    Text(validityStatus.displayText)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(isValidStyle ? .white.opacity(0.9) : Color.forValidityStatus(validityStatus))
+            }
+        }
+    }
+
+    private var rulesContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Parking Rules")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(isValidStyle ? .white : .primary)
+
+                Spacer()
+
+                Button {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        isFlipped = false
+                    }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(ruleSummaryLines, id: \.self) { rule in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "circle.fill")
+                                .font(.system(size: 6))
+                                .foregroundColor(isValidStyle ? .white.opacity(0.7) : .secondary)
+                                .padding(.top, 6)
+
+                            Text(rule)
+                                .font(.body)
+                                .foregroundColor(isValidStyle ? .white : .primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+
+                    if ruleSummaryLines.isEmpty {
+                        Text("No specific rules available")
+                            .font(.body)
+                            .foregroundColor(isValidStyle ? .white.opacity(0.7) : .secondary)
+                            .italic()
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+
+            Spacer()
+        }
+        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+    }
+}
+
+// MARK: - Large Multi-Permit Circle View
+
+private struct LargeMultiPermitCircleView: View {
+    let permitAreas: [String]
+    let animationIndex: Int
+    let size: CGFloat
+
+    private var offset: CGFloat { size * 0.35 }
+    private var totalWidth: CGFloat { size + (CGFloat(permitAreas.count - 1) * offset) }
+
+    private var reorderedAreas: [(area: String, index: Int)] {
+        var areas = permitAreas.enumerated().map { (area: $1, index: $0) }
+        if let animatedItem = areas.first(where: { $0.index == animationIndex }) {
+            areas.removeAll { $0.index == animationIndex }
+            areas.append(animatedItem)
+        }
+        return areas
+    }
+
+    var body: some View {
+        ZStack(alignment: .center) {
+            ForEach(reorderedAreas, id: \.index) { item in
+                let isActive = item.index == animationIndex
+                let xOffset = CGFloat(item.index) * offset - (totalWidth - size) / 2
+
+                ZStack {
+                    Circle()
+                        .fill(ZoneColorProvider.swiftUIColor(for: item.area))
+                        .frame(width: size, height: size)
+                        .shadow(color: isActive ? .black.opacity(0.3) : .black.opacity(0.15),
+                                radius: isActive ? 8 : 4, x: 0, y: isActive ? 4 : 2)
+
+                    Text(item.area)
+                        .font(.system(size: size * 0.5, weight: .bold))
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.5)
+                }
+                .offset(x: xOffset)
+                .scaleEffect(isActive ? 1.15 : 1.0)
+                .zIndex(isActive ? 1 : 0)
+            }
+        }
+        .frame(width: totalWidth, height: size * 1.2)
+    }
+}
+
+// MARK: - Mini Zone Card (compact version for expanded map) - DEPRECATED, kept for reference
+
+private struct MiniZoneCardView: View {
+    let zoneName: String
+    let zoneCode: String?
+    let zoneType: ZoneType
+    let validityStatus: PermitValidityStatus
+    let applicablePermits: [ParkingPermit]
+    let allValidPermitAreas: [String]
+    let timeLimitMinutes: Int?
+
+    @State private var animationIndex: Int = 0
+
+    private var isMultiPermitLocation: Bool {
+        allValidPermitAreas.count > 1
+    }
+
+    private var orderedPermitAreas: [String] {
+        guard isMultiPermitLocation else {
+            return [zoneCode ?? "?"]
+        }
+        var areas = allValidPermitAreas
+        if let userPermitArea = applicablePermits.first?.area,
+           let index = areas.firstIndex(of: userPermitArea) {
+            areas.remove(at: index)
+            areas.insert(userPermitArea, at: 0)
+        }
+        return areas
+    }
+
+    private var isValidStyle: Bool {
+        validityStatus == .valid || validityStatus == .multipleApply
+    }
+
+    private var cardBackground: Color {
+        if zoneType == .metered {
+            return Color(.systemBackground)
+        }
+        return isValidStyle ? Color.green : Color(.systemBackground)
+    }
+
+    private var circleBackground: Color {
+        ZoneColorProvider.swiftUIColor(for: zoneCode)
+    }
+
+    private var currentSelectedArea: String {
+        guard isMultiPermitLocation, animationIndex < orderedPermitAreas.count else {
+            return zoneCode ?? "?"
+        }
+        return orderedPermitAreas[animationIndex]
+    }
+
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = orderedPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
+    /// Calculate "Park until" time
+    private var parkUntilText: String? {
+        guard (validityStatus == .invalid || validityStatus == .noPermitSet),
+              let limit = timeLimitMinutes else { return nil }
+        let parkUntil = Date().addingTimeInterval(TimeInterval(limit * 60))
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return "Park until \(formatter.string(from: parkUntil))"
+    }
+
+    var body: some View {
+        HStack(spacing: 16) {
+            // Zone circle
+            if isMultiPermitLocation {
+                MiniMultiPermitCircleView(
+                    permitAreas: orderedPermitAreas,
+                    animationIndex: animationIndex,
+                    size: 56
+                )
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        animationIndex = (animationIndex + 1) % orderedPermitAreas.count
+                    }
+                }
+            } else {
+                ZStack {
+                    Circle()
+                        .fill(circleBackground)
+                        .frame(width: 56, height: 56)
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+
+                    Text(zoneCode ?? "?")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                }
+            }
+
+            // Zone info
+            VStack(alignment: .leading, spacing: 4) {
+                if isMultiPermitLocation {
+                    Text("Zone \(currentSelectedArea)")
+                        .font(.headline)
+                        .foregroundColor(isValidStyle ? .white : .primary)
+                        .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                    Text(formattedZonesList)
+                        .font(.caption)
+                        .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                } else {
+                    Text(zoneName)
+                        .font(.headline)
+                        .foregroundColor(isValidStyle ? .white : .primary)
+                }
+
+                // Status or Park Until
+                if let parkUntil = parkUntilText {
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock")
+                            .font(.caption)
+                        Text(parkUntil)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(isValidStyle ? .white.opacity(0.9) : .orange)
+                } else {
+                    HStack(spacing: 6) {
+                        Image(systemName: validityStatus.iconName)
+                            .font(.caption)
+                        Text(validityStatus.displayText)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(isValidStyle ? .white.opacity(0.9) : Color.forValidityStatus(validityStatus))
+                }
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(cardBackground)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+    }
+}
+
+// MARK: - Mini Multi-Permit Circle View
+
+private struct MiniMultiPermitCircleView: View {
+    let permitAreas: [String]
+    let animationIndex: Int
+    let size: CGFloat
+
+    private var offset: CGFloat { size * 0.25 }
+    private var totalWidth: CGFloat { size + (CGFloat(permitAreas.count - 1) * offset) }
+
+    private var reorderedAreas: [(area: String, index: Int)] {
+        var areas = permitAreas.enumerated().map { (area: $1, index: $0) }
+        if let animatedItem = areas.first(where: { $0.index == animationIndex }) {
+            areas.removeAll { $0.index == animationIndex }
+            areas.append(animatedItem)
+        }
+        return areas
+    }
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            ForEach(reorderedAreas, id: \.index) { item in
+                let isActive = item.index == animationIndex
+                ZStack {
+                    Circle()
+                        .fill(ZoneColorProvider.swiftUIColor(for: item.area))
+                        .frame(width: size, height: size)
+                        .shadow(color: isActive ? .black.opacity(0.3) : .black.opacity(0.1),
+                                radius: isActive ? 4 : 2, x: 0, y: isActive ? 2 : 1)
+
+                    Text(item.area)
+                        .font(.system(size: size * 0.4, weight: .bold))
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.5)
+                }
+                .offset(x: CGFloat(item.index) * offset)
+                .scaleEffect(isActive ? 1.1 : 1.0)
+                .zIndex(isActive ? 1 : 0)
+            }
+        }
+        .frame(width: totalWidth, height: size * 1.1)
+    }
+}
+
+// MARK: - Expanded Bottom Card
+
+private struct ExpandedBottomCard: View {
+    let onSettingsTap: () -> Void
+
+    var body: some View {
+        HStack {
+            Spacer()
+
+            // Settings button
+            Button(action: onSettingsTap) {
+                HStack(spacing: 6) {
+                    Image(systemName: "gearshape")
+                    Text("Settings")
+                }
+                .font(.subheadline)
+                .foregroundColor(.blue)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+    }
+}
+
+// MARK: - Tapped Zone Info Card
+
+private struct TappedZoneInfoCard: View {
+    let zone: ParkingZone
+    let onDismiss: () -> Void
+
+    @State private var animationIndex: Int = 0
+
+    private var zoneCode: String {
+        zone.permitArea ?? zone.displayName
+    }
+
+    private var isMultiPermitZone: Bool {
+        !zone.multiPermitBoundaries.isEmpty && zone.zoneType == .residentialPermit
+    }
+
+    private var allPermitAreas: [String] {
+        guard isMultiPermitZone else { return [zoneCode] }
+        var areas = Set<String>()
+        if let permitArea = zone.permitArea { areas.insert(permitArea) }
+        for boundary in zone.multiPermitBoundaries {
+            areas.formUnion(boundary.validPermitAreas)
+        }
+        return areas.sorted()
+    }
+
+    private var currentSelectedArea: String {
+        guard isMultiPermitZone, animationIndex < allPermitAreas.count else { return zoneCode }
+        return allPermitAreas[animationIndex]
+    }
+
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = allPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                HStack(spacing: 12) {
+                    if isMultiPermitZone {
+                        MiniMultiPermitCircleView(
+                            permitAreas: allPermitAreas,
+                            animationIndex: animationIndex,
+                            size: 44
+                        )
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                animationIndex = (animationIndex + 1) % allPermitAreas.count
+                            }
+                        }
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(ZoneColorProvider.swiftUIColor(for: zone.permitArea))
+                                .frame(width: 44, height: 44)
+                            Text(zoneCode)
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.white)
+                                .minimumScaleFactor(0.5)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        if isMultiPermitZone {
+                            Text("Zone \(currentSelectedArea)")
+                                .font(.headline)
+                                .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                            Text(formattedZonesList)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text(zone.displayName)
+                                .font(.headline)
+                            Text(zone.zoneType.displayName)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            if let ruleDesc = zone.primaryRuleDescription {
+                Text(ruleDesc)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            if let hours = zone.enforcementHours {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                    Text(hours)
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
+    }
+}
+
+// MARK: - Overlapping Zones Button (kept for compatibility)
 
 struct OverlappingZonesButton: View {
     let zoneCount: Int
@@ -217,12 +1363,10 @@ struct LoadingOverlay: View {
 
     var body: some View {
         ZStack {
-            // Solid background for visibility
             Color(.systemGroupedBackground)
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
-                // Animated parking icon
                 ZStack {
                     Circle()
                         .fill(brandColor.opacity(0.15))
@@ -268,28 +1412,31 @@ struct LoadingOverlay: View {
 struct ErrorView: View {
     let error: AppError
     let onRetry: () -> Void
+    let onDismiss: (() -> Void)?
     @State private var showTechnicalDetails = false
+
+    init(error: AppError, onRetry: @escaping () -> Void, onDismiss: (() -> Void)? = nil) {
+        self.error = error
+        self.onRetry = onRetry
+        self.onDismiss = onDismiss
+    }
 
     var body: some View {
         VStack(spacing: 20) {
-            // Error icon with contextual color
             Image(systemName: error.iconName)
                 .font(.system(size: 48))
                 .foregroundColor(error.iconColor)
 
-            // Error title
             Text(errorTitle)
                 .font(.title2)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
 
-            // Error description
             Text(error.localizedDescription)
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
 
-            // Recovery suggestion
             if let suggestion = error.recoverySuggestion {
                 Text(suggestion)
                     .font(.subheadline)
@@ -298,7 +1445,6 @@ struct ErrorView: View {
                     .padding(.top, 4)
             }
 
-            // Action buttons
             VStack(spacing: 12) {
                 if error.canRetry {
                     Button(action: onRetry) {
@@ -325,10 +1471,21 @@ struct ErrorView: View {
                     }
                     .buttonStyle(.bordered)
                 }
+
+                // Show "Back to Map" for area-related errors
+                if let onDismiss = onDismiss, (error == .unknownArea || error == .outsideCoverage) {
+                    Button(action: onDismiss) {
+                        HStack {
+                            Image(systemName: "map")
+                            Text("Back to Map")
+                        }
+                        .frame(minWidth: 140)
+                    }
+                    .buttonStyle(.bordered)
+                }
             }
             .padding(.top, 8)
 
-            // Technical details for data errors (debug builds)
             #if DEBUG
             if case .dataLoadFailed(let dataError) = error {
                 Button {
@@ -377,47 +1534,6 @@ struct ErrorView: View {
     }
 }
 
-// MARK: - Full Rules Sheet
-
-struct FullRulesSheet: View {
-    let zoneName: String
-    let ruleSummaryLines: [String]
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(zoneName)
-                        .font(.title)
-                        .fontWeight(.bold)
-
-                    ForEach(Array(ruleSummaryLines.enumerated()), id: \.offset) { index, line in
-                        HStack(alignment: .top, spacing: 12) {
-                            Text("\(index + 1).")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
-                                .frame(width: 24, alignment: .trailing)
-                            Text(line)
-                                .font(.body)
-                        }
-                    }
-
-                    Spacer()
-                }
-                .padding()
-            }
-            .navigationTitle("Full Rules")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Overlapping Zones Sheet
 
 struct OverlappingZonesSheet: View {
@@ -444,6 +1560,70 @@ struct OverlappingZonesSheet: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Bottom Navigation Bar
+
+/// Fixed bottom navigation with three evenly distributed buttons
+private struct BottomNavigationBar: View {
+    let isDeveloperModeActive: Bool
+    let onDeveloperTap: () -> Void
+    let onSettingsTap: () -> Void
+    let onExpandTap: () -> Void
+    let isExpanded: Bool
+
+    var body: some View {
+        HStack(spacing: 0) {
+            // Left: Developer tools button (only when developer mode is unlocked)
+            Button {
+                HapticFeedback.selection()
+                onDeveloperTap()
+            } label: {
+                Image(systemName: "chevron.left.forwardslash.chevron.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.6))
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+            .opacity(isDeveloperModeActive ? 1.0 : 0.0)
+            .disabled(!isDeveloperModeActive)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Center: Settings button
+            Button {
+                HapticFeedback.selection()
+                onSettingsTap()
+            } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.6))
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+
+            // Right: Expand/collapse button
+            Button {
+                HapticFeedback.light()
+                onExpandTap()
+            } label: {
+                Image(systemName: isExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.6))
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
     }
 }
 

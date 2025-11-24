@@ -53,16 +53,20 @@ For a functional Alpha release with real data, complete these in order:
 | S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | **COMPLETE** | 8/10 |
-| S17: Map Zone Boundaries | In Progress | 10/19 |
+| S17: Map Zone Boundaries | In Progress | 15/26 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
-| S20: Performance Optimization | Not Started | 0/14 |
+| S20: Performance Optimization | In Progress | 5/14 |
+| S21: Zone Card UI Refinements | In Progress | 25/28 |
+| S22: CarPlay Experience Update | Not Started | 0/10 |
 
-**Beta Progress:** 31/91 tasks complete (34%)
+**Beta Progress:** 66/136 tasks complete (49%)
 
 ---
 
-**Overall Progress:** 132/196 tasks complete (67%)
+**Overall Progress:** 167/241 tasks complete (69%)
+
+*Note: Future Enhancement tasks (F-series) not included in progress counts*
 
 ---
 
@@ -644,6 +648,8 @@ For a functional Alpha release with real data, complete these in order:
 
 > **MapContentBuilder Limitations (discovered in Alpha):** SwiftUI's `@MapContentBuilder` has limited support for control flow (no `if let`, complex `ForEach` with conditionals). Initial attempts to render zone polygons using `MapPolygon` and `MapPolyline` with `foregroundStyle()` failed due to these limitations. Consider using `MKMapView` with `UIViewRepresentable` and `MKPolygonRenderer` for reliable polygon rendering, or explore MapKit overlay approach outside of `@MapContentBuilder`.
 
+> **Async Zone Loading Bug (discovered Nov 2025):** Zone overlays were only loaded in `makeUIView`. If zones arrived after map creation (async loading), overlays never appeared. Fixed by adding `overlaysLoaded` flag and `loadOverlays()` helper in `updateUIView` to load overlays when zones become available.
+
 ### Tasks
 
 #### Zone Boundary Display
@@ -673,6 +679,22 @@ For a functional Alpha release with real data, complete these in order:
 - [x] **17.12** Implement color-coded polygon overlays on expanded map view (full screen only)
 
 - [ ] **17.13** Add legend or key showing zone colors (optional, toggleable)
+
+#### Zone Overlay Fixes
+- [x] **17.20** Fix zone overlays not loading when zones arrive after map creation (async loading bug)
+
+- [x] **17.21** Add `overlaysLoaded` flag to coordinator to track overlay loading state
+
+- [x] **17.22** Create `loadOverlays()` helper function for deferred overlay loading from `updateUIView`
+
+- [x] **17.23** Reduce stroke prominence (3.0/1.5 → 2.0/1.0 line width)
+
+- [x] **17.24** Improve multi-permit zone dash pattern ([8,4] → [4,2], same width as regular)
+
+#### Boundary Geometry Cleanup
+- [ ] **17.25** Make zone boundaries more geometric (simplify irregular edges, straighten block-aligned segments)
+
+- [ ] **17.26** Clean up boundary intersections at corners (resolve overlapping/jagged edges where zones meet)
 
 #### Map Provider Abstraction
 - [ ] **17.14** Create MapProviderProtocol abstraction layer for switching between map providers
@@ -760,11 +782,11 @@ For a functional Alpha release with real data, complete these in order:
 ### Tasks
 
 #### Spatial Index Optimization
-- [ ] **20.1** Implement R-tree spatial index for zone boundaries using bounding box pre-filtering
+- [x] **20.1** Implement R-tree spatial index for zone boundaries using bounding box pre-filtering
 
-- [ ] **20.2** Add zone boundary bounding box caching to avoid recalculating during lookup
+- [x] **20.2** Add zone boundary bounding box caching to avoid recalculating during lookup
 
-- [ ] **20.3** Optimize point-in-polygon to early-exit on bounding box miss
+- [x] **20.3** Optimize point-in-polygon to early-exit on bounding box miss
 
 #### Data Loading Optimization
 - [ ] **20.4** Implement lazy loading for zone boundaries (load metadata first, boundaries on demand)
@@ -781,11 +803,11 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] **20.9** Profile memory usage with full SF dataset and optimize if >100MB
 
 #### Lookup Performance
-- [ ] **20.10** Benchmark zone lookup time with 24 zones × 3,673 boundaries (Zone U scale)
+- [x] **20.10** Benchmark zone lookup time with 24 zones × 3,673 boundaries (Zone U scale)
 
 - [ ] **20.11** Target <100ms lookup time for 95th percentile on iPhone 12+
 
-- [ ] **20.12** Add performance logging to track lookup times in production builds
+- [x] **20.12** Add performance logging to track lookup times in production builds
 
 #### Startup Performance
 - [ ] **20.13** Measure cold start time with full dataset, target <2s to first result
@@ -798,6 +820,123 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] Memory usage stays under 100MB typical usage
 - [ ] No UI jank during zone loading or lookup
 - [ ] Performance metrics logged for monitoring
+
+---
+
+## Story 21 (S21): Zone Card UI Refinements
+
+**Goal:** Polish zone card appearance and behavior across expanded/minimized states
+
+### Tasks
+
+#### Card Dimensions & Layout
+- [x] **21.1** Reduce expanded card height by 20% (miniCardHeight 88→70pt)
+
+- [x] **21.2** Scale zone circle proportionally (56→44pt) for reduced card height
+
+- [x] **21.3** Adjust HStack spacing (16→12pt) for tighter layout
+
+#### Map Zoom Levels
+- [x] **21.4** Configure expanded map zoom multiplier (1.3→0.5)
+
+- [x] **21.5** Configure collapsed map zoom multiplier (0.7→0.65)
+
+#### Permit Status Badges
+- [x] **21.6** Move PERMIT INVALID badge from minimized card to expanded card
+
+- [x] **21.7** Position PERMIT INVALID badge in top-left corner alongside PERMIT VALID badge
+
+- [x] **21.8** Apply consistent badge styling (gray background for invalid)
+
+#### Zone Circle Colors
+- [x] **21.9** Update zone circle on expanded card to use zone-specific color palette
+
+- [x] **21.10** Use ZoneColorProvider.swiftUIColor for consistent zone colors
+
+- [x] **21.11** Apply white text on zone-colored background for all states
+
+#### Card Content Implementation
+- [x] **21.12** Implement content areas for "In Permit Zone" state (expanded + minimized)
+
+- [x] **21.13** Implement content areas for "Multi-Permit Zone" state (expanded + minimized)
+
+- [x] **21.14** Implement content areas for "Out of Permit Zone" state (expanded + minimized)
+
+- [x] **21.15** Implement content areas for "Paid Parking" state (expanded + minimized)
+
+- [ ] **21.16** Add time-based information (time until restrictions, street cleaning)
+
+- [x] **21.17** Add enforcement hours display and "Park Until" calculation
+
+- [ ] **21.18** Add distance to nearest valid zone (out of permit zone state)
+
+#### Enforcement-Aware Park Until (Nov 2025)
+- [x] **21.19** Add enforcementStartTime, enforcementEndTime, enforcementDays to ViewModel
+
+- [x] **21.20** Calculate Park Until time considering enforcement hours (not just time limit)
+
+- [x] **21.21** Show actual move time including future days (e.g., "Park until Mon 8:00 AM")
+
+- [x] **21.22** Top banner shows "UNLIMITED NOW" when outside enforcement, time limit when active
+
+- [x] **21.23** Mini card title shows "Unlimited Now" or time limit based on enforcement
+
+- [x] **21.24** Hook up ValidityBadgeView on expanded card to use same enforcement-aware logic
+
+#### Address Search Map Pin (Nov 2025)
+- [x] **21.25** Add SearchedLocationAnnotation class for address search pin
+
+- [x] **21.26** Show blue pin on map when address search succeeds
+
+- [x] **21.27** Remove pin when returning to GPS location
+
+- [x] **21.28** Fix location timeout when returning from address search (use cached GPS)
+
+**Story 21 Complete When:**
+- [x] Expanded card has reduced height with proportional elements
+- [x] Map zoom levels tuned for optimal zone visibility
+- [x] Permit badges positioned correctly on expanded card
+- [x] Zone circles display zone-specific colors
+- [x] Content design completed for all four parking states
+- [x] Park Until shows enforcement-aware times
+- [x] Address search shows pin marker on map
+
+---
+
+## Story 22 (S22): CarPlay Experience Update
+
+**Goal:** Enhance CarPlay integration with improved zone display and interaction
+
+### Tasks
+
+#### Zone Display Improvements
+- [ ] **22.1** Update CPInformationTemplate to show state-specific content (valid/invalid/metered)
+
+- [ ] **22.2** Add zone color indicator to CarPlay display
+
+- [ ] **22.3** Show time limit information for out-of-permit zones
+
+- [ ] **22.4** Display metered parking rate and limit info
+
+#### Navigation & Interaction
+- [ ] **22.5** Add "Find Parking" button to navigate to nearest valid zone
+
+- [ ] **22.6** Implement zone change alerts with haptic feedback
+
+- [ ] **22.7** Add quick actions for common tasks (save location, start timer)
+
+#### Visual Polish
+- [ ] **22.8** Improve CarPlay template styling for better readability while driving
+
+- [ ] **22.9** Add dark mode support for CarPlay display
+
+- [ ] **22.10** Test on CarPlay Simulator and physical unit
+
+**Story 22 Complete When:**
+- [ ] CarPlay shows state-specific zone information
+- [ ] Zone changes are clearly communicated to driver
+- [ ] Quick actions accessible without distraction
+- [ ] Tested on physical CarPlay unit
 
 ---
 
@@ -821,15 +960,34 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] **F5** Add Berkeley RPP zone support
 - [ ] **F6** Abstract city-specific logic for multi-city scalability
 
-### Parking Event Capture
+### Parking Experience (Full Feature)
 
+**Goal:** Complete parking session management from arrival to departure
+
+#### Parking Event Detection
 - [ ] **F7** Detect parking events (location stationary for >2 minutes after driving)
 - [ ] **F8** Save parking location with timestamp, zone info, and address
-- [ ] **F9** Track parking duration with optional reminders (street sweeping, meter expiry)
-- [ ] **F10** Show "Find My Car" feature with walking directions to saved location
-- [ ] **F11** Build parking history view with filter by zone, date, duration
-- [ ] **F12** Add parking session notes (floor/section for garages, photo of spot)
-- [ ] **F13** Export parking history (CSV for expense tracking)
+- [ ] **F9** Auto-detect when user leaves parked car (walking away from location)
+
+#### Active Parking Session
+- [ ] **F10** Show active parking session card on home screen
+- [ ] **F11** Display elapsed time since parked with live counter
+- [ ] **F12** Track parking duration with countdown for time-limited zones
+- [ ] **F13** Integrate with meter payment apps (PayByPhone, ParkMobile deep links)
+- [ ] **F14-P** Add "I'm leaving" button to end parking session
+
+#### Find My Car
+- [ ] **F15-P** Show "Find My Car" button when away from parked location
+- [ ] **F16-P** Display walking directions to saved parking location
+- [ ] **F17-P** Show distance and estimated walk time to car
+- [ ] **F18-P** Add AR view option for finding car in garages
+
+#### Parking History
+- [ ] **F19-P** Build parking history view with list of past sessions
+- [ ] **F20-P** Filter history by zone, date range, duration
+- [ ] **F21-P** Add parking session notes (floor/section for garages, photo of spot)
+- [ ] **F22-P** Show statistics (most visited zones, average duration, total time)
+- [ ] **F23-P** Export parking history (CSV for expense tracking)
 
 ### Detailed Parking Restrictions (Non-RPP)
 
@@ -841,16 +999,35 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] **F19** Display no-parking zones (fire hydrants, driveways, bus stops)
 - [ ] **F20** Create unified "parking rules at this spot" view combining all restriction types
 
-### Move Car Notifications
+### Notification Experience (Full Feature)
 
-*Blocked by: F7-F13 (Parking Event Capture)*
+**Goal:** Proactive alerts to help users avoid parking violations
 
-- [ ] **F21** Send push notification before street sweeping at parked location
-- [ ] **F22** Alert when approaching time limit for time-restricted parking
-- [ ] **F23** Notify before meter expires (if meter end time was entered)
-- [ ] **F24** Warn about upcoming tow-away hours at current parking spot
-- [ ] **F25** Add configurable notification lead time (15min, 30min, 1hr before)
-- [ ] **F26** Support "snooze" and "I moved" actions on notifications
+*Blocked by: Parking Experience (F7-F23-P)*
+
+#### Move Car Alerts
+- [ ] **F-N1** Send push notification before street sweeping at parked location
+- [ ] **F-N2** Alert when approaching time limit for time-restricted parking
+- [ ] **F-N3** Notify before meter expires (if meter end time was entered)
+- [ ] **F-N4** Warn about upcoming tow-away hours at current parking spot
+
+#### Configuration
+- [ ] **F-N5** Add configurable notification lead time (15min, 30min, 1hr before)
+- [ ] **F-N6** Allow per-notification-type enable/disable settings
+- [ ] **F-N7** Set quiet hours (no notifications during sleep time)
+- [ ] **F-N8** Configure notification sound and vibration preferences
+
+#### Notification Actions
+- [ ] **F-N9** Support "Snooze" action on notifications (remind again in 10min)
+- [ ] **F-N10** Add "I moved" action to dismiss and end parking session
+- [ ] **F-N11** Add "Navigate to car" action for quick directions
+- [ ] **F-N12** Support "Extend meter" deep link to payment app
+
+#### Smart Notifications
+- [ ] **F-N13** Learn user patterns (typical parking duration, common zones)
+- [ ] **F-N14** Adjust notification timing based on walking distance to car
+- [ ] **F-N15** Detect when user is already walking to car (suppress alerts)
+- [ ] **F-N16** Send summary notification at end of day (parking stats)
 
 ---
 
