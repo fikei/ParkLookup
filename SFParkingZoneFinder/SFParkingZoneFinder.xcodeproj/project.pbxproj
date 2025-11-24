@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C3898E92ED3F68D006C780C /* DeveloperMapOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */; };
+		3C3898EC2ED3F696006C780C /* PolygonSimplifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */; };
+		3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */; };
 		3C3D50FB2ED26CAC002208EF /* ZoneColorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50F92ED26CAC002208EF /* ZoneColorProvider.swift */; };
 		3C3D50FD2ED26CCA002208EF /* ZoneMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */; };
 		3C3D50FF2ED26CDA002208EF /* PersistentZoneCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3D50FE2ED26CDA002208EF /* PersistentZoneCache.swift */; };
@@ -64,6 +67,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperMapOverlay.swift; sourceTree = "<group>"; };
+		3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolygonSimplifier.swift; sourceTree = "<group>"; };
+		3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperSettings.swift; sourceTree = "<group>"; };
 		3C3D50F92ED26CAC002208EF /* ZoneColorProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneColorProvider.swift; sourceTree = "<group>"; };
 		3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneMapView.swift; sourceTree = "<group>"; };
 		3C3D50FE2ED26CDA002208EF /* PersistentZoneCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersistentZoneCache.swift; sourceTree = "<group>"; };
@@ -133,6 +139,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C3898EB2ED3F696006C780C /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		3C3D50FA2ED26CAC002208EF /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -250,6 +264,7 @@
 		3C4145D62ED14A6F001BDE61 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */,
 				3C4145D02ED14A6F001BDE61 /* LocationService.swift */,
 				3C4145D12ED14A6F001BDE61 /* PermitService.swift */,
 				3C4145D22ED14A6F001BDE61 /* ReverseGeocodingService.swift */,
@@ -263,6 +278,7 @@
 		3C4145D72ED14A6F001BDE61 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				3C3898EB2ED3F696006C780C /* Utilities */,
 				3C4145BD2ED14A6F001BDE61 /* Extensions */,
 				3C4145C62ED14A6F001BDE61 /* Models */,
 				3C4145CF2ED14A6F001BDE61 /* Protocols */,
@@ -283,6 +299,7 @@
 		3C4145DF2ED14A6F001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */,
 				3C3D51042ED2EBE5002208EF /* AddressSearchCard.swift */,
 				3C4145DA2ED14A6F001BDE61 /* AdditionalInfoView.swift */,
 				3C4145DB2ED14A6F001BDE61 /* MainResultView.swift */,
@@ -486,6 +503,7 @@
 				3C4145FE2ED14A70001BDE61 /* ReverseGeocodingService.swift in Sources */,
 				3C3D50FB2ED26CAC002208EF /* ZoneColorProvider.swift in Sources */,
 				3C3D51052ED2EBE5002208EF /* AddressSearchCard.swift in Sources */,
+				3C3898EC2ED3F696006C780C /* PolygonSimplifier.swift in Sources */,
 				3C3D50FF2ED26CDA002208EF /* PersistentZoneCache.swift in Sources */,
 				3C4145F12ED14A70001BDE61 /* ParkingZone.swift in Sources */,
 				3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */,
@@ -495,6 +513,7 @@
 				3C4145E62ED14A6F001BDE61 /* LocalZoneDataSource.swift in Sources */,
 				3C4145ED2ED14A6F001BDE61 /* CityIdentifier.swift in Sources */,
 				3C4146072ED14A70001BDE61 /* ZoneStatusCardView.swift in Sources */,
+				3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */,
 				3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */,
 				3C4145EF2ED14A6F001BDE61 /* ParkingPermit.swift in Sources */,
 				3C4145FC2ED14A70001BDE61 /* LocationService.swift in Sources */,
@@ -513,6 +532,7 @@
 				3C4145EB2ED14A6F001BDE61 /* Color+Theme.swift in Sources */,
 				3C4145F52ED14A70001BDE61 /* MapProviderProtocol.swift in Sources */,
 				3C41460E2ED14AC3001BDE61 /* DependencyContainer.swift in Sources */,
+				3C3898E92ED3F68D006C780C /* DeveloperMapOverlay.swift in Sources */,
 				3C4146062ED14A70001BDE61 /* ValidityBadgeView.swift in Sources */,
 				3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */,
 				3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */,
