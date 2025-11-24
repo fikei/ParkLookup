@@ -138,6 +138,7 @@ struct DeveloperMapOverlay: View {
             compactToggle("Grid Snapping", isOn: $devSettings.useGridSnapping, icon: "grid")
             compactToggle("Corner Rounding", isOn: $devSettings.useCornerRounding, icon: "circle.bottomhalf.filled")
             compactToggle("Convex Hull", isOn: $devSettings.useConvexHull, icon: "pentagon")
+            compactToggle("Overlap Clipping", isOn: $devSettings.useOverlapClipping, icon: "square.on.square.intersection.dashed")
 
             if devSettings.useDouglasPeucker {
                 compactToggle("Preserve Curves", isOn: $devSettings.preserveCurves, icon: "point.topleft.down.to.point.bottomright.curvepath")

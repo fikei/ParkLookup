@@ -180,6 +180,11 @@ struct ZoneMapView: UIViewRepresentable {
 
             }
 
+            // Apply overlap clipping if enabled (visual only)
+            if devSettings.useOverlapClipping {
+                polygons = Self.applyOverlapClipping(polygons, tolerance: devSettings.overlapTolerance)
+            }
+
             // Separate polygons by zone type - metered zones render below RPP zones
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
             let rppPolygons = polygons.filter { $0.zoneType != .metered }
@@ -388,6 +393,82 @@ struct ZoneMapView: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator {
         Coordinator(currentZoneId: currentZoneId, zones: zones, onZoneTapped: onZoneTapped)
+    }
+
+    // MARK: - Overlap Clipping
+
+    /// Apply overlap clipping to polygons (visual only - doesn't affect zone lookup)
+    /// Priority rules: Metered > RPP, Vertical (N-S) > Horizontal (E-W)
+    private static func applyOverlapClipping(_ polygons: [ZonePolygon], tolerance: Double) -> [ZonePolygon] {
+        guard polygons.count > 1 else { return polygons }
+
+        // Build polygon info for priority comparison
+        var polygonInfos: [(polygon: ZonePolygon, info: PolygonInfo, coords: [CLLocationCoordinate2D])] = []
+
+        for polygon in polygons {
+            let coords = polygon.coordinates.map { $0 }
+            guard coords.count >= 3 else { continue }
+
+            let info = PolygonInfo(
+                coords: coords,
+                zoneId: polygon.zoneId ?? "",
+                zoneCode: polygon.zoneCode,
+                isMetered: polygon.zoneType == .metered
+            )
+            polygonInfos.append((polygon, info, coords))
+        }
+
+        // Find overlapping pairs and clip lower-priority polygons
+        var resultCoords: [[CLLocationCoordinate2D]] = polygonInfos.map { $0.coords }
+
+        for i in 0..<polygonInfos.count {
+            for j in (i + 1)..<polygonInfos.count {
+                let info1 = polygonInfos[i].info
+                let info2 = polygonInfos[j].info
+
+                // Skip if same zone
+                guard info1.zoneId != info2.zoneId else { continue }
+
+                // Check if bounding boxes overlap
+                guard PolygonClipper.boundingBoxesOverlap(resultCoords[i], resultCoords[j], tolerance: tolerance) else {
+                    continue
+                }
+
+                // Determine which polygon has priority
+                if PolygonClipper.hasPriority(polygon1: info1, over: info2) {
+                    // Polygon 1 wins - clip polygon 2
+                    let clippedResults = PolygonClipper.subtractPolygon(subject: resultCoords[j], minus: resultCoords[i])
+                    if let firstClipped = clippedResults.first, firstClipped.count >= 3 {
+                        resultCoords[j] = firstClipped
+                    }
+                } else {
+                    // Polygon 2 wins - clip polygon 1
+                    let clippedResults = PolygonClipper.subtractPolygon(subject: resultCoords[i], minus: resultCoords[j])
+                    if let firstClipped = clippedResults.first, firstClipped.count >= 3 {
+                        resultCoords[i] = firstClipped
+                    }
+                }
+            }
+        }
+
+        // Create new polygons with clipped coordinates
+        var result: [ZonePolygon] = []
+        for (index, (original, _, _)) in polygonInfos.enumerated() {
+            let clippedCoords = resultCoords[index]
+            guard clippedCoords.count >= 3 else { continue }
+
+            let newPolygon = ZonePolygon(coordinates: clippedCoords, count: clippedCoords.count)
+            newPolygon.zoneId = original.zoneId
+            newPolygon.zoneCode = original.zoneCode
+            newPolygon.zoneType = original.zoneType
+            newPolygon.isMultiPermit = original.isMultiPermit
+            newPolygon.allValidPermitAreas = original.allValidPermitAreas
+            newPolygon.originalVertexCount = original.originalVertexCount
+
+            result.append(newPolygon)
+        }
+
+        return result
     }
 
     // MARK: - Private Helpers
@@ -842,6 +923,14 @@ class ZonePolygon: MKPolygon {
     var isMultiPermit: Bool = false  // True if this polygon accepts multiple permits
     var allValidPermitAreas: [String]?  // All valid permit areas for multi-permit polygons
     var originalVertexCount: Int = 0  // For debug: original vertex count before simplification
+
+    /// Extract coordinates from polygon points
+    var coordinates: [CLLocationCoordinate2D] {
+        let points = self.points()
+        return (0..<pointCount).map { index in
+            MKMapPoint(x: points[index].x, y: points[index].y).coordinate
+        }
+    }
 }
 
 /// Annotation for zone label display

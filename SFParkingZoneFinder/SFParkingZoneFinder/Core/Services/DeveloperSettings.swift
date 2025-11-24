@@ -73,6 +73,13 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(overlapTolerance, forKey: Keys.overlapTolerance) }
     }
 
+    /// Enable overlap clipping (visual only)
+    /// Clips overlapping polygons so they don't stack visually
+    /// Priority: Metered > RPP, Vertical (N-S) > Horizontal (E-W)
+    @Published var useOverlapClipping: Bool {
+        didSet { UserDefaults.standard.set(useOverlapClipping, forKey: Keys.useOverlapClipping) }
+    }
+
     // MARK: - Zone Colors (hex strings without #)
 
     /// Color for user's valid permit zones (default: green 33B366)
@@ -165,6 +172,7 @@ final class DeveloperSettings: ObservableObject {
         static let cornerRoundingRadius = "dev.cornerRoundingRadius"
         static let useCornerRounding = "dev.useCornerRounding"
         static let overlapTolerance = "dev.overlapTolerance"
+        static let useOverlapClipping = "dev.useOverlapClipping"
         static let userZoneColorHex = "dev.userZoneColorHex"
         static let rppZoneColorHex = "dev.rppZoneColorHex"
         static let meteredZoneColorHex = "dev.meteredZoneColorHex"
@@ -193,6 +201,7 @@ final class DeveloperSettings: ObservableObject {
         static let cornerRoundingRadius = 0.00005  // ~5.5m radius
         static let useCornerRounding = false
         static let overlapTolerance = 0.00001  // ~1m tolerance for overlap detection
+        static let useOverlapClipping = false  // Visual-only overlap clipping
         static let userZoneColorHex = "33B366"  // Green
         static let rppZoneColorHex = "F29933"   // Orange
         static let meteredZoneColorHex = "808080"  // Grey
@@ -224,6 +233,7 @@ final class DeveloperSettings: ObservableObject {
         cornerRoundingRadius = defaults.object(forKey: Keys.cornerRoundingRadius) as? Double ?? Defaults.cornerRoundingRadius
         useCornerRounding = defaults.object(forKey: Keys.useCornerRounding) as? Bool ?? Defaults.useCornerRounding
         overlapTolerance = defaults.object(forKey: Keys.overlapTolerance) as? Double ?? Defaults.overlapTolerance
+        useOverlapClipping = defaults.object(forKey: Keys.useOverlapClipping) as? Bool ?? Defaults.useOverlapClipping
         userZoneColorHex = defaults.object(forKey: Keys.userZoneColorHex) as? String ?? Defaults.userZoneColorHex
         rppZoneColorHex = defaults.object(forKey: Keys.rppZoneColorHex) as? String ?? Defaults.rppZoneColorHex
         meteredZoneColorHex = defaults.object(forKey: Keys.meteredZoneColorHex) as? String ?? Defaults.meteredZoneColorHex
@@ -259,6 +269,7 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(useCornerRounding)
         hasher.combine(cornerRoundingRadius)
         hasher.combine(overlapTolerance)
+        hasher.combine(useOverlapClipping)
         hasher.combine(userZoneColorHex)
         hasher.combine(rppZoneColorHex)
         hasher.combine(meteredZoneColorHex)
@@ -317,6 +328,7 @@ final class DeveloperSettings: ObservableObject {
         useCornerRounding = Defaults.useCornerRounding
         cornerRoundingRadius = Defaults.cornerRoundingRadius
         overlapTolerance = Defaults.overlapTolerance
+        useOverlapClipping = Defaults.useOverlapClipping
         userZoneColorHex = Defaults.userZoneColorHex
         rppZoneColorHex = Defaults.rppZoneColorHex
         meteredZoneColorHex = Defaults.meteredZoneColorHex
