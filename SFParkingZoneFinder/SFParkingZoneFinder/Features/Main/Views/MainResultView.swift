@@ -69,8 +69,9 @@ struct MainResultView: View {
     }
 
     /// User's valid permit area codes (uppercase) for map coloring
+    /// Uses ALL user permits (not just applicable ones) so all matching zones are colored green
     private var userPermitAreaCodes: Set<String> {
-        Set(viewModel.applicablePermits.map { $0.area.uppercased() })
+        Set(viewModel.userPermits.map { $0.area.uppercased() })
     }
 
     var body: some View {

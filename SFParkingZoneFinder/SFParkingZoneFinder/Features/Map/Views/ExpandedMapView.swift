@@ -11,6 +11,7 @@ struct ExpandedMapView: View {
     let zoneName: String?
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
+    let userPermits: [ParkingPermit]  // All user permits for map coloring
     let allValidPermitAreas: [String]  // All valid permits in current location
     let zones: [ParkingZone]
     let currentZoneId: String?
@@ -25,6 +26,7 @@ struct ExpandedMapView: View {
         zoneName: String?,
         validityStatus: PermitValidityStatus = .noPermitRequired,
         applicablePermits: [ParkingPermit] = [],
+        userPermits: [ParkingPermit] = [],
         allValidPermitAreas: [String] = [],
         zones: [ParkingZone] = [],
         currentZoneId: String? = nil
@@ -33,6 +35,7 @@ struct ExpandedMapView: View {
         self.zoneName = zoneName
         self.validityStatus = validityStatus
         self.applicablePermits = applicablePermits
+        self.userPermits = userPermits
         self.allValidPermitAreas = allValidPermitAreas
         self.zones = zones
         self.currentZoneId = currentZoneId
@@ -51,8 +54,9 @@ struct ExpandedMapView: View {
     }
 
     /// User's valid permit area codes (uppercase) for map coloring
+    /// Uses ALL user permits (not just applicable ones) so all matching zones are colored green
     private var userPermitAreaCodes: Set<String> {
-        Set(applicablePermits.map { $0.area.uppercased() })
+        Set(userPermits.map { $0.area.uppercased() })
     }
 
     var body: some View {
