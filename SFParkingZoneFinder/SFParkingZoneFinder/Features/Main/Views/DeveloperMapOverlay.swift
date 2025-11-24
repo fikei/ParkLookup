@@ -5,9 +5,14 @@ import SwiftUI
 /// Provides real-time controls for polygon simplification settings
 struct DeveloperMapOverlay: View {
     @ObservedObject var devSettings: DeveloperSettings
-    @State private var isExpanded = false
+    @Binding var isPanelExpanded: Bool
     @State private var showingSaveConfirmation = false
     @State private var savedCandidateName: String = ""
+
+    /// Panel height as fraction of screen
+    private var panelHeight: CGFloat {
+        UIScreen.main.bounds.height / 3
+    }
 
     var body: some View {
         VStack {
@@ -17,7 +22,7 @@ struct DeveloperMapOverlay: View {
                 // Developer panel (bottom left, aligned with expand/collapse button)
                 VStack(alignment: .leading, spacing: 8) {
                     // Expanded panel (appears above button)
-                    if isExpanded {
+                    if isPanelExpanded {
                         developerPanel
                             .transition(.asymmetric(
                                 insertion: .opacity.combined(with: .move(edge: .bottom)),
@@ -29,14 +34,14 @@ struct DeveloperMapOverlay: View {
                     // Shows pressed/active state when panel is open
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            isExpanded.toggle()
+                            isPanelExpanded.toggle()
                         }
                     } label: {
-                        Image(systemName: isExpanded ? "xmark" : "chevron.left.forwardslash.chevron.right")
+                        Image(systemName: isPanelExpanded ? "xmark" : "chevron.left.forwardslash.chevron.right")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(isExpanded ? .black : .white)
+                            .foregroundColor(isPanelExpanded ? .black : .white)
                             .frame(width: 44, height: 44)
-                            .background(isExpanded ? Color.white : Color.black.opacity(0.6))
+                            .background(isPanelExpanded ? Color.white : Color.black.opacity(0.6))
                             .clipShape(Circle())
                             .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
@@ -57,53 +62,63 @@ struct DeveloperMapOverlay: View {
     // MARK: - Developer Panel
 
     private var developerPanel: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
-            HStack {
-                Image(systemName: "slider.horizontal.3")
+        VStack(alignment: .leading, spacing: 0) {
+            // Fixed header
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: "slider.horizontal.3")
+                        .foregroundColor(.secondary)
+                    Text("Layer Settings")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                }
+
+                // Pipeline status
+                Text(devSettings.simplificationDescription)
+                    .font(.caption)
                     .foregroundColor(.secondary)
-                Text("Layer Settings")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.bottom, 4)
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
 
             Divider()
+                .padding(.horizontal, 16)
 
-            // Pipeline status
-            Text(devSettings.simplificationDescription)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            // Scrollable content
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    // Quick toggles
+                    quickToggles
 
-            Divider()
+                    // Sliders section
+                    if devSettings.useDouglasPeucker || devSettings.useGridSnapping || devSettings.preserveCurves {
+                        Divider()
+                        slidersSection
+                    }
 
-            // Quick toggles
-            quickToggles
+                    Divider()
 
-            // Sliders section
-            if devSettings.useDouglasPeucker || devSettings.useGridSnapping || devSettings.preserveCurves {
-                Divider()
-                slidersSection
+                    // Debug visualization toggles
+                    debugToggles
+
+                    Divider()
+
+                    // Save candidate button
+                    saveCandidateButton
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
-
-            Divider()
-
-            // Debug visualization toggles
-            debugToggles
-
-            Divider()
-
-            // Save candidate button
-            saveCandidateButton
         }
-        .padding(16)
-        .frame(width: 280)
+        .frame(width: 280, height: panelHeight)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.systemBackground))
                 .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
         )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Quick Toggles
@@ -385,10 +400,18 @@ struct SimplificationCandidate: Codable {
 // MARK: - Preview
 
 #Preview {
-    ZStack {
-        Color.gray.opacity(0.3)
-            .ignoresSafeArea()
+    struct PreviewWrapper: View {
+        @State private var isExpanded = false
 
-        DeveloperMapOverlay(devSettings: DeveloperSettings.shared)
+        var body: some View {
+            ZStack {
+                Color.gray.opacity(0.3)
+                    .ignoresSafeArea()
+
+                DeveloperMapOverlay(devSettings: DeveloperSettings.shared, isPanelExpanded: $isExpanded)
+            }
+        }
     }
+
+    return PreviewWrapper()
 }

@@ -41,6 +41,7 @@ struct MainResultView: View {
     @State private var selectedZone: ParkingZone?
     @State private var searchedCoordinate: CLLocationCoordinate2D?
     @State private var showOutsideCoverageAlert = false
+    @State private var developerPanelExpanded = false
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -95,7 +96,7 @@ struct MainResultView: View {
 
                     // Developer overlay (only in expanded map mode when developer mode is unlocked)
                     if isMapExpanded && devSettings.developerModeUnlocked {
-                        DeveloperMapOverlay(devSettings: devSettings)
+                        DeveloperMapOverlay(devSettings: devSettings, isPanelExpanded: $developerPanelExpanded)
                     }
                 }
                 .ignoresSafeArea()
@@ -104,8 +105,8 @@ struct MainResultView: View {
                     .ignoresSafeArea()
             }
 
-            // Layer 2: Card overlays
-            if !viewModel.isLoading && viewModel.error == nil {
+            // Layer 2: Card overlays (hidden when developer panel is open)
+            if !viewModel.isLoading && viewModel.error == nil && !developerPanelExpanded {
                 VStack {
                     // Address search card (only in expanded mode)
                     if isMapExpanded {

@@ -18,6 +18,7 @@ struct ExpandedMapView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var devSettings = DeveloperSettings.shared
     @State private var selectedZone: ParkingZone?
+    @State private var developerPanelExpanded = false
 
     init(
         coordinate: CLLocationCoordinate2D?,
@@ -68,13 +69,14 @@ struct ExpandedMapView: View {
 
                 // Developer overlay (when developer mode is unlocked)
                 if devSettings.developerModeUnlocked {
-                    DeveloperMapOverlay(devSettings: devSettings)
+                    DeveloperMapOverlay(devSettings: devSettings, isPanelExpanded: $developerPanelExpanded)
                 }
 
-                // Zone info overlay
-                VStack {
-                    // Current zone card at top
-                    MiniZoneCard(
+                // Zone info overlay (hidden when developer panel is open)
+                if !developerPanelExpanded {
+                    VStack {
+                        // Current zone card at top
+                        MiniZoneCard(
                         zoneName: zoneName,
                         zoneCode: currentPermitArea,
                         validityStatus: validityStatus,
@@ -94,8 +96,9 @@ struct ExpandedMapView: View {
                         .padding()
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
+                    }
+                    .animation(.easeInOut(duration: 0.2), value: selectedZone?.id)
                 }
-                .animation(.easeInOut(duration: 0.2), value: selectedZone?.id)
             }
             .navigationTitle("Zone Map")
             .navigationBarTitleDisplayMode(.inline)
