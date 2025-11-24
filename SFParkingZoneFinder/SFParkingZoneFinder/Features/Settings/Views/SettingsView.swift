@@ -76,8 +76,10 @@ struct SettingsView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         versionTapCount += 1
+                        print("🔧 DEBUG: Version tap count: \(versionTapCount)/5")
                         if versionTapCount >= 5 {
                             devSettings.developerModeUnlocked = true
+                            print("✅ DEBUG: Developer mode UNLOCKED! Value: \(devSettings.developerModeUnlocked)")
                             versionTapCount = 0
                             // Haptic feedback
                             let generator = UINotificationFeedbackGenerator()

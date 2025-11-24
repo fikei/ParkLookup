@@ -75,6 +75,7 @@ struct MainResultView: View {
     }
 
     var body: some View {
+        let _ = print("🔧 DEBUG: MainResultView body - devMode: \(devSettings.developerModeUnlocked), expanded: \(isMapExpanded), panel: \(developerPanelExpanded)")
         ZStack {
             // Layer 1: Fullscreen Map (always visible as background)
             if viewModel.error == nil && !viewModel.isLoading {
@@ -180,6 +181,7 @@ struct MainResultView: View {
                     BottomNavigationBar(
                         isDeveloperModeActive: devSettings.developerModeUnlocked,
                         onDeveloperTap: {
+                            print("🔧 DEBUG: Developer button tapped! Panel will expand")
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 developerPanelExpanded.toggle()
                             }
