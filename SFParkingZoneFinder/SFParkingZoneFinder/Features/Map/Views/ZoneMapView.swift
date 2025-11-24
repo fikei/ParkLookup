@@ -728,6 +728,22 @@ struct ZoneMapView: UIViewRepresentable {
                 logger.info("📐 Simplification: \(totalInputPoints) → \(totalOutputPoints) vertices (\(String(format: "%.1f", reduction))% reduction)")
             }
 
+            // Apply overlap clipping if enabled (visual only)
+            if devSettings.useOverlapClipping {
+                polygons = Self.applyOverlapClipping(polygons, tolerance: devSettings.overlapTolerance)
+            }
+
+            // Apply polygon merging if enabled (visual only)
+            if devSettings.mergeOverlappingSameZone || devSettings.useProximityMerging {
+                polygons = Self.applyPolygonMerging(
+                    polygons,
+                    mergeOverlapping: devSettings.mergeOverlappingSameZone,
+                    useProximity: devSettings.useProximityMerging,
+                    proximityMeters: devSettings.proximityMergeDistance,
+                    tolerance: devSettings.overlapTolerance
+                )
+            }
+
             let meteredPolygons = polygons.filter { $0.zoneType == .metered }
             let rppPolygons = polygons.filter { $0.zoneType != .metered }
 

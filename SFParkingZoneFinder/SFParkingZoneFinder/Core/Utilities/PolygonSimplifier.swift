@@ -40,6 +40,11 @@ enum PolygonSimplifier {
             result = convexHull(result)
         }
 
+        // Step 4: Corner rounding (creates smooth arcs at corners)
+        if settings.useCornerRounding {
+            result = roundCorners(result, radius: settings.cornerRoundingRadius)
+        }
+
         // Ensure polygon is closed
         if result.count >= 3 && !coordsEqual(result.first!, result.last!) {
             result.append(result[0])
@@ -270,6 +275,150 @@ enum PolygonSimplifier {
         }
 
         return hull
+    }
+
+    // MARK: - Corner Rounding
+
+    /// Round corners of a polygon by replacing sharp vertices with arc segments
+    /// - Parameters:
+    ///   - coords: The input polygon coordinates
+    ///   - radius: The radius of the corner rounding (in degrees, ~0.00001 ≈ 1.1m)
+    ///   - segments: Number of points to generate for each arc
+    /// - Returns: A new polygon with rounded corners
+    static func roundCorners(
+        _ coords: [CLLocationCoordinate2D],
+        radius: Double,
+        segments: Int = 8
+    ) -> [CLLocationCoordinate2D] {
+        guard coords.count >= 3 && radius > 0 else { return coords }
+
+        // Remove closing point if present (we'll add it back at the end)
+        var points = coords
+        if points.count > 1 && coordsEqual(points.first!, points.last!) {
+            points.removeLast()
+        }
+
+        guard points.count >= 3 else { return coords }
+
+        var result: [CLLocationCoordinate2D] = []
+
+        for i in 0..<points.count {
+            let prev = points[(i - 1 + points.count) % points.count]
+            let curr = points[i]
+            let next = points[(i + 1) % points.count]
+
+            // Calculate vectors from current point to previous and next
+            let toPrev = (prev.longitude - curr.longitude, prev.latitude - curr.latitude)
+            let toNext = (next.longitude - curr.longitude, next.latitude - curr.latitude)
+
+            // Calculate lengths
+            let lenPrev = sqrt(toPrev.0 * toPrev.0 + toPrev.1 * toPrev.1)
+            let lenNext = sqrt(toNext.0 * toNext.0 + toNext.1 * toNext.1)
+
+            // Skip if edges are too short for rounding
+            let minLen = min(lenPrev, lenNext)
+            if minLen < radius * 2 {
+                result.append(curr)
+                continue
+            }
+
+            // Normalize vectors
+            let unitPrev = (toPrev.0 / lenPrev, toPrev.1 / lenPrev)
+            let unitNext = (toNext.0 / lenNext, toNext.1 / lenNext)
+
+            // Calculate the angle between the two edges
+            let dot = unitPrev.0 * unitNext.0 + unitPrev.1 * unitNext.1
+            let angle = acos(max(-1, min(1, dot)))
+
+            // If angle is very close to 180° (straight line), skip rounding
+            if angle > .pi - 0.01 {
+                result.append(curr)
+                continue
+            }
+
+            // If angle is very sharp (close to 0°), skip rounding
+            if angle < 0.1 {
+                result.append(curr)
+                continue
+            }
+
+            // Calculate the distance from corner to tangent points
+            // For a circular arc tangent to both edges: d = radius / tan(angle/2)
+            let halfAngle = angle / 2
+            let tangentDist = min(radius / tan(halfAngle), minLen * 0.4)
+
+            // Calculate tangent points on each edge
+            let tangentPrev = CLLocationCoordinate2D(
+                latitude: curr.latitude + unitPrev.1 * tangentDist,
+                longitude: curr.longitude + unitPrev.0 * tangentDist
+            )
+            let tangentNext = CLLocationCoordinate2D(
+                latitude: curr.latitude + unitNext.1 * tangentDist,
+                longitude: curr.longitude + unitNext.0 * tangentDist
+            )
+
+            // Calculate the center of the arc
+            // The center is along the angle bisector, at distance radius/sin(angle/2) from corner
+            let bisectorX = unitPrev.0 + unitNext.0
+            let bisectorY = unitPrev.1 + unitNext.1
+            let bisectorLen = sqrt(bisectorX * bisectorX + bisectorY * bisectorY)
+
+            if bisectorLen < 0.0000001 {
+                // Degenerate case - just keep the corner
+                result.append(curr)
+                continue
+            }
+
+            let unitBisector = (bisectorX / bisectorLen, bisectorY / bisectorLen)
+            let centerDist = tangentDist / sin(halfAngle)
+            let center = CLLocationCoordinate2D(
+                latitude: curr.latitude + unitBisector.1 * centerDist,
+                longitude: curr.longitude + unitBisector.0 * centerDist
+            )
+
+            // Calculate actual arc radius (distance from center to tangent points)
+            let arcRadius = sqrt(
+                pow(tangentPrev.longitude - center.longitude, 2) +
+                pow(tangentPrev.latitude - center.latitude, 2)
+            )
+
+            // Calculate start and end angles for the arc
+            let startAngle = atan2(
+                tangentPrev.latitude - center.latitude,
+                tangentPrev.longitude - center.longitude
+            )
+            let endAngle = atan2(
+                tangentNext.latitude - center.latitude,
+                tangentNext.longitude - center.longitude
+            )
+
+            // Determine arc direction (we want the shorter arc on the outside of the corner)
+            var arcAngle = endAngle - startAngle
+
+            // Normalize to -π to π
+            while arcAngle > .pi { arcAngle -= 2 * .pi }
+            while arcAngle < -.pi { arcAngle += 2 * .pi }
+
+            // Generate arc points
+            result.append(tangentPrev)
+            for j in 1..<segments {
+                let t = Double(j) / Double(segments)
+                let currentAngle = startAngle + arcAngle * t
+                let arcPoint = CLLocationCoordinate2D(
+                    latitude: center.latitude + arcRadius * sin(currentAngle),
+                    longitude: center.longitude + arcRadius * cos(currentAngle)
+                )
+                result.append(arcPoint)
+            }
+            result.append(tangentNext)
+        }
+
+        // Close the polygon
+        if result.count >= 3 && !coordsEqual(result.first!, result.last!) {
+            result.append(result[0])
+        }
+
+        return result
     }
 
     // MARK: - Geometry Helpers
