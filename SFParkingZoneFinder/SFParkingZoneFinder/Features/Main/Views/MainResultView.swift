@@ -178,7 +178,7 @@ struct MainResultView: View {
                 VStack {
                     Spacer()
                     BottomNavigationBar(
-                        isDeveloperModeActive: devSettings.developerModeUnlocked && isMapExpanded,
+                        isDeveloperModeActive: devSettings.developerModeUnlocked,
                         onDeveloperTap: {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 developerPanelExpanded.toggle()

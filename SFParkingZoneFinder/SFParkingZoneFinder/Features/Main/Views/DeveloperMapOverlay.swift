@@ -73,7 +73,7 @@ struct DeveloperMapOverlay: View {
                 HStack {
                     Image(systemName: "slider.horizontal.3")
                         .foregroundColor(.secondary)
-                    Text("Layer Settings")
+                    Text("Overlay Settings")
                         .font(.headline)
                         .foregroundColor(.primary)
 

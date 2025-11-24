@@ -979,6 +979,9 @@ struct ZoneMapView: UIViewRepresentable {
             let isCurrentZone = polygon.zoneId == currentZoneId
             let devSettings = DeveloperSettings.shared
 
+            // DEBUG: Log rendering details
+            logger.debug("🎨 Rendering overlay #\(self.rendererCallCount): zoneId=\(polygon.zoneId ?? "nil"), zoneCode=\(polygon.zoneCode ?? "nil"), zoneType=\(String(describing: polygon.zoneType)), isMultiPermit=\(polygon.isMultiPermit), isCurrentZone=\(isCurrentZone)")
+
             // Determine zone category and get appropriate color/opacity
             var baseColor: UIColor
             var fillOpacity: Double
@@ -990,28 +993,33 @@ struct ZoneMapView: UIViewRepresentable {
                 baseColor = devSettings.paidZonesColor
                 fillOpacity = devSettings.paidZonesFillOpacity
                 strokeOpacity = devSettings.paidZonesStrokeOpacity
+                logger.debug("  → Category: Paid Zone, color=\(devSettings.paidZonesColorHex), fillOpacity=\(fillOpacity), strokeOpacity=\(strokeOpacity)")
             } else if let zoneCode = polygon.zoneCode?.uppercased(),
                       userPermitAreas.contains(zoneCode) {
                 // My Permit Zones (user has permit)
                 baseColor = devSettings.myPermitZonesColor
                 fillOpacity = devSettings.myPermitZonesFillOpacity
                 strokeOpacity = devSettings.myPermitZonesStrokeOpacity
+                logger.debug("  → Category: My Permit Zone, color=\(devSettings.myPermitZonesColorHex), fillOpacity=\(fillOpacity), strokeOpacity=\(strokeOpacity)")
             } else if zoneType == .residentialPermit {
                 // Free Timed Zones (RPP zones without permit)
                 baseColor = devSettings.freeTimedZonesColor
                 fillOpacity = devSettings.freeTimedZonesFillOpacity
                 strokeOpacity = devSettings.freeTimedZonesStrokeOpacity
+                logger.debug("  → Category: Free Timed Zone, color=\(devSettings.freeTimedZonesColorHex), fillOpacity=\(fillOpacity), strokeOpacity=\(strokeOpacity)")
             } else {
                 // Fallback
                 baseColor = ZoneColorProvider.color(for: zoneType)
                 fillOpacity = 0.20
                 strokeOpacity = 0.6
+                logger.debug("  → Category: Fallback, fillOpacity=\(fillOpacity), strokeOpacity=\(strokeOpacity)")
             }
 
             // Override opacity if this is the current zone (user is inside)
             if isCurrentZone {
                 fillOpacity = devSettings.currentZoneFillOpacity
                 strokeOpacity = devSettings.currentZoneStrokeOpacity
+                logger.debug("  → Current Zone Override: fillOpacity=\(fillOpacity), strokeOpacity=\(strokeOpacity)")
             }
 
             // Apply fill and stroke colors with opacity
