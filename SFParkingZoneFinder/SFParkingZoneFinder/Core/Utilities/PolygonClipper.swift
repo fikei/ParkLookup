@@ -322,6 +322,7 @@ enum PolygonClipper {
     }
 
     /// Merge a list of polygons that overlap with each other
+    /// Preserves all original vertices by computing polygon union
     private static func mergeOverlappingPolygons(
         _ polygons: [[CLLocationCoordinate2D]],
         tolerance: Double
@@ -345,9 +346,8 @@ enum PolygonClipper {
                     guard !used.contains(j) else { continue }
 
                     if boundingBoxesOverlap(currentMerge, polygons[j], tolerance: tolerance) {
-                        // Merge by taking convex hull of both polygons
-                        let combined = currentMerge + polygons[j]
-                        currentMerge = convexHull(of: combined)
+                        // Merge preserving all vertices by computing union boundary
+                        currentMerge = unionPolygons(currentMerge, polygons[j])
                         used.insert(j)
                         changed = true
                     }
@@ -410,6 +410,7 @@ enum PolygonClipper {
     }
 
     /// Merge polygons that are within proximity distance
+    /// Preserves all original vertices by computing polygon union
     private static func mergePolygonsByProximity(
         _ polygons: [[CLLocationCoordinate2D]],
         distanceMeters: Double
@@ -433,9 +434,8 @@ enum PolygonClipper {
                     guard !used.contains(j) else { continue }
 
                     if areWithinDistance(currentMerge, polygons[j], meters: distanceMeters) {
-                        // Merge by taking convex hull
-                        let combined = currentMerge + polygons[j]
-                        currentMerge = convexHull(of: combined)
+                        // Merge preserving all vertices by computing union boundary
+                        currentMerge = unionPolygons(currentMerge, polygons[j])
                         used.insert(j)
                         changed = true
                     }
@@ -448,7 +448,212 @@ enum PolygonClipper {
         return merged
     }
 
-    /// Compute convex hull of points (Graham scan)
+    // MARK: - Polygon Union (Vertex-Preserving)
+
+    /// Compute union of two polygons, preserving all original vertices
+    /// Uses Weiler-Atherton inspired algorithm to walk the outer boundary
+    private static func unionPolygons(
+        _ poly1: [CLLocationCoordinate2D],
+        _ poly2: [CLLocationCoordinate2D]
+    ) -> [CLLocationCoordinate2D] {
+        guard poly1.count >= 3, poly2.count >= 3 else {
+            return poly1.count >= 3 ? poly1 : poly2
+        }
+
+        // Remove closing point if present
+        var p1 = poly1
+        var p2 = poly2
+        if p1.count > 1 && coordsEqual(p1.first!, p1.last!) { p1.removeLast() }
+        if p2.count > 1 && coordsEqual(p2.first!, p2.last!) { p2.removeLast() }
+
+        // Find all intersection points between polygon edges
+        var intersections: [(point: CLLocationCoordinate2D, edge1Idx: Int, edge2Idx: Int, t1: Double, t2: Double)] = []
+
+        for i in 0..<p1.count {
+            let a1 = p1[i]
+            let a2 = p1[(i + 1) % p1.count]
+
+            for j in 0..<p2.count {
+                let b1 = p2[j]
+                let b2 = p2[(j + 1) % p2.count]
+
+                if let (point, t1, t2) = segmentIntersection(a1: a1, a2: a2, b1: b1, b2: b2) {
+                    intersections.append((point, i, j, t1, t2))
+                }
+            }
+        }
+
+        // If no intersections, check containment
+        if intersections.isEmpty {
+            // Check if one polygon contains the other
+            if isPointInPolygon(p2[0], polygon: p1) {
+                return p1  // p1 contains p2, return p1
+            } else if isPointInPolygon(p1[0], polygon: p2) {
+                return p2  // p2 contains p1, return p2
+            } else {
+                // Polygons don't overlap - connect them at closest points
+                return connectPolygonsAtClosestPoints(p1, p2)
+            }
+        }
+
+        // Build union boundary by walking around the outer perimeter
+        // Start from the leftmost point of both polygons (guaranteed to be on outer boundary)
+        let allPoints = p1 + p2
+        let startPoint = allPoints.min { $0.longitude < $1.longitude || ($0.longitude == $1.longitude && $0.latitude < $1.latitude) }!
+
+        var result: [CLLocationCoordinate2D] = []
+        var visited = Set<String>()
+        var currentPoly = p1.contains(where: { coordsEqual($0, startPoint) }) ? 1 : 2
+        var currentIdx = (currentPoly == 1 ? p1 : p2).firstIndex(where: { coordsEqual($0, startPoint) }) ?? 0
+        let poly = { currentPoly == 1 ? p1 : p2 }
+
+        // Walk around the outer boundary
+        let maxIterations = (p1.count + p2.count + intersections.count) * 2
+        var iterations = 0
+
+        repeat {
+            let current = poly()[currentIdx]
+            let key = "\(current.latitude),\(current.longitude)"
+
+            if visited.contains(key) && result.count > 2 {
+                break
+            }
+            visited.insert(key)
+            result.append(current)
+
+            let nextIdx = (currentIdx + 1) % poly().count
+            let currentEdge = currentPoly == 1 ? currentIdx : currentIdx
+
+            // Check if there's an intersection on this edge
+            let relevantIntersections = intersections.filter { intersection in
+                if currentPoly == 1 {
+                    return intersection.edge1Idx == currentIdx && intersection.t1 > 0.001 && intersection.t1 < 0.999
+                } else {
+                    return intersection.edge2Idx == currentIdx && intersection.t2 > 0.001 && intersection.t2 < 0.999
+                }
+            }.sorted { i1, i2 in
+                currentPoly == 1 ? i1.t1 < i2.t1 : i1.t2 < i2.t2
+            }
+
+            if let firstIntersection = relevantIntersections.first {
+                // Add intersection point and switch to other polygon
+                result.append(firstIntersection.point)
+
+                // Switch polygons
+                currentPoly = currentPoly == 1 ? 2 : 1
+                let otherEdgeIdx = currentPoly == 1 ? firstIntersection.edge1Idx : firstIntersection.edge2Idx
+                currentIdx = (otherEdgeIdx + 1) % poly().count
+            } else {
+                currentIdx = nextIdx
+            }
+
+            iterations += 1
+        } while iterations < maxIterations && (result.count < 3 || !coordsEqual(result.first!, poly()[currentIdx]))
+
+        // Ensure closed polygon
+        if result.count >= 3 && !coordsEqual(result.first!, result.last!) {
+            result.append(result[0])
+        }
+
+        return result.count >= 3 ? result : (p1.count >= p2.count ? p1 : p2)
+    }
+
+    /// Connect two non-overlapping polygons at their closest points
+    private static func connectPolygonsAtClosestPoints(
+        _ poly1: [CLLocationCoordinate2D],
+        _ poly2: [CLLocationCoordinate2D]
+    ) -> [CLLocationCoordinate2D] {
+        var minDist = Double.infinity
+        var closest1 = 0
+        var closest2 = 0
+
+        // Find closest pair of vertices
+        for i in 0..<poly1.count {
+            for j in 0..<poly2.count {
+                let dist = distance(poly1[i], poly2[j])
+                if dist < minDist {
+                    minDist = dist
+                    closest1 = i
+                    closest2 = j
+                }
+            }
+        }
+
+        // Build combined polygon: walk poly1, jump to poly2 at closest point, walk poly2, jump back
+        var result: [CLLocationCoordinate2D] = []
+
+        // Walk poly1 starting from closest1
+        for i in 0...poly1.count {
+            result.append(poly1[(closest1 + i) % poly1.count])
+        }
+
+        // Walk poly2 starting from closest2
+        for i in 0...poly2.count {
+            result.append(poly2[(closest2 + i) % poly2.count])
+        }
+
+        return result
+    }
+
+    /// Find intersection point of two line segments, returning parametric t values
+    private static func segmentIntersection(
+        a1: CLLocationCoordinate2D, a2: CLLocationCoordinate2D,
+        b1: CLLocationCoordinate2D, b2: CLLocationCoordinate2D
+    ) -> (point: CLLocationCoordinate2D, t1: Double, t2: Double)? {
+        let d1 = (a2.longitude - a1.longitude, a2.latitude - a1.latitude)
+        let d2 = (b2.longitude - b1.longitude, b2.latitude - b1.latitude)
+
+        let cross = d1.0 * d2.1 - d1.1 * d2.0
+        guard abs(cross) > 1e-10 else { return nil }  // Parallel
+
+        let d3 = (b1.longitude - a1.longitude, b1.latitude - a1.latitude)
+        let t1 = (d3.0 * d2.1 - d3.1 * d2.0) / cross
+        let t2 = (d3.0 * d1.1 - d3.1 * d1.0) / cross
+
+        // Check if intersection is within both segments (exclusive of endpoints)
+        guard t1 > 0.001 && t1 < 0.999 && t2 > 0.001 && t2 < 0.999 else { return nil }
+
+        let point = CLLocationCoordinate2D(
+            latitude: a1.latitude + t1 * d1.1,
+            longitude: a1.longitude + t1 * d1.0
+        )
+
+        return (point, t1, t2)
+    }
+
+    /// Check if a point is inside a polygon using ray casting
+    private static func isPointInPolygon(_ point: CLLocationCoordinate2D, polygon: [CLLocationCoordinate2D]) -> Bool {
+        var inside = false
+        var j = polygon.count - 1
+
+        for i in 0..<polygon.count {
+            let pi = polygon[i]
+            let pj = polygon[j]
+
+            if ((pi.latitude > point.latitude) != (pj.latitude > point.latitude)) &&
+               (point.longitude < (pj.longitude - pi.longitude) * (point.latitude - pi.latitude) / (pj.latitude - pi.latitude) + pi.longitude) {
+                inside = !inside
+            }
+            j = i
+        }
+
+        return inside
+    }
+
+    /// Calculate distance between two coordinates (in degrees, for comparison only)
+    private static func distance(_ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> Double {
+        let latDiff = a.latitude - b.latitude
+        let lonDiff = (a.longitude - b.longitude) * 0.79  // Adjust for SF latitude
+        return sqrt(latDiff * latDiff + lonDiff * lonDiff)
+    }
+
+    /// Check if two coordinates are equal
+    private static func coordsEqual(_ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> Bool {
+        return abs(a.latitude - b.latitude) < 0.0000001 &&
+               abs(a.longitude - b.longitude) < 0.0000001
+    }
+
+    /// Compute convex hull of points (Graham scan) - kept for fallback
     private static func convexHull(of points: [CLLocationCoordinate2D]) -> [CLLocationCoordinate2D] {
         guard points.count >= 3 else { return points }
 
