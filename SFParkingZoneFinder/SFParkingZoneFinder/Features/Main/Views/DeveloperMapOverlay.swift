@@ -89,8 +89,13 @@ struct DeveloperMapOverlay: View {
             // Scrollable content
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    // Quick toggles
-                    quickToggles
+                    // Merging section (top)
+                    mergingToggles
+
+                    Divider()
+
+                    // Simplification toggles
+                    simplificationToggles
 
                     // Sliders section (always shown - overlap tolerance is always available)
                     Divider()
@@ -124,9 +129,25 @@ struct DeveloperMapOverlay: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
-    // MARK: - Quick Toggles
+    // MARK: - Merging Toggles
 
-    private var quickToggles: some View {
+    private var mergingToggles: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Merging")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            compactToggle("Overlap Clipping", isOn: $devSettings.useOverlapClipping, icon: "square.on.square.intersection.dashed")
+            compactToggle("Merge Overlapping", isOn: $devSettings.mergeOverlappingSameZone, icon: "arrow.triangle.merge")
+            compactToggle("Proximity Merge", isOn: $devSettings.useProximityMerging, icon: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+        }
+    }
+
+    // MARK: - Simplification Toggles
+
+    private var simplificationToggles: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Simplification")
                 .font(.caption)
@@ -138,9 +159,6 @@ struct DeveloperMapOverlay: View {
             compactToggle("Grid Snapping", isOn: $devSettings.useGridSnapping, icon: "grid")
             compactToggle("Corner Rounding", isOn: $devSettings.useCornerRounding, icon: "circle.bottomhalf.filled")
             compactToggle("Convex Hull", isOn: $devSettings.useConvexHull, icon: "pentagon")
-            compactToggle("Overlap Clipping", isOn: $devSettings.useOverlapClipping, icon: "square.on.square.intersection.dashed")
-            compactToggle("Merge Overlapping", isOn: $devSettings.mergeOverlappingSameZone, icon: "arrow.triangle.merge")
-            compactToggle("Proximity Merge", isOn: $devSettings.useProximityMerging, icon: "arrow.left.and.right.righttriangle.left.righttriangle.right")
 
             if devSettings.useDouglasPeucker {
                 compactToggle("Preserve Curves", isOn: $devSettings.preserveCurves, icon: "point.topleft.down.to.point.bottomright.curvepath")
@@ -224,17 +242,44 @@ struct DeveloperMapOverlay: View {
 
     private var colorSettings: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Colors")
+            Text("Colors & Style")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
 
-            hexColorField(label: "User Zone", value: $devSettings.userZoneColorHex, previewColor: devSettings.userZoneColor)
-            hexColorField(label: "RPP Zones", value: $devSettings.rppZoneColorHex, previewColor: devSettings.rppZoneColor)
-            hexColorField(label: "Metered", value: $devSettings.meteredZoneColorHex, previewColor: devSettings.meteredZoneColor)
+            // Permitted Zone (user has permit)
+            zoneColorGroup(
+                label: "Permitted Zone",
+                colorHex: $devSettings.userZoneColorHex,
+                previewColor: devSettings.userZoneColor,
+                fillOpacity: $devSettings.otherZoneFillOpacity,
+                strokeOpacity: $devSettings.otherZoneStrokeOpacity,
+                strokeWidth: $devSettings.permittedZoneStrokeWidth
+            )
 
-            Text("Opacity")
+            // Non-Permitted Zone (no permit held)
+            zoneColorGroup(
+                label: "Non-Permitted Zone",
+                colorHex: $devSettings.rppZoneColorHex,
+                previewColor: devSettings.rppZoneColor,
+                fillOpacity: $devSettings.otherZoneFillOpacity,
+                strokeOpacity: $devSettings.otherZoneStrokeOpacity,
+                strokeWidth: $devSettings.nonPermittedZoneStrokeWidth
+            )
+
+            // Metered/Paid Zones
+            zoneColorGroup(
+                label: "Metered/Paid Zones",
+                colorHex: $devSettings.meteredZoneColorHex,
+                previewColor: devSettings.meteredZoneColor,
+                fillOpacity: $devSettings.otherZoneFillOpacity,
+                strokeOpacity: $devSettings.otherZoneStrokeOpacity,
+                strokeWidth: $devSettings.meteredZoneStrokeWidth
+            )
+
+            // In Zone opacity (current zone only)
+            Text("In Zone")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
@@ -242,7 +287,7 @@ struct DeveloperMapOverlay: View {
                 .padding(.top, 8)
 
             sliderControl(
-                label: "Current Fill",
+                label: "Fill Opacity",
                 value: $devSettings.currentZoneFillOpacity,
                 range: 0.0...1.0,
                 step: 0.05,
@@ -250,24 +295,8 @@ struct DeveloperMapOverlay: View {
             )
 
             sliderControl(
-                label: "Other Fill",
-                value: $devSettings.otherZoneFillOpacity,
-                range: 0.0...1.0,
-                step: 0.05,
-                formatter: { String(format: "%.0f%%", $0 * 100) }
-            )
-
-            sliderControl(
-                label: "Current Stroke",
+                label: "Stroke Opacity",
                 value: $devSettings.currentZoneStrokeOpacity,
-                range: 0.0...1.0,
-                step: 0.05,
-                formatter: { String(format: "%.0f%%", $0 * 100) }
-            )
-
-            sliderControl(
-                label: "Other Stroke",
-                value: $devSettings.otherZoneStrokeOpacity,
                 range: 0.0...1.0,
                 step: 0.05,
                 formatter: { String(format: "%.0f%%", $0 * 100) }
@@ -386,6 +415,48 @@ struct DeveloperMapOverlay: View {
                     .textFieldStyle(.plain)
             }
         }
+    }
+
+    private func zoneColorGroup(
+        label: String,
+        colorHex: Binding<String>,
+        previewColor: UIColor,
+        fillOpacity: Binding<Double>,
+        strokeOpacity: Binding<Double>,
+        strokeWidth: Binding<Double>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Color header
+            hexColorField(label: label, value: colorHex, previewColor: previewColor)
+
+            // Fill opacity
+            sliderControl(
+                label: "Fill",
+                value: fillOpacity,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
+
+            // Stroke opacity
+            sliderControl(
+                label: "Stroke",
+                value: strokeOpacity,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
+
+            // Stroke width
+            sliderControl(
+                label: "Width",
+                value: strokeWidth,
+                range: 0.0...5.0,
+                step: 0.25,
+                formatter: { String(format: "%.2f", $0) }
+            )
+        }
+        .padding(.vertical, 4)
     }
 
     // MARK: - Save Candidate Logic

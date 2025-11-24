@@ -134,6 +134,23 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(otherZoneStrokeOpacity, forKey: Keys.otherZoneStrokeOpacity) }
     }
 
+    // MARK: - Stroke Width
+
+    /// Stroke width for permitted zones (user has permit) - 0.0 to 5.0
+    @Published var permittedZoneStrokeWidth: Double {
+        didSet { UserDefaults.standard.set(permittedZoneStrokeWidth, forKey: Keys.permittedZoneStrokeWidth) }
+    }
+
+    /// Stroke width for non-permitted zones (no permit held) - 0.0 to 5.0
+    @Published var nonPermittedZoneStrokeWidth: Double {
+        didSet { UserDefaults.standard.set(nonPermittedZoneStrokeWidth, forKey: Keys.nonPermittedZoneStrokeWidth) }
+    }
+
+    /// Stroke width for metered/paid zones - 0.0 to 5.0
+    @Published var meteredZoneStrokeWidth: Double {
+        didSet { UserDefaults.standard.set(meteredZoneStrokeWidth, forKey: Keys.meteredZoneStrokeWidth) }
+    }
+
     // MARK: - Debug Visualization
 
     /// Show lookup boundaries as semi-transparent overlay
@@ -198,6 +215,9 @@ final class DeveloperSettings: ObservableObject {
         static let otherZoneFillOpacity = "dev.otherZoneFillOpacity"
         static let currentZoneStrokeOpacity = "dev.currentZoneStrokeOpacity"
         static let otherZoneStrokeOpacity = "dev.otherZoneStrokeOpacity"
+        static let permittedZoneStrokeWidth = "dev.permittedZoneStrokeWidth"
+        static let nonPermittedZoneStrokeWidth = "dev.nonPermittedZoneStrokeWidth"
+        static let meteredZoneStrokeWidth = "dev.meteredZoneStrokeWidth"
         static let showLookupBoundaries = "dev.showLookupBoundaries"
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
@@ -230,6 +250,9 @@ final class DeveloperSettings: ObservableObject {
         static let otherZoneFillOpacity = 0.20
         static let currentZoneStrokeOpacity = 1.0
         static let otherZoneStrokeOpacity = 0.6
+        static let permittedZoneStrokeWidth = 1.0
+        static let nonPermittedZoneStrokeWidth = 1.0
+        static let meteredZoneStrokeWidth = 1.0
         static let showLookupBoundaries = false
         static let showOriginalOverlay = false
         static let showVertexCounts = false
@@ -265,6 +288,9 @@ final class DeveloperSettings: ObservableObject {
         otherZoneFillOpacity = defaults.object(forKey: Keys.otherZoneFillOpacity) as? Double ?? Defaults.otherZoneFillOpacity
         currentZoneStrokeOpacity = defaults.object(forKey: Keys.currentZoneStrokeOpacity) as? Double ?? Defaults.currentZoneStrokeOpacity
         otherZoneStrokeOpacity = defaults.object(forKey: Keys.otherZoneStrokeOpacity) as? Double ?? Defaults.otherZoneStrokeOpacity
+        permittedZoneStrokeWidth = defaults.object(forKey: Keys.permittedZoneStrokeWidth) as? Double ?? Defaults.permittedZoneStrokeWidth
+        nonPermittedZoneStrokeWidth = defaults.object(forKey: Keys.nonPermittedZoneStrokeWidth) as? Double ?? Defaults.nonPermittedZoneStrokeWidth
+        meteredZoneStrokeWidth = defaults.object(forKey: Keys.meteredZoneStrokeWidth) as? Double ?? Defaults.meteredZoneStrokeWidth
         showLookupBoundaries = defaults.object(forKey: Keys.showLookupBoundaries) as? Bool ?? Defaults.showLookupBoundaries
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
