@@ -215,7 +215,10 @@ final class DeveloperSettings: ObservableObject {
 
     /// Whether developer settings section is unlocked
     @Published var developerModeUnlocked: Bool {
-        didSet { UserDefaults.standard.set(developerModeUnlocked, forKey: Keys.developerModeUnlocked) }
+        didSet {
+            print("🔧 DEBUG: developerModeUnlocked changed to: \(developerModeUnlocked)")
+            UserDefaults.standard.set(developerModeUnlocked, forKey: Keys.developerModeUnlocked)
+        }
     }
 
     /// Reload trigger - increment this to force overlay reload (not persisted)
@@ -343,7 +346,10 @@ final class DeveloperSettings: ObservableObject {
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
-        developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
+        // TEMPORARY DEBUG: Force developer mode ON for testing
+        // TODO: Remove this line after debugging
+        developerModeUnlocked = true  // Force ON
+        // developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
     }
 
     // MARK: - Computed Properties
