@@ -529,13 +529,26 @@ struct DeveloperMapOverlay: View {
     private func saveCandidate() {
         let config = SimplificationCandidate(
             timestamp: Date(),
+            // Basic simplification
             useDouglasPeucker: devSettings.useDouglasPeucker,
             douglasPeuckerTolerance: devSettings.douglasPeuckerTolerance,
             useGridSnapping: devSettings.useGridSnapping,
             gridSnapSize: devSettings.gridSnapSize,
             useConvexHull: devSettings.useConvexHull,
             preserveCurves: devSettings.preserveCurves,
-            curveAngleThreshold: devSettings.curveAngleThreshold
+            curveAngleThreshold: devSettings.curveAngleThreshold,
+            // Corner rounding
+            useCornerRounding: devSettings.useCornerRounding,
+            cornerRoundingRadius: devSettings.cornerRoundingRadius,
+            // Overlap handling
+            useOverlapClipping: devSettings.useOverlapClipping,
+            overlapTolerance: devSettings.overlapTolerance,
+            // Polygon merging
+            mergeOverlappingSameZone: devSettings.mergeOverlappingSameZone,
+            useProximityMerging: devSettings.useProximityMerging,
+            proximityMergeDistance: devSettings.proximityMergeDistance,
+            // Deduplication
+            deduplicationThreshold: devSettings.deduplicationThreshold
         )
 
         // Generate name from settings
@@ -575,6 +588,8 @@ struct DeveloperMapOverlay: View {
 /// Used for exporting settings to integrate into the pipeline
 struct SimplificationCandidate: Codable {
     let timestamp: Date
+
+    // MARK: - Basic Simplification (Pipeline)
     let useDouglasPeucker: Bool
     let douglasPeuckerTolerance: Double
     let useGridSnapping: Bool
@@ -583,10 +598,27 @@ struct SimplificationCandidate: Codable {
     let preserveCurves: Bool
     let curveAngleThreshold: Double
 
+    // MARK: - Corner Rounding (Pipeline)
+    let useCornerRounding: Bool
+    let cornerRoundingRadius: Double
+
+    // MARK: - Overlap Handling (App Runtime)
+    let useOverlapClipping: Bool
+    let overlapTolerance: Double
+
+    // MARK: - Polygon Merging (App Runtime)
+    let mergeOverlappingSameZone: Bool
+    let useProximityMerging: Bool
+    let proximityMergeDistance: Double
+
+    // MARK: - Deduplication (App Runtime)
+    let deduplicationThreshold: Double
+
     /// Generate a suggested name based on enabled features
     var suggestedName: String {
         var parts: [String] = []
 
+        // Pipeline features
         if useDouglasPeucker {
             let tolMeters = Int(douglasPeuckerTolerance * 111000)
             parts.append("dp\(tolMeters)m")
@@ -601,6 +633,25 @@ struct SimplificationCandidate: Codable {
         if preserveCurves && useDouglasPeucker {
             parts.append("curves\(Int(curveAngleThreshold))deg")
         }
+        if useCornerRounding {
+            let radiusMeters = Int(cornerRoundingRadius * 111000)
+            parts.append("round\(radiusMeters)m")
+        }
+
+        // Runtime features (may be moved to pipeline)
+        if useOverlapClipping {
+            parts.append("clip")
+        }
+        if mergeOverlappingSameZone {
+            parts.append("merge")
+        }
+        if useProximityMerging {
+            let distMeters = Int(proximityMergeDistance)
+            parts.append("prox\(distMeters)m")
+        }
+        if deduplicationThreshold < 0.95 {  // Only add if non-default
+            parts.append("dedup\(Int(deduplicationThreshold * 100))")
+        }
 
         if parts.isEmpty {
             return "original"
@@ -613,8 +664,11 @@ struct SimplificationCandidate: Codable {
     var humanReadableDescription: String {
         var lines: [String] = []
 
-        lines.append("Pipeline: \(suggestedName)")
+        lines.append("=== CONFIGURATION: \(suggestedName) ===")
         lines.append("")
+
+        // Pipeline features
+        lines.append("--- PIPELINE (Preprocessing) ---")
 
         if useDouglasPeucker {
             lines.append("Douglas-Peucker: ON")
@@ -637,21 +691,63 @@ struct SimplificationCandidate: Codable {
             lines.append("Convex Hull: ON (aggressive)")
         }
 
+        if useCornerRounding {
+            lines.append("Corner Rounding: ON")
+            lines.append("  Radius: \(String(format: "%.5f", cornerRoundingRadius))° (~\(Int(cornerRoundingRadius * 111000))m)")
+        } else {
+            lines.append("Corner Rounding: OFF")
+        }
+
+        // Runtime features
+        lines.append("")
+        lines.append("--- APP RUNTIME (Visual Processing) ---")
+
+        if useOverlapClipping {
+            lines.append("Overlap Clipping: ON")
+            lines.append("  Tolerance: \(String(format: "%.5f", overlapTolerance))°")
+        } else {
+            lines.append("Overlap Clipping: OFF")
+        }
+
+        if mergeOverlappingSameZone {
+            lines.append("Merge Same Zone: ON")
+        }
+
+        if useProximityMerging {
+            lines.append("Proximity Merging: ON")
+            lines.append("  Distance: \(Int(proximityMergeDistance))m")
+        }
+
+        lines.append("Deduplication Threshold: \(Int(deduplicationThreshold * 100))%")
+
         return lines.joined(separator: "\n")
     }
 
     /// Swift code snippet for pipeline integration
     var swiftCodeSnippet: String {
         """
-        // Simplification preset: \(suggestedName)
-        static let \(suggestedName.replacingOccurrences(of: "-", with: "_")) = SimplificationPreset(
+        // Configuration preset: \(suggestedName)
+        static let \(suggestedName.replacingOccurrences(of: "-", with: "_")) = SimplificationConfig(
+            // Basic simplification
             useDouglasPeucker: \(useDouglasPeucker),
             douglasPeuckerTolerance: \(douglasPeuckerTolerance),
             useGridSnapping: \(useGridSnapping),
             gridSnapSize: \(gridSnapSize),
             useConvexHull: \(useConvexHull),
             preserveCurves: \(preserveCurves),
-            curveAngleThreshold: \(curveAngleThreshold)
+            curveAngleThreshold: \(curveAngleThreshold),
+            // Corner rounding
+            useCornerRounding: \(useCornerRounding),
+            cornerRoundingRadius: \(cornerRoundingRadius),
+            // Overlap handling
+            useOverlapClipping: \(useOverlapClipping),
+            overlapTolerance: \(overlapTolerance),
+            // Polygon merging
+            mergeOverlappingSameZone: \(mergeOverlappingSameZone),
+            useProximityMerging: \(useProximityMerging),
+            proximityMergeDistance: \(proximityMergeDistance),
+            // Deduplication
+            deduplicationThreshold: \(deduplicationThreshold)
         )
         """
     }
