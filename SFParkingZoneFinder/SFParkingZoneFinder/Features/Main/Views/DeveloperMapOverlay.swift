@@ -8,6 +8,7 @@ struct DeveloperMapOverlay: View {
     @Binding var isPanelExpanded: Bool
     @State private var showingSaveConfirmation = false
     @State private var savedCandidateName: String = ""
+    var onRefreshLayers: (() -> Void)?  // Callback to trigger layer refresh
 
     /// Panel height as fraction of screen
     private var panelHeight: CGFloat {
@@ -71,6 +72,20 @@ struct DeveloperMapOverlay: View {
                     Text("Layer Settings")
                         .font(.headline)
                         .foregroundColor(.primary)
+
+                    Spacer()
+
+                    // Refresh button
+                    Button {
+                        refreshLayers()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 28, height: 28)
+                            .background(Color.blue)
+                            .clipShape(Circle())
+                    }
                 }
 
                 // Pipeline status
@@ -457,6 +472,20 @@ struct DeveloperMapOverlay: View {
             )
         }
         .padding(.vertical, 4)
+    }
+
+    // MARK: - Layer Refresh
+
+    private func refreshLayers() {
+        // Force reload of overlays by incrementing reload trigger
+        devSettings.forceReloadOverlays()
+
+        // Call optional callback (for future use)
+        onRefreshLayers?()
+
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 
     // MARK: - Save Candidate Logic

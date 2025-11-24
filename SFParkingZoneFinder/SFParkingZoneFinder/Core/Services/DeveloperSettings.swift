@@ -191,6 +191,14 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(developerModeUnlocked, forKey: Keys.developerModeUnlocked) }
     }
 
+    /// Reload trigger - increment this to force overlay reload (not persisted)
+    @Published var reloadTrigger: Int = 0
+
+    /// Force reload of map overlays
+    func forceReloadOverlays() {
+        reloadTrigger += 1
+    }
+
     // MARK: - Keys
 
     private enum Keys {

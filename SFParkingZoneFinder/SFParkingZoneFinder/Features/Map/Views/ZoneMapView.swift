@@ -291,6 +291,27 @@ struct ZoneMapView: UIViewRepresentable {
         // Handle searched location annotation
         updateSearchedAnnotation(mapView: mapView, context: context)
 
+        // Check if reload trigger changed - force reload if so
+        let currentReloadTrigger = DeveloperSettings.shared.reloadTrigger
+        if context.coordinator.overlaysLoaded && currentReloadTrigger != context.coordinator.lastReloadTrigger {
+            logger.info("🔄 Manual refresh triggered - reloading overlays")
+            context.coordinator.lastReloadTrigger = currentReloadTrigger
+
+            // Clear existing overlays and annotations (except user location and searched pin)
+            let overlaysToRemove = mapView.overlays
+            let annotationsToRemove = mapView.annotations.filter { annotation in
+                !(annotation is MKUserLocation) && !(annotation is SearchedLocationAnnotation)
+            }
+            mapView.removeOverlays(overlaysToRemove)
+            mapView.removeAnnotations(annotationsToRemove)
+
+            // Reset overlay state and reload
+            context.coordinator.overlaysLoaded = false
+            context.coordinator.overlaysCurrentlyVisible = false
+            loadOverlays(mapView: mapView, context: context)
+            return
+        }
+
         // Check if developer settings changed - reload overlays if so
         let currentSettingsHash = DeveloperSettings.shared.settingsHash
         if context.coordinator.overlaysLoaded && currentSettingsHash != context.coordinator.lastSettingsHash {
@@ -824,11 +845,15 @@ struct ZoneMapView: UIViewRepresentable {
         // Track developer settings hash to detect changes and refresh overlays
         var lastSettingsHash: Int = 0
 
+        // Track reload trigger to detect manual refresh requests
+        var lastReloadTrigger: Int = 0
+
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone) -> Void)?) {
             self.currentZoneId = currentZoneId
             self.zones = zones
             self.onZoneTapped = onZoneTapped
             self.lastSettingsHash = DeveloperSettings.shared.settingsHash
+            self.lastReloadTrigger = DeveloperSettings.shared.reloadTrigger
         }
 
         // MARK: - MKMapViewDelegate
