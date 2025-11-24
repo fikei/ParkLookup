@@ -260,11 +260,14 @@ struct ZoneMapView: UIViewRepresentable {
 
                     // Hide overlays if showOverlays is false
                     if !shouldShowOverlays {
+                        logger.debug("⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false")
                         for overlay in batch {
                             if let renderer = mapView.renderer(for: overlay) {
                                 renderer.alpha = 0
                             }
                         }
+                    } else {
+                        logger.debug("✅ Adding overlays with alpha=1 (visible) - showOverlays=true, batch size=\(batch.count)")
                     }
 
                     if endIndex < totalPolygons {
@@ -319,8 +322,7 @@ struct ZoneMapView: UIViewRepresentable {
             mapView.removeOverlays(overlaysToRemove)
             mapView.removeAnnotations(annotationsToRemove)
 
-            // Reset overlay state and reload
-            context.coordinator.overlaysLoaded = false
+            // Reload overlays (keep overlaysLoaded=true to prevent race condition)
             context.coordinator.overlaysCurrentlyVisible = false
             loadOverlays(mapView: mapView, context: context)
             return
@@ -340,8 +342,7 @@ struct ZoneMapView: UIViewRepresentable {
             mapView.removeOverlays(overlaysToRemove)
             mapView.removeAnnotations(annotationsToRemove)
 
-            // Reset overlay state and reload
-            context.coordinator.overlaysLoaded = false
+            // Reload overlays (keep overlaysLoaded=true to prevent race condition)
             context.coordinator.overlaysCurrentlyVisible = false
             loadOverlays(mapView: mapView, context: context)
             return
@@ -363,6 +364,7 @@ struct ZoneMapView: UIViewRepresentable {
         let overlaysVisible = context.coordinator.overlaysCurrentlyVisible
         if showOverlays != overlaysVisible {
             if showOverlays {
+                logger.info("👁️ Showing overlays with fade-in animation (1.6s total)")
                 // Show overlays with slow fade animation when maximizing
                 for overlay in mapView.overlays {
                     if let renderer = mapView.renderer(for: overlay) {
@@ -386,8 +388,11 @@ struct ZoneMapView: UIViewRepresentable {
                             view.alpha = 1
                         }
                     }
+                } completion: { _ in
+                    logger.info("✅ Fade-in animation complete - overlays should be visible")
                 }
             } else {
+                logger.info("🙈 Hiding overlays with fade-out animation")
                 // Hide overlays with fade out
                 UIView.animate(withDuration: 0.4, delay: 0, options: [.curveEaseIn]) {
                     for overlay in mapView.overlays {
