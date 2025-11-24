@@ -52,7 +52,7 @@ struct ExpandedMapView: View {
 
     /// User's valid permit area codes (uppercase) for map coloring
     private var userPermitAreaCodes: Set<String> {
-        Set(applicablePermits.compactMap { $0.area?.uppercased() })
+        Set(applicablePermits.map { $0.area.uppercased() })
     }
 
     var body: some View {

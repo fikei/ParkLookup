@@ -70,7 +70,7 @@ struct MainResultView: View {
 
     /// User's valid permit area codes (uppercase) for map coloring
     private var userPermitAreaCodes: Set<String> {
-        Set(viewModel.applicablePermits.compactMap { $0.area?.uppercased() })
+        Set(viewModel.applicablePermits.map { $0.area.uppercased() })
     }
 
     var body: some View {
