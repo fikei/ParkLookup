@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UIKit
 
 /// Singleton managing developer/debug settings for polygon display
 /// Access via hidden gesture in Settings (5-tap on version)
