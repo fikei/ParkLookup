@@ -747,6 +747,9 @@ struct ZoneMapView: UIViewRepresentable {
         let coordinator = context.coordinator
         let devSettings = DeveloperSettings.shared
 
+        // Mark as loaded immediately to prevent race condition (multiple simultaneous loads)
+        coordinator.overlaysLoaded = true
+
         let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
 
