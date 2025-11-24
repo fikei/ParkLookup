@@ -50,6 +50,11 @@ struct ExpandedMapView: View {
         return String(zoneName.dropFirst(5))
     }
 
+    /// User's valid permit area codes (uppercase) for map coloring
+    private var userPermitAreaCodes: Set<String> {
+        Set(applicablePermits.compactMap { $0.area?.uppercased() })
+    }
+
     var body: some View {
         let _ = logger.debug("ExpandedMapView body evaluated - zones: \(zones.count)")
 
@@ -63,6 +68,7 @@ struct ExpandedMapView: View {
                     onZoneTapped: { zone in
                         selectedZone = zone
                     },
+                    userPermitAreas: userPermitAreaCodes,
                     devSettingsHash: devSettings.settingsHash
                 )
                 .ignoresSafeArea()

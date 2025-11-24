@@ -12,6 +12,10 @@ struct ZoneMapView: UIViewRepresentable {
     let userCoordinate: CLLocationCoordinate2D?
     let onZoneTapped: ((ParkingZone) -> Void)?
 
+    /// User's valid permit areas (uppercase codes like "Q", "AA")
+    /// Zones matching these will be colored green, others orange
+    var userPermitAreas: Set<String> = []
+
     /// Developer settings hash - when this changes, overlays reload with new simplification
     var devSettingsHash: Int = DeveloperSettings.shared.settingsHash
 
@@ -266,6 +270,7 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
         context.coordinator.showOverlays = showOverlays
+        context.coordinator.userPermitAreas = userPermitAreas
 
         // Handle searched location annotation
         updateSearchedAnnotation(mapView: mapView, context: context)
@@ -621,6 +626,7 @@ struct ZoneMapView: UIViewRepresentable {
         var currentZoneId: String?
         var zones: [ParkingZone]
         var onZoneTapped: ((ParkingZone) -> Void)?
+        var userPermitAreas: Set<String> = []
 
         // Store initial region to re-apply after overlays load
         var initialCenter: CLLocationCoordinate2D?
@@ -660,28 +666,51 @@ struct ZoneMapView: UIViewRepresentable {
             rendererCallCount += 1
             let renderer = MKPolygonRenderer(polygon: polygon)
             let isCurrentZone = polygon.zoneId == currentZoneId
+            let devSettings = DeveloperSettings.shared
 
-            // Use zone type-aware coloring for metered zones
-            var fillColor: UIColor
-            var strokeColor: UIColor
-            if let zoneType = polygon.zoneType, zoneType == .metered {
-                fillColor = ZoneColorProvider.fillColor(for: zoneType, isCurrentZone: isCurrentZone)
-                strokeColor = ZoneColorProvider.strokeColor(for: zoneType, isCurrentZone: isCurrentZone)
+            // Determine base color using user permit-aware logic and developer settings
+            var baseColor: UIColor
+            let zoneType = polygon.zoneType ?? .residentialPermit
+
+            if zoneType == .metered {
+                // Metered zones use developer settings color (default: grey)
+                baseColor = devSettings.meteredZoneColor
+            } else if let zoneCode = polygon.zoneCode?.uppercased(),
+                      userPermitAreas.contains(zoneCode) {
+                // User's valid permit zones use developer settings color (default: green)
+                baseColor = devSettings.userZoneColor
+            } else if zoneType == .residentialPermit {
+                // Other RPP zones use developer settings color (default: orange)
+                baseColor = devSettings.rppZoneColor
             } else {
-                fillColor = ZoneColorProvider.fillColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
-                strokeColor = ZoneColorProvider.strokeColor(for: polygon.zoneCode, isCurrentZone: isCurrentZone)
+                // Fallback
+                baseColor = ZoneColorProvider.color(for: zoneType)
             }
 
-            renderer.fillColor = fillColor
-            renderer.strokeColor = strokeColor
+            // Apply fill and stroke with developer settings opacity
+            let fillAlpha = devSettings.fillOpacity(isCurrentZone: isCurrentZone)
+            let strokeAlpha = devSettings.strokeOpacity(isCurrentZone: isCurrentZone)
+
+            renderer.fillColor = baseColor.withAlphaComponent(fillAlpha)
+            renderer.strokeColor = baseColor.withAlphaComponent(strokeAlpha)
             renderer.lineWidth = ZoneColorProvider.strokeWidth(isCurrentZone: isCurrentZone)
 
-            // Multi-permit polygons get a dashed border and slightly different fill
+            // Multi-permit polygons get a dashed border
+            // If user has permit for this multi-permit zone, use user zone color with dashed edge
             if polygon.isMultiPermit {
-                renderer.lineDashPattern = [4, 2]  // More frequent dashes for multi-permit zones
-                // Use same stroke width as regular zones (no override)
-                // Slightly more saturated fill for multi-permit areas
-                renderer.fillColor = fillColor.withAlphaComponent(0.35)
+                renderer.lineDashPattern = [4, 2]  // Dashed border for multi-permit zones
+                renderer.fillColor = baseColor.withAlphaComponent(devSettings.fillOpacity(isCurrentZone: true))
+
+                // Check if any of the multi-permit areas match user's permits
+                if let multiPermitAreas = polygon.allValidPermitAreas {
+                    let matchesUserPermit = multiPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
+                    if matchesUserPermit {
+                        // User has a valid permit for this multi-permit zone - use user zone color
+                        let userColor = devSettings.userZoneColor
+                        renderer.fillColor = userColor.withAlphaComponent(devSettings.fillOpacity(isCurrentZone: true))
+                        renderer.strokeColor = userColor.withAlphaComponent(strokeAlpha)
+                    }
+                }
             }
 
             return renderer

@@ -53,6 +53,64 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(curveAngleThreshold, forKey: Keys.curveAngleThreshold) }
     }
 
+    /// Corner rounding radius in degrees
+    /// Smooths sharp corners by adding arc segments
+    /// 0 = no rounding, higher = more rounded corners
+    @Published var cornerRoundingRadius: Double {
+        didSet { UserDefaults.standard.set(cornerRoundingRadius, forKey: Keys.cornerRoundingRadius) }
+    }
+
+    /// Enable corner rounding
+    @Published var useCornerRounding: Bool {
+        didSet { UserDefaults.standard.set(useCornerRounding, forKey: Keys.useCornerRounding) }
+    }
+
+    /// Error tolerance for overlap detection (degrees)
+    /// Used to detect and clean up small overlaps/gaps between polygons
+    /// Smaller = more precise, larger = more aggressive cleanup
+    @Published var overlapTolerance: Double {
+        didSet { UserDefaults.standard.set(overlapTolerance, forKey: Keys.overlapTolerance) }
+    }
+
+    // MARK: - Zone Colors (hex strings without #)
+
+    /// Color for user's valid permit zones (default: green 33B366)
+    @Published var userZoneColorHex: String {
+        didSet { UserDefaults.standard.set(userZoneColorHex, forKey: Keys.userZoneColorHex) }
+    }
+
+    /// Color for other RPP zones (default: orange F29933)
+    @Published var rppZoneColorHex: String {
+        didSet { UserDefaults.standard.set(rppZoneColorHex, forKey: Keys.rppZoneColorHex) }
+    }
+
+    /// Color for metered zones (default: grey 808080)
+    @Published var meteredZoneColorHex: String {
+        didSet { UserDefaults.standard.set(meteredZoneColorHex, forKey: Keys.meteredZoneColorHex) }
+    }
+
+    // MARK: - Zone Opacity
+
+    /// Fill opacity for current zone (0.0 - 1.0)
+    @Published var currentZoneFillOpacity: Double {
+        didSet { UserDefaults.standard.set(currentZoneFillOpacity, forKey: Keys.currentZoneFillOpacity) }
+    }
+
+    /// Fill opacity for other zones (0.0 - 1.0)
+    @Published var otherZoneFillOpacity: Double {
+        didSet { UserDefaults.standard.set(otherZoneFillOpacity, forKey: Keys.otherZoneFillOpacity) }
+    }
+
+    /// Stroke opacity for current zone (0.0 - 1.0)
+    @Published var currentZoneStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(currentZoneStrokeOpacity, forKey: Keys.currentZoneStrokeOpacity) }
+    }
+
+    /// Stroke opacity for other zones (0.0 - 1.0)
+    @Published var otherZoneStrokeOpacity: Double {
+        didSet { UserDefaults.standard.set(otherZoneStrokeOpacity, forKey: Keys.otherZoneStrokeOpacity) }
+    }
+
     // MARK: - Debug Visualization
 
     /// Show lookup boundaries as semi-transparent overlay
@@ -103,6 +161,16 @@ final class DeveloperSettings: ObservableObject {
         static let gridSnapSize = "dev.gridSnapSize"
         static let preserveCurves = "dev.preserveCurves"
         static let curveAngleThreshold = "dev.curveAngleThreshold"
+        static let cornerRoundingRadius = "dev.cornerRoundingRadius"
+        static let useCornerRounding = "dev.useCornerRounding"
+        static let overlapTolerance = "dev.overlapTolerance"
+        static let userZoneColorHex = "dev.userZoneColorHex"
+        static let rppZoneColorHex = "dev.rppZoneColorHex"
+        static let meteredZoneColorHex = "dev.meteredZoneColorHex"
+        static let currentZoneFillOpacity = "dev.currentZoneFillOpacity"
+        static let otherZoneFillOpacity = "dev.otherZoneFillOpacity"
+        static let currentZoneStrokeOpacity = "dev.currentZoneStrokeOpacity"
+        static let otherZoneStrokeOpacity = "dev.otherZoneStrokeOpacity"
         static let showLookupBoundaries = "dev.showLookupBoundaries"
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
@@ -121,6 +189,16 @@ final class DeveloperSettings: ObservableObject {
         static let gridSnapSize = 0.00005  // ~5.5m grid
         static let preserveCurves = true
         static let curveAngleThreshold = 15.0  // degrees - angles > 15° are "curves"
+        static let cornerRoundingRadius = 0.00005  // ~5.5m radius
+        static let useCornerRounding = false
+        static let overlapTolerance = 0.00001  // ~1m tolerance for overlap detection
+        static let userZoneColorHex = "33B366"  // Green
+        static let rppZoneColorHex = "F29933"   // Orange
+        static let meteredZoneColorHex = "808080"  // Grey
+        static let currentZoneFillOpacity = 0.35
+        static let otherZoneFillOpacity = 0.20
+        static let currentZoneStrokeOpacity = 1.0
+        static let otherZoneStrokeOpacity = 0.6
         static let showLookupBoundaries = false
         static let showOriginalOverlay = false
         static let showVertexCounts = false
@@ -142,6 +220,16 @@ final class DeveloperSettings: ObservableObject {
         gridSnapSize = defaults.object(forKey: Keys.gridSnapSize) as? Double ?? Defaults.gridSnapSize
         preserveCurves = defaults.object(forKey: Keys.preserveCurves) as? Bool ?? Defaults.preserveCurves
         curveAngleThreshold = defaults.object(forKey: Keys.curveAngleThreshold) as? Double ?? Defaults.curveAngleThreshold
+        cornerRoundingRadius = defaults.object(forKey: Keys.cornerRoundingRadius) as? Double ?? Defaults.cornerRoundingRadius
+        useCornerRounding = defaults.object(forKey: Keys.useCornerRounding) as? Bool ?? Defaults.useCornerRounding
+        overlapTolerance = defaults.object(forKey: Keys.overlapTolerance) as? Double ?? Defaults.overlapTolerance
+        userZoneColorHex = defaults.object(forKey: Keys.userZoneColorHex) as? String ?? Defaults.userZoneColorHex
+        rppZoneColorHex = defaults.object(forKey: Keys.rppZoneColorHex) as? String ?? Defaults.rppZoneColorHex
+        meteredZoneColorHex = defaults.object(forKey: Keys.meteredZoneColorHex) as? String ?? Defaults.meteredZoneColorHex
+        currentZoneFillOpacity = defaults.object(forKey: Keys.currentZoneFillOpacity) as? Double ?? Defaults.currentZoneFillOpacity
+        otherZoneFillOpacity = defaults.object(forKey: Keys.otherZoneFillOpacity) as? Double ?? Defaults.otherZoneFillOpacity
+        currentZoneStrokeOpacity = defaults.object(forKey: Keys.currentZoneStrokeOpacity) as? Double ?? Defaults.currentZoneStrokeOpacity
+        otherZoneStrokeOpacity = defaults.object(forKey: Keys.otherZoneStrokeOpacity) as? Double ?? Defaults.otherZoneStrokeOpacity
         showLookupBoundaries = defaults.object(forKey: Keys.showLookupBoundaries) as? Bool ?? Defaults.showLookupBoundaries
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
@@ -154,7 +242,7 @@ final class DeveloperSettings: ObservableObject {
 
     /// Whether any simplification is enabled
     var isSimplificationEnabled: Bool {
-        useConvexHull || useDouglasPeucker || useGridSnapping
+        useConvexHull || useDouglasPeucker || useGridSnapping || useCornerRounding
     }
 
     /// Settings hash for detecting changes (triggers map refresh)
@@ -167,6 +255,16 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(gridSnapSize)
         hasher.combine(preserveCurves)
         hasher.combine(curveAngleThreshold)
+        hasher.combine(useCornerRounding)
+        hasher.combine(cornerRoundingRadius)
+        hasher.combine(overlapTolerance)
+        hasher.combine(userZoneColorHex)
+        hasher.combine(rppZoneColorHex)
+        hasher.combine(meteredZoneColorHex)
+        hasher.combine(currentZoneFillOpacity)
+        hasher.combine(otherZoneFillOpacity)
+        hasher.combine(currentZoneStrokeOpacity)
+        hasher.combine(otherZoneStrokeOpacity)
         hasher.combine(showLookupBoundaries)
         hasher.combine(showOriginalOverlay)
         hasher.combine(showVertexCounts)
@@ -184,6 +282,10 @@ final class DeveloperSettings: ObservableObject {
         if useGridSnapping {
             let gridStr = String(format: "%.5f", gridSnapSize)
             steps.append("Grid (\(gridStr)°)")
+        }
+        if useCornerRounding {
+            let radiusStr = String(format: "%.5f", cornerRoundingRadius)
+            steps.append("Round (\(radiusStr)°)")
         }
         if useConvexHull {
             steps.append("Hull")
@@ -211,12 +313,64 @@ final class DeveloperSettings: ObservableObject {
         gridSnapSize = Defaults.gridSnapSize
         preserveCurves = Defaults.preserveCurves
         curveAngleThreshold = Defaults.curveAngleThreshold
+        useCornerRounding = Defaults.useCornerRounding
+        cornerRoundingRadius = Defaults.cornerRoundingRadius
+        overlapTolerance = Defaults.overlapTolerance
+        userZoneColorHex = Defaults.userZoneColorHex
+        rppZoneColorHex = Defaults.rppZoneColorHex
+        meteredZoneColorHex = Defaults.meteredZoneColorHex
+        currentZoneFillOpacity = Defaults.currentZoneFillOpacity
+        otherZoneFillOpacity = Defaults.otherZoneFillOpacity
+        currentZoneStrokeOpacity = Defaults.currentZoneStrokeOpacity
+        otherZoneStrokeOpacity = Defaults.otherZoneStrokeOpacity
         showLookupBoundaries = Defaults.showLookupBoundaries
         showOriginalOverlay = Defaults.showOriginalOverlay
         showVertexCounts = Defaults.showVertexCounts
         logSimplificationStats = Defaults.logSimplificationStats
         logLookupPerformance = Defaults.logLookupPerformance
         // Don't reset developerModeUnlocked
+    }
+
+    // MARK: - Color Helpers
+
+    /// Parse hex string to UIColor
+    static func colorFromHex(_ hex: String) -> UIColor {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let b = CGFloat(rgb & 0x0000FF) / 255.0
+
+        return UIColor(red: r, green: g, blue: b, alpha: 1.0)
+    }
+
+    /// Get user zone color from hex setting
+    var userZoneColor: UIColor {
+        Self.colorFromHex(userZoneColorHex)
+    }
+
+    /// Get RPP zone color from hex setting
+    var rppZoneColor: UIColor {
+        Self.colorFromHex(rppZoneColorHex)
+    }
+
+    /// Get metered zone color from hex setting
+    var meteredZoneColor: UIColor {
+        Self.colorFromHex(meteredZoneColorHex)
+    }
+
+    /// Get fill opacity based on whether zone is current
+    func fillOpacity(isCurrentZone: Bool) -> CGFloat {
+        CGFloat(isCurrentZone ? currentZoneFillOpacity : otherZoneFillOpacity)
+    }
+
+    /// Get stroke opacity based on whether zone is current
+    func strokeOpacity(isCurrentZone: Bool) -> CGFloat {
+        CGFloat(isCurrentZone ? currentZoneStrokeOpacity : otherZoneStrokeOpacity)
     }
 
     // MARK: - Descriptions (for UI)

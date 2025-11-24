@@ -4,6 +4,17 @@ import UIKit
 /// Provides consistent colors for parking zone visualization on maps
 enum ZoneColorProvider {
 
+    // MARK: - Standard Colors
+
+    /// Color for user's valid permit zone (green)
+    static let userZoneColor = UIColor(red: 0.2, green: 0.7, blue: 0.4, alpha: 1.0)  // #33B366 Green
+
+    /// Color for all other RPP zones (orange)
+    static let rppZoneColor = UIColor(red: 0.95, green: 0.6, blue: 0.2, alpha: 1.0)  // #F29933 Orange
+
+    /// Color for metered/paid parking zones (grey)
+    static let meteredZoneColor = UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)  // #808080 Grey
+
     // MARK: - Zone Colors
 
     /// Get the color for a zone by its permit area code
@@ -24,7 +35,7 @@ enum ZoneColorProvider {
         case .metered:
             return meteredZoneColor
         case .residentialPermit:
-            return .systemBlue
+            return rppZoneColor  // Default orange for RPP
         case .timeLimited:
             return .systemOrange
         case .noParking:
@@ -36,8 +47,31 @@ enum ZoneColorProvider {
         }
     }
 
-    /// Color for metered/paid parking zones
-    static let meteredZoneColor = UIColor(red: 0.2, green: 0.7, blue: 0.4, alpha: 1.0)  // #33B366 Green
+    /// Get the color for a zone considering user's valid permit areas
+    /// - Parameters:
+    ///   - zone: The parking zone to color
+    ///   - userPermitAreas: Set of permit area codes the user has valid permits for
+    /// - Returns: Green for user's zones, grey for metered, orange for other RPP
+    static func color(for zone: ParkingZone, userPermitAreas: Set<String>) -> UIColor {
+        // Metered zones are always grey
+        if zone.zoneType == .metered {
+            return meteredZoneColor
+        }
+
+        // Check if this is user's valid permit zone
+        if let permitArea = zone.permitArea?.uppercased(),
+           userPermitAreas.contains(permitArea) {
+            return userZoneColor
+        }
+
+        // All other RPP zones are orange
+        if zone.zoneType == .residentialPermit {
+            return rppZoneColor
+        }
+
+        // Fallback to type-based coloring
+        return color(for: zone.zoneType)
+    }
 
     /// SwiftUI Color wrapper
     static func swiftUIColor(for zoneCode: String?) -> Color {
@@ -160,5 +194,26 @@ enum ZoneColorProvider {
         let baseColor = color(for: zone)
         let alpha: CGFloat = isCurrentZone ? 1.0 : 0.6
         return baseColor.withAlphaComponent(alpha)
+    }
+
+    // MARK: - User Permit-Aware Coloring
+
+    /// Fill color for a zone considering user's valid permit areas
+    static func fillColor(for zone: ParkingZone, userPermitAreas: Set<String>, isCurrentZone: Bool) -> UIColor {
+        let baseColor = color(for: zone, userPermitAreas: userPermitAreas)
+        let alpha: CGFloat = isCurrentZone ? 0.35 : 0.20
+        return baseColor.withAlphaComponent(alpha)
+    }
+
+    /// Stroke color for a zone considering user's valid permit areas
+    static func strokeColor(for zone: ParkingZone, userPermitAreas: Set<String>, isCurrentZone: Bool) -> UIColor {
+        let baseColor = color(for: zone, userPermitAreas: userPermitAreas)
+        let alpha: CGFloat = isCurrentZone ? 1.0 : 0.6
+        return baseColor.withAlphaComponent(alpha)
+    }
+
+    /// SwiftUI Color for zone with user permit awareness
+    static func swiftUIColor(for zone: ParkingZone, userPermitAreas: Set<String>) -> Color {
+        Color(uiColor: color(for: zone, userPermitAreas: userPermitAreas))
     }
 }

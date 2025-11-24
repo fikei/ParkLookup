@@ -92,11 +92,14 @@ struct DeveloperMapOverlay: View {
                     // Quick toggles
                     quickToggles
 
-                    // Sliders section
-                    if devSettings.useDouglasPeucker || devSettings.useGridSnapping || devSettings.preserveCurves {
-                        Divider()
-                        slidersSection
-                    }
+                    // Sliders section (always shown - overlap tolerance is always available)
+                    Divider()
+                    slidersSection
+
+                    Divider()
+
+                    // Color and opacity settings
+                    colorSettings
 
                     Divider()
 
@@ -133,6 +136,7 @@ struct DeveloperMapOverlay: View {
 
             compactToggle("Douglas-Peucker", isOn: $devSettings.useDouglasPeucker, icon: "waveform.path")
             compactToggle("Grid Snapping", isOn: $devSettings.useGridSnapping, icon: "grid")
+            compactToggle("Corner Rounding", isOn: $devSettings.useCornerRounding, icon: "circle.bottomhalf.filled")
             compactToggle("Convex Hull", isOn: $devSettings.useConvexHull, icon: "pentagon")
 
             if devSettings.useDouglasPeucker {
@@ -171,6 +175,16 @@ struct DeveloperMapOverlay: View {
                 )
             }
 
+            if devSettings.useCornerRounding {
+                sliderControl(
+                    label: "Corner Radius",
+                    value: $devSettings.cornerRoundingRadius,
+                    range: 0.00001...0.0002,
+                    step: 0.00001,
+                    formatter: { String(format: "%.5f° (~%dm)", $0, Int($0 * 111000)) }
+                )
+            }
+
             if devSettings.preserveCurves && devSettings.useDouglasPeucker {
                 sliderControl(
                     label: "Curve Threshold",
@@ -180,6 +194,70 @@ struct DeveloperMapOverlay: View {
                     formatter: { "\(Int($0))°" }
                 )
             }
+
+            // Overlap tolerance (always shown for future overlap cleanup feature)
+            sliderControl(
+                label: "Overlap Tolerance",
+                value: $devSettings.overlapTolerance,
+                range: 0.000001...0.0001,
+                step: 0.000001,
+                formatter: { String(format: "%.6f° (~%.1fm)", $0, $0 * 111000) }
+            )
+        }
+    }
+
+    // MARK: - Color Settings
+
+    private var colorSettings: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Colors")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            hexColorField(label: "User Zone", value: $devSettings.userZoneColorHex, previewColor: devSettings.userZoneColor)
+            hexColorField(label: "RPP Zones", value: $devSettings.rppZoneColorHex, previewColor: devSettings.rppZoneColor)
+            hexColorField(label: "Metered", value: $devSettings.meteredZoneColorHex, previewColor: devSettings.meteredZoneColor)
+
+            Text("Opacity")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+                .padding(.top, 8)
+
+            sliderControl(
+                label: "Current Fill",
+                value: $devSettings.currentZoneFillOpacity,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
+
+            sliderControl(
+                label: "Other Fill",
+                value: $devSettings.otherZoneFillOpacity,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
+
+            sliderControl(
+                label: "Current Stroke",
+                value: $devSettings.currentZoneStrokeOpacity,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
+
+            sliderControl(
+                label: "Other Stroke",
+                value: $devSettings.otherZoneStrokeOpacity,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
         }
     }
 
@@ -261,6 +339,38 @@ struct DeveloperMapOverlay: View {
 
             Slider(value: value, in: range, step: step)
                 .tint(.accentColor)
+        }
+    }
+
+    private func hexColorField(label: String, value: Binding<String>, previewColor: UIColor) -> some View {
+        HStack {
+            // Color preview circle
+            Circle()
+                .fill(Color(uiColor: previewColor))
+                .frame(width: 20, height: 20)
+                .overlay(
+                    Circle()
+                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                )
+
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.primary)
+
+            Spacer()
+
+            // Hex input field
+            HStack(spacing: 2) {
+                Text("#")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                TextField("RRGGBB", text: value)
+                    .font(.caption.monospaced())
+                    .textCase(.uppercase)
+                    .frame(width: 60)
+                    .multilineTextAlignment(.trailing)
+                    .textFieldStyle(.plain)
+            }
         }
     }
 

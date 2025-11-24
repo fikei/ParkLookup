@@ -68,6 +68,11 @@ struct MainResultView: View {
         return String(viewModel.zoneName.dropFirst(5))
     }
 
+    /// User's valid permit area codes (uppercase) for map coloring
+    private var userPermitAreaCodes: Set<String> {
+        Set(viewModel.applicablePermits.compactMap { $0.area?.uppercased() })
+    }
+
     var body: some View {
         ZStack {
             // Layer 1: Fullscreen Map (always visible as background)
@@ -82,6 +87,7 @@ struct MainResultView: View {
                                 selectedZone = zone
                             }
                         },
+                        userPermitAreas: userPermitAreaCodes,
                         devSettingsHash: devSettings.settingsHash,
                         // When collapsed, shift user location below the card
                         // A bias of 0.5 places the user indicator well below the large card
