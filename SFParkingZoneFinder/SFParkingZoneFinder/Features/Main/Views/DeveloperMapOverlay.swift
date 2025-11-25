@@ -144,6 +144,35 @@ struct DeveloperMapOverlay: View {
                         Spacer()
                     }
                 }
+
+                // Tapped overlay info (only show if an overlay has been tapped)
+                if devSettings.tappedOverlayNumber > 0 {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Tapped Overlay #\(devSettings.tappedOverlayNumber)")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
+                        HStack(spacing: 8) {
+                            Text("Zone: \(devSettings.tappedZoneCode.isEmpty ? "N/A" : devSettings.tappedZoneCode)")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            if devSettings.tappedIsMultiPermit {
+                                Text("Multi-Permit")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 1)
+                                    .background(Color.green)
+                                    .cornerRadius(3)
+                            }
+                            Text("\(devSettings.tappedVertexCount) pts")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)

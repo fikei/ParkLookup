@@ -1102,6 +1102,7 @@ struct ZoneMapView: UIViewRepresentable {
             }
 
             rendererCallCount += 1
+            polygon.overlayNumber = rendererCallCount  // Store overlay number for debug display
 
             // Validate polygon before rendering
             let pointCount = polygon.pointCount
@@ -1322,6 +1323,18 @@ struct ZoneMapView: UIViewRepresentable {
                     if let zone = zones.first(where: { $0.id == polygon.zoneId }) {
                         onZoneTapped?(zone)
                     }
+
+                    // Store overlay debug info if developer mode is active
+                    let devSettings = DeveloperSettings.shared
+                    if devSettings.developerModeUnlocked {
+                        devSettings.tappedOverlayNumber = polygon.overlayNumber
+                        devSettings.tappedZoneId = polygon.zoneId ?? ""
+                        devSettings.tappedZoneCode = polygon.zoneCode ?? ""
+                        devSettings.tappedIsMultiPermit = polygon.isMultiPermit
+                        devSettings.tappedVertexCount = polygon.pointCount
+                        logger.debug("📍 Tapped overlay #\(polygon.overlayNumber): zone=\(polygon.zoneCode ?? "nil"), vertices=\(polygon.pointCount), multiPermit=\(polygon.isMultiPermit)")
+                    }
+
                     return
                 }
             }
@@ -1339,6 +1352,7 @@ class ZonePolygon: MKPolygon {
     var isMultiPermit: Bool = false  // True if this polygon accepts multiple permits
     var allValidPermitAreas: [String]?  // All valid permit areas for multi-permit polygons
     var originalVertexCount: Int = 0  // For debug: original vertex count before simplification
+    var overlayNumber: Int = 0  // For debug: rendering order number (overlay #)
 
     /// Extract coordinates from polygon points
     var coordinates: [CLLocationCoordinate2D] {
