@@ -1415,3 +1415,12 @@ List has 3 nodes:
 	7 8 1 
 Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
 Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
+
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=1243
+🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=false, overlays.count=1243
+👁️ Showing overlays with fade-in animation (1.6s total), overlay count=1243
+✅ Fade-in animation complete - overlays should be visible
