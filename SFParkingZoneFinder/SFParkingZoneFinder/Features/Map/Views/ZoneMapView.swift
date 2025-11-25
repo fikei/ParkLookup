@@ -280,6 +280,8 @@ struct ZoneMapView: UIViewRepresentable {
                         // Use CURRENT showOverlays value, not captured value
                         coordinator.overlaysCurrentlyVisible = self.showOverlays
                         coordinator.overlaysLoaded = true
+                        coordinator.isLoadingOverlays = false
+                        coordinator.overlayLoadingMessage = ""
                         logger.info("Overlays loaded: \(totalPolygons) polygons")
                     }
                 }
@@ -291,6 +293,8 @@ struct ZoneMapView: UIViewRepresentable {
                     // Use CURRENT showOverlays value, not captured value
                     coordinator.overlaysCurrentlyVisible = self.showOverlays
                     coordinator.overlaysLoaded = true
+                    coordinator.isLoadingOverlays = false
+                    coordinator.overlayLoadingMessage = ""
                 }
             }
         }
@@ -757,6 +761,10 @@ struct ZoneMapView: UIViewRepresentable {
 
         logger.debug("🔧 loadOverlays called with shouldShowOverlays=\(shouldShowOverlays)")
 
+        // Mark as loading started
+        coordinator.isLoadingOverlays = true
+        coordinator.overlayLoadingMessage = "Processing \(zonesToLoad.count) zones..."
+
         // Mark as loaded immediately to prevent race condition (multiple simultaneous loads)
         coordinator.overlaysLoaded = true
 
@@ -926,6 +934,9 @@ struct ZoneMapView: UIViewRepresentable {
                     }
 
                     if endIndex < totalPolygons {
+                        // Update loading progress for developer view
+                        coordinator.overlayLoadingMessage = "Rendering overlays \(endIndex)/\(totalPolygons)..."
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
                             addBatch(startIndex: endIndex)
                         }
@@ -933,6 +944,8 @@ struct ZoneMapView: UIViewRepresentable {
                         // Use CURRENT showOverlays value, not captured value
                         coordinator.overlaysCurrentlyVisible = self.showOverlays
                         coordinator.overlaysLoaded = true
+                        coordinator.isLoadingOverlays = false
+                        coordinator.overlayLoadingMessage = ""
                         logger.info("Deferred overlays loaded: \(totalPolygons) polygons, overlaysCurrentlyVisible set to \(self.showOverlays)")
                     }
                 }
@@ -943,6 +956,8 @@ struct ZoneMapView: UIViewRepresentable {
                     // Use CURRENT showOverlays value, not captured value
                     coordinator.overlaysCurrentlyVisible = self.showOverlays
                     coordinator.overlaysLoaded = true
+                    coordinator.isLoadingOverlays = false
+                    coordinator.overlayLoadingMessage = ""
                 }
             }
         }
@@ -967,6 +982,8 @@ struct ZoneMapView: UIViewRepresentable {
         var showOverlays: Bool = true
         var overlaysCurrentlyVisible: Bool = false  // Start hidden, will be set true after initial load if showOverlays is true
         var overlaysLoaded: Bool = false  // Track whether overlays have been loaded
+        var isLoadingOverlays: Bool = false  // Track whether overlays are currently being loaded/rendered
+        var overlayLoadingMessage: String = ""  // Detailed message for developer view
         var lastVerticalBias: Double = 0.0
 
         // Track the searched location annotation

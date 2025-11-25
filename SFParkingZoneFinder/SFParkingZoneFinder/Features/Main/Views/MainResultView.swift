@@ -42,6 +42,8 @@ struct MainResultView: View {
     @State private var searchedCoordinate: CLLocationCoordinate2D?
     @State private var showOutsideCoverageAlert = false
     @State private var developerPanelExpanded = false
+    @State private var isLoadingOverlays = false
+    @State private var overlayLoadingMessage = ""
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -113,8 +115,34 @@ struct MainResultView: View {
                             showToggleButton: false
                         )
                     }
+
+                    // Loading overlays
+                    if devSettings.developerModeUnlocked {
+                        // Detailed developer loading overlay
+                        DeveloperLoadingOverlay(
+                            isLoadingZones: viewModel.isLoading,
+                            isLoadingOverlays: isLoadingOverlays,
+                            statusMessage: overlayLoadingMessage
+                        )
+                    } else {
+                        // Simple loading overlay for regular users
+                        MapLoadingOverlay(isLoading: viewModel.isLoading || isLoadingOverlays)
+                    }
                 }
                 .ignoresSafeArea()
+                .onChange(of: viewModel.allLoadedZones.count) { newCount in
+                    // Simulate overlay loading state
+                    if newCount > 0 && !isLoadingOverlays {
+                        isLoadingOverlays = true
+                        overlayLoadingMessage = "Rendering \(newCount) zone overlays..."
+
+                        // Clear loading state after a delay (overlays load asynchronously)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            isLoadingOverlays = false
+                            overlayLoadingMessage = ""
+                        }
+                    }
+                }
             } else {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
