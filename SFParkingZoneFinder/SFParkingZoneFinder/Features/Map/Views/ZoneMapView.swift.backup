@@ -81,6 +81,232 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Note: Overlay loading is handled in updateUIView via loadOverlays() to avoid duplication
 
+            // Filter radius for visible zones
+            let filterRadius = 0.03   // ~3.3km - visible area
+
+            let minLat = center.latitude - filterRadius
+            let maxLat = center.latitude + filterRadius
+            let minLon = center.longitude - filterRadius
+            let maxLon = center.longitude + filterRadius
+
+            for zone in zonesToLoad {
+                let zoneBoundaryCount = zone.allBoundaryCoordinates.count
+                totalBoundaries += zoneBoundaryCount
+
+                // Collect nearby boundaries
+                var nearbyBoundaries: [[CLLocationCoordinate2D]] = []
+
+                for boundary in zone.allBoundaryCoordinates {
+                    totalInputPoints += boundary.count
+
+                    // Check if any point of this boundary is within filter bounds
+                    let hasNearbyPoint = boundary.contains { coord in
+                        coord.latitude >= minLat && coord.latitude <= maxLat &&
+                        coord.longitude >= minLon && coord.longitude <= maxLon
+                    }
+
+                    if hasNearbyPoint {
+                        nearbyBoundaries.append(boundary)
+                    }
+                }
+
+                // Apply simplification pipeline based on DeveloperSettings
+                let multiPermitIndices = zone.multiPermitBoundaryIndices
+                let allBoundaries = zone.allBoundaryCoordinates
+
+                // Debug logging for multi-permit zones
+                if !multiPermitIndices.isEmpty && zone.permitArea == "I" {
+                    logger.debug("🔍 Zone \(zone.permitArea ?? "nil"): multiPermitIndices=\(Array(multiPermitIndices).sorted()), multiPermitBoundaries count=\(zone.multiPermitBoundaries.count)")
+                    for mpb in zone.multiPermitBoundaries {
+                        logger.debug("  - Boundary[\(mpb.boundaryIndex)]: permits=\(mpb.validPermitAreas)")
+                    }
+                }
+
+                for boundary in nearbyBoundaries {
+                    guard boundary.count >= 3 else { continue }
+
+                    // Apply simplification if enabled
+                    var displayBoundary = devSettings.isSimplificationEnabled
+                        ? PolygonSimplifier.simplify(boundary, settings: devSettings)
+                        : boundary
+
+                    // Apply polygon buffering if enabled (cleans up self-intersections)
+                    if devSettings.usePolygonBuffering {
+                        displayBoundary = Self.bufferPolygon(displayBoundary, bufferDistance: devSettings.polygonBufferDistance)
+                    }
+
+                    guard displayBoundary.count >= 3 else { continue }
+
+                    let polygon = ZonePolygon(coordinates: displayBoundary, count: displayBoundary.count)
+                    polygon.zoneId = zone.id
+                    polygon.zoneCode = zone.permitArea
+                    polygon.zoneType = zone.zoneType
+                    polygon.originalVertexCount = boundary.count  // Store for debug display
+
+                    // Check if this is a multi-permit boundary
+                    if let firstCoord = boundary.first {
+                        for (originalIndex, originalBoundary) in allBoundaries.enumerated() {
+                            if let origFirst = originalBoundary.first,
+                               abs(origFirst.latitude - firstCoord.latitude) < 0.000001 &&
+                               abs(origFirst.longitude - firstCoord.longitude) < 0.000001 &&
+                               multiPermitIndices.contains(originalIndex) {
+                                polygon.isMultiPermit = true
+                                let validAreas = zone.validPermitAreas(for: originalIndex)
+                                polygon.allValidPermitAreas = validAreas
+
+                                // Debug logging for zone I
+                                if zone.permitArea == "I" {
+                                    logger.debug("  🎯 Matched boundary index \(originalIndex) for zone I: validAreas=\(validAreas?.description ?? "nil")")
+                                }
+                                break
+                            }
+                        }
+                    }
+
+                    polygons.append(polygon)
+                    totalOutputPoints += displayBoundary.count
+                }
+
+                // Add annotation at zone centroid (from all nearby boundaries)
+                let allNearbyPoints = nearbyBoundaries.flatMap { $0 }
+                if !allNearbyPoints.isEmpty {
+                    let sumLat = allNearbyPoints.reduce(0.0) { $0 + $1.latitude }
+                    let sumLon = allNearbyPoints.reduce(0.0) { $0 + $1.longitude }
+                    let centroid = CLLocationCoordinate2D(
+                        latitude: sumLat / Double(allNearbyPoints.count),
+                        longitude: sumLon / Double(allNearbyPoints.count)
+                    )
+                    // For metered zones, use "$" symbol; for RPP use permit area code
+                    let labelCode = zone.zoneType == .metered ? "$" : (zone.permitArea ?? zone.displayName)
+                    let annotation = ZoneLabelAnnotation(
+                        coordinate: centroid,
+                        zoneCode: labelCode,
+                        zoneId: zone.id,
+                        zoneType: zone.zoneType
+                    )
+                    annotations.append(annotation)
+                }
+
+            }
+
+            // Apply overlap clipping if enabled (visual only)
+            if devSettings.useOverlapClipping {
+                polygons = Self.applyOverlapClipping(polygons, tolerance: devSettings.overlapTolerance)
+            }
+
+            // Apply polygon merging if enabled (visual only)
+            if devSettings.mergeOverlappingSameZone || devSettings.useProximityMerging {
+                polygons = Self.applyPolygonMerging(
+                    polygons,
+                    mergeOverlapping: devSettings.mergeOverlappingSameZone,
+                    useProximity: devSettings.useProximityMerging,
+                    proximityMeters: devSettings.proximityMergeDistance,
+                    tolerance: devSettings.overlapTolerance
+                )
+            }
+
+            // Remove near-duplicate polygons to prevent double-rendering
+            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: devSettings.deduplicationThreshold)
+
+            // Separate polygons by zone type and permit status for proper layering
+            // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
+            let meteredPolygons = polygons.filter { $0.zoneType == .metered }
+            let nonPermittedPolygons = polygons.filter { polygon in
+                guard polygon.zoneType != .metered else { return false }
+                guard let zoneCode = polygon.zoneCode?.uppercased() else { return true }
+                return !self.userPermitAreas.contains(zoneCode)
+            }
+            let permittedPolygons = polygons.filter { polygon in
+                guard polygon.zoneType != .metered else { return false }
+                guard let zoneCode = polygon.zoneCode?.uppercased() else { return false }
+                return self.userPermitAreas.contains(zoneCode)
+            }
+
+            // Capture the coordinator, initial region, and showOverlays before async block
+            let coordinator = context.coordinator
+            let initialCenter = coordinator.initialCenter
+            let initialSpan = coordinator.initialSpan
+            let shouldShowOverlays = self.showOverlays
+
+            // Add to map on main thread in batches to keep UI responsive
+            DispatchQueue.main.async {
+
+                // Mark setup done immediately so map is interactive
+                coordinator.initialSetupDone = true
+                coordinator.showOverlays = shouldShowOverlays
+
+                // Re-apply the initial zoom first
+                if let center = initialCenter, let span = initialSpan {
+                    let region = MKCoordinateRegion(center: center, span: span)
+                    mapView.setRegion(region, animated: false)
+                }
+
+                // Add annotations immediately (they're lightweight)
+                mapView.addAnnotations(annotations)
+
+                // Hide annotations if overlays should be hidden
+                if !shouldShowOverlays {
+                    for annotation in annotations {
+                        if let view = mapView.view(for: annotation) {
+                            view.alpha = 0
+                        }
+                    }
+                }
+
+                // Add overlays in batches with proper layering:
+                // Metered (bottom) → Non-Permitted RPP (middle) → Permitted RPP (top)
+                let batchSize = 500
+
+                // Ordered polygons: metered first, then non-permitted, then permitted (later additions render on top)
+                let orderedPolygons = meteredPolygons + nonPermittedPolygons + permittedPolygons
+                let totalPolygons = orderedPolygons.count
+
+                func addBatch(startIndex: Int) {
+                    let endIndex = min(startIndex + batchSize, totalPolygons)
+                    let batch = Array(orderedPolygons[startIndex..<endIndex])
+
+                    mapView.addOverlays(batch, level: .aboveRoads)
+
+                    // Set alpha based on coordinator's CURRENT showOverlays value
+                    // Coordinator is updated in updateUIView, so this reflects real-time state
+                    if !coordinator.showOverlays {
+                        logger.debug("⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false")
+                        for overlay in batch {
+                            if let renderer = mapView.renderer(for: overlay) {
+                                renderer.alpha = 0
+                            }
+                        }
+                    } else {
+                        logger.debug("✅ Adding overlays with alpha=1 (visible) - showOverlays=true, batch size=\(batch.count)")
+                    }
+
+                    if endIndex < totalPolygons {
+                        // Schedule next batch with tiny delay to let UI breathe
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                            addBatch(startIndex: endIndex)
+                        }
+                    } else {
+                        // Use coordinator's current showOverlays value
+                        coordinator.overlaysCurrentlyVisible = coordinator.showOverlays
+                        coordinator.overlaysLoaded = true
+                        coordinator.isLoadingOverlays = false
+                        coordinator.overlayLoadingMessage = ""
+                        logger.info("Overlays loaded: \(totalPolygons) polygons, visible=\(coordinator.showOverlays)")
+                    }
+                }
+
+                // Start adding batches
+                if !orderedPolygons.isEmpty {
+                    addBatch(startIndex: 0)
+                } else {
+                    // Use coordinator's current showOverlays value
+                    coordinator.overlaysCurrentlyVisible = coordinator.showOverlays
+                    coordinator.overlaysLoaded = true
+                    coordinator.isLoadingOverlays = false
+                    coordinator.overlayLoadingMessage = ""
+                }
+            }
+        }
 
         return mapView
     }
