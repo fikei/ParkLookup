@@ -39,6 +39,7 @@ struct MainResultView: View {
     @State private var contentAppeared = false
     @State private var isMapExpanded = false
     @State private var selectedZone: ParkingZone?
+    @State private var tappedPermitAreas: [String]?  // Specific permit areas for the tapped boundary
     @State private var searchedCoordinate: CLLocationCoordinate2D?
     @State private var showOutsideCoverageAlert = false
     @State private var developerPanelExpanded = false
@@ -86,9 +87,10 @@ struct MainResultView: View {
                         zones: viewModel.allLoadedZones,
                         currentZoneId: viewModel.currentZoneId,
                         userCoordinate: activeCoordinate,
-                        onZoneTapped: { zone in
+                        onZoneTapped: { zone, permitAreas in
                             if isMapExpanded {
                                 selectedZone = zone
+                                tappedPermitAreas = permitAreas
                             }
                         },
                         userPermitAreas: userPermitAreaCodes,
@@ -201,8 +203,9 @@ struct MainResultView: View {
 
                     // Bottom section - Tapped zone info (only in expanded mode)
                     if isMapExpanded, let selected = selectedZone {
-                        TappedZoneInfoCard(zone: selected) {
+                        TappedZoneInfoCard(zone: selected, tappedPermitAreas: tappedPermitAreas) {
                             selectedZone = nil
+                            tappedPermitAreas = nil
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 80) // Padding to avoid overlap with bottom navigation
@@ -231,6 +234,7 @@ struct MainResultView: View {
                                 isMapExpanded.toggle()
                                 if !isMapExpanded {
                                     selectedZone = nil
+                                    tappedPermitAreas = nil
                                     developerPanelExpanded = false
                                     // Reset to current location when minimizing
                                     if searchedCoordinate != nil {
@@ -1249,6 +1253,7 @@ private struct ExpandedBottomCard: View {
 
 private struct TappedZoneInfoCard: View {
     let zone: ParkingZone
+    let tappedPermitAreas: [String]?  // Specific permit areas for the tapped boundary
     let onDismiss: () -> Void
 
     @State private var animationIndex: Int = 0
@@ -1262,13 +1267,12 @@ private struct TappedZoneInfoCard: View {
     }
 
     private var allPermitAreas: [String] {
-        guard isMultiPermitZone else { return [zoneCode] }
-        var areas = Set<String>()
-        if let permitArea = zone.permitArea { areas.insert(permitArea) }
-        for boundary in zone.multiPermitBoundaries {
-            areas.formUnion(boundary.validPermitAreas)
+        // Use the specific tapped boundary's permit areas if available
+        if let tappedAreas = tappedPermitAreas, !tappedAreas.isEmpty {
+            return tappedAreas.sorted()
         }
-        return areas.sorted()
+        // Fallback to zone code if no multi-permit data
+        return [zoneCode]
     }
 
     private var currentSelectedArea: String {
