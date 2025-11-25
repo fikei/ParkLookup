@@ -127,6 +127,7 @@ struct MainResultView: View {
                     } else {
                         // Simple loading overlay for regular users
 
+
                         MapLoadingOverlay(isLoading: viewModel.isLoading || isLoadingOverlays)
                     }
                 }
