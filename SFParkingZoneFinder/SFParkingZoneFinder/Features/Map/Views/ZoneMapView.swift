@@ -42,7 +42,7 @@ struct ZoneMapView: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> MKMapView {
-        logger.info("ZoneMapView init - \(self.zones.count) zones")
+        logger.info("🚀 BUILD VERIFICATION: makeUIView called with \(self.zones.count) zones - DUPLICATE FIX ACTIVE")
 
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
