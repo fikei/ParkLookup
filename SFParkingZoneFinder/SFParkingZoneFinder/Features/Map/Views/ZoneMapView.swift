@@ -315,6 +315,9 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.onZoneTapped = onZoneTapped
         context.coordinator.showOverlays = showOverlays
 
+        // Debug logging to track permit changes
+        logger.debug("🔍 updateUIView called: overlaysLoaded=\(context.coordinator.overlaysLoaded), userPermitAreas=\(Array(userPermitAreas).sorted()), lastUserPermitAreas=\(Array(context.coordinator.lastUserPermitAreas).sorted())")
+
         // Check if user permits changed - reload overlays if so
         if context.coordinator.overlaysLoaded && userPermitAreas != context.coordinator.lastUserPermitAreas {
             logger.info("🔄 User permits changed - reloading overlays (permits: \(Array(userPermitAreas)))")
@@ -334,6 +337,10 @@ struct ZoneMapView: UIViewRepresentable {
             loadOverlays(mapView: mapView, context: context)
             return
         } else {
+            // Update coordinator's permit areas (no reload needed)
+            if context.coordinator.userPermitAreas != userPermitAreas {
+                logger.debug("🔍 Updating coordinator userPermitAreas: \(Array(context.coordinator.userPermitAreas).sorted()) -> \(Array(userPermitAreas).sorted())")
+            }
             context.coordinator.userPermitAreas = userPermitAreas
         }
 
@@ -828,6 +835,7 @@ struct ZoneMapView: UIViewRepresentable {
         // Mark as loaded immediately to prevent race condition (multiple simultaneous loads)
         coordinator.overlaysLoaded = true
         coordinator.lastUserPermitAreas = userPermitAreas  // Initialize permit tracking
+        logger.debug("🔧 loadOverlays: initialized lastUserPermitAreas=\(Array(userPermitAreas).sorted())")
 
         let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
