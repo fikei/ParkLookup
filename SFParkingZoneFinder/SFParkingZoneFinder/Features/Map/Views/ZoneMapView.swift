@@ -685,6 +685,8 @@ struct ZoneMapView: UIViewRepresentable {
                                abs(origFirst.longitude - firstCoord.longitude) < 0.000001 &&
                                multiPermitIndices.contains(originalIndex) {
                                 polygon.isMultiPermit = true
+                                polygon.allValidPermitAreas = zone.validPermitAreas(for: originalIndex)
+                                logger.debug("  🎯 Multi-permit boundary matched: zone=\(zone.permitArea ?? "nil"), boundaryIndex=\(originalIndex), validAreas=\(polygon.allValidPermitAreas?.description ?? "nil")")
                                 break
                             }
                         }
