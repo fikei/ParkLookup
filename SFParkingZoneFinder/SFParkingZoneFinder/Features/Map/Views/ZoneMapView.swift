@@ -1193,6 +1193,16 @@ struct ZoneMapView: UIViewRepresentable {
                 }
             }
 
+            // Override with purple color if showing lookup boundaries
+            if devSettings.showLookupBoundaries {
+                let purpleColor = UIColor(red: 0.6, green: 0.3, blue: 0.8, alpha: 1.0)  // Purple
+                let opacity = CGFloat(devSettings.lookupBoundaryOpacity)
+                renderer.fillColor = purpleColor.withAlphaComponent(opacity * 0.5)  // Lighter fill
+                renderer.strokeColor = purpleColor.withAlphaComponent(opacity)  // Stronger stroke
+                renderer.lineWidth = 2.0  // Thicker line for visibility
+                logger.debug("  → Lookup Boundary Override: PURPLE, opacity=\(devSettings.lookupBoundaryOpacity)")
+            }
+
             // Set renderer alpha based on current visibility state
             // This ensures overlays respect the showOverlays state when rendered
             renderer.alpha = showOverlays ? 1.0 : 0.0

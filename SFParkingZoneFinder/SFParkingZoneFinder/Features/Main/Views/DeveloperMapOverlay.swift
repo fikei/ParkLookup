@@ -449,6 +449,19 @@ struct DeveloperMapOverlay: View {
                 .textCase(.uppercase)
 
             compactToggle("Lookup Bounds", isOn: $devSettings.showLookupBoundaries, icon: "rectangle.dashed")
+
+            // Lookup boundary opacity slider (only shown when enabled)
+            if devSettings.showLookupBoundaries {
+                sliderControl(
+                    label: "Boundary Opacity",
+                    value: $devSettings.lookupBoundaryOpacity,
+                    range: 0.0...1.0,
+                    step: 0.05,
+                    formatter: { String(format: "%.0f%%", $0 * 100) }
+                )
+                .padding(.leading, 8)
+            }
+
             compactToggle("Original Overlay", isOn: $devSettings.showOriginalOverlay, icon: "square.on.square.dashed")
             compactToggle("Vertex Counts", isOn: $devSettings.showVertexCounts, icon: "number")
         }

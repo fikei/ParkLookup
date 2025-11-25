@@ -203,6 +203,11 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(showLookupBoundaries, forKey: Keys.showLookupBoundaries) }
     }
 
+    /// Opacity for lookup boundary overlay (0.0 - 1.0)
+    @Published var lookupBoundaryOpacity: Double {
+        didSet { UserDefaults.standard.set(lookupBoundaryOpacity, forKey: Keys.lookupBoundaryOpacity) }
+    }
+
     /// Show original (unsimplified) boundaries as comparison overlay
     /// Renders with dashed outline to compare against simplified display
     @Published var showOriginalOverlay: Bool {
@@ -297,6 +302,7 @@ final class DeveloperSettings: ObservableObject {
         static let strokeWidth = "dev.strokeWidth"
         static let dashLength = "dev.dashLength"
         static let showLookupBoundaries = "dev.showLookupBoundaries"
+        static let lookupBoundaryOpacity = "dev.lookupBoundaryOpacity"
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
         static let logSimplificationStats = "dev.logSimplificationStats"
@@ -339,6 +345,7 @@ final class DeveloperSettings: ObservableObject {
         static let strokeWidth = 1.0  // Global stroke width
         static let dashLength = 0.0  // 0 = solid line
         static let showLookupBoundaries = false
+        static let lookupBoundaryOpacity = 0.4  // Default 40% opacity for purple overlay
         static let showOriginalOverlay = false
         static let showVertexCounts = false
         static let logSimplificationStats = false
@@ -384,6 +391,7 @@ final class DeveloperSettings: ObservableObject {
         strokeWidth = defaults.object(forKey: Keys.strokeWidth) as? Double ?? Defaults.strokeWidth
         dashLength = defaults.object(forKey: Keys.dashLength) as? Double ?? Defaults.dashLength
         showLookupBoundaries = defaults.object(forKey: Keys.showLookupBoundaries) as? Bool ?? Defaults.showLookupBoundaries
+        lookupBoundaryOpacity = defaults.object(forKey: Keys.lookupBoundaryOpacity) as? Double ?? Defaults.lookupBoundaryOpacity
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
@@ -436,6 +444,7 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(strokeWidth)
         hasher.combine(dashLength)
         hasher.combine(showLookupBoundaries)
+        hasher.combine(lookupBoundaryOpacity)
         hasher.combine(showOriginalOverlay)
         hasher.combine(showVertexCounts)
         return hasher.finalize()
@@ -525,6 +534,7 @@ final class DeveloperSettings: ObservableObject {
         strokeWidth = Defaults.strokeWidth
         dashLength = Defaults.dashLength
         showLookupBoundaries = Defaults.showLookupBoundaries
+        lookupBoundaryOpacity = Defaults.lookupBoundaryOpacity
         showOriginalOverlay = Defaults.showOriginalOverlay
         showVertexCounts = Defaults.showVertexCounts
         logSimplificationStats = Defaults.logSimplificationStats
