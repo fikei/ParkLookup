@@ -65,6 +65,13 @@
 		3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146212ED16803001BDE61 /* SettingsViewModel.swift */; };
 		3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146232ED16803001BDE61 /* AddPermitView.swift */; };
 		3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146242ED16803001BDE61 /* SettingsView.swift */; };
+		3C9E4FF22ED52D6300EE643B /* AdditionalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEA2ED52D6300EE643B /* AdditionalInfoView.swift */; };
+		3C9E4FF32ED52D6400EE643B /* AddressSearchCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEB2ED52D6300EE643B /* AddressSearchCard.swift */; };
+		3C9E4FF42ED52D6400EE643B /* DeveloperMapOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEC2ED52D6300EE643B /* DeveloperMapOverlay.swift */; };
+		3C9E4FF52ED52D6400EE643B /* MainResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FED2ED52D6300EE643B /* MainResultView.swift */; };
+		3C9E4FF62ED52D6400EE643B /* RulesSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEE2ED52D6300EE643B /* RulesSummaryView.swift */; };
+		3C9E4FF72ED52D6400EE643B /* ValidityBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEF2ED52D6300EE643B /* ValidityBadgeView.swift */; };
+		3C9E4FF82ED52D6400EE643B /* ZoneStatusCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FF02ED52D6300EE643B /* ZoneStatusCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -128,6 +135,13 @@
 		3C4146212ED16803001BDE61 /* SettingsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		3C4146232ED16803001BDE61 /* AddPermitView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPermitView.swift; sourceTree = "<group>"; };
 		3C4146242ED16803001BDE61 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3C9E4FEA2ED52D6300EE643B /* AdditionalInfoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdditionalInfoView.swift; sourceTree = "<group>"; };
+		3C9E4FEB2ED52D6300EE643B /* AddressSearchCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressSearchCard.swift; sourceTree = "<group>"; };
+		3C9E4FEC2ED52D6300EE643B /* DeveloperMapOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperMapOverlay.swift; sourceTree = "<group>"; };
+		3C9E4FED2ED52D6300EE643B /* MainResultView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainResultView.swift; sourceTree = "<group>"; };
+		3C9E4FEE2ED52D6300EE643B /* RulesSummaryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RulesSummaryView.swift; sourceTree = "<group>"; };
+		3C9E4FEF2ED52D6300EE643B /* ValidityBadgeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValidityBadgeView.swift; sourceTree = "<group>"; };
+		3C9E4FF02ED52D6300EE643B /* ZoneStatusCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoneStatusCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -302,6 +316,7 @@
 		3C4145DF2ED14A6F001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3C9E4FF12ED52D6300EE643B /* Views */,
 				3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */,
 				3C3D51042ED2EBE5002208EF /* AddressSearchCard.swift */,
 				3C4145DA2ED14A6F001BDE61 /* AdditionalInfoView.swift */,
@@ -428,6 +443,20 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		3C9E4FF12ED52D6300EE643B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C9E4FEA2ED52D6300EE643B /* AdditionalInfoView.swift */,
+				3C9E4FEB2ED52D6300EE643B /* AddressSearchCard.swift */,
+				3C9E4FEC2ED52D6300EE643B /* DeveloperMapOverlay.swift */,
+				3C9E4FED2ED52D6300EE643B /* MainResultView.swift */,
+				3C9E4FEE2ED52D6300EE643B /* RulesSummaryView.swift */,
+				3C9E4FEF2ED52D6300EE643B /* ValidityBadgeView.swift */,
+				3C9E4FF02ED52D6300EE643B /* ZoneStatusCardView.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -517,7 +546,9 @@
 				3C4145ED2ED14A6F001BDE61 /* CityIdentifier.swift in Sources */,
 				3C4146072ED14A70001BDE61 /* ZoneStatusCardView.swift in Sources */,
 				3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */,
+				3C9E4FF32ED52D6400EE643B /* AddressSearchCard.swift in Sources */,
 				3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */,
+				3C9E4FF42ED52D6400EE643B /* DeveloperMapOverlay.swift in Sources */,
 				3C4145EF2ED14A6F001BDE61 /* ParkingPermit.swift in Sources */,
 				3C4145FC2ED14A70001BDE61 /* LocationService.swift in Sources */,
 				3C4145F82ED14A70001BDE61 /* RuleInterpreterProtocol.swift in Sources */,
@@ -525,25 +556,30 @@
 				3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */,
 				3C4146012ED14A70001BDE61 /* ZoneService.swift in Sources */,
 				3C4145F32ED14A70001BDE61 /* ZoneLookupResult.swift in Sources */,
+				3C9E4FF82ED52D6400EE643B /* ZoneStatusCardView.swift in Sources */,
 				3C4146202ED15702001BDE61 /* ExpandedMapView.swift in Sources */,
 				3C4145F62ED14A70001BDE61 /* PermitServiceProtocol.swift in Sources */,
 				3C4146002ED14A70001BDE61 /* ZoneLookupEngine.swift in Sources */,
 				3C4146032ED14A70001BDE61 /* AdditionalInfoView.swift in Sources */,
 				3C41461B2ED1559C001BDE61 /* OnboardingContainerView.swift in Sources */,
 				3C41461C2ED1559C001BDE61 /* PermitSetupView.swift in Sources */,
+				3C9E4FF52ED52D6400EE643B /* MainResultView.swift in Sources */,
 				3C4145F42ED14A70001BDE61 /* LocationServiceProtocol.swift in Sources */,
 				3C4145EB2ED14A6F001BDE61 /* Color+Theme.swift in Sources */,
 				3C4145F52ED14A70001BDE61 /* MapProviderProtocol.swift in Sources */,
 				3C41460E2ED14AC3001BDE61 /* DependencyContainer.swift in Sources */,
 				3C3898E92ED3F68D006C780C /* DeveloperMapOverlay.swift in Sources */,
 				3C4146062ED14A70001BDE61 /* ValidityBadgeView.swift in Sources */,
+				3C9E4FF62ED52D6400EE643B /* RulesSummaryView.swift in Sources */,
 				3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */,
 				3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */,
 				3C4145F92ED14A70001BDE61 /* ZoneDataSourceProtocol.swift in Sources */,
 				3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */,
 				3C3898F02ED405C4006C780C /* PolygonClipper.swift in Sources */,
+				3C9E4FF22ED52D6300EE643B /* AdditionalInfoView.swift in Sources */,
 				3C3D50FD2ED26CCA002208EF /* ZoneMapView.swift in Sources */,
 				3C4145FB2ED14A70001BDE61 /* ZoneServiceProtocol.swift in Sources */,
+				3C9E4FF72ED52D6400EE643B /* ValidityBadgeView.swift in Sources */,
 				3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */,
 				3C4145E52ED14A6F001BDE61 /* ZoneCache.swift in Sources */,
 				3C4145FF2ED14A70001BDE61 /* RuleInterpreter.swift in Sources */,
