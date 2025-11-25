@@ -1209,8 +1209,8 @@ class SearchedLocationAnnotation: NSObject, MKAnnotation {
         zones: [],
         currentZoneId: nil,
         userCoordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
-        onZoneTapped: { zone in
-            print("Tapped zone: \(zone.displayName)")
+        onZoneTapped: { zone, permitAreas in
+            print("Tapped zone: \(zone.displayName), permits: \(permitAreas?.description ?? "nil")")
         }
     )
 }
