@@ -1309,14 +1309,14 @@ private struct TappedSpotInfoCard: View {
         String(repeating: ".", count: ellipsisCount)
     }
 
-    /// Time limit formatted as "[X Hour] Max" or "[X Min] Max"
+    /// Time limit formatted as "X Hour Max" or "X Min Max"
     private var timeLimitText: String? {
         guard let minutes = zone.nonPermitTimeLimit else { return nil }
         let hours = minutes / 60
         if hours > 0 {
-            return "[\(hours) Hour] Max"
+            return "\(hours) Hour Max"
         } else {
-            return "[\(minutes) Min] Max"
+            return "\(minutes) Min Max"
         }
     }
 
