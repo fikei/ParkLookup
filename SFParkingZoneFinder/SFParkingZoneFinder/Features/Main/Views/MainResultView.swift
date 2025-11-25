@@ -203,7 +203,7 @@ struct MainResultView: View {
 
                     // Bottom section - Tapped zone info (only in expanded mode)
                     if isMapExpanded, let selected = selectedZone {
-                        TappedZoneInfoCard(
+                        TappedSpotInfoCard(
                             zone: selected,
                             tappedPermitAreas: tappedPermitAreas,
                             userPermits: viewModel.userPermits
@@ -1253,15 +1253,19 @@ private struct ExpandedBottomCard: View {
     }
 }
 
-// MARK: - Tapped Zone Info Card
+// MARK: - Tapped Spot Info Card
 
-private struct TappedZoneInfoCard: View {
+private struct TappedSpotInfoCard: View {
     let zone: ParkingZone
     let tappedPermitAreas: [String]?  // Specific permit areas for the tapped boundary
     let userPermits: [ParkingPermit]
     let onDismiss: () -> Void
 
     @State private var animationIndex: Int = 0
+    @State private var ellipsisCount: Int = 0
+
+    // Timer for ellipsis animation
+    let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
 
     private var zoneCode: String {
         zone.permitArea ?? zone.displayName
@@ -1286,16 +1290,44 @@ private struct TappedZoneInfoCard: View {
         return allPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
     }
 
-    /// Header text showing time limit when user doesn't have valid permit
-    private var headerText: String? {
+    /// Calculate "Park Until" time based on time limit
+    private var parkUntilText: String? {
         guard !hasValidPermit, zone.zoneType == .residentialPermit else { return nil }
-        if let minutes = zone.nonPermitTimeLimit {
-            let hours = minutes / 60
-            if hours > 0 {
-                return "\(hours) Hour Parking"
-            }
+        guard let minutes = zone.nonPermitTimeLimit else { return nil }
+
+        let calendar = Calendar.current
+        let now = Date()
+        let parkUntil = calendar.date(byAdding: .minute, value: minutes, to: now) ?? now
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return "Park Until \(formatter.string(from: parkUntil))"
+    }
+
+    /// Animated ellipsis dots
+    private var ellipsis: String {
+        String(repeating: ".", count: ellipsisCount)
+    }
+
+    /// Time limit formatted as "[X Hour] Max" or "[X Min] Max"
+    private var timeLimitText: String? {
+        guard let minutes = zone.nonPermitTimeLimit else { return nil }
+        let hours = minutes / 60
+        if hours > 0 {
+            return "[\(hours) Hour] Max"
+        } else {
+            return "[\(minutes) Min] Max"
         }
-        return nil
+    }
+
+    /// Rule description text
+    private var ruleDescriptionText: String? {
+        // For users without valid permit, show custom text
+        if !hasValidPermit && zone.requiresPermit && zone.zoneType == .residentialPermit {
+            return "Permit Required for Long Term Parking"
+        }
+        // Otherwise use zone's default description
+        return zone.primaryRuleDescription
     }
 
     private var currentSelectedArea: String {
@@ -1303,31 +1335,42 @@ private struct TappedZoneInfoCard: View {
         return allPermitAreas[animationIndex]
     }
 
-    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
-    private var formattedZonesList: String {
-        let areas = allPermitAreas
-        switch areas.count {
-        case 0: return "Zone"
-        case 1: return "Zone \(areas[0])"
-        case 2: return "Zones \(areas[0]) & \(areas[1])"
-        default:
-            let allButLast = areas.dropLast().joined(separator: ", ")
-            return "Zones \(allButLast) & \(areas.last!)"
-        }
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header showing time limit when user doesn't have valid permit
-            if let header = headerText {
-                Text(header)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-            }
-
             HStack {
                 HStack(spacing: 12) {
+                    // Text first, then circle (reordered)
+                    VStack(alignment: .leading, spacing: 2) {
+                        // First line: "Park Until" with timer icon or zone name
+                        HStack(spacing: 4) {
+                            if let parkUntil = parkUntilText {
+                                Image(systemName: "timer")
+                                    .font(.headline)
+                                    .foregroundColor(.orange)
+                                Text(parkUntil + ellipsis)
+                                    .font(.headline)
+                                    .onReceive(timer) { _ in
+                                        ellipsisCount = (ellipsisCount + 1) % 4
+                                    }
+                            } else if isMultiPermitZone {
+                                Text("Zone \(currentSelectedArea)")
+                                    .font(.headline)
+                                    .animation(.easeInOut(duration: 0.2), value: animationIndex)
+                            } else {
+                                Text("Zone \(zoneCode)")
+                                    .font(.headline)
+                            }
+                        }
+
+                        // Second line: Time limit for both single and multi-permit zones
+                        if let timeLimit = timeLimitText {
+                            Text(timeLimit)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    // Circle after text (moved from before)
                     if isMultiPermitZone {
                         MiniMultiPermitCircleView(
                             permitAreas: allPermitAreas,
@@ -1350,23 +1393,6 @@ private struct TappedZoneInfoCard: View {
                                 .minimumScaleFactor(0.5)
                         }
                     }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        if isMultiPermitZone {
-                            Text("Zone \(currentSelectedArea)")
-                                .font(.headline)
-                                .animation(.easeInOut(duration: 0.2), value: animationIndex)
-                            Text(formattedZonesList)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text("Zone \(zoneCode)")
-                                .font(.headline)
-                            Text(zone.zoneType.displayName)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
                 }
 
                 Spacer()
@@ -1378,12 +1404,14 @@ private struct TappedZoneInfoCard: View {
                 }
             }
 
-            if let ruleDesc = zone.primaryRuleDescription {
+            // Rule description with custom text for invalid permits
+            if let ruleDesc = ruleDescriptionText {
                 Text(ruleDesc)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
 
+            // Enforcement hours (unchanged)
             if let hours = zone.enforcementHours {
                 HStack(spacing: 6) {
                     Image(systemName: "clock")
