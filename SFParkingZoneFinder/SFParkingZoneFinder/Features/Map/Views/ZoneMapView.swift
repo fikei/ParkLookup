@@ -871,11 +871,17 @@ struct ZoneMapView: UIViewRepresentable {
 
             // Apply overlap clipping if enabled (visual only)
             if devSettings.useOverlapClipping {
+                let beforeCount = polygons.count
                 polygons = Self.applyOverlapClipping(polygons, tolerance: devSettings.overlapTolerance)
+                let afterCount = polygons.count
+                if beforeCount != afterCount {
+                    logger.info("🔪 Overlap clipping: \(beforeCount) → \(afterCount) polygons (\(beforeCount - afterCount) removed)")
+                }
             }
 
             // Apply polygon merging if enabled (visual only)
             if devSettings.mergeOverlappingSameZone || devSettings.useProximityMerging {
+                let beforeCount = polygons.count
                 polygons = Self.applyPolygonMerging(
                     polygons,
                     mergeOverlapping: devSettings.mergeOverlappingSameZone,
@@ -883,10 +889,19 @@ struct ZoneMapView: UIViewRepresentable {
                     proximityMeters: devSettings.proximityMergeDistance,
                     tolerance: devSettings.overlapTolerance
                 )
+                let afterCount = polygons.count
+                if beforeCount != afterCount {
+                    logger.info("🔗 Polygon merging: \(beforeCount) → \(afterCount) polygons (\(beforeCount - afterCount) merged)")
+                }
             }
 
             // Remove near-duplicate polygons to prevent double-rendering
+            let beforeDedup = polygons.count
             polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: devSettings.deduplicationThreshold)
+            let afterDedup = polygons.count
+            if beforeDedup != afterDedup {
+                logger.info("🗑️ Deduplication: \(beforeDedup) → \(afterDedup) polygons (\(beforeDedup - afterDedup) removed)")
+            }
 
             // Separate polygons by zone type and permit status for proper layering
             // Layer order (bottom to top): Metered → Non-Permitted RPP → Permitted RPP
@@ -1013,12 +1028,20 @@ struct ZoneMapView: UIViewRepresentable {
             }
 
             rendererCallCount += 1
+
+            // Validate polygon before rendering
+            let pointCount = polygon.pointCount
+            if pointCount < 3 {
+                logger.warning("⚠️ Skipping invalid polygon (< 3 points): zoneId=\(polygon.zoneId ?? "nil"), points=\(pointCount)")
+                return MKOverlayRenderer(overlay: overlay)
+            }
+
             let renderer = MKPolygonRenderer(polygon: polygon)
             let isCurrentZone = polygon.zoneId == currentZoneId
             let devSettings = DeveloperSettings.shared
 
             // DEBUG: Log rendering details
-            logger.debug("🎨 Rendering overlay #\(self.rendererCallCount): zoneId=\(polygon.zoneId ?? "nil"), zoneCode=\(polygon.zoneCode ?? "nil"), zoneType=\(String(describing: polygon.zoneType)), isMultiPermit=\(polygon.isMultiPermit), isCurrentZone=\(isCurrentZone)")
+            logger.debug("🎨 Rendering overlay #\(self.rendererCallCount): zoneId=\(polygon.zoneId ?? "nil"), zoneCode=\(polygon.zoneCode ?? "nil"), zoneType=\(String(describing: polygon.zoneType)), isMultiPermit=\(polygon.isMultiPermit), points=\(pointCount), isCurrentZone=\(isCurrentZone)")
 
             // Determine zone category and get appropriate color/opacity
             var baseColor: UIColor
