@@ -314,7 +314,28 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
         context.coordinator.showOverlays = showOverlays
-        context.coordinator.userPermitAreas = userPermitAreas
+
+        // Check if user permits changed - reload overlays if so
+        if context.coordinator.overlaysLoaded && userPermitAreas != context.coordinator.lastUserPermitAreas {
+            logger.info("🔄 User permits changed - reloading overlays (permits: \(Array(userPermitAreas)))")
+            context.coordinator.userPermitAreas = userPermitAreas
+            context.coordinator.lastUserPermitAreas = userPermitAreas
+
+            // Clear existing overlays and annotations (except user location and searched pin)
+            let overlaysToRemove = mapView.overlays
+            let annotationsToRemove = mapView.annotations.filter { annotation in
+                !(annotation is MKUserLocation) && !(annotation is SearchedLocationAnnotation)
+            }
+            mapView.removeOverlays(overlaysToRemove)
+            mapView.removeAnnotations(annotationsToRemove)
+
+            // Reload overlays (keep overlaysLoaded=true to prevent race condition)
+            context.coordinator.overlaysCurrentlyVisible = false
+            loadOverlays(mapView: mapView, context: context)
+            return
+        } else {
+            context.coordinator.userPermitAreas = userPermitAreas
+        }
 
         // Handle searched location annotation
         updateSearchedAnnotation(mapView: mapView, context: context)
@@ -806,6 +827,7 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Mark as loaded immediately to prevent race condition (multiple simultaneous loads)
         coordinator.overlaysLoaded = true
+        coordinator.lastUserPermitAreas = userPermitAreas  // Initialize permit tracking
 
         let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
         let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
@@ -1059,6 +1081,7 @@ struct ZoneMapView: UIViewRepresentable {
         var zones: [ParkingZone]
         var onZoneTapped: ((ParkingZone) -> Void)?
         var userPermitAreas: Set<String> = []
+        var lastUserPermitAreas: Set<String> = []  // Track previous permits to detect changes
 
         // Store initial region to re-apply after overlays load
         var initialCenter: CLLocationCoordinate2D?
