@@ -267,6 +267,13 @@ final class DeveloperSettings: ObservableObject {
     /// Total zones loaded
     @Published var totalZonesLoaded: Int = 0
 
+    /// Tapped overlay information (for developer debugging)
+    @Published var tappedOverlayNumber: Int = 0
+    @Published var tappedZoneId: String = ""
+    @Published var tappedZoneCode: String = ""
+    @Published var tappedIsMultiPermit: Bool = false
+    @Published var tappedVertexCount: Int = 0
+
     // MARK: - Keys
 
     private enum Keys {
