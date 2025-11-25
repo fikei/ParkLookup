@@ -128,9 +128,14 @@ struct ZoneMapView: UIViewRepresentable {
                     guard boundary.count >= 3 else { continue }
 
                     // Apply simplification if enabled
-                    let displayBoundary = devSettings.isSimplificationEnabled
+                    var displayBoundary = devSettings.isSimplificationEnabled
                         ? PolygonSimplifier.simplify(boundary, settings: devSettings)
                         : boundary
+
+                    // Apply polygon buffering if enabled (cleans up self-intersections)
+                    if devSettings.usePolygonBuffering {
+                        displayBoundary = Self.bufferPolygon(displayBoundary, bufferDistance: devSettings.polygonBufferDistance)
+                    }
 
                     guard displayBoundary.count >= 3 else { continue }
 
@@ -603,6 +608,40 @@ struct ZoneMapView: UIViewRepresentable {
         return result
     }
 
+    /// Buffer polygon to clean up self-intersecting edges and remove points that are too close together
+    /// This helps fix triangulation failures caused by invalid geometry
+    private static func bufferPolygon(
+        _ coordinates: [CLLocationCoordinate2D],
+        bufferDistance: Double
+    ) -> [CLLocationCoordinate2D] {
+        guard coordinates.count >= 3 else { return coordinates }
+
+        var cleaned: [CLLocationCoordinate2D] = []
+        var previous: CLLocationCoordinate2D? = nil
+
+        for coord in coordinates {
+            // Skip points that are too close to the previous point
+            if let prev = previous {
+                let latDiff = abs(coord.latitude - prev.latitude)
+                let lonDiff = abs(coord.longitude - prev.longitude)
+                let distance = sqrt(latDiff * latDiff + lonDiff * lonDiff)
+
+                // Only add if distance is greater than buffer distance
+                if distance >= bufferDistance {
+                    cleaned.append(coord)
+                    previous = coord
+                }
+            } else {
+                // Always add first point
+                cleaned.append(coord)
+                previous = coord
+            }
+        }
+
+        // Ensure we have at least 3 points for a valid polygon
+        return cleaned.count >= 3 ? cleaned : coordinates
+    }
+
     /// Remove near-duplicate polygons that have high overlap (e.g., 95%+)
     /// Prevents double-rendering of essentially the same polygon
     private static func deduplicateOverlappingPolygons(
@@ -813,9 +852,14 @@ struct ZoneMapView: UIViewRepresentable {
                     guard boundary.count >= 3 else { continue }
 
                     // Apply simplification if enabled
-                    let displayBoundary = devSettings.isSimplificationEnabled
+                    var displayBoundary = devSettings.isSimplificationEnabled
                         ? PolygonSimplifier.simplify(boundary, settings: devSettings)
                         : boundary
+
+                    // Apply polygon buffering if enabled (cleans up self-intersections)
+                    if devSettings.usePolygonBuffering {
+                        displayBoundary = Self.bufferPolygon(displayBoundary, bufferDistance: devSettings.polygonBufferDistance)
+                    }
 
                     guard displayBoundary.count >= 3 else { continue }
 

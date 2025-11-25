@@ -106,6 +106,17 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(deduplicationThreshold, forKey: Keys.deduplicationThreshold) }
     }
 
+    /// Enable polygon buffering to clean up self-intersecting edges
+    @Published var usePolygonBuffering: Bool {
+        didSet { UserDefaults.standard.set(usePolygonBuffering, forKey: Keys.usePolygonBuffering) }
+    }
+
+    /// Buffer distance for polygon cleanup (in degrees, very small values)
+    /// Removes points closer than this distance to clean up geometry
+    @Published var polygonBufferDistance: Double {
+        didSet { UserDefaults.standard.set(polygonBufferDistance, forKey: Keys.polygonBufferDistance) }
+    }
+
     // MARK: - In Zone (Current Zone Override)
 
     /// Fill opacity for current zone (user is in this zone) - 0.0 to 1.0
@@ -270,6 +281,8 @@ final class DeveloperSettings: ObservableObject {
         static let proximityMergeDistance = "dev.proximityMergeDistance"
         static let useDeduplication = "dev.useDeduplication"
         static let deduplicationThreshold = "dev.deduplicationThreshold"
+        static let usePolygonBuffering = "dev.usePolygonBuffering"
+        static let polygonBufferDistance = "dev.polygonBufferDistance"
         static let currentZoneFillOpacity = "dev.currentZoneFillOpacity"
         static let currentZoneStrokeOpacity = "dev.currentZoneStrokeOpacity"
         static let myPermitZonesColorHex = "dev.myPermitZonesColorHex"
@@ -310,6 +323,8 @@ final class DeveloperSettings: ObservableObject {
         static let proximityMergeDistance = 5.0  // Default 5 meters
         static let useDeduplication = true  // Enable deduplication by default
         static let deduplicationThreshold = 0.95  // Default 95% overlap threshold
+        static let usePolygonBuffering = false  // Disabled by default (experimental)
+        static let polygonBufferDistance = 0.000005  // ~0.5m default buffer distance
         static let currentZoneFillOpacity = 0.35  // In Zone fill opacity
         static let currentZoneStrokeOpacity = 1.0  // In Zone stroke opacity
         static let myPermitZonesColorHex = "33B366"  // Green
@@ -353,6 +368,8 @@ final class DeveloperSettings: ObservableObject {
         proximityMergeDistance = defaults.object(forKey: Keys.proximityMergeDistance) as? Double ?? Defaults.proximityMergeDistance
         useDeduplication = defaults.object(forKey: Keys.useDeduplication) as? Bool ?? Defaults.useDeduplication
         deduplicationThreshold = defaults.object(forKey: Keys.deduplicationThreshold) as? Double ?? Defaults.deduplicationThreshold
+        usePolygonBuffering = defaults.object(forKey: Keys.usePolygonBuffering) as? Bool ?? Defaults.usePolygonBuffering
+        polygonBufferDistance = defaults.object(forKey: Keys.polygonBufferDistance) as? Double ?? Defaults.polygonBufferDistance
         currentZoneFillOpacity = defaults.object(forKey: Keys.currentZoneFillOpacity) as? Double ?? Defaults.currentZoneFillOpacity
         currentZoneStrokeOpacity = defaults.object(forKey: Keys.currentZoneStrokeOpacity) as? Double ?? Defaults.currentZoneStrokeOpacity
         myPermitZonesColorHex = defaults.object(forKey: Keys.myPermitZonesColorHex) as? String ?? Defaults.myPermitZonesColorHex
@@ -403,6 +420,8 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(proximityMergeDistance)
         hasher.combine(useDeduplication)
         hasher.combine(deduplicationThreshold)
+        hasher.combine(usePolygonBuffering)
+        hasher.combine(polygonBufferDistance)
         hasher.combine(currentZoneFillOpacity)
         hasher.combine(currentZoneStrokeOpacity)
         hasher.combine(myPermitZonesColorHex)
@@ -490,6 +509,8 @@ final class DeveloperSettings: ObservableObject {
         proximityMergeDistance = Defaults.proximityMergeDistance
         useDeduplication = Defaults.useDeduplication
         deduplicationThreshold = Defaults.deduplicationThreshold
+        usePolygonBuffering = Defaults.usePolygonBuffering
+        polygonBufferDistance = Defaults.polygonBufferDistance
         currentZoneFillOpacity = Defaults.currentZoneFillOpacity
         currentZoneStrokeOpacity = Defaults.currentZoneStrokeOpacity
         myPermitZonesColorHex = Defaults.myPermitZonesColorHex

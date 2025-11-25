@@ -222,6 +222,7 @@ struct DeveloperMapOverlay: View {
             compactToggle("Merge Overlapping", isOn: $devSettings.mergeOverlappingSameZone, icon: "arrow.triangle.merge")
             compactToggle("Proximity Merge", isOn: $devSettings.useProximityMerging, icon: "arrow.left.and.right.righttriangle.left.righttriangle.right")
             compactToggle("Deduplication", isOn: $devSettings.useDeduplication, icon: "doc.on.doc")
+            compactToggle("Polygon Buffering", isOn: $devSettings.usePolygonBuffering, icon: "wand.and.stars")
         }
     }
 
@@ -324,6 +325,17 @@ struct DeveloperMapOverlay: View {
                 step: 0.05,
                 formatter: { String(format: "%.0f%%", $0 * 100) }
             )
+
+            // Polygon buffer distance (only shown when buffering is enabled)
+            if devSettings.usePolygonBuffering {
+                sliderControl(
+                    label: "Buffer Distance",
+                    value: $devSettings.polygonBufferDistance,
+                    range: 0.000001...0.0001,
+                    step: 0.000001,
+                    formatter: { String(format: "%.6f° (~%dm)", $0, Int($0 * 111000)) }
+                )
+            }
         }
     }
 
