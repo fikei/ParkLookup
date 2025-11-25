@@ -124,6 +124,14 @@ struct ZoneMapView: UIViewRepresentable {
                 let multiPermitIndices = zone.multiPermitBoundaryIndices
                 let allBoundaries = zone.allBoundaryCoordinates
 
+                // Debug logging for multi-permit zones
+                if !multiPermitIndices.isEmpty && zone.permitArea == "I" {
+                    logger.debug("🔍 Zone \(zone.permitArea ?? "nil"): multiPermitIndices=\(Array(multiPermitIndices).sorted()), multiPermitBoundaries count=\(zone.multiPermitBoundaries.count)")
+                    for mpb in zone.multiPermitBoundaries {
+                        logger.debug("  - Boundary[\(mpb.boundaryIndex)]: permits=\(mpb.validPermitAreas)")
+                    }
+                }
+
                 for boundary in nearbyBoundaries {
                     guard boundary.count >= 3 else { continue }
 
@@ -153,7 +161,13 @@ struct ZoneMapView: UIViewRepresentable {
                                abs(origFirst.longitude - firstCoord.longitude) < 0.000001 &&
                                multiPermitIndices.contains(originalIndex) {
                                 polygon.isMultiPermit = true
-                                polygon.allValidPermitAreas = zone.validPermitAreas(for: originalIndex)
+                                let validAreas = zone.validPermitAreas(for: originalIndex)
+                                polygon.allValidPermitAreas = validAreas
+
+                                // Debug logging for zone I
+                                if zone.permitArea == "I" {
+                                    logger.debug("  🎯 Matched boundary index \(originalIndex) for zone I: validAreas=\(validAreas?.description ?? "nil")")
+                                }
                                 break
                             }
                         }
