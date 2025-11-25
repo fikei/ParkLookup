@@ -293,7 +293,6 @@ struct MainResultView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
-        .developerTextSelection()  // Enable text selection in developer mode
         .alert("Outside Coverage Area", isPresented: $showOutsideCoverageAlert) {
             Button("OK", role: .cancel) { }
         } message: {
