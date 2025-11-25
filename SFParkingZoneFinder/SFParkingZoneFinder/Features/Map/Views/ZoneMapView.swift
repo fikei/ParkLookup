@@ -1065,25 +1065,34 @@ struct ZoneMapView: UIViewRepresentable {
             renderer.strokeColor = baseColor.withAlphaComponent(CGFloat(strokeOpacity))
             renderer.lineWidth = CGFloat(devSettings.strokeWidth)
 
-            // Multi-permit polygons get a dashed border if dash length is set
-            // If user has permit for this multi-permit zone, use my permit zones color
+            // Multi-permit polygons: Always apply dashed border and set color based on permit match
             if polygon.isMultiPermit {
-                // Apply dash pattern if dashLength > 0
-                if devSettings.dashLength > 0 {
-                    renderer.lineDashPattern = [NSNumber(value: devSettings.dashLength), NSNumber(value: devSettings.dashLength * 0.5)]
-                }
+                // ALWAYS apply dash pattern to multi-permit zones (user can control density with dashLength)
+                let dashLength = max(devSettings.dashLength, 5.0) // Minimum dash length of 5 if not set
+                renderer.lineDashPattern = [NSNumber(value: dashLength), NSNumber(value: dashLength * 0.5)]
 
                 // Check if any of the multi-permit areas match user's permits
+                var matchesUserPermit = false
                 if let multiPermitAreas = polygon.allValidPermitAreas {
-                    let matchesUserPermit = multiPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
-                    if matchesUserPermit {
-                        // User has a valid permit for this multi-permit zone
-                        let userColor = devSettings.myPermitZonesColor
-                        let userFillOpacity = isCurrentZone ? devSettings.currentZoneFillOpacity : devSettings.myPermitZonesFillOpacity
-                        let userStrokeOpacity = isCurrentZone ? devSettings.currentZoneStrokeOpacity : devSettings.myPermitZonesStrokeOpacity
-                        renderer.fillColor = userColor.withAlphaComponent(CGFloat(userFillOpacity))
-                        renderer.strokeColor = userColor.withAlphaComponent(CGFloat(userStrokeOpacity))
-                    }
+                    matchesUserPermit = multiPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
+                }
+
+                if matchesUserPermit {
+                    // User has a valid permit for this multi-permit zone → GREEN
+                    let userColor = devSettings.myPermitZonesColor
+                    let userFillOpacity = isCurrentZone ? devSettings.currentZoneFillOpacity : devSettings.myPermitZonesFillOpacity
+                    let userStrokeOpacity = isCurrentZone ? devSettings.currentZoneStrokeOpacity : devSettings.myPermitZonesStrokeOpacity
+                    renderer.fillColor = userColor.withAlphaComponent(CGFloat(userFillOpacity))
+                    renderer.strokeColor = userColor.withAlphaComponent(CGFloat(userStrokeOpacity))
+                    logger.debug("  → Multi-Permit Zone (WITH user permit): GREEN, dashed")
+                } else {
+                    // User does NOT have a valid permit for this multi-permit zone → ORANGE
+                    let orangeColor = devSettings.freeTimedZonesColor
+                    let orangeFillOpacity = isCurrentZone ? devSettings.currentZoneFillOpacity : devSettings.freeTimedZonesFillOpacity
+                    let orangeStrokeOpacity = isCurrentZone ? devSettings.currentZoneStrokeOpacity : devSettings.freeTimedZonesStrokeOpacity
+                    renderer.fillColor = orangeColor.withAlphaComponent(CGFloat(orangeFillOpacity))
+                    renderer.strokeColor = orangeColor.withAlphaComponent(CGFloat(orangeStrokeOpacity))
+                    logger.debug("  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed")
                 }
             }
 

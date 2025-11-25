@@ -91,12 +91,6 @@ struct DeveloperMapOverlay: View {
                             .clipShape(Circle())
                     }
                 }
-
-                // Pipeline status
-                Text(devSettings.simplificationDescription)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 16)
             .padding(.top, 16)
@@ -132,8 +126,24 @@ struct DeveloperMapOverlay: View {
 
                     Divider()
 
-                    // Save candidate button
-                    saveCandidateButton
+                    // Pipeline status summary
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Summary")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+                            .textCase(.uppercase)
+
+                        Text(devSettings.simplificationDescription)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Divider()
+
+                    // Save profile button
+                    saveProfileButton
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -381,15 +391,15 @@ struct DeveloperMapOverlay: View {
         }
     }
 
-    // MARK: - Save Candidate Button
+    // MARK: - Save Profile Button
 
-    private var saveCandidateButton: some View {
+    private var saveProfileButton: some View {
         Button {
             saveCandidate()
         } label: {
             HStack {
                 Image(systemName: "square.and.arrow.down")
-                Text("Save Candidate")
+                Text("Save Profile")
                     .fontWeight(.medium)
             }
             .font(.subheadline)
