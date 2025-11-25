@@ -221,6 +221,7 @@ struct DeveloperMapOverlay: View {
             compactToggle("Overlap Clipping", isOn: $devSettings.useOverlapClipping, icon: "square.on.square.intersection.dashed")
             compactToggle("Merge Overlapping", isOn: $devSettings.mergeOverlappingSameZone, icon: "arrow.triangle.merge")
             compactToggle("Proximity Merge", isOn: $devSettings.useProximityMerging, icon: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+            compactToggle("Deduplication", isOn: $devSettings.useDeduplication, icon: "doc.on.doc")
         }
     }
 

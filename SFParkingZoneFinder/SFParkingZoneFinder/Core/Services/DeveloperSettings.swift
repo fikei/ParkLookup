@@ -95,6 +95,11 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(proximityMergeDistance, forKey: Keys.proximityMergeDistance) }
     }
 
+    /// Enable deduplication to remove near-duplicate polygons
+    @Published var useDeduplication: Bool {
+        didSet { UserDefaults.standard.set(useDeduplication, forKey: Keys.useDeduplication) }
+    }
+
     /// Deduplication threshold for removing near-duplicate polygons (0.0 - 1.0)
     /// Polygons with overlap >= this threshold are considered duplicates
     @Published var deduplicationThreshold: Double {
@@ -263,6 +268,7 @@ final class DeveloperSettings: ObservableObject {
         static let mergeOverlappingSameZone = "dev.mergeOverlappingSameZone"
         static let useProximityMerging = "dev.useProximityMerging"
         static let proximityMergeDistance = "dev.proximityMergeDistance"
+        static let useDeduplication = "dev.useDeduplication"
         static let deduplicationThreshold = "dev.deduplicationThreshold"
         static let currentZoneFillOpacity = "dev.currentZoneFillOpacity"
         static let currentZoneStrokeOpacity = "dev.currentZoneStrokeOpacity"
@@ -302,6 +308,7 @@ final class DeveloperSettings: ObservableObject {
         static let mergeOverlappingSameZone = false  // Merge overlapping polygons in same zone
         static let useProximityMerging = false  // Distance-based polygon merging
         static let proximityMergeDistance = 5.0  // Default 5 meters
+        static let useDeduplication = true  // Enable deduplication by default
         static let deduplicationThreshold = 0.95  // Default 95% overlap threshold
         static let currentZoneFillOpacity = 0.35  // In Zone fill opacity
         static let currentZoneStrokeOpacity = 1.0  // In Zone stroke opacity
@@ -344,6 +351,7 @@ final class DeveloperSettings: ObservableObject {
         mergeOverlappingSameZone = defaults.object(forKey: Keys.mergeOverlappingSameZone) as? Bool ?? Defaults.mergeOverlappingSameZone
         useProximityMerging = defaults.object(forKey: Keys.useProximityMerging) as? Bool ?? Defaults.useProximityMerging
         proximityMergeDistance = defaults.object(forKey: Keys.proximityMergeDistance) as? Double ?? Defaults.proximityMergeDistance
+        useDeduplication = defaults.object(forKey: Keys.useDeduplication) as? Bool ?? Defaults.useDeduplication
         deduplicationThreshold = defaults.object(forKey: Keys.deduplicationThreshold) as? Double ?? Defaults.deduplicationThreshold
         currentZoneFillOpacity = defaults.object(forKey: Keys.currentZoneFillOpacity) as? Double ?? Defaults.currentZoneFillOpacity
         currentZoneStrokeOpacity = defaults.object(forKey: Keys.currentZoneStrokeOpacity) as? Double ?? Defaults.currentZoneStrokeOpacity
@@ -393,6 +401,7 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(mergeOverlappingSameZone)
         hasher.combine(useProximityMerging)
         hasher.combine(proximityMergeDistance)
+        hasher.combine(useDeduplication)
         hasher.combine(deduplicationThreshold)
         hasher.combine(currentZoneFillOpacity)
         hasher.combine(currentZoneStrokeOpacity)
@@ -479,6 +488,7 @@ final class DeveloperSettings: ObservableObject {
         mergeOverlappingSameZone = Defaults.mergeOverlappingSameZone
         useProximityMerging = Defaults.useProximityMerging
         proximityMergeDistance = Defaults.proximityMergeDistance
+        useDeduplication = Defaults.useDeduplication
         deduplicationThreshold = Defaults.deduplicationThreshold
         currentZoneFillOpacity = Defaults.currentZoneFillOpacity
         currentZoneStrokeOpacity = Defaults.currentZoneStrokeOpacity

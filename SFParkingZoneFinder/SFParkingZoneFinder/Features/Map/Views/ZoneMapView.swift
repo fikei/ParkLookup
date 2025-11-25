@@ -911,17 +911,24 @@ struct ZoneMapView: UIViewRepresentable {
                 }
             }
 
-            // Remove near-duplicate polygons to prevent double-rendering
-            let beforeDedup = polygons.count
-            polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: devSettings.deduplicationThreshold)
-            let afterDedup = polygons.count
-            let dedupRemoved = beforeDedup - afterDedup
-            if dedupRemoved > 0 {
-                logger.info("🗑️ Deduplication: \(beforeDedup) → \(afterDedup) polygons (\(dedupRemoved) removed)")
-            }
-            DispatchQueue.main.async {
-                devSettings.polygonsRemovedByDeduplication = dedupRemoved
-                devSettings.totalZonesLoaded = zonesToLoad.count
+            // Remove near-duplicate polygons to prevent double-rendering (if enabled)
+            if devSettings.useDeduplication {
+                let beforeDedup = polygons.count
+                polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: devSettings.deduplicationThreshold)
+                let afterDedup = polygons.count
+                let dedupRemoved = beforeDedup - afterDedup
+                if dedupRemoved > 0 {
+                    logger.info("🗑️ Deduplication: \(beforeDedup) → \(afterDedup) polygons (\(dedupRemoved) removed)")
+                }
+                DispatchQueue.main.async {
+                    devSettings.polygonsRemovedByDeduplication = dedupRemoved
+                    devSettings.totalZonesLoaded = zonesToLoad.count
+                }
+            } else {
+                DispatchQueue.main.async {
+                    devSettings.polygonsRemovedByDeduplication = 0
+                    devSettings.totalZonesLoaded = zonesToLoad.count
+                }
             }
 
             // Separate polygons by zone type and permit status for proper layering
