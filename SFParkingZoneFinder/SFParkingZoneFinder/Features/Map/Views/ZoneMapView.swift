@@ -258,8 +258,9 @@ struct ZoneMapView: UIViewRepresentable {
 
                     mapView.addOverlays(batch, level: .aboveRoads)
 
-                    // Hide overlays if showOverlays is false
-                    if !shouldShowOverlays {
+                    // Set alpha based on CURRENT showOverlays value (not captured value)
+                    // This ensures overlays are visible if user opens panel during loading
+                    if !self.showOverlays {
                         logger.debug("⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false")
                         for overlay in batch {
                             if let renderer = mapView.renderer(for: overlay) {
@@ -276,8 +277,8 @@ struct ZoneMapView: UIViewRepresentable {
                             addBatch(startIndex: endIndex)
                         }
                     } else {
-                        // Mark overlays as visible/hidden based on initial state
-                        coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                        // Use CURRENT showOverlays value, not captured value
+                        coordinator.overlaysCurrentlyVisible = self.showOverlays
                         coordinator.overlaysLoaded = true
                         logger.info("Overlays loaded: \(totalPolygons) polygons")
                     }
@@ -287,7 +288,8 @@ struct ZoneMapView: UIViewRepresentable {
                 if !orderedPolygons.isEmpty {
                     addBatch(startIndex: 0)
                 } else {
-                    coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                    // Use CURRENT showOverlays value, not captured value
+                    coordinator.overlaysCurrentlyVisible = self.showOverlays
                     coordinator.overlaysLoaded = true
                 }
             }
@@ -896,8 +898,9 @@ struct ZoneMapView: UIViewRepresentable {
 
                 mapView.addAnnotations(annotations)
 
-                // Set initial alpha based on showOverlays
-                let initialAlpha: CGFloat = shouldShowOverlays ? 1.0 : 0.0
+                // Set initial alpha based on CURRENT showOverlays value (not captured value)
+                // This ensures overlays are visible if user opens panel during loading
+                let initialAlpha: CGFloat = self.showOverlays ? 1.0 : 0.0
                 for annotation in annotations {
                     if let view = mapView.view(for: annotation) {
                         view.alpha = initialAlpha
@@ -927,16 +930,18 @@ struct ZoneMapView: UIViewRepresentable {
                             addBatch(startIndex: endIndex)
                         }
                     } else {
-                        coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                        // Use CURRENT showOverlays value, not captured value
+                        coordinator.overlaysCurrentlyVisible = self.showOverlays
                         coordinator.overlaysLoaded = true
-                        logger.info("Deferred overlays loaded: \(totalPolygons) polygons, overlaysCurrentlyVisible set to \(shouldShowOverlays)")
+                        logger.info("Deferred overlays loaded: \(totalPolygons) polygons, overlaysCurrentlyVisible set to \(self.showOverlays)")
                     }
                 }
 
                 if !orderedPolygons.isEmpty {
                     addBatch(startIndex: 0)
                 } else {
-                    coordinator.overlaysCurrentlyVisible = shouldShowOverlays
+                    // Use CURRENT showOverlays value, not captured value
+                    coordinator.overlaysCurrentlyVisible = self.showOverlays
                     coordinator.overlaysLoaded = true
                 }
             }
