@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/6116CE59-0DEF-4004-8943-23981848FCCB/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/1FC3559D-3189-4B6B-8FBE-D68B4AA8589C/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 126.2ms
+Loaded 421 zones from disk cache in 135.9ms
 ✓ Returning 421 zones from cache
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 ZoneMapView init - 0 zones
@@ -13,10 +13,10 @@ ZoneMapView init - 0 zones
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 Getting zones for city: sf
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 5.6ms: 33 RPP, 388 metered, 0 other
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
+✅ Loaded 421 zones in 7.0ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 📍 No exact match, using nearest zone 'Zone Z' at 7m
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
@@ -24,19 +24,7 @@ Cache hit (memory) for city: sf
 ZoneMapView init - 421 zones
 🎬 Initial overlay load: 421 zones (overlaysLoaded=false)
 🔧 loadOverlays called with shouldShowOverlays=false
-Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile debug info: (Key: 10481.25334.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 85, PendingMaterial count: 85, Invisible MeshInstances count: 0 | Key: 10481.25333.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 54, PendingMaterial count: 54, Invisible MeshInstances count: 0 | Key: 10481.25335.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 77, PendingMaterial count: 77, Invisible MeshInstances count: 0)
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=false, overlays.count=0
-👁️ Showing overlays with fade-in animation (1.6s total), overlay count=0
-✅ Fade-in animation complete - overlays should be visible
-🔧 DEBUG: Developer button tapped! Panel will expand
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0
+Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile debug info: (Key: 10481.25333.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 54, PendingMaterial count: 54, Invisible MeshInstances count: 0 | Key: 10481.25334.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 85, PendingMaterial count: 85, Invisible MeshInstances count: 0 | Key: 10481.25335.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 77, PendingMaterial count: 77, Invisible MeshInstances count: 0)
 🔍 Removed 44 near-duplicate polygon(s) (≥100% overlap)
 🎨 Rendering overlay #1: zoneId=sf_metered_metered_0109_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
@@ -200,60 +188,86 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #81: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #82: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #83: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #84: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #85: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #86: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #87: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #88: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #89: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #90: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #91: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #92: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #93: zoneId=sf_rpp_p_001, zoneCode=P, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #94: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #95: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #96: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #97: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #98: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #99: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #100: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #101: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #102: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #103: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #104: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #105: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #106: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #107: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #108: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #109: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #110: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -270,16 +284,22 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #116: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #117: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #118: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #119: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #120: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #121: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #122: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #123: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -374,36 +394,52 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #168: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #169: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #170: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #171: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #172: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #173: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #174: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #175: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #176: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #177: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #178: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #179: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #180: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #181: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #182: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #183: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #184: zoneId=sf_rpp_u_001, zoneCode=U, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #185: zoneId=sf_rpp_u_001, zoneCode=U, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -471,6 +507,7 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
 🎨 Rendering overlay #216: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=true
+🔍 Removed 44 near-duplicate polygon(s) (≥100% overlap)
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
 🎨 Rendering overlay #217: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=true
@@ -560,33 +597,43 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
 🎨 Rendering overlay #245: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #246: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #247: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #248: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #249: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #250: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #251: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #252: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #253: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #254: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #255: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #256: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -681,42 +728,41 @@ Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile de
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #301: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #302: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #303: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #304: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #305: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #306: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #307: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #308: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #309: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #310: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
-Deferred overlays loaded: 617 polygons, visible=true
-🔍 Removed 44 near-duplicate polygon(s) (≥100% overlap)
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
+Deferred overlays loaded: 617 polygons, visible=false
 🎨 Rendering overlay #311: zoneId=sf_metered_metered_0109_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #312: zoneId=sf_metered_metered_0110_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #313: zoneId=sf_metered_metered_0120_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
 🎨 Rendering overlay #314: zoneId=sf_metered_metered_0121_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #315: zoneId=sf_metered_metered_0122_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
@@ -873,60 +919,86 @@ Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #391: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #392: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #393: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #394: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #395: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #396: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #397: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #398: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #399: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #400: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #401: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #402: zoneId=sf_rpp_hv_001, zoneCode=HV, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #403: zoneId=sf_rpp_p_001, zoneCode=P, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #404: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #405: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #406: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #407: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #408: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #409: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #410: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #411: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #412: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #413: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #414: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #415: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #416: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #417: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #418: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #419: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #420: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -943,16 +1015,22 @@ Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #426: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #427: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #428: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #429: zoneId=sf_rpp_r_001, zoneCode=R, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #430: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #431: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #432: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #433: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -1047,36 +1125,52 @@ Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #478: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #479: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #480: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #481: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #482: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #483: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #484: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #485: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #486: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #487: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #488: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #489: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #490: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #491: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #492: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #493: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #494: zoneId=sf_rpp_u_001, zoneCode=U, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #495: zoneId=sf_rpp_u_001, zoneCode=U, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -1234,33 +1328,43 @@ Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
 🎨 Rendering overlay #555: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #556: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #557: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #558: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #559: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
 🎨 Rendering overlay #560: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #561: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #562: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #563: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #564: zoneId=sf_rpp_z_001, zoneCode=Z, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=true
   → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
   → Current Zone Override: fillOpacity=0.150000, strokeOpacity=0.250000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #565: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #566: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -1309,8 +1413,18 @@ Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #588: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+Wrapped around the polygon without finishing... :-(
+List has 3 nodes:
+	7 8 1 
+Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
+Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
 🎨 Rendering overlay #589: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+Wrapped around the polygon without finishing... :-(
+List has 3 nodes:
+	7 8 1 
+Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
+Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
 🎨 Rendering overlay #590: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #591: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -1341,8 +1455,18 @@ Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #604: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+Wrapped around the polygon without finishing... :-(
+List has 3 nodes:
+	7 8 1 
+Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
+Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
 🎨 Rendering overlay #605: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+Wrapped around the polygon without finishing... :-(
+List has 3 nodes:
+	7 8 1 
+Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
+Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
 🎨 Rendering overlay #606: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #607: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
@@ -1355,24 +1479,34 @@ Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #611: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #612: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #613: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #614: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #615: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #616: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #617: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #618: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #619: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 🎨 Rendering overlay #620: zoneId=sf_rpp_i_001, zoneCode=I, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
   → Category: My Permit Zone, color=33B366, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITH user permit): GREEN, dashed
 ⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false
 Overlays loaded: 626 polygons, visible=false
 Wrapped around the polygon without finishing... :-(
@@ -1395,32 +1529,76 @@ List has 3 nodes:
 	7 8 1 
 Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
 Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-Wrapped around the polygon without finishing... :-(
-List has 3 nodes:
-	7 8 1 
-Triangulator failed to fully triangulate polygon: (0.726111, 0.205799), (0.722338, 0.273631), (0.716779, 0.278727), (0.699251, 0.277751), (0.69541, 0.279984), (0.691571, 0.312835), (0.685516, 0.319623), (0.112335, 0.276157), (0.120406, 0.276771), (0.121246, 0.265676), (0.112834, 0.265676), (0.11438, 0.233188), (0.1108, 0.232916), (0.114289, 0.159368), (0.120568, 0.150795), (0.719278, 0.196054), (0.72429, 0.199137)
-Mismatching number of indices, indexCount: 45, triangulatedIndexCount: 42
-
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=1243
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+🔧 DEBUG: Developer button tapped! Panel will expand
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
 ✓ Overlay parameters updated (no reload needed)
 🔍 Visibility check: showOverlays=true, overlaysVisible=false, overlays.count=1243
 👁️ Showing overlays with fade-in animation (1.6s total), overlay count=1243
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=1243
 ✅ Fade-in animation complete - overlays should be visible
+🎨 Rendering overlay #621: zoneId=sf_metered_metered_0119_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
+  → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #622: zoneId=sf_metered_metered_0138_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
+  → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #623: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #624: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #625: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #626: zoneId=sf_metered_metered_0119_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
+  → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #627: zoneId=sf_metered_metered_0138_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, isCurrentZone=false
+  → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #628: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #629: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #630: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #631: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #632: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #633: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #634: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #635: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #636: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #637: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
+🎨 Rendering overlay #638: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #639: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #640: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
+🎨 Rendering overlay #641: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #642: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #643: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #644: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #645: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #646: zoneId=sf_rpp_d_001, zoneCode=D, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #647: zoneId=sf_rpp_q_001, zoneCode=Q, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
+🎨 Rendering overlay #648: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #649: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=false, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+🎨 Rendering overlay #650: zoneId=sf_rpp_s_001, zoneCode=S, zoneType=Optional(SFParkingZoneFinder.ZoneType.residentialPermit), isMultiPermit=true, isCurrentZone=false
+  → Category: Free Timed Zone, color=F29933, fillOpacity=0.200000, strokeOpacity=0.600000
+  → Multi-Permit Zone (WITHOUT user permit): ORANGE, dashed
