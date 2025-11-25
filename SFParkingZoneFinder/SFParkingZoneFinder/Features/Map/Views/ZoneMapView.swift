@@ -1087,6 +1087,10 @@ struct ZoneMapView: UIViewRepresentable {
                 }
             }
 
+            // Set renderer alpha based on current visibility state
+            // This ensures overlays respect the showOverlays state when rendered
+            renderer.alpha = showOverlays ? 1.0 : 0.0
+
             return renderer
         }
 
