@@ -106,7 +106,8 @@ struct ZoneStatusCardView: View {
         if isMultiPermitLocation {
             return formattedZonesList
         }
-        return nil
+        // Show zone name for single zone RPP
+        return "Zone \(singleZoneCode)"
     }
 
     /// Whether the card should use the "valid" green style
