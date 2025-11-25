@@ -58,16 +58,6 @@ struct ZoneStatusCardView: View {
 
     /// Single zone code for non-multi-permit locations
     private var singleZoneCode: String {
-        // When user doesn't have valid permit, show time limit instead of zone letter
-        if !isValidStyle && !isMeteredZone {
-            if let minutes = timeLimitMinutes {
-                let hours = minutes / 60
-                if hours > 0 {
-                    return "\(hours) HR"
-                }
-            }
-        }
-
         if isMeteredZone {
             return "$"
         }
@@ -78,6 +68,20 @@ struct ZoneStatusCardView: View {
             return String(zoneName.dropFirst(5))
         }
         return zoneName
+    }
+
+    /// Header text shown above circle when user doesn't have valid permit
+    private var cardHeaderText: String? {
+        // Show time limit as header when user doesn't have valid permit
+        if !isValidStyle && !isMeteredZone {
+            if let minutes = timeLimitMinutes {
+                let hours = minutes / 60
+                if hours > 0 {
+                    return "\(hours) Hour Parking"
+                }
+            }
+        }
+        return nil
     }
 
     /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
@@ -98,10 +102,6 @@ struct ZoneStatusCardView: View {
         if isMeteredZone {
             // Show hourly cost & max time for metered zones
             return meteredSubtitle ?? "$2/hr • 2hr max"
-        }
-        // When user doesn't have valid permit, show "Parking" below time limit
-        if !isValidStyle && timeLimitMinutes != nil {
-            return "Parking"
         }
         if isMultiPermitLocation {
             return formattedZonesList
@@ -169,6 +169,15 @@ struct ZoneStatusCardView: View {
         ZStack {
             // Zone Letter in Circle (truly centered)
             VStack(spacing: 8) {
+                // Header text for time limit when user doesn't have valid permit
+                if let headerText = cardHeaderText {
+                    Text(headerText)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 20)
+                }
+
                 if isMultiPermitLocation {
                     // Multi-permit: overlapping circles with animation
                     LargeMultiPermitCircleView(
