@@ -1171,7 +1171,10 @@ struct ZoneMapView: UIViewRepresentable {
                 // Check if any of the multi-permit areas match user's permits
                 var matchesUserPermit = false
                 if let multiPermitAreas = polygon.allValidPermitAreas {
+                    logger.debug("  🔍 Multi-Permit Check: zone=\(polygon.zoneCode ?? "nil"), multiPermitAreas=\(multiPermitAreas), userPermitAreas=\(Array(userPermitAreas))")
                     matchesUserPermit = multiPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
+                } else {
+                    logger.debug("  🔍 Multi-Permit Check: zone=\(polygon.zoneCode ?? "nil"), allValidPermitAreas=nil, userPermitAreas=\(Array(userPermitAreas))")
                 }
 
                 if matchesUserPermit {
