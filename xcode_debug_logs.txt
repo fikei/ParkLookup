@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/3E9664A3-27DF-4732-8425-8644A53D89E1/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/5C0B7F2B-85C0-49FB-8689-5DF3FEFF6E1B/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 118.2ms
+Loaded 421 zones from disk cache in 122.1ms
 ✓ Returning 421 zones from cache
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 ZoneMapView init - 0 zones
@@ -14,44 +14,11 @@ ZoneMapView init - 0 zones
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [SPR USA Bay Area Landmarks, 3.000000]
-Failed to resolve packName for packKey:SPR USA Bay Area Landmarks.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key SPR USA Bay Area Landmarks
-No packs of type config available for key: [San Francisco Icons, 3.000000]
-Failed to resolve packName for packKey:San Francisco Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key San Francisco Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
-No packs of type config available for key: [Localized Poi INTL Dollar Icons, 3.000000]
-Failed to resolve packName for packKey:Localized Poi INTL Dollar Icons.3.000000 packType:config with resourceNames:[Guides_Icons_Default@3x.iconconfigpack, Guides_Icons_Default@3x.icondatapack, Railroad_Crossing@3x.iconconfigpack, Default_Icons@3x.iconconfigpack, Default_Icons@3x.icondatapack, Default_Shields@3x.iconconfigpack, Default@3x.iconmappack, Railroad_Crossing@3x.icondatapack, Default_Shields@3x.icondatapack]
-No config pack found for key Localized Poi INTL Dollar Icons
 Getting zones for city: sf
-Cache hit (memory) for city: sf
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
+Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 5.6ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 5.1ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
@@ -975,6 +942,32 @@ Deferred overlays loaded: 661 polygons, visible=false
 🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
 ✓ Overlay parameters updated (no reload needed)
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=661
+🔧 DEBUG: Developer button tapped! Panel will expand
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=false, overlays.count=661
+👁️ Showing overlays with fade-in animation (1.6s total), overlay count=661
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+✅ Fade-in animation complete - overlays should be visible
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
 🔍 Removed 44 near-duplicate polygon(s) (≥100% overlap)
 🎨 Rendering overlay #342: zoneId=sf_metered_metered_0109_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, points=291, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
@@ -1799,44 +1792,10 @@ Deferred overlays loaded: 661 polygons, visible=false
   → Multi-Permit Zone (WITH user permit): GREEN, dashed
 ⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false
 Overlays loaded: 631 polygons, visible=false
-🔧 DEBUG: Developer button tapped! Panel will expand
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
 🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
 ✓ Overlay parameters updated (no reload needed)
 🔍 Visibility check: showOverlays=true, overlaysVisible=false, overlays.count=1292
 👁️ Showing overlays with fade-in animation (1.6s total), overlay count=1292
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=1292
 ✅ Fade-in animation complete - overlays should be visible
-📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=1292
-📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=1292
-📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=1292
-📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
-🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=1292
-Wrapped around the polygon without finishing... :-(
-List has 4 nodes:
-	1 10 11 0 
-Triangulator failed to fully triangulate polygon: (0, 1), (0, 0), (0.740312, 0), (0.705535, 0.469926), (0.700317, 0.482386), (0.689663, 0.486529), (0.588172, 0.474372), (0.578322, 0.467772), (0.575047, 0.454295), (0.609058, 0), (0, 0), (0, 1), (0.534007, 1), (0.561505, 0.646419), (0.565097, 0.640849), (0.575754, 0.636717), (0.677237, 0.648979), (0.687083, 0.655589), (0.689776, 0.661918), (0.664245, 1)
-Mismatching number of indices, indexCount: 54, triangulatedIndexCount: 48
-Wrapped around the polygon without finishing... :-(
-List has 4 nodes:
-	1 10 11 0 
-Triangulator failed to fully triangulate polygon: (0, 1), (0, 0), (0.740312, 0), (0.705535, 0.469926), (0.700317, 0.482386), (0.689663, 0.486529), (0.588172, 0.474372), (0.578322, 0.467772), (0.575047, 0.454295), (0.609058, 0), (0, 0), (0, 1), (0.534007, 1), (0.561505, 0.646419), (0.565097, 0.640849), (0.575754, 0.636717), (0.677237, 0.648979), (0.687083, 0.655589), (0.689776, 0.661918), (0.664245, 1)
-Mismatching number of indices, indexCount: 54, triangulatedIndexCount: 48
