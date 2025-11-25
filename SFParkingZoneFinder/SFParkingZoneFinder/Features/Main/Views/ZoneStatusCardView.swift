@@ -70,20 +70,6 @@ struct ZoneStatusCardView: View {
         return zoneName
     }
 
-    /// Header text shown above circle when user doesn't have valid permit
-    private var cardHeaderText: String? {
-        // Show time limit as header when user doesn't have valid permit
-        if !isValidStyle && !isMeteredZone {
-            if let minutes = timeLimitMinutes {
-                let hours = minutes / 60
-                if hours > 0 {
-                    return "\(hours) Hour Parking"
-                }
-            }
-        }
-        return nil
-    }
-
     /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
     private var formattedZonesList: String {
         let areas = orderedPermitAreas
@@ -106,8 +92,7 @@ struct ZoneStatusCardView: View {
         if isMultiPermitLocation {
             return formattedZonesList
         }
-        // Show zone name for single zone RPP
-        return "Zone \(singleZoneCode)"
+        return nil
     }
 
     /// Whether the card should use the "valid" green style
@@ -170,15 +155,6 @@ struct ZoneStatusCardView: View {
         ZStack {
             // Zone Letter in Circle (truly centered)
             VStack(spacing: 8) {
-                // Header text for time limit when user doesn't have valid permit
-                if let headerText = cardHeaderText {
-                    Text(headerText)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.secondary)
-                        .padding(.top, 20)
-                }
-
                 if isMultiPermitLocation {
                     // Multi-permit: overlapping circles with animation
                     LargeMultiPermitCircleView(
