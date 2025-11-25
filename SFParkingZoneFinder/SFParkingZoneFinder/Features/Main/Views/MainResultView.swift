@@ -1359,9 +1359,17 @@ private struct TappedSpotInfoCard: View {
                 HStack(spacing: 12) {
                     // Text first, then circle (reordered)
                     VStack(alignment: .leading, spacing: 2) {
-                        // First line: "Park Until" with timer icon or zone name
+                        // First line: Shows different content based on permit validity
                         HStack(spacing: 4) {
-                            if let parkUntil = parkUntilText {
+                            if hasValidPermit {
+                                // User has valid permit: Show infinity icon + "Unlimited Parking"
+                                Image(systemName: "infinity")
+                                    .font(.headline)
+                                    .foregroundColor(.green)
+                                Text("Unlimited Parking")
+                                    .font(.headline)
+                            } else if let parkUntil = parkUntilText {
+                                // No valid permit: Show "Park Until" with timer
                                 Image(systemName: "timer")
                                     .font(.headline)
                                     .foregroundColor(.orange)
@@ -1380,8 +1388,14 @@ private struct TappedSpotInfoCard: View {
                             }
                         }
 
-                        // Second line: Time limit for both single and multi-permit zones
-                        if let timeLimit = timeLimitText {
+                        // Second line: Shows permit validity or time limit
+                        if hasValidPermit {
+                            // User has valid permit: Show "Your Permit is Valid Here"
+                            Text("Your Permit is Valid Here")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else if let timeLimit = timeLimitText {
+                            // No valid permit: Show time limit
                             Text(timeLimit)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
