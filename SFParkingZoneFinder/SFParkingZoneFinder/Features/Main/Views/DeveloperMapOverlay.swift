@@ -99,6 +99,56 @@ struct DeveloperMapOverlay: View {
             Divider()
                 .padding(.horizontal, 16)
 
+            // Stats display (fixed, above scroll)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 12) {
+                    // Total zones and polygons
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Zones")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text("\(devSettings.totalZonesLoaded)")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .monospacedDigit()
+                    }
+
+                    Divider()
+                        .frame(height: 32)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Polygons")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text("\(devSettings.totalPolygonsRendered)")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .monospacedDigit()
+                    }
+
+                    Spacer()
+                }
+
+                // Processing stats (only show if any are non-zero)
+                if devSettings.polygonsRemovedByClipping > 0 || devSettings.polygonsRemovedByMerging > 0 || devSettings.polygonsRemovedByDeduplication > 0 {
+                    HStack(spacing: 8) {
+                        if devSettings.polygonsRemovedByClipping > 0 {
+                            statsChip(label: "Clipped", count: devSettings.polygonsRemovedByClipping, color: .orange)
+                        }
+                        if devSettings.polygonsRemovedByMerging > 0 {
+                            statsChip(label: "Merged", count: devSettings.polygonsRemovedByMerging, color: .blue)
+                        }
+                        if devSettings.polygonsRemovedByDeduplication > 0 {
+                            statsChip(label: "Deduped", count: devSettings.polygonsRemovedByDeduplication, color: .purple)
+                        }
+                        Spacer()
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color(.systemGray6))
+
             // Scrollable content
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
@@ -430,6 +480,23 @@ struct DeveloperMapOverlay: View {
                 .labelsHidden()
                 .scaleEffect(0.8)
         }
+    }
+
+    private func statsChip(label: String, count: Int, color: Color) -> some View {
+        HStack(spacing: 4) {
+            Text(label)
+                .font(.caption2)
+                .fontWeight(.medium)
+            Text("\(count)")
+                .font(.caption2)
+                .fontWeight(.bold)
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(color.opacity(0.15))
+        .foregroundColor(color)
+        .cornerRadius(4)
     }
 
     private func sliderControl(

@@ -229,6 +229,23 @@ final class DeveloperSettings: ObservableObject {
         reloadTrigger += 1
     }
 
+    // MARK: - Runtime Stats (not persisted)
+
+    /// Total polygons currently rendered on map
+    @Published var totalPolygonsRendered: Int = 0
+
+    /// Polygons removed by overlap clipping
+    @Published var polygonsRemovedByClipping: Int = 0
+
+    /// Polygons removed by merging
+    @Published var polygonsRemovedByMerging: Int = 0
+
+    /// Polygons removed by deduplication
+    @Published var polygonsRemovedByDeduplication: Int = 0
+
+    /// Total zones loaded
+    @Published var totalZonesLoaded: Int = 0
+
     // MARK: - Keys
 
     private enum Keys {

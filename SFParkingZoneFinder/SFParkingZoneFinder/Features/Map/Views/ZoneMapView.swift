@@ -874,8 +874,16 @@ struct ZoneMapView: UIViewRepresentable {
                 let beforeCount = polygons.count
                 polygons = Self.applyOverlapClipping(polygons, tolerance: devSettings.overlapTolerance)
                 let afterCount = polygons.count
-                if beforeCount != afterCount {
-                    logger.info("🔪 Overlap clipping: \(beforeCount) → \(afterCount) polygons (\(beforeCount - afterCount) removed)")
+                let removed = beforeCount - afterCount
+                if removed > 0 {
+                    logger.info("🔪 Overlap clipping: \(beforeCount) → \(afterCount) polygons (\(removed) removed)")
+                }
+                DispatchQueue.main.async {
+                    devSettings.polygonsRemovedByClipping = removed
+                }
+            } else {
+                DispatchQueue.main.async {
+                    devSettings.polygonsRemovedByClipping = 0
                 }
             }
 
@@ -890,8 +898,16 @@ struct ZoneMapView: UIViewRepresentable {
                     tolerance: devSettings.overlapTolerance
                 )
                 let afterCount = polygons.count
-                if beforeCount != afterCount {
-                    logger.info("🔗 Polygon merging: \(beforeCount) → \(afterCount) polygons (\(beforeCount - afterCount) merged)")
+                let removed = beforeCount - afterCount
+                if removed > 0 {
+                    logger.info("🔗 Polygon merging: \(beforeCount) → \(afterCount) polygons (\(removed) merged)")
+                }
+                DispatchQueue.main.async {
+                    devSettings.polygonsRemovedByMerging = removed
+                }
+            } else {
+                DispatchQueue.main.async {
+                    devSettings.polygonsRemovedByMerging = 0
                 }
             }
 
@@ -899,8 +915,13 @@ struct ZoneMapView: UIViewRepresentable {
             let beforeDedup = polygons.count
             polygons = Self.deduplicateOverlappingPolygons(polygons, overlapThreshold: devSettings.deduplicationThreshold)
             let afterDedup = polygons.count
-            if beforeDedup != afterDedup {
-                logger.info("🗑️ Deduplication: \(beforeDedup) → \(afterDedup) polygons (\(beforeDedup - afterDedup) removed)")
+            let dedupRemoved = beforeDedup - afterDedup
+            if dedupRemoved > 0 {
+                logger.info("🗑️ Deduplication: \(beforeDedup) → \(afterDedup) polygons (\(dedupRemoved) removed)")
+            }
+            DispatchQueue.main.async {
+                devSettings.polygonsRemovedByDeduplication = dedupRemoved
+                devSettings.totalZonesLoaded = zonesToLoad.count
             }
 
             // Separate polygons by zone type and permit status for proper layering
@@ -962,6 +983,8 @@ struct ZoneMapView: UIViewRepresentable {
                         coordinator.isLoadingOverlays = false
                         coordinator.overlayLoadingMessage = ""
                         logger.info("Deferred overlays loaded: \(totalPolygons) polygons, visible=\(coordinator.showOverlays)")
+                        // Update stats
+                        devSettings.totalPolygonsRendered = totalPolygons
                     }
                 }
 
