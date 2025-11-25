@@ -1,9 +1,10 @@
+Logging Error: Failed to initialize logging system. Log messages may be missing. If this issue persists, try setting IDEPreferLogStreaming=YES in the active scheme actions environment variables.
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/0874B432-52D2-4A61-993E-15B88AD4399B/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/1259B6A3-4B5E-4C8A-920C-635003CDCEAE/data/Containers/Data/Application/F5607D24-F3F2-4EAE-88D0-781AF687554A/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 183.3ms
+Loaded 421 zones from disk cache in 487.6ms
 ✓ Returning 421 zones from cache
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 ZoneMapView init - 0 zones
@@ -14,11 +15,11 @@ ZoneMapView init - 0 zones
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
-Getting zones for city: sf
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
+Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 9.0ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 9.6ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: false
@@ -29,6 +30,7 @@ ZoneMapView init - 421 zones
 🎬 Initial overlay load: 421 zones (overlaysLoaded=false)
 🔧 loadOverlays called with shouldShowOverlays=false
 🔧 loadOverlays: initialized lastUserPermitAreas=["I"]
+Missing MeshRenderables for ground mesh layer for (3/3) of ground tiles. Tile debug info: (Key: 10481.25333.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 54, PendingMaterial count: 54, Invisible MeshInstances count: 0 | Key: 10481.25334.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 85, PendingMaterial count: 85, Invisible MeshInstances count: 0 | Key: 10481.25335.16.255 t:33 kt:0, Has mesh errors: 0, MeshInstance count: 77, PendingMaterial count: 77, Invisible MeshInstances count: 0)
 🎨 Rendering overlay #1: zoneId=sf_metered_metered_0103_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, points=1337, isCurrentZone=false
   → Category: Paid Zone, color=808080, fillOpacity=0.200000, strokeOpacity=0.600000
 🎨 Rendering overlay #2: zoneId=sf_metered_metered_0109_001, zoneCode=nil, zoneType=Optional(SFParkingZoneFinder.ZoneType.metered), isMultiPermit=false, points=291, isCurrentZone=false
@@ -931,3 +933,58 @@ Deferred overlays loaded: 661 polygons, visible=false
 ✓ Overlay parameters updated (no reload needed)
 🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
 ✅ Fade-in animation complete - overlays should be visible
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+📍 Tapped overlay #211: zone=S, vertices=21, multiPermit=true
+🔧 DEBUG: MainResultView body - devMode: true, expanded: false, panel: true
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=661
+Wrapped around the polygon without finishing... :-(
+List has 4 nodes:
+	1 10 11 0 
+Triangulator failed to fully triangulate polygon: (0, 1), (0, 0), (0.740312, 0), (0.705535, 0.469926), (0.700317, 0.482386), (0.689663, 0.486529), (0.588172, 0.474372), (0.578322, 0.467772), (0.575047, 0.454295), (0.609058, 0), (0, 0), (0, 1), (0.534007, 1), (0.561505, 0.646419), (0.565097, 0.640849), (0.575754, 0.636717), (0.677237, 0.648979), (0.687083, 0.655589), (0.689776, 0.661918), (0.664245, 1)
+Mismatching number of indices, indexCount: 54, triangulatedIndexCount: 48
+Wrapped around the polygon without finishing... :-(
+List has 4 nodes:
+	1 10 11 0 
+Triangulator failed to fully triangulate polygon: (0, 1), (0, 0), (0.740312, 0), (0.705535, 0.469926), (0.700317, 0.482386), (0.689663, 0.486529), (0.588172, 0.474372), (0.578322, 0.467772), (0.575047, 0.454295), (0.609058, 0), (0, 0), (0, 1), (0.534007, 1), (0.561505, 0.646419), (0.565097, 0.640849), (0.575754, 0.636717), (0.677237, 0.648979), (0.687083, 0.655589), (0.689776, 0.661918), (0.664245, 1)
+Mismatching number of indices, indexCount: 54, triangulatedIndexCount: 48
+=== SIMPLIFICATION CANDIDATE SAVED ===
+Name: dp29m_curves17deg_round2m
+JSON:
+{"gridSnapSize":1e-05,"douglasPeuckerTolerance":0.00027000000000000006,"useOverlapClipping":false,"useDouglasPeucker":true,"useCornerRounding":true,"useGridSnapping":false,"deduplicationThreshold":1,"preserveCurves":true,"curveAngleThreshold":17,"useConvexHull":false,"proximityMergeDistance":10,"useProximityMerging":false,"overlapTolerance":1e-06,"cornerRoundingRadius":2e-05,"timestamp":785799488.35813,"mergeOverlappingSameZone":false}
+=====================================
+
+Human-readable config:
+=== CONFIGURATION: dp29m_curves17deg_round2m ===
+
+--- PIPELINE (Preprocessing) ---
+Douglas-Peucker: ON
+  Tolerance: 0.00027° (~29m)
+  Curve preservation: ON (>17°)
+Grid Snapping: OFF
+Corner Rounding: ON
+  Radius: 0.00002° (~2m)
+
+--- APP RUNTIME (Visual Processing) ---
+Overlap Clipping: OFF
+Deduplication Threshold: 100%
