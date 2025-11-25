@@ -1320,14 +1320,32 @@ private struct TappedSpotInfoCard: View {
         }
     }
 
-    /// Rule description text
+    /// Rule description text with zone prefix
     private var ruleDescriptionText: String? {
+        let zonePrefix = isMultiPermitZone ? formattedZonesList : "Zone \(zoneCode)"
+
         // For users without valid permit, show custom text
         if !hasValidPermit && zone.requiresPermit && zone.zoneType == .residentialPermit {
-            return "Permit Required for Long Term Parking"
+            return "\(zonePrefix) - Permit Required for Long Term Parking"
         }
-        // Otherwise use zone's default description
-        return zone.primaryRuleDescription
+        // Otherwise use zone's default description with zone prefix
+        if let ruleDesc = zone.primaryRuleDescription {
+            return "\(zonePrefix) - \(ruleDesc)"
+        }
+        return zonePrefix
+    }
+
+    /// Format multi-permit zones as "Zones A & B" or "Zones A, B & C"
+    private var formattedZonesList: String {
+        let areas = allPermitAreas
+        switch areas.count {
+        case 0: return "Zone"
+        case 1: return "Zone \(areas[0])"
+        case 2: return "Zones \(areas[0]) & \(areas[1])"
+        default:
+            let allButLast = areas.dropLast().joined(separator: ", ")
+            return "Zones \(allButLast) & \(areas.last!)"
+        }
     }
 
     private var currentSelectedArea: String {
@@ -1370,29 +1388,29 @@ private struct TappedSpotInfoCard: View {
                         }
                     }
 
-                    // Circle after text (moved from before)
-                    if isMultiPermitZone {
-                        MiniMultiPermitCircleView(
-                            permitAreas: allPermitAreas,
-                            animationIndex: animationIndex,
-                            size: 44
-                        )
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                animationIndex = (animationIndex + 1) % allPermitAreas.count
-                            }
-                        }
-                    } else {
-                        ZStack {
-                            Circle()
-                                .fill(ZoneColorProvider.swiftUIColor(for: zone.permitArea))
-                                .frame(width: 44, height: 44)
-                            Text(zoneCode)
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(.white)
-                                .minimumScaleFactor(0.5)
-                        }
-                    }
+                    // Circle UI hidden for now
+                    // if isMultiPermitZone {
+                    //     MiniMultiPermitCircleView(
+                    //         permitAreas: allPermitAreas,
+                    //         animationIndex: animationIndex,
+                    //         size: 44
+                    //     )
+                    //     .onTapGesture {
+                    //         withAnimation(.easeInOut(duration: 0.3)) {
+                    //             animationIndex = (animationIndex + 1) % allPermitAreas.count
+                    //         }
+                    //     }
+                    // } else {
+                    //     ZStack {
+                    //         Circle()
+                    //             .fill(ZoneColorProvider.swiftUIColor(for: zone.permitArea))
+                    //             .frame(width: 44, height: 44)
+                    //         Text(zoneCode)
+                    //             .font(.system(size: 18, weight: .bold))
+                    //             .foregroundColor(.white)
+                    //             .minimumScaleFactor(0.5)
+                    //     }
+                    // }
                 }
 
                 Spacer()
