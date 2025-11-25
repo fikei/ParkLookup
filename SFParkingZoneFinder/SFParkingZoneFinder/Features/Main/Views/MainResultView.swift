@@ -203,7 +203,11 @@ struct MainResultView: View {
 
                     // Bottom section - Tapped zone info (only in expanded mode)
                     if isMapExpanded, let selected = selectedZone {
-                        TappedZoneInfoCard(zone: selected, tappedPermitAreas: tappedPermitAreas) {
+                        TappedZoneInfoCard(
+                            zone: selected,
+                            tappedPermitAreas: tappedPermitAreas,
+                            userPermits: viewModel.userPermits
+                        ) {
                             selectedZone = nil
                             tappedPermitAreas = nil
                         }
@@ -1254,6 +1258,7 @@ private struct ExpandedBottomCard: View {
 private struct TappedZoneInfoCard: View {
     let zone: ParkingZone
     let tappedPermitAreas: [String]?  // Specific permit areas for the tapped boundary
+    let userPermits: [ParkingPermit]
     let onDismiss: () -> Void
 
     @State private var animationIndex: Int = 0
@@ -1273,6 +1278,24 @@ private struct TappedZoneInfoCard: View {
         }
         // Fallback to zone code if no multi-permit data
         return [zoneCode]
+    }
+
+    /// Check if user has valid permit for this tapped boundary
+    private var hasValidPermit: Bool {
+        let userPermitAreas = Set(userPermits.map { $0.area.uppercased() })
+        return allPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
+    }
+
+    /// Header text showing time limit when user doesn't have valid permit
+    private var headerText: String? {
+        guard !hasValidPermit, zone.zoneType == .residentialPermit else { return nil }
+        if let minutes = zone.nonPermitTimeLimit {
+            let hours = minutes / 60
+            if hours > 0 {
+                return "\(hours) Hour Parking"
+            }
+        }
+        return nil
     }
 
     private var currentSelectedArea: String {
@@ -1295,6 +1318,14 @@ private struct TappedZoneInfoCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // Header showing time limit when user doesn't have valid permit
+            if let header = headerText {
+                Text(header)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+            }
+
             HStack {
                 HStack(spacing: 12) {
                     if isMultiPermitZone {
@@ -1329,7 +1360,7 @@ private struct TappedZoneInfoCard: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         } else {
-                            Text(zone.displayName)
+                            Text("Zone \(zoneCode)")
                                 .font(.headline)
                             Text(zone.zoneType.displayName)
                                 .font(.caption)
