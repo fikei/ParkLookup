@@ -110,7 +110,12 @@ final class RuleInterpreter: RuleInterpreterProtocol {
 
         // Permit requirement
         if zone.requiresPermit, let area = zone.permitArea {
-            lines.append("Residential permit Zone \(area) required")
+            // Show different text based on whether user has valid permit
+            if status == .invalid || status == .noPermitSet {
+                lines.append("Residential Permit Required for Long Term Parking")
+            } else {
+                lines.append("Residential permit Zone \(area) required")
+            }
         }
 
         // Time limits - permit holders have no limit in their zone

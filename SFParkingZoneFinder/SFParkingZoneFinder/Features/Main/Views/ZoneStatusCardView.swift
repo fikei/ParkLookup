@@ -58,6 +58,16 @@ struct ZoneStatusCardView: View {
 
     /// Single zone code for non-multi-permit locations
     private var singleZoneCode: String {
+        // When user doesn't have valid permit, show time limit instead of zone letter
+        if !isValidStyle && !isMeteredZone {
+            if let minutes = timeLimitMinutes {
+                let hours = minutes / 60
+                if hours > 0 {
+                    return "\(hours) HR"
+                }
+            }
+        }
+
         if isMeteredZone {
             return "$"
         }
@@ -88,6 +98,10 @@ struct ZoneStatusCardView: View {
         if isMeteredZone {
             // Show hourly cost & max time for metered zones
             return meteredSubtitle ?? "$2/hr • 2hr max"
+        }
+        // When user doesn't have valid permit, show "Parking" below time limit
+        if !isValidStyle && timeLimitMinutes != nil {
+            return "Parking"
         }
         if isMultiPermitLocation {
             return formattedZonesList
