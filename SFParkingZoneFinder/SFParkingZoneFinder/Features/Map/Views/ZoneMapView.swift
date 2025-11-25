@@ -258,9 +258,9 @@ struct ZoneMapView: UIViewRepresentable {
 
                     mapView.addOverlays(batch, level: .aboveRoads)
 
-                    // Set alpha based on CURRENT showOverlays value (not captured value)
-                    // This ensures overlays are visible if user opens panel during loading
-                    if !self.showOverlays {
+                    // Set alpha based on coordinator's CURRENT showOverlays value
+                    // Coordinator is updated in updateUIView, so this reflects real-time state
+                    if !coordinator.showOverlays {
                         logger.debug("⚠️ Adding overlays with alpha=0 (hidden) - showOverlays=false")
                         for overlay in batch {
                             if let renderer = mapView.renderer(for: overlay) {
@@ -277,12 +277,12 @@ struct ZoneMapView: UIViewRepresentable {
                             addBatch(startIndex: endIndex)
                         }
                     } else {
-                        // Use CURRENT showOverlays value, not captured value
-                        coordinator.overlaysCurrentlyVisible = self.showOverlays
+                        // Use coordinator's current showOverlays value
+                        coordinator.overlaysCurrentlyVisible = coordinator.showOverlays
                         coordinator.overlaysLoaded = true
                         coordinator.isLoadingOverlays = false
                         coordinator.overlayLoadingMessage = ""
-                        logger.info("Overlays loaded: \(totalPolygons) polygons")
+                        logger.info("Overlays loaded: \(totalPolygons) polygons, visible=\(coordinator.showOverlays)")
                     }
                 }
 
@@ -290,8 +290,8 @@ struct ZoneMapView: UIViewRepresentable {
                 if !orderedPolygons.isEmpty {
                     addBatch(startIndex: 0)
                 } else {
-                    // Use CURRENT showOverlays value, not captured value
-                    coordinator.overlaysCurrentlyVisible = self.showOverlays
+                    // Use coordinator's current showOverlays value
+                    coordinator.overlaysCurrentlyVisible = coordinator.showOverlays
                     coordinator.overlaysLoaded = true
                     coordinator.isLoadingOverlays = false
                     coordinator.overlayLoadingMessage = ""
@@ -906,9 +906,9 @@ struct ZoneMapView: UIViewRepresentable {
 
                 mapView.addAnnotations(annotations)
 
-                // Set initial alpha based on CURRENT showOverlays value (not captured value)
-                // This ensures overlays are visible if user opens panel during loading
-                let initialAlpha: CGFloat = self.showOverlays ? 1.0 : 0.0
+                // Set initial alpha based on coordinator's CURRENT showOverlays value
+                // Coordinator is updated in updateUIView, so this reflects real-time state
+                let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
                 for annotation in annotations {
                     if let view = mapView.view(for: annotation) {
                         view.alpha = initialAlpha
@@ -941,20 +941,20 @@ struct ZoneMapView: UIViewRepresentable {
                             addBatch(startIndex: endIndex)
                         }
                     } else {
-                        // Use CURRENT showOverlays value, not captured value
-                        coordinator.overlaysCurrentlyVisible = self.showOverlays
+                        // Use coordinator's current showOverlays value
+                        coordinator.overlaysCurrentlyVisible = coordinator.showOverlays
                         coordinator.overlaysLoaded = true
                         coordinator.isLoadingOverlays = false
                         coordinator.overlayLoadingMessage = ""
-                        logger.info("Deferred overlays loaded: \(totalPolygons) polygons, overlaysCurrentlyVisible set to \(self.showOverlays)")
+                        logger.info("Deferred overlays loaded: \(totalPolygons) polygons, visible=\(coordinator.showOverlays)")
                     }
                 }
 
                 if !orderedPolygons.isEmpty {
                     addBatch(startIndex: 0)
                 } else {
-                    // Use CURRENT showOverlays value, not captured value
-                    coordinator.overlaysCurrentlyVisible = self.showOverlays
+                    // Use coordinator's current showOverlays value
+                    coordinator.overlaysCurrentlyVisible = coordinator.showOverlays
                     coordinator.overlaysLoaded = true
                     coordinator.isLoadingOverlays = false
                     coordinator.overlayLoadingMessage = ""
