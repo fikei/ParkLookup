@@ -100,6 +100,22 @@ struct SettingsView: View {
                     Text("Enable developer tools and overlay controls in the map view")
                         .font(.caption)
                         .foregroundColor(.secondary)
+
+                    // Blockface PoC toggle - only visible when developer mode is enabled
+                    if devSettings.developerModeUnlocked {
+                        Toggle("Street Cleaning (PoC)", isOn: $devSettings.showBlockfaceOverlays)
+                            .onChange(of: devSettings.showBlockfaceOverlays) { _, isEnabled in
+                                if isEnabled {
+                                    // Haptic feedback when enabled
+                                    let generator = UIImpactFeedbackGenerator(style: .light)
+                                    generator.impactOccurred()
+                                }
+                            }
+
+                        Text("Show blockface-based street cleaning visualization on map")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
 
                 // MARK: - About Section
