@@ -2067,7 +2067,7 @@ private struct BottomNavigationBar: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(Color.blue)
+                    .background(hasActiveSession ? Color.blue : buttonBackgroundColor)
                     .clipShape(Capsule())
                     .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
