@@ -1617,7 +1617,14 @@ private struct TappedSpotInfoCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         // First line: Shows different content based on permit validity
                         HStack(spacing: 4) {
-                            if hasValidPermit {
+                            if zone.zoneType == .metered {
+                                // Paid parking: Show dollar icon + zone name
+                                Image(systemName: "dollarsign.circle.fill")
+                                    .font(.headline)
+                                    .foregroundColor(ZoneColorProvider.swiftUIColor(for: .metered))
+                                Text(zone.displayName)
+                                    .font(.headline)
+                            } else if hasValidPermit {
                                 // User has valid permit: Show infinity icon + "Unlimited Parking"
                                 Image(systemName: "infinity")
                                     .font(.headline)
