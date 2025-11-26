@@ -5,6 +5,7 @@ import os.log
 
 private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "ParkingSession")
 
+@MainActor
 protocol ParkingSessionManagerProtocol {
     var activeSession: ParkingSession? { get }
     var activeSessionPublisher: AnyPublisher<ParkingSession?, Never> { get }
@@ -179,9 +180,9 @@ final class ParkingSessionManager: ObservableObject, ParkingSessionManagerProtoc
     }
 
     private func saveHistoryToStorage() {
-        if let encoded = try? JSONEncoder().encode(sessionHistory) {
-            UserDefaults.standard.set(encoded, forKey: sessionHistoryKey)
-            logger.debug("Session history saved (\(sessionHistory.count) sessions)")
+        if let encoded = try? JSONEncoder().encode(self.sessionHistory) {
+            UserDefaults.standard.set(encoded, forKey: self.sessionHistoryKey)
+            logger.debug("Session history saved (\(self.sessionHistory.count) sessions)")
         } else {
             logger.error("Failed to encode session history")
         }

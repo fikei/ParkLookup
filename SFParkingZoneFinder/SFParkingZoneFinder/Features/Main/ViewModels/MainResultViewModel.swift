@@ -3,8 +3,6 @@ import CoreLocation
 import Combine
 import os.log
 
-private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
-
 // MARK: - Future Feature TODOs
 // TODO: Support time-limited parking zones (non-RPP areas with time restrictions)
 //       - Display time limit warnings and "Park Until" time
@@ -63,6 +61,9 @@ final class MainResultViewModel: ObservableObject {
     // User permits
     @Published private(set) var applicablePermits: [ParkingPermit] = []
     @Published private(set) var userPermits: [ParkingPermit] = []
+
+    // Logging
+    private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
 
     // Map preferences (read from UserDefaults)
     @Published var showFloatingMap: Bool
