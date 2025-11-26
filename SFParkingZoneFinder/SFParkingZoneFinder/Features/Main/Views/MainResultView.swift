@@ -413,6 +413,36 @@ private struct AnimatedZoneCard: View {
         return currentMinutes < startMinutes || currentMinutes >= endMinutes
     }
 
+    /// "Park Until" text for when parking is unlimited due to being outside enforcement hours
+    private var unlimitedUntilText: String? {
+        guard isOutsideEnforcement,
+              let startTime = enforcementStartTime else { return nil }
+
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.totalMinutes
+
+        // Check if today is an enforcement day
+        var currentDayOfWeek: DayOfWeek?
+        var isEnforcementDay = true
+        if let days = enforcementDays, !days.isEmpty,
+           let weekday = components.weekday,
+           let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+            currentDayOfWeek = dayOfWeek
+            isEnforcementDay = days.contains(dayOfWeek)
+        }
+
+        if isEnforcementDay && currentMinutes < startMinutes {
+            // Before enforcement starts today - can park until enforcement begins
+            return formatParkUntil(hour: startTime.hour, minute: startTime.minute, on: now)
+        } else {
+            // After enforcement ends today or not an enforcement day - find next enforcement start
+            return findNextEnforcementStart(from: now, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
+        }
+    }
+
     private var parkUntilText: String? {
         guard (validityStatus == .invalid || validityStatus == .noPermitSet),
               let _ = timeLimitMinutes else { return nil }
@@ -606,9 +636,9 @@ private struct AnimatedZoneCard: View {
                             .foregroundColor(.secondary)
                     } else {
                         // OUT OF PERMIT ZONE (invalid) - show status as title, zone on line 2
-                        if isOutsideEnforcement {
-                            // Outside enforcement - show unlimited
-                            Text("Unlimited Now")
+                        if let unlimited = unlimitedUntilText {
+                            // Outside enforcement - show when enforcement starts
+                            Text(unlimited)
                                 .font(.headline)
                                 .foregroundColor(.primary)
                             Text(zoneName)
