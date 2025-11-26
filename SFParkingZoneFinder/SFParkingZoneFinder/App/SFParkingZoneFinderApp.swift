@@ -40,7 +40,7 @@ struct ContentView: View {
                     }
             }
         }
-        .onChange(of: hasCompletedOnboarding) { _, completed in
+        .onChange(of: hasCompletedOnboarding) { completed in
             if completed {
                 // Brief transition when onboarding completes
                 isTransitioning = true

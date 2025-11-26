@@ -81,15 +81,19 @@ struct MapCardView: View {
 // MARK: - Preview
 
 #Preview {
-    ScrollView {
-        VStack(spacing: 16) {
-            MapCardView(
-                coordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
-                zoneName: "Area Q",
-                onTap: {}
-            )
+    if #available(iOS 17.0, *) {
+        ScrollView {
+            VStack(spacing: 16) {
+                MapCardView(
+                    coordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
+                    zoneName: "Area Q",
+                    onTap: {}
+                )
+            }
+            .padding()
         }
-        .padding()
+        .background(Color(.systemGroupedBackground))
+    } else {
+        Text("MapCardView requires iOS 17+")
     }
-    .background(Color(.systemGroupedBackground))
 }
