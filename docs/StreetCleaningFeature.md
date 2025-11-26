@@ -1,8 +1,210 @@
 # Street Cleaning Feature - Design Document
 
-**Status:** Planning
+**Status:** In Progress - Park Feature MVP Complete ✅
 **Last Updated:** 2025-11-26
 **Owner:** Engineering Team
+
+---
+
+## Product Status
+
+### ✅ Completed: Park Feature MVP (Prerequisite)
+
+Before implementing street cleaning features, we completed the foundational **Park Feature MVP** which provides the infrastructure needed for parking session tracking and notifications.
+
+**Completed Components:**
+- ✅ Parking session model and lifecycle management
+- ✅ iOS notification service with UserNotifications framework
+- ✅ ActiveParkingView full-screen UI with countdown timer
+- ✅ Park button in bottom navigation
+- ✅ Settings integration for notification preferences
+- ✅ Walking directions to parked car via Apple Maps
+- ✅ Session persistence across app launches
+
+**Next Step:** Use this notification and session infrastructure to add street cleaning-specific features (Phase 1 & Phase 2 below).
+
+### Completed Stories & Tasks
+
+#### Story 1: Parking Session Data Model ✅
+**As a** developer
+**I want** a robust data model for parking sessions
+**So that** the app can track when and where users are parked
+
+**Tasks Completed:**
+- ✅ Created `ParkingSession.swift` model with location, zone, rules, and timestamps
+- ✅ Added `ParkingLocation` struct with coordinate and address
+- ✅ Implemented `SessionRule` with deadline calculations
+- ✅ Created `SessionRuleType` enum (timeLimit, streetCleaning, enforcement, meter, noParking)
+- ✅ Added `NotificationTiming` enum (1 hour, 15 minutes, at deadline)
+- ✅ Implemented `parkUntil` computed property for earliest deadline
+- ✅ Added `timeRemaining` calculation for countdown display
+
+**Files Created:**
+- `SFParkingZoneFinder/Core/Models/ParkingSession.swift`
+
+---
+
+#### Story 2: iOS Notification Service ✅
+**As a** user
+**I want** to receive timely notifications about my parking
+**So that** I don't forget to move my car and get ticketed
+
+**Tasks Completed:**
+- ✅ Implemented `NotificationService.swift` using UserNotifications framework
+- ✅ Added `requestPermission()` method for iOS notification authorization
+- ✅ Created `scheduleSessionNotifications()` with calendar-based triggers
+- ✅ Implemented smart notification timing (1h before, 15min before, at deadline)
+- ✅ Added notification cancellation for session IDs
+- ✅ Created notification content with title, body, and user info payload
+- ✅ Implemented `getEnabledNotificationTimings()` respecting user preferences
+- ✅ Added urgency-based notification titles and messages
+
+**Files Created:**
+- `SFParkingZoneFinder/Core/Services/NotificationService.swift`
+
+---
+
+#### Story 3: Parking Session Manager ✅
+**As a** developer
+**I want** centralized parking session lifecycle management
+**So that** sessions persist across app launches and integrate with notifications
+
+**Tasks Completed:**
+- ✅ Created `ParkingSessionManager.swift` with @MainActor for UI thread safety
+- ✅ Implemented `startSession()` method creating sessions from current zone data
+- ✅ Added `endSession()` method with notification cancellation
+- ✅ Implemented session persistence using UserDefaults with JSONEncoder
+- ✅ Added `loadActiveSession()` with stale session validation (1 hour past deadline)
+- ✅ Created session history tracking (max 50 sessions)
+- ✅ Integrated with NotificationService for automatic notification scheduling
+- ✅ Added Combine publisher for reactive session updates
+- ✅ Implemented `createSessionRules()` in MainResultViewModel
+- ✅ Added smart `calculateParkingDeadline()` with enforcement window awareness
+
+**Files Created:**
+- `SFParkingZoneFinder/Core/Services/ParkingSessionManager.swift`
+
+**Files Modified:**
+- `SFParkingZoneFinder/Features/Main/ViewModels/MainResultViewModel.swift`
+- `SFParkingZoneFinder/App/DependencyContainer.swift`
+
+---
+
+#### Story 4: ActiveParkingView UI ✅
+**As a** user
+**I want** a clear, full-screen view of my active parking session
+**So that** I can easily see how much time I have left and navigate back to my car
+
+**Tasks Completed:**
+- ✅ Created `ActiveParkingView.swift` with SwiftUI
+- ✅ Implemented countdown timer updating every second
+- ✅ Added `CountdownCard` with color-coded urgency (green → yellow → orange → red)
+- ✅ Created "Parked Since" display with duration formatting
+- ✅ Added `RulesCard` showing all active parking rules with icons
+- ✅ Implemented "Directions to My Car" button with walking mode
+- ✅ Added "End Parking Session" button with loading state
+- ✅ Created drag indicator for swipe-down dismissal (iOS standard)
+- ✅ Added rule-specific icons and color coding
+- ✅ Implemented time expiration warnings with exclamation icon
+- ✅ Created SwiftUI previews for active and expired states
+
+**Files Created:**
+- `SFParkingZoneFinder/Features/Main/Views/ActiveParkingView.swift`
+
+---
+
+#### Story 5: Park Button & Navigation Integration ✅
+**As a** user
+**I want** an easily accessible Park button
+**So that** I can quickly start tracking my parking session
+
+**Tasks Completed:**
+- ✅ Added Park button to `BottomNavigationBar` with 4-button layout
+- ✅ Positioned Park button centrally with prominent styling (52x52, accent color)
+- ✅ Used `parkingsign.circle.fill` icon for brand consistency
+- ✅ Integrated with MainResultView state management
+- ✅ Added `showingActiveParkingView` state variable
+- ✅ Implemented sheet presentation for ActiveParkingView
+- ✅ Created `openDirectionsToParking()` helper using MKMapItem
+- ✅ Connected Park button to `startParkingSession()` async method
+- ✅ Added haptic feedback on button tap
+- ✅ Handled button visibility based on developer mode toggle
+
+**Files Modified:**
+- `SFParkingZoneFinder/Features/Main/Views/MainResultView.swift`
+
+---
+
+#### Story 6: Settings Integration ✅
+**As a** user
+**I want** to control my notification preferences
+**So that** I can customize when I receive parking reminders
+
+**Tasks Completed:**
+- ✅ Added notification settings to `SettingsViewModel.swift`
+- ✅ Created 4 @Published properties with UserDefaults persistence:
+  - `notificationsEnabled` (master toggle)
+  - `notify1HourBefore`
+  - `notify15MinBefore`
+  - `notifyAtDeadline`
+- ✅ Implemented `requestNotificationPermission()` async method
+- ✅ Added automatic disabling on permission denial
+- ✅ Injected `NotificationService` into SettingsViewModel
+- ✅ Updated DependencyContainer with new services
+- ✅ Created "Parking Notifications" section in SettingsView
+- ✅ Added conditional toggles (only show when master toggle is on)
+- ✅ Implemented onChange handler for permission requests
+- ✅ Added helpful footer text explaining notification purpose
+
+**Files Modified:**
+- `SFParkingZoneFinder/Features/Settings/ViewModels/SettingsViewModel.swift`
+- `SFParkingZoneFinder/Features/Settings/Views/SettingsView.swift`
+- `SFParkingZoneFinder/App/DependencyContainer.swift`
+
+---
+
+#### Story 7: Git Integration & Deployment ✅
+**As a** developer
+**I want** clean, organized commits
+**So that** the feature history is clear and can be reviewed/reverted if needed
+
+**Tasks Completed:**
+- ✅ Created feature branch `claude/add-street-cleaning-feature-01TWeFkVoCP9hhfZ55Un4Lxm`
+- ✅ Broke work into 7 logical commits:
+  1. Add parking session and notification foundations
+  2. Add ActiveParkingView and parking session support
+  3. Add Park button to bottom navigation bar
+  4. Replace close button with swipe-down gesture
+  5. Wire up Park button to show ActiveParkingView
+- ✅ Rebased onto main branch (resolved conflicts with driving mode UI changes)
+- ✅ Force-pushed rebased commits
+- ✅ All commits include detailed messages following conventional commit format
+
+**Branch:** `claude/add-street-cleaning-feature-01TWeFkVoCP9hhfZ55Un4Lxm`
+
+---
+
+### Technical Architecture Decisions
+
+**Decision 1: UserNotifications Framework**
+- **Rationale:** Native iOS framework, supports calendar-based repeating notifications
+- **Tradeoff:** Limited to local notifications (no remote push), but sufficient for MVP
+
+**Decision 2: UserDefaults for Session Persistence**
+- **Rationale:** Simple, synchronous, sufficient for single active session + history
+- **Tradeoff:** Not suitable for large datasets, but max 50 sessions is manageable
+
+**Decision 3: @MainActor for ParkingSessionManager**
+- **Rationale:** Ensures all UI updates happen on main thread, prevents race conditions
+- **Tradeoff:** Less flexible for background work, but session operations are fast
+
+**Decision 4: Protocol-Based Dependency Injection**
+- **Rationale:** Enables testing, follows existing app architecture patterns
+- **Tradeoff:** More boilerplate, but better separation of concerns
+
+**Decision 5: SwiftUI Sheet Presentation**
+- **Rationale:** Native iOS modal pattern, supports standard swipe-down dismissal
+- **Tradeoff:** Less customization than custom modals, but more familiar to users
 
 ---
 
