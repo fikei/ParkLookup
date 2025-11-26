@@ -1718,37 +1718,53 @@ private struct BottomNavigationBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Left: Developer tools button (only when developer mode is unlocked)
-            Button {
-                HapticFeedback.selection()
-                onDeveloperTap()
-            } label: {
-                Image(systemName: "chevron.left.forwardslash.chevron.right")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            // Left: Developer tools button (when developer mode is active) OR Settings button (when not active)
+            if isDeveloperModeActive {
+                Button {
+                    HapticFeedback.selection()
+                    onDeveloperTap()
+                } label: {
+                    Image(systemName: "chevron.left.forwardslash.chevron.right")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.black.opacity(0.6))
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Button {
+                    HapticFeedback.selection()
+                    onSettingsTap()
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.black.opacity(0.6))
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .opacity(isDeveloperModeActive ? 1.0 : 0.0)
-            .disabled(!isDeveloperModeActive)
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Center: Settings button
-            Button {
-                HapticFeedback.selection()
-                onSettingsTap()
-            } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            // Center: Settings button (only when developer mode is active)
+            if isDeveloperModeActive {
+                Button {
+                    HapticFeedback.selection()
+                    onSettingsTap()
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.black.opacity(0.6))
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
             }
-            .frame(maxWidth: .infinity, alignment: .center)
 
             // Right: Expand/collapse button
             Button {

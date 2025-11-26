@@ -403,10 +403,7 @@ final class DeveloperSettings: ObservableObject {
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
-        // TEMPORARY DEBUG: Force developer mode ON for testing
-        // TODO: Remove this line after debugging
-        developerModeUnlocked = true  // Force ON
-        // developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
+        developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
     }
 
     // MARK: - Computed Properties
