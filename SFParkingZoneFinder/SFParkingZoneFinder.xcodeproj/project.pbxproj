@@ -56,6 +56,7 @@
 		3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41460B2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift */; };
 		3C4146192ED1559C001BDE61 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */; };
 		3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */; };
+		3C4146AB2ED1559C001BDE61 /* NotificationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146AA2ED1559C001BDE61 /* NotificationPermissionView.swift */; };
 		3C41461B2ED1559C001BDE61 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */; };
 		3C41461C2ED1559C001BDE61 /* PermitSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146152ED1559C001BDE61 /* PermitSetupView.swift */; };
 		3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146162ED1559C001BDE61 /* WelcomeView.swift */; };
@@ -126,6 +127,7 @@
 		3C4146102ED15289001BDE61 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SFParkingZoneFinder/Info.plist; sourceTree = "<group>"; };
 		3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationPermissionView.swift; sourceTree = "<group>"; };
+		3C4146AA2ED1559C001BDE61 /* NotificationPermissionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationPermissionView.swift; sourceTree = "<group>"; };
 		3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
 		3C4146152ED1559C001BDE61 /* PermitSetupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermitSetupView.swift; sourceTree = "<group>"; };
 		3C4146162ED1559C001BDE61 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
@@ -398,6 +400,7 @@
 			children = (
 				3C70DDCD2ED7961100D53137 /* NotificationPermissionView.swift */,
 				3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */,
+				3C4146AA2ED1559C001BDE61 /* NotificationPermissionView.swift */,
 				3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */,
 				3C4146152ED1559C001BDE61 /* PermitSetupView.swift */,
 				3C4146162ED1559C001BDE61 /* WelcomeView.swift */,
@@ -595,6 +598,7 @@
 				3C4145EC2ED14A6F001BDE61 /* Address.swift in Sources */,
 				3C41460D2ED14AC3001BDE61 /* AppDelegate.swift in Sources */,
 				3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */,
+				3C4146AB2ED1559C001BDE61 /* NotificationPermissionView.swift in Sources */,
 				3C4146082ED14A70001BDE61 /* GoogleMapsAdapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -655,7 +659,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -714,7 +718,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
