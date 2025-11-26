@@ -494,7 +494,7 @@ private struct AnimatedZoneCard: View {
         return calculateTimeLimitEnd(from: now, endTime: nil)
     }
 
-    /// Format "Park until" with day if not today
+    /// Format "Park until" with day only when ambiguous
     private func formatParkUntil(hour: Int, minute: Int, on date: Date) -> String {
         let calendar = Calendar.current
         guard let targetDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date) else {
@@ -502,13 +502,25 @@ private struct AnimatedZoneCard: View {
         }
 
         let formatter = DateFormatter()
+        let now = Date()
+        let currentHour = calendar.component(.hour, from: now)
+        let targetIsAM = hour < 12
+
+        // If target is today, never show day
         if calendar.isDateInToday(targetDate) {
             formatter.dateFormat = "h:mm a"
             return "Park until \(formatter.string(from: targetDate))"
-        } else {
-            formatter.dateFormat = "EEE h:mm a"
+        }
+
+        // If target is tomorrow AND it's after noon AND target is AM, it's obvious - don't show day
+        if calendar.isDateInTomorrow(targetDate) && currentHour >= 12 && targetIsAM {
+            formatter.dateFormat = "h:mm a"
             return "Park until \(formatter.string(from: targetDate))"
         }
+
+        // Otherwise show day for clarity
+        formatter.dateFormat = "EEE h:mm a"
+        return "Park until \(formatter.string(from: targetDate))"
     }
 
     /// Find the next enforcement start time
@@ -1441,7 +1453,7 @@ private struct TappedSpotInfoCard: View {
         return "Park Until \(formatter.string(from: parkUntil))"
     }
 
-    /// Format "Park until" with day if not today (for TappedSpotInfoCard)
+    /// Format "Park Until" with day only when ambiguous (for TappedSpotInfoCard)
     private func formatParkUntilTime(hour: Int, minute: Int, on date: Date) -> String {
         let calendar = Calendar.current
         guard let targetDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date) else {
@@ -1449,13 +1461,25 @@ private struct TappedSpotInfoCard: View {
         }
 
         let formatter = DateFormatter()
+        let now = Date()
+        let currentHour = calendar.component(.hour, from: now)
+        let targetIsAM = hour < 12
+
+        // If target is today, never show day
         if calendar.isDateInToday(targetDate) {
             formatter.dateFormat = "h:mm a"
             return "Park Until \(formatter.string(from: targetDate))"
-        } else {
-            formatter.dateFormat = "EEE h:mm a"
+        }
+
+        // If target is tomorrow AND it's after noon AND target is AM, it's obvious - don't show day
+        if calendar.isDateInTomorrow(targetDate) && currentHour >= 12 && targetIsAM {
+            formatter.dateFormat = "h:mm a"
             return "Park Until \(formatter.string(from: targetDate))"
         }
+
+        // Otherwise show day for clarity
+        formatter.dateFormat = "EEE h:mm a"
+        return "Park Until \(formatter.string(from: targetDate))"
     }
 
     /// Find the next enforcement start time (for TappedSpotInfoCard)
