@@ -61,7 +61,7 @@ struct AddressSearchCard: View {
                         .textFieldStyle(.plain)
                         .focused($isSearchFocused)
                         .autocorrectionDisabled()
-                        .onChange(of: searchText) { _, newValue in
+                        .onChange(of: searchText) { newValue in
                             searchCompleter.search(query: newValue)
                         }
                 } else {
@@ -168,7 +168,7 @@ struct AddressSearchCard: View {
         let search = MKLocalSearch(request: searchRequest)
 
         search.start { response, error in
-            if let location = response?.mapItems.first?.location {
+            if let location = response?.mapItems.first?.placemark.location {
                 let coordinate = location.coordinate
                 // Log the exact coordinate returned by MKLocalSearch
                 logger.info("📍 MKLocalSearch returned: (\(coordinate.latitude), \(coordinate.longitude)) for '\(result.title)'")
