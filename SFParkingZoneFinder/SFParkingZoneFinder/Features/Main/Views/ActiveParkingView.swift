@@ -7,7 +7,6 @@ struct ActiveParkingView: View {
     let userLocation: CLLocationCoordinate2D?
     let onDismiss: () -> Void
     let onEndParking: () async -> Void
-    let onGetDirections: () -> Void
 
     @State private var currentTime = Date()
     @State private var isEndingParking = false
@@ -86,21 +85,40 @@ struct ActiveParkingView: View {
 
                 // Action buttons at bottom (outside ScrollView)
                 VStack(spacing: 12) {
-                    // Get Directions button (conditionally shown)
+                    // Map navigation buttons (conditionally shown)
                     if shouldShowDirections {
-                        Button {
-                            onGetDirections()
-                        } label: {
-                            HStack {
-                                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                                Text("Directions to My Car")
-                                    .fontWeight(.semibold)
+                        HStack(spacing: 12) {
+                            // Apple Maps button
+                            Button {
+                                openInAppleMaps()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "map.fill")
+                                    Text("Apple Maps")
+                                        .fontWeight(.semibold)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.accentColor)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.accentColor)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+
+                            // Google Maps button
+                            Button {
+                                openInGoogleMaps()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "map.circle.fill")
+                                    Text("Google Maps")
+                                        .fontWeight(.semibold)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                            }
                         }
                     }
 
@@ -155,6 +173,35 @@ struct ActiveParkingView: View {
             return "\(hours)h \(minutes)m"
         } else {
             return "\(minutes)m"
+        }
+    }
+
+    // MARK: - Map Navigation
+
+    private func openInAppleMaps() {
+        let coordinate = session.location.coordinate
+        let placemark = MKPlacemark(coordinate: coordinate)
+        let mapItem = MKMapItem(placemark: placemark)
+        mapItem.name = session.location.address ?? "Parked Car"
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
+        ])
+    }
+
+    private func openInGoogleMaps() {
+        let coordinate = session.location.coordinate
+        // Google Maps URL scheme for directions
+        let urlString = "comgooglemaps://?daddr=\(coordinate.latitude),\(coordinate.longitude)&directionsmode=walking"
+
+        if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+            // Google Maps app is installed
+            UIApplication.shared.open(url)
+        } else {
+            // Fallback to Google Maps web
+            let webURLString = "https://www.google.com/maps/dir/?api=1&destination=\(coordinate.latitude),\(coordinate.longitude)&travelmode=walking"
+            if let webURL = URL(string: webURLString) {
+                UIApplication.shared.open(webURL)
+            }
         }
     }
 }
@@ -320,8 +367,7 @@ struct RulesCard: View {
         ),
         userLocation: CLLocationCoordinate2D(latitude: 37.7750, longitude: -122.4195),  // 100m away
         onDismiss: {},
-        onEndParking: {},
-        onGetDirections: {}
+        onEndParking: {}
     )
 }
 
@@ -344,7 +390,6 @@ struct RulesCard: View {
         ),
         userLocation: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),  // At car (< 40m)
         onDismiss: {},
-        onEndParking: {},
-        onGetDirections: {}
+        onEndParking: {}
     )
 }

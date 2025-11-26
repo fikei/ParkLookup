@@ -339,9 +339,6 @@ struct MainResultView: View {
                     onEndParking: {
                         await viewModel.endParkingSession()
                         showingActiveParkingView = false
-                    },
-                    onGetDirections: {
-                        openDirectionsToParking(session: session)
                     }
                 )
             }
@@ -352,20 +349,6 @@ struct MainResultView: View {
             Text("That address is outside San Francisco. We currently only support SF parking zones.")
         }
         }
-    }
-
-    // MARK: - Helper Methods
-
-    private func openDirectionsToParking(session: ParkingSession) {
-        let coordinate = session.location.coordinate
-
-        // Create MKMapItem using MKPlacemark (compatible with all iOS versions)
-        let placemark = MKPlacemark(coordinate: coordinate)
-        let mapItem = MKMapItem(placemark: placemark)
-        mapItem.name = session.location.address ?? "Parked Car"
-        mapItem.openInMaps(launchOptions: [
-            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
-        ])
     }
 }
 
