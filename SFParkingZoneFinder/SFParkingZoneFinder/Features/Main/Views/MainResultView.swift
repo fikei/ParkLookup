@@ -345,7 +345,8 @@ struct MainResultView: View {
 
     private func openDirectionsToParking(session: ParkingSession) {
         let coordinate = session.location.coordinate
-        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let mapItem = MKMapItem(location: location, address: session.location.address)
         mapItem.name = session.location.address ?? "Parked Car"
         mapItem.openInMaps(launchOptions: [
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
@@ -1271,7 +1272,7 @@ private struct MiniZoneCardView: View {
                 } else {
                     HStack(spacing: 4) {
                         // Dollar icon for paid/metered zones
-                        if zone.zoneType == .metered {
+                        if zoneType == .metered {
                             Image(systemName: "dollarsign.circle.fill")
                                 .font(.headline)
                                 .foregroundColor(ZoneColorProvider.swiftUIColor(for: .metered))
