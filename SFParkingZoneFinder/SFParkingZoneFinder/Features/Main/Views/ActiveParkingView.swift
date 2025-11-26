@@ -32,6 +32,33 @@ struct ActiveParkingView: View {
         return distance > 40  // Hide if within 40 meters
     }
 
+    /// Apple Maps URL for sharing
+    private var shareURL: URL {
+        let coordinate = session.location.coordinate
+        return URL(string: "http://maps.apple.com/?ll=\(coordinate.latitude),\(coordinate.longitude)&q=Parked%20Car")!
+    }
+
+    /// Share message with parking details
+    private var shareMessage: String {
+        let address = session.location.address ?? "parking spot"
+        let rules = session.rules.map { $0.description }.joined(separator: "\n• ")
+
+        var message = "📍 I'm parked at: \(address)\n"
+        message += "\nZone: \(session.zoneName)"
+
+        if !session.rules.isEmpty {
+            message += "\n\nParking Rules:\n• \(rules)"
+        }
+
+        if let deadline = session.parkUntil {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            message += "\n\n⏰ Must move by: \(formatter.string(from: deadline))"
+        }
+
+        return message
+    }
+
     var body: some View {
         ZStack {
             // Background
@@ -120,6 +147,20 @@ struct ActiveParkingView: View {
                                 .cornerRadius(12)
                             }
                         }
+                    }
+
+                    // Share Location button
+                    ShareLink(item: shareURL, subject: Text("My Parking Location"), message: Text(shareMessage)) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up")
+                            Text("Share Location")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.purple.opacity(0.15))
+                        .foregroundColor(.purple)
+                        .cornerRadius(12)
                     }
 
                     // End Parking button
