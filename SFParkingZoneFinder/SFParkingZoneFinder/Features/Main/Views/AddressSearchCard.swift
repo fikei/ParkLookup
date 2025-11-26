@@ -165,7 +165,8 @@ struct AddressSearchCard: View {
         let search = MKLocalSearch(request: searchRequest)
 
         search.start { response, error in
-            if let coordinate = response?.mapItems.first?.placemark.coordinate {
+            if let location = response?.mapItems.first?.location {
+                let coordinate = location.coordinate
                 // Log the exact coordinate returned by MKLocalSearch
                 logger.info("📍 MKLocalSearch returned: (\(coordinate.latitude), \(coordinate.longitude)) for '\(result.title)'")
 

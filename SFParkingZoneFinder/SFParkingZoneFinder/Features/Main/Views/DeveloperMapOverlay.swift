@@ -12,25 +12,26 @@ struct DeveloperMapOverlay: View {
     var showToggleButton: Bool = true  // Whether to show the toggle button (default true for backward compatibility)
 
     /// Panel height as fraction of screen
-    private var panelHeight: CGFloat {
-        UIScreen.main.bounds.height / 3
+    private func panelHeight(for screenHeight: CGFloat) -> CGFloat {
+        screenHeight / 3
     }
 
     var body: some View {
-        VStack {
-            Spacer()
+        GeometryReader { geometry in
+            VStack {
+                Spacer()
 
-            HStack {
-                // Developer panel (bottom left, aligned with expand/collapse button)
-                VStack(alignment: .leading, spacing: 8) {
-                    // Expanded panel (appears above button)
-                    if isPanelExpanded {
-                        developerPanel
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .move(edge: .bottom)),
-                                removal: .opacity.combined(with: .scale(scale: 0.9))
-                            ))
-                    }
+                HStack {
+                    // Developer panel (bottom left, aligned with expand/collapse button)
+                    VStack(alignment: .leading, spacing: 8) {
+                        // Expanded panel (appears above button)
+                        if isPanelExpanded {
+                            developerPanel(screenHeight: geometry.size.height)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .move(edge: .bottom)),
+                                    removal: .opacity.combined(with: .scale(scale: 0.9))
+                                ))
+                        }
 
                     // Code button to toggle panel - matches expand/collapse style
                     // Shows pressed/active state when panel is open
@@ -54,7 +55,8 @@ struct DeveloperMapOverlay: View {
                 .padding(.leading, 16)
                 .padding(.bottom, showToggleButton ? 16 : 100) // Extra padding when no toggle button to avoid bottom nav overlap
 
-                Spacer()
+                    Spacer()
+                }
             }
         }
         .alert("Configuration Saved", isPresented: $showingSaveConfirmation) {
@@ -66,7 +68,7 @@ struct DeveloperMapOverlay: View {
 
     // MARK: - Developer Panel
 
-    private var developerPanel: some View {
+    private func developerPanel(screenHeight: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             // Fixed header
             VStack(alignment: .leading, spacing: 8) {
@@ -228,7 +230,7 @@ struct DeveloperMapOverlay: View {
                 .padding(.vertical, 12)
             }
         }
-        .frame(width: 280, height: panelHeight)
+        .frame(width: 280, height: panelHeight(for: screenHeight))
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.systemBackground))

@@ -1,10 +1,10 @@
 import Foundation
 import CoreLocation
+import MapKit
 
-/// Reverse geocoding service using CLGeocoder
+/// Reverse geocoding service using MapKit
 final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
 
-    private let geocoder = CLGeocoder()
     private var cache: [String: Address] = [:]
 
     func reverseGeocode(location: CLLocation) async throws -> Address {
@@ -18,10 +18,15 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
         }
 
         do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            guard let placemark = placemarks.first else {
+            // Use MapKit's reverse geocoding request (iOS 26+)
+            let request = MKReverseGeocodingRequest(coordinate: location.coordinate)
+            let result = try await request.submit()
+
+            guard let mapItem = result.mapItem else {
                 throw GeocodingError.noResults
             }
+
+            let placemark = mapItem.placemark
 
             let address = Address(
                 streetNumber: placemark.subThoroughfare,
@@ -41,7 +46,7 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
         }
     }
 
-    private func formatAddress(from placemark: CLPlacemark) -> String {
+    private func formatAddress(from placemark: MKPlacemark) -> String {
         var components: [String] = []
 
         if let subThoroughfare = placemark.subThoroughfare {

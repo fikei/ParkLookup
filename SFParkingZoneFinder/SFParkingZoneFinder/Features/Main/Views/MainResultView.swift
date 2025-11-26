@@ -78,8 +78,9 @@ struct MainResultView: View {
     }
 
     var body: some View {
-        let _ = print("🔧 DEBUG: MainResultView body - devMode: \(devSettings.developerModeUnlocked), expanded: \(isMapExpanded), panel: \(developerPanelExpanded)")
-        ZStack {
+        GeometryReader { geometry in
+            let _ = print("🔧 DEBUG: MainResultView body - devMode: \(devSettings.developerModeUnlocked), expanded: \(isMapExpanded), panel: \(developerPanelExpanded)")
+            ZStack {
             // Layer 1: Fullscreen Map (always visible as background)
             if viewModel.error == nil && !viewModel.isLoading {
                 ZStack {
@@ -196,7 +197,8 @@ struct MainResultView: View {
                             ruleSummaryLines: viewModel.ruleSummaryLines,
                             enforcementStartTime: viewModel.enforcementStartTime,
                             enforcementEndTime: viewModel.enforcementEndTime,
-                            enforcementDays: viewModel.enforcementDays
+                            enforcementDays: viewModel.enforcementDays,
+                            screenHeight: geometry.size.height
                         )
                         .padding(.horizontal)
                         .padding(.top, 8)
@@ -312,6 +314,8 @@ struct MainResultView: View {
         } message: {
             Text("That address is outside San Francisco. We currently only support SF parking zones.")
         }
+            }
+        }
     }
 }
 
@@ -334,6 +338,8 @@ private struct AnimatedZoneCard: View {
     let enforcementStartTime: TimeOfDay?
     let enforcementEndTime: TimeOfDay?
     let enforcementDays: [DayOfWeek]?
+
+    let screenHeight: CGFloat
 
     @State private var animationIndex: Int = 0
     @State private var isFlipped: Bool = false
@@ -526,7 +532,6 @@ private struct AnimatedZoneCard: View {
 
     /// Responsive card height for large mode
     private var largeCardHeight: CGFloat {
-        let screenHeight = UIScreen.main.bounds.height
         let safeAreaTop: CGFloat = 59
         let safeAreaBottom: CGFloat = 34
         let padding: CGFloat = 32

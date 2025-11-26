@@ -11,6 +11,7 @@ struct ZoneStatusCardView: View {
     let meteredSubtitle: String?  // For metered zones: "$2/hr • 2hr max"
     let timeLimitMinutes: Int?  // Time limit in minutes for non-permit holders
     let ruleSummaryLines: [String]  // Parking rules to show on back of card
+    let screenHeight: CGFloat
 
     @State private var animationIndex: Int = 0
     @State private var isFlipped: Bool = false
@@ -18,7 +19,6 @@ struct ZoneStatusCardView: View {
     /// Responsive card height based on screen size
     /// Calculated to show: zone card + map card (120pt) + rules header peek (~20pt)
     private var cardHeight: CGFloat {
-        let screenHeight = UIScreen.main.bounds.height
         let safeAreaTop: CGFloat = 59  // Approximate for notch devices
         let safeAreaBottom: CGFloat = 34
         let padding: CGFloat = 32  // 16pt top + 16pt horizontal padding
@@ -376,7 +376,8 @@ private struct LargeMultiPermitCircleView: View {
                 "2-hour limit without permit",
                 "No limit with Zone Q permit",
                 "Enforced 8:00 AM - 6:00 PM"
-            ]
+            ],
+            screenHeight: 844
         )
         .padding()
     }
@@ -398,7 +399,8 @@ private struct LargeMultiPermitCircleView: View {
                 "Residential permit Zone R required",
                 "2-hour limit without permit",
                 "No limit with Zone R permit"
-            ]
+            ],
+            screenHeight: 844
         )
         .padding()
     }
@@ -421,7 +423,8 @@ private struct LargeMultiPermitCircleView: View {
                 "Zones A & B",
                 "Zone A or Zone B permit required",
                 "2-hour limit without permit"
-            ]
+            ],
+            screenHeight: 844
         )
         .padding()
     }
@@ -442,7 +445,8 @@ private struct LargeMultiPermitCircleView: View {
                 "Zone U",
                 "Residential permit Zone U required",
                 "Special conditions may apply"
-            ]
+            ],
+            screenHeight: 844
         )
         .padding()
     }
@@ -464,7 +468,8 @@ private struct LargeMultiPermitCircleView: View {
                 "$3/hr metered parking",
                 "2-hour maximum",
                 "Enforced 9:00 AM - 6:00 PM"
-            ]
+            ],
+            screenHeight: 844
         )
         .padding()
     }
