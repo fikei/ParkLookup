@@ -274,24 +274,24 @@ final class MainResultViewModel: ObservableObject {
 
     /// Start a parking session at the current location
     func startParkingSession() async {
-        guard let coordinate = currentCoordinate else {
-            logger.warning("Cannot start parking session: no current location")
+        guard let coordinate = self.currentCoordinate else {
+            self.logger.warning("Cannot start parking session: no current location")
             return
         }
 
         // Convert current zone rules to session rules
-        let rules = createSessionRules()
+        let rules = self.createSessionRules()
 
         // Start the session
-        await parkingSessionManager.startSession(
+        await self.parkingSessionManager.startSession(
             location: coordinate,
-            address: currentAddress != "Locating..." ? currentAddress : nil,
-            zoneName: zoneName,
-            zoneType: zoneType,
+            address: self.currentAddress != "Locating..." ? self.currentAddress : nil,
+            zoneName: self.zoneName,
+            zoneType: self.zoneType,
             rules: rules
         )
 
-        logger.info("Started parking session at \(zoneName)")
+        self.logger.info("Started parking session at \(self.zoneName)")
     }
 
     /// Get the current active parking session
