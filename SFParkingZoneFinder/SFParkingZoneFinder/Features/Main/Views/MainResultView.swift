@@ -175,6 +175,7 @@ struct MainResultView: View {
                             onResetToCurrentLocation: {
                                 searchedCoordinate = nil
                                 tappedCoordinate = nil
+                                selectedZone = nil  // Close tapped spot card
                                 viewModel.returnToGPSLocation()
                             },
                             onOutsideCoverage: {
