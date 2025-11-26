@@ -33,7 +33,7 @@ extension MKMapView {
 
 /// Renderer for blockface polylines
 class BlockfacePolylineRenderer: MKPolylineRenderer {
-    let blockface: Blockface
+    let blockface: Blockface?
 
     init(polyline: MKPolyline, blockface: Blockface) {
         self.blockface = blockface
@@ -43,7 +43,25 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         configureStyle()
     }
 
+    // Required initializers - not used in our implementation
+    override init(overlay: MKOverlay) {
+        self.blockface = nil
+        super.init(overlay: overlay)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        self.blockface = nil
+        super.init(coder: aDecoder)
+    }
+
     private func configureStyle() {
+        guard let blockface = blockface else {
+            // Default style if no blockface data
+            strokeColor = UIColor.systemGray.withAlphaComponent(0.5)
+            lineWidth = 2
+            return
+        }
+
         // Check for active street cleaning
         if blockface.hasActiveStreetCleaning() {
             // Red dashed line for active street cleaning
