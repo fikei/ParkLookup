@@ -306,7 +306,7 @@ struct RulesCard: View {
                 address: "123 Mission St"
             ),
             zoneName: "Zone Q",
-            zoneType: .residential,
+            zoneType: .residentialPermit,
             rules: [
                 SessionRule(
                     type: .timeLimit,
@@ -334,7 +334,7 @@ struct RulesCard: View {
                 address: "123 Mission St"
             ),
             zoneName: "Zone Q",
-            zoneType: .residential,
+            zoneType: .residentialPermit,
             rules: [
                 SessionRule(
                     type: .timeLimit,
