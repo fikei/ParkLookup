@@ -47,6 +47,27 @@ struct SettingsView: View {
                     Toggle("Show Parking Meters", isOn: $viewModel.showParkingMeters)
                 }
 
+                // MARK: - Parking Notifications Section
+                Section(
+                    header: Text("Parking Notifications"),
+                    footer: Text("Receive alerts when parking at time-limited zones. Notifications remind you to move your car before time expires.")
+                ) {
+                    Toggle("Enable Notifications", isOn: $viewModel.notificationsEnabled)
+                        .onChange(of: viewModel.notificationsEnabled) { _, newValue in
+                            if newValue {
+                                Task {
+                                    await viewModel.requestNotificationPermission()
+                                }
+                            }
+                        }
+
+                    if viewModel.notificationsEnabled {
+                        Toggle("1 Hour Before", isOn: $viewModel.notify1HourBefore)
+                        Toggle("15 Minutes Before", isOn: $viewModel.notify15MinBefore)
+                        Toggle("When Time Expires", isOn: $viewModel.notifyAtDeadline)
+                    }
+                }
+
                 // MARK: - Help Section
                 Section(header: Text("Help & Support")) {
                     Button {

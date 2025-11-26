@@ -25,10 +25,33 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
+    // Notification Settings
+    @Published var notificationsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled")
+        }
+    }
+    @Published var notify1HourBefore: Bool {
+        didSet {
+            UserDefaults.standard.set(notify1HourBefore, forKey: "notification_1_hour_enabled")
+        }
+    }
+    @Published var notify15MinBefore: Bool {
+        didSet {
+            UserDefaults.standard.set(notify15MinBefore, forKey: "notification_15_minutes_enabled")
+        }
+    }
+    @Published var notifyAtDeadline: Bool {
+        didSet {
+            UserDefaults.standard.set(notifyAtDeadline, forKey: "notification_at_deadline_enabled")
+        }
+    }
+
     // MARK: - Dependencies
 
     private let permitService: PermitServiceProtocol
     private let zoneDataSource: ZoneDataSourceProtocol
+    private let notificationService: NotificationServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - App Info
@@ -51,14 +74,26 @@ final class SettingsViewModel: ObservableObject {
 
     // MARK: - Initialization
 
-    init(permitService: PermitServiceProtocol, zoneDataSource: ZoneDataSourceProtocol) {
+    init(
+        permitService: PermitServiceProtocol,
+        zoneDataSource: ZoneDataSourceProtocol,
+        notificationService: NotificationServiceProtocol
+    ) {
         self.permitService = permitService
         self.zoneDataSource = zoneDataSource
+        self.notificationService = notificationService
+
+        // Load map preferences
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
         let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
         self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
-        // Show parking meters (individual pins) is OFF by default
         self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
+
+        // Load notification preferences (all enabled by default)
+        self.notificationsEnabled = UserDefaults.standard.object(forKey: "notificationsEnabled") as? Bool ?? false
+        self.notify1HourBefore = UserDefaults.standard.object(forKey: "notification_1_hour_enabled") as? Bool ?? true
+        self.notify15MinBefore = UserDefaults.standard.object(forKey: "notification_15_minutes_enabled") as? Bool ?? true
+        self.notifyAtDeadline = UserDefaults.standard.object(forKey: "notification_at_deadline_enabled") as? Bool ?? true
 
         setupBindings()
     }
@@ -66,7 +101,8 @@ final class SettingsViewModel: ObservableObject {
     convenience init() {
         self.init(
             permitService: DependencyContainer.shared.permitService,
-            zoneDataSource: DependencyContainer.shared.zoneDataSource
+            zoneDataSource: DependencyContainer.shared.zoneDataSource,
+            notificationService: DependencyContainer.shared.notificationService
         )
     }
 
@@ -123,5 +159,17 @@ final class SettingsViewModel: ObservableObject {
 
     func resetOnboarding() {
         UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+    }
+
+    // MARK: - Notification Management
+
+    func requestNotificationPermission() async {
+        let granted = await notificationService.requestPermission()
+        if !granted {
+            // If permission denied, turn off notifications
+            await MainActor.run {
+                notificationsEnabled = false
+            }
+        }
     }
 }

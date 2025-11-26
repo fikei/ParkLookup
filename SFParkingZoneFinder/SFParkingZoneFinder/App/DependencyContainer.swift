@@ -41,6 +41,12 @@ final class DependencyContainer: ObservableObject {
     // Map Services
     private(set) lazy var mapProvider: MapProviderProtocol = GoogleMapsAdapter()
 
+    // Parking Session Services
+    private(set) lazy var notificationService: NotificationServiceProtocol = NotificationService()
+    private(set) lazy var parkingSessionManager: ParkingSessionManagerProtocol = ParkingSessionManager(
+        notificationService: notificationService
+    )
+
     // MARK: - Initialization
 
     private init() {
