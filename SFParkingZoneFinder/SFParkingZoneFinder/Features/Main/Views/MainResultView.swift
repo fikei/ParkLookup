@@ -42,6 +42,7 @@ struct MainResultView: View {
     @State private var tappedPermitAreas: [String]?  // Specific permit areas for the tapped boundary
     @State private var searchedCoordinate: CLLocationCoordinate2D?
     @State private var tappedCoordinate: CLLocationCoordinate2D?  // Coordinate where user tapped (for blue dot indicator)
+    @State private var recenterTrigger = false  // Toggle to force map recenter
     @State private var showOutsideCoverageAlert = false
     @State private var developerPanelExpanded = false
     @State private var isLoadingOverlays = false
@@ -110,7 +111,9 @@ struct MainResultView: View {
                         // Show pin for searched address
                         searchedCoordinate: searchedCoordinate,
                         // Show blue dot for tapped location
-                        tappedCoordinate: tappedCoordinate
+                        tappedCoordinate: tappedCoordinate,
+                        // Force recenter trigger
+                        recenterTrigger: recenterTrigger
                     )
                     // Use zone count in ID to allow updates when zones load, but prevent recreation on UI-only changes
                     .id("zoneMapView-\(viewModel.allLoadedZones.count)")
@@ -177,6 +180,7 @@ struct MainResultView: View {
                                 tappedCoordinate = nil
                                 selectedZone = nil  // Close tapped spot card
                                 viewModel.returnToGPSLocation()
+                                recenterTrigger.toggle()  // Force map recenter
                             },
                             onOutsideCoverage: {
                                 showOutsideCoverageAlert = true

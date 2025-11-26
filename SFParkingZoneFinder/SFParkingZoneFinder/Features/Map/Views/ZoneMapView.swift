@@ -36,6 +36,9 @@ struct ZoneMapView: UIViewRepresentable {
     /// Coordinate where user tapped on map (shows a blue dot when set)
     var tappedCoordinate: CLLocationCoordinate2D? = nil
 
+    /// Toggle to force map recenter (for when coordinate doesn't change but we want to recenter anyway)
+    var recenterTrigger: Bool = false
+
     /// Validates a coordinate to ensure it won't cause NaN errors
     private func isValidCoordinate(_ coord: CLLocationCoordinate2D?) -> Bool {
         guard let c = coord else { return false }
@@ -142,9 +145,17 @@ struct ZoneMapView: UIViewRepresentable {
             coordinateChanged = (context.coordinator.lastUserCoordinate == nil) != (userCoordinate == nil)
         }
 
-        if coordinateChanged && isValidCoordinate(userCoordinate) {
-            logger.info("📍 User coordinate changed - recentering map to (\(userCoordinate!.latitude), \(userCoordinate!.longitude))")
+        // Check if recenter was explicitly triggered (even if coordinate didn't change)
+        let recenterTriggered = recenterTrigger != context.coordinator.lastRecenterTrigger
+
+        if (coordinateChanged || recenterTriggered) && isValidCoordinate(userCoordinate) {
+            if recenterTriggered {
+                logger.info("📍 Recenter triggered - forcing map recenter to (\(userCoordinate!.latitude), \(userCoordinate!.longitude))")
+            } else {
+                logger.info("📍 User coordinate changed - recentering map to (\(userCoordinate!.latitude), \(userCoordinate!.longitude))")
+            }
             context.coordinator.lastUserCoordinate = userCoordinate
+            context.coordinator.lastRecenterTrigger = recenterTrigger
 
             // Recenter map with animation
             let baseSpan = 0.006
@@ -972,6 +983,9 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Track last user coordinate to detect when user returns to GPS location
         var lastUserCoordinate: CLLocationCoordinate2D?
+
+        // Track recenter trigger to force recentering even when coordinate doesn't change
+        var lastRecenterTrigger: Bool = false
 
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?) {
             self.currentZoneId = currentZoneId
