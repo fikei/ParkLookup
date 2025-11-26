@@ -314,7 +314,6 @@ struct MainResultView: View {
         } message: {
             Text("That address is outside San Francisco. We currently only support SF parking zones.")
         }
-            }
         }
     }
 }
