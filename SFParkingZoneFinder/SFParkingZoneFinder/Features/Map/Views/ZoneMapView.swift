@@ -200,9 +200,25 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Check if developer settings changed - reload overlays if so
         let currentSettingsHash = DeveloperSettings.shared.settingsHash
+        let devSettings = DeveloperSettings.shared
+        let blockfaceOverlaysJustEnabled = !context.coordinator.lastBlockfaceOverlaysEnabled && devSettings.showBlockfaceOverlays
+
         if context.coordinator.overlaysLoaded && currentSettingsHash != context.coordinator.lastSettingsHash {
             logger.info("🔄 Developer settings changed - reloading overlays")
             context.coordinator.lastSettingsHash = currentSettingsHash
+
+            // Check if blockface overlays were just enabled - zoom to sample location
+            if blockfaceOverlaysJustEnabled {
+                logger.info("🚧 PoC: Blockface overlays enabled - zooming to Mission St sample location")
+                // Mission St between 24th-26th (center of sample blockfaces)
+                let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7531, longitude: -122.4182)
+                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.002, longitudeDelta: 0.002) // ~220m, tight zoom
+                let blockfaceRegion = MKCoordinateRegion(center: blockfaceCenter, span: blockfaceSpan)
+                mapView.setRegion(blockfaceRegion, animated: true)
+            }
+
+            // Update tracking state
+            context.coordinator.lastBlockfaceOverlaysEnabled = devSettings.showBlockfaceOverlays
 
             // Clear existing overlays and annotations (except user location and searched pin)
             let overlaysToRemove = mapView.overlays
@@ -1011,12 +1027,16 @@ struct ZoneMapView: UIViewRepresentable {
         // Track recenter trigger to force recentering even when coordinate doesn't change
         var lastRecenterTrigger: Bool = false
 
+        // Track blockface overlay state to zoom to sample location when enabled
+        var lastBlockfaceOverlaysEnabled: Bool = false
+
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?) {
             self.currentZoneId = currentZoneId
             self.zones = zones
             self.onZoneTapped = onZoneTapped
             self.lastSettingsHash = DeveloperSettings.shared.settingsHash
             self.lastReloadTrigger = DeveloperSettings.shared.reloadTrigger
+            self.lastBlockfaceOverlaysEnabled = DeveloperSettings.shared.showBlockfaceOverlays
         }
 
         // MARK: - MKMapViewDelegate
