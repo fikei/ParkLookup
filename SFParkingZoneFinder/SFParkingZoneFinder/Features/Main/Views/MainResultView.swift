@@ -2070,6 +2070,7 @@ private struct BottomNavigationBar: View {
             }
         }
         .padding(.horizontal, 16)
+        .offset(y: -16)
     }
 }
 
