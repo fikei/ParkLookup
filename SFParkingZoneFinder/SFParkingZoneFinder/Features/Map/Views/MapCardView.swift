@@ -2,6 +2,8 @@ import SwiftUI
 import MapKit
 
 /// Full-width map card showing user location and current zone
+/// Note: Requires iOS 17+ for SwiftUI Map API
+@available(iOS 17.0, *)
 struct MapCardView: View {
     let coordinate: CLLocationCoordinate2D?
     let zoneName: String?
