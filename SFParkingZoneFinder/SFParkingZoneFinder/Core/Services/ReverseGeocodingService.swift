@@ -2,10 +2,11 @@ import Foundation
 import CoreLocation
 import MapKit
 
-/// Reverse geocoding service using MapKit MKLocalSearch
+/// Reverse geocoding service using CLGeocoder
 final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
 
     private var cache: [String: Address] = [:]
+    private let geocoder = CLGeocoder()
 
     func reverseGeocode(location: CLLocation) async throws -> Address {
         // Create cache key (rounded to ~10 meter precision)
@@ -17,25 +18,13 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
             return cached
         }
 
-        // Use MKLocalSearch with coordinate region for reverse geocoding
-        let request = MKLocalSearch.Request()
-        request.region = MKCoordinateRegion(
-            center: location.coordinate,
-            latitudinalMeters: 50,
-            longitudinalMeters: 50
-        )
-        request.resultTypes = .address
-
-        let search = MKLocalSearch(request: request)
-
+        // Use CLGeocoder for reverse geocoding (the correct API for coordinate → address)
         do {
-            let response = try await search.start()
+            let placemarks = try await geocoder.reverseGeocodeLocation(location)
 
-            guard let mapItem = response.mapItems.first else {
+            guard let placemark = placemarks.first else {
                 throw GeocodingError.noResults
             }
-
-            let placemark = mapItem.placemark
 
             let address = Address(
                 streetNumber: placemark.subThoroughfare,
@@ -48,6 +37,13 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
             cache[cacheKey] = address
             return address
 
+        } catch let error as CLError {
+            // Handle specific CLGeocoder errors
+            if error.code == .network {
+                throw GeocodingError.networkError
+            } else {
+                throw GeocodingError.noResults
+            }
         } catch {
             throw GeocodingError.networkError
         }
@@ -69,6 +65,11 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
             components.append(locality)
         }
 
-        return components.joined(separator: " ")
+        let formatted = components.joined(separator: " ")
+        // Ensure we never return empty string - use neighborhood or city as fallback
+        if formatted.isEmpty {
+            return placemark.subLocality ?? placemark.locality ?? "San Francisco"
+        }
+        return formatted
     }
 }
