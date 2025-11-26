@@ -5,8 +5,12 @@ import SwiftUI
 extension Color {
     // MARK: - Validity Status Colors
 
-    /// Green - permit is valid
+    /// Green - permit is valid (accessible color for backgrounds)
     static let validGreen = Color("ValidGreen", bundle: nil)
+
+    /// Accessible green for valid permit backgrounds (WCAG AA compliant)
+    /// Uses a darker, more saturated green (#2D8B57 - Sea Green) for better contrast
+    static let accessibleValidGreen = Color(red: 0.176, green: 0.545, blue: 0.341)  // #2D8B57
 
     /// Red - permit is not valid
     static let invalidRed = Color("InvalidRed", bundle: nil)

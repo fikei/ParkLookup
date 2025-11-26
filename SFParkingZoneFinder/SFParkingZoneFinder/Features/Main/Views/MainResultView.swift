@@ -408,7 +408,7 @@ private struct AnimatedZoneCard: View {
 
     private var cardBackground: Color {
         if zoneType == .metered { return Color(.systemBackground) }
-        return isValidStyle ? Color.green : Color(.systemBackground)
+        return isValidStyle ? Color.accessibleValidGreen : Color(.systemBackground)
     }
 
     private var circleBackground: Color {
@@ -1192,7 +1192,7 @@ private struct MiniZoneCardView: View {
         if zoneType == .metered {
             return Color(.systemBackground)
         }
-        return isValidStyle ? Color.green : Color(.systemBackground)
+        return isValidStyle ? Color.accessibleValidGreen : Color(.systemBackground)
     }
 
     private var circleBackground: Color {
@@ -1993,18 +1993,23 @@ private struct BottomNavigationBar: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            // Center-Left: Park button
+            // Center: Park button (horizontal with label)
             Button {
                 HapticFeedback.medium()
                 onParkTap()
             } label: {
-                Image(systemName: "parkingsign.circle.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 52, height: 52)
-                    .background(Color.accentColor)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                HStack(spacing: 8) {
+                    Image(systemName: "parkingsign.circle.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                    Text("Park")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color.black)
+                .clipShape(Capsule())
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
             }
             .frame(maxWidth: .infinity, alignment: .center)
 
@@ -2031,12 +2036,8 @@ private struct BottomNavigationBar: View {
                 onExpandTap()
             } label: {
                 Image(systemName: "car.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(isExpanded ? Color.blue : Color.black.opacity(0.6))
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(isExpanded ? .blue : .black)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
