@@ -1984,6 +1984,13 @@ private struct BottomNavigationBar: View {
     let onExpandTap: () -> Void
     let isExpanded: Bool
 
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// Adaptive background color for buttons based on light/dark mode
+    private var buttonBackgroundColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.6)
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             // Left section: Developer tools button OR Settings button
@@ -1998,7 +2005,7 @@ private struct BottomNavigationBar: View {
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: 44, height: 44)
-                            .background(Color.black.opacity(0.6))
+                            .background(buttonBackgroundColor)
                             .clipShape(Circle())
                             .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
@@ -2013,7 +2020,7 @@ private struct BottomNavigationBar: View {
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(Color.black.opacity(0.6))
+                        .background(buttonBackgroundColor)
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
@@ -2032,7 +2039,7 @@ private struct BottomNavigationBar: View {
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(isExpanded ? Color.blue : Color.black.opacity(0.6))
+                        .background(isExpanded ? Color.blue : buttonBackgroundColor)
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
