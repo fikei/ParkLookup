@@ -1988,7 +1988,12 @@ private struct BottomNavigationBar: View {
 
     /// Adaptive background color for buttons based on light/dark mode
     private var buttonBackgroundColor: Color {
-        colorScheme == .dark ? Color.black.opacity(0.6) : Color.white.opacity(0.2)
+        colorScheme == .dark ? Color.black.opacity(0.6) : Color.white.opacity(0.85)
+    }
+
+    /// Adaptive foreground color for button icons/text
+    private var buttonForegroundColor: Color {
+        colorScheme == .dark ? .white : .black
     }
 
     var body: some View {
@@ -2003,7 +2008,7 @@ private struct BottomNavigationBar: View {
                     } label: {
                         Image(systemName: "chevron.left.forwardslash.chevron.right")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(buttonForegroundColor)
                             .frame(width: 44, height: 44)
                             .background(buttonBackgroundColor)
                             .clipShape(Circle())
@@ -2018,7 +2023,7 @@ private struct BottomNavigationBar: View {
                 } label: {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(buttonForegroundColor)
                         .frame(width: 44, height: 44)
                         .background(buttonBackgroundColor)
                         .clipShape(Circle())
@@ -2037,7 +2042,7 @@ private struct BottomNavigationBar: View {
                 } label: {
                     Image(systemName: "car.fill")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(isExpanded ? buttonForegroundColor : .white)
                         .frame(width: 44, height: 44)
                         .background(isExpanded ? buttonBackgroundColor : Color.blue)
                         .clipShape(Circle())
@@ -2055,7 +2060,7 @@ private struct BottomNavigationBar: View {
                         Text(hasActiveSession ? "Parked" : "Park")
                             .font(.system(size: 16, weight: .semibold))
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(hasActiveSession ? .white : buttonForegroundColor)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
                     .background(hasActiveSession ? Color.blue : buttonBackgroundColor)
