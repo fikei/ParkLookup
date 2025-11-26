@@ -743,9 +743,9 @@ private struct AnimatedZoneCard: View {
                             Text(zoneName)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                        } else if let limit = timeLimitMinutes {
-                            // During enforcement - show time limit
-                            Text("\(limit / 60) Hour Limit")
+                        } else if let parkUntil = parkUntilText {
+                            // During enforcement - show "Park until" time
+                            Text(parkUntil)
                                 .font(.headline)
                                 .foregroundColor(.primary)
                             Text(zoneName)
@@ -2016,7 +2016,7 @@ private struct BottomNavigationBar: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
-                .background(Color.black)
+                .background(Color.blue)
                 .clipShape(Capsule())
                 .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
             }
