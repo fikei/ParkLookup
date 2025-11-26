@@ -1988,7 +1988,7 @@ private struct BottomNavigationBar: View {
 
     /// Adaptive background color for buttons based on light/dark mode
     private var buttonBackgroundColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.6)
+        colorScheme == .dark ? Color.black.opacity(0.6) : Color.white.opacity(0.2)
     }
 
     var body: some View {
