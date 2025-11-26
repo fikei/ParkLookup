@@ -45,6 +45,7 @@ struct MainResultView: View {
     @State private var developerPanelExpanded = false
     @State private var isLoadingOverlays = false
     @State private var overlayLoadingMessage = ""
+    @State private var showingActiveParkingView = false
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -238,7 +239,10 @@ struct MainResultView: View {
                             }
                         },
                         onParkTap: {
-                            // TODO: Show ActiveParkingView
+                            Task {
+                                await viewModel.startParkingSession()
+                                showingActiveParkingView = true
+                            }
                         },
                         onSettingsTap: {
                             showingSettings = true
@@ -312,12 +316,40 @@ struct MainResultView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
+        .sheet(isPresented: $showingActiveParkingView) {
+            if let session = viewModel.getActiveSession() {
+                ActiveParkingView(
+                    session: session,
+                    onDismiss: {
+                        showingActiveParkingView = false
+                    },
+                    onEndParking: {
+                        await viewModel.endParkingSession()
+                        showingActiveParkingView = false
+                    },
+                    onGetDirections: {
+                        openDirectionsToParking(session: session)
+                    }
+                )
+            }
+        }
         .alert("Outside Coverage Area", isPresented: $showOutsideCoverageAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text("That address is outside San Francisco. We currently only support SF parking zones.")
         }
         }
+    }
+
+    // MARK: - Helper Methods
+
+    private func openDirectionsToParking(session: ParkingSession) {
+        let coordinate = session.location.coordinate
+        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+        mapItem.name = session.location.address ?? "Parked Car"
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
+        ])
     }
 }
 
