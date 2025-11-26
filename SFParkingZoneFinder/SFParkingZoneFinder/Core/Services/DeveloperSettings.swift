@@ -321,14 +321,14 @@ final class DeveloperSettings: ObservableObject {
 
     private enum Defaults {
         static let useConvexHull = false
-        static let useDouglasPeucker = false
-        static let douglasPeuckerTolerance = 0.0001  // ~11m - moderate simplification
+        static let useDouglasPeucker = true  // Enable D-P simplification by default
+        static let douglasPeuckerTolerance = 0.0003  // ~33m - balanced simplification
         static let useGridSnapping = false
         static let gridSnapSize = 0.00005  // ~5.5m grid
         static let preserveCurves = true
         static let curveAngleThreshold = 15.0  // degrees - angles > 15° are "curves"
         static let cornerRoundingRadius = 0.00005  // ~5.5m radius
-        static let useCornerRounding = false
+        static let useCornerRounding = true  // Enable corner rounding by default
         static let overlapTolerance = 0.00001  // ~1m tolerance for overlap detection
         static let useOverlapClipping = false  // Visual-only overlap clipping
         static let mergeOverlappingSameZone = false  // Merge overlapping polygons in same zone

@@ -19,21 +19,23 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
 
         do {
             // Use MapKit's reverse geocoding request (iOS 26+)
-            let request = MKReverseGeocodingRequest(coordinate: location.coordinate)
+            var request = MKReverseGeocodingRequest()
+            request.coordinate = location.coordinate
             let result = try await request.submit()
 
             guard let mapItem = result.mapItem else {
                 throw GeocodingError.noResults
             }
 
-            let placemark = mapItem.placemark
+            // Use MKMapItem's properties instead of deprecated MKPlacemark (iOS 26+)
+            let addressDict = mapItem.addressDictionary ?? [:]
 
             let address = Address(
-                streetNumber: placemark.subThoroughfare,
-                streetName: placemark.thoroughfare,
-                neighborhood: placemark.subLocality,
-                city: placemark.locality,
-                formattedAddress: formatAddress(from: placemark)
+                streetNumber: addressDict["SubThoroughfare"] as? String,
+                streetName: addressDict["Thoroughfare"] as? String,
+                neighborhood: addressDict["SubLocality"] as? String,
+                city: addressDict["City"] as? String,
+                formattedAddress: formatAddress(from: addressDict)
             )
 
             cache[cacheKey] = address
@@ -46,16 +48,16 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
         }
     }
 
-    private func formatAddress(from placemark: MKPlacemark) -> String {
+    private func formatAddress(from addressDict: [String: Any]) -> String {
         var components: [String] = []
 
-        if let subThoroughfare = placemark.subThoroughfare {
+        if let subThoroughfare = addressDict["SubThoroughfare"] as? String {
             components.append(subThoroughfare)
         }
-        if let thoroughfare = placemark.thoroughfare {
+        if let thoroughfare = addressDict["Thoroughfare"] as? String {
             components.append(thoroughfare)
         }
-        if let locality = placemark.locality {
+        if let locality = addressDict["City"] as? String {
             if !components.isEmpty {
                 components.append(",")
             }
