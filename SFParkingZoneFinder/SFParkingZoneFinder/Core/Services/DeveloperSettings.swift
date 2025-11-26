@@ -334,7 +334,7 @@ final class DeveloperSettings: ObservableObject {
         static let mergeOverlappingSameZone = false  // Merge overlapping polygons in same zone
         static let useProximityMerging = false  // Distance-based polygon merging
         static let proximityMergeDistance = 5.0  // Default 5 meters
-        static let useDeduplication = true  // Enable deduplication by default
+        static let useDeduplication = false  // Disable deduplication by default
         static let deduplicationThreshold = 0.95  // Default 95% overlap threshold
         static let usePolygonBuffering = false  // Disabled by default (experimental)
         static let polygonBufferDistance = 0.000005  // ~0.5m default buffer distance
