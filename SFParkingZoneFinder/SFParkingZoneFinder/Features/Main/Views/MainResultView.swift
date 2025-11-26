@@ -2039,8 +2039,12 @@ private struct BottomNavigationBar: View {
                 onExpandTap()
             } label: {
                 Image(systemName: "car.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(isExpanded ? .blue : .black)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(isExpanded ? Color.blue : Color.black.opacity(0.6))
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
