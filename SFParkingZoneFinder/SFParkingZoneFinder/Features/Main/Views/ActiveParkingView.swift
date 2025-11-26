@@ -22,19 +22,11 @@ struct ActiveParkingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header with close button
-                HStack {
-                    Spacer()
-                    Button {
-                        onDismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.secondary)
-                            .symbolRenderingMode(.hierarchical)
-                    }
-                    .padding()
-                }
+                // Drag indicator for swipe-down gesture
+                RoundedRectangle(cornerRadius: 2.5)
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 8)
 
                 ScrollView {
                     VStack(spacing: 24) {
