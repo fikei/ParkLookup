@@ -494,9 +494,8 @@ final class MainResultViewModel: ObservableObject {
             let address = try await reverseGeocodingService.reverseGeocode(location: location)
             currentAddress = address.shortAddress
         } catch {
-            currentAddress = String(format: "%.4f, %.4f",
-                                   location.coordinate.latitude,
-                                   location.coordinate.longitude)
+            // Fallback to a user-friendly message instead of coordinates
+            currentAddress = "Address unavailable"
         }
     }
 }
