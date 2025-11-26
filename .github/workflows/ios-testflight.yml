@@ -1,0 +1,161 @@
+name: iOS TestFlight Deployment
+
+on:
+  # Manual trigger via workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip running tests'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'beta'
+        type: choice
+        options:
+          - beta
+          - production
+
+  # Auto-trigger on push to main (optional, can be removed if you only want manual)
+  push:
+    branches:
+      - main
+    paths:
+      - 'SFParkingZoneFinder/**'
+      - '.github/workflows/ios-testflight.yml'
+
+jobs:
+  deploy-testflight:
+    name: Build and Deploy to TestFlight
+    runs-on: macos-14  # Use latest macOS with Apple Silicon
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
+
+      - name: Cache Ruby Gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install Ruby Dependencies
+        run: |
+          cd SFParkingZoneFinder
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Install Fastlane
+        run: |
+          gem install fastlane -N
+          fastlane --version
+
+      - name: Setup App Store Connect API Key
+        env:
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: |
+          cd SFParkingZoneFinder/fastlane
+          echo "$APP_STORE_CONNECT_API_KEY_CONTENT" > api_key.json
+
+      - name: Import Certificates
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+
+          # Import certificate
+          echo "$CERTIFICATE_P12" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          rm certificate.p12
+
+      - name: Install Provisioning Profile
+        env:
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISIONING_PROFILE" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Configure Environment
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
+          APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}
+          PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}
+        run: |
+          cd SFParkingZoneFinder/fastlane
+          cat > .env << EOF
+          APPLE_ID=$APPLE_ID
+          TEAM_ID=$TEAM_ID
+          ITC_TEAM_ID=$ITC_TEAM_ID
+          APP_IDENTIFIER=$APP_IDENTIFIER
+          PROVISIONING_PROFILE_SPECIFIER=$PROVISIONING_PROFILE_SPECIFIER
+          APP_STORE_CONNECT_API_KEY_PATH=./fastlane/api_key.json
+          SKIP_GIT_CHECK=true
+          SKIP_BRANCH_CHECK=true
+          SKIP_GIT_PUSH=false
+          EOF
+
+      - name: Run Tests
+        if: ${{ github.event.inputs.skip_tests != 'true' }}
+        run: |
+          cd SFParkingZoneFinder
+          fastlane test
+        continue-on-error: true
+
+      - name: Build and Deploy to TestFlight
+        run: |
+          cd SFParkingZoneFinder
+          fastlane beta
+
+      - name: Upload Build Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-logs
+          path: |
+            SFParkingZoneFinder/fastlane/report.xml
+            SFParkingZoneFinder/fastlane/test_output
+            SFParkingZoneFinder/build/*.ipa
+          retention-days: 30
+
+      - name: Notify on Success
+        if: success()
+        run: |
+          echo "✅ Successfully deployed to TestFlight!"
+          echo "Build number: $(cd SFParkingZoneFinder && agvtool what-version -terse)"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ TestFlight deployment failed"
+          exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          security delete-keychain build.keychain || true
+          rm -f SFParkingZoneFinder/fastlane/api_key.json
+          rm -f SFParkingZoneFinder/fastlane/.env

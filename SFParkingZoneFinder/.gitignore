@@ -30,6 +30,10 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+fastlane/*.cer
+fastlane/*.p12
+fastlane/*.mobileprovision
+fastlane/api_key.json
 
 # Secrets - NEVER commit these
 Config.plist

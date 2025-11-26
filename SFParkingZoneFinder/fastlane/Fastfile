@@ -1,0 +1,113 @@
+# Fastfile for SF Parking Zone Finder
+
+default_platform(:ios)
+
+platform :ios do
+  # Configuration
+  xcodeproj = "SFParkingZoneFinder.xcodeproj"
+  scheme = "SFParkingZoneFinder"
+  app_identifier = ENV["APP_IDENTIFIER"] || "com.yourcompany.sfparkingzonefinder"
+
+  before_all do
+    ensure_git_status_clean unless ENV["SKIP_GIT_CHECK"]
+  end
+
+  desc "Build the app"
+  lane :build do
+    build_app(
+      scheme: scheme,
+      workspace: nil,
+      project: xcodeproj,
+      clean: true,
+      output_directory: "./build",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          app_identifier => ENV["PROVISIONING_PROFILE_SPECIFIER"]
+        }
+      }
+    )
+  end
+
+  desc "Run tests"
+  lane :test do
+    run_tests(
+      scheme: scheme,
+      project: xcodeproj,
+      devices: ["iPhone 15 Pro"],
+      clean: true
+    )
+  end
+
+  desc "Increment build number"
+  lane :bump_build do
+    increment_build_number(
+      xcodeproj: xcodeproj
+    )
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    # Ensure we're on the correct branch
+    ensure_git_branch(
+      branch: ENV["ALLOWED_BRANCH"] || "main"
+    ) unless ENV["SKIP_BRANCH_CHECK"]
+
+    # Increment build number
+    bump_build
+
+    # Build the app
+    build_app(
+      scheme: scheme,
+      workspace: nil,
+      project: xcodeproj,
+      clean: true,
+      output_directory: "./build",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          app_identifier => ENV["PROVISIONING_PROFILE_SPECIFIER"] || "match AppStore #{app_identifier}"
+        }
+      }
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_waiting_for_build_processing: true,
+      skip_submission: true,
+      notify_external_testers: false
+    )
+
+    # Commit version bump
+    commit_version_bump(
+      message: "Bump build number for TestFlight release [skip ci]",
+      xcodeproj: xcodeproj
+    )
+
+    # Push to remote
+    push_to_git_remote(
+      tags: false
+    ) unless ENV["SKIP_GIT_PUSH"]
+
+    # Notify completion
+    UI.success("✅ Successfully uploaded to TestFlight!")
+  end
+
+  desc "Deploy to TestFlight (alias for beta)"
+  lane :deploy do
+    beta
+  end
+
+  desc "Take screenshots"
+  lane :screenshots do
+    capture_screenshots(
+      scheme: scheme,
+      output_directory: "./fastlane/screenshots"
+    )
+  end
+
+  error do |lane, exception|
+    UI.error("Error in lane #{lane}: #{exception.message}")
+  end
+end
