@@ -4,6 +4,7 @@ import MapKit
 /// Full-screen view showing active parking session with timer and controls
 struct ActiveParkingView: View {
     let session: ParkingSession
+    let userLocation: CLLocationCoordinate2D?
     let onDismiss: () -> Void
     let onEndParking: () async -> Void
     let onGetDirections: () -> Void
@@ -14,6 +15,23 @@ struct ActiveParkingView: View {
 
     // Timer to update the countdown
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
+    /// Distance to parked car in meters (nil if user location unavailable)
+    private var distanceToParkedCar: Double? {
+        guard let userLoc = userLocation else { return nil }
+        let userCLLocation = CLLocation(latitude: userLoc.latitude, longitude: userLoc.longitude)
+        let parkedLocation = CLLocation(
+            latitude: session.location.coordinate.latitude,
+            longitude: session.location.coordinate.longitude
+        )
+        return userCLLocation.distance(from: parkedLocation)
+    }
+
+    /// Whether to show directions button (hide if within 40m)
+    private var shouldShowDirections: Bool {
+        guard let distance = distanceToParkedCar else { return true }
+        return distance > 40  // Hide if within 40 meters
+    }
 
     var body: some View {
         ZStack {
@@ -62,72 +80,58 @@ struct ActiveParkingView: View {
                             RulesCard(rules: session.rules)
                                 .padding(.horizontal)
                         }
-
-                        // Action buttons
-                        VStack(spacing: 12) {
-                            // Get Directions button
-                            Button {
-                                onGetDirections()
-                            } label: {
-                                HStack {
-                                    Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                                    Text("Directions to My Car")
-                                        .fontWeight(.semibold)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.accentColor)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-                            }
-
-                            // End Parking button
-                            Button {
-                                Task {
-                                    isEndingParking = true
-                                    await onEndParking()
-                                    isEndingParking = false
-                                }
-                            } label: {
-                                HStack {
-                                    if isEndingParking {
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: .red))
-                                    } else {
-                                        Image(systemName: "xmark.circle.fill")
-                                        Text("End Parking Session")
-                                            .fontWeight(.semibold)
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.red.opacity(0.1))
-                                .foregroundColor(.red)
-                                .cornerRadius(12)
-                            }
-                            .disabled(isEndingParking)
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-
-                        // Parking duration
-                        VStack(spacing: 4) {
-                            Text("Parked Since")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-
-                            Text(formatTime(session.startTime))
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-
-                            Text(formatDuration(session.duration))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.top, 8)
                     }
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 20)
                 }
+
+                // Action buttons at bottom (outside ScrollView)
+                VStack(spacing: 12) {
+                    // Get Directions button (conditionally shown)
+                    if shouldShowDirections {
+                        Button {
+                            onGetDirections()
+                        } label: {
+                            HStack {
+                                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                                Text("Directions to My Car")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                        }
+                    }
+
+                    // End Parking button
+                    Button {
+                        Task {
+                            isEndingParking = true
+                            await onEndParking()
+                            isEndingParking = false
+                        }
+                    } label: {
+                        HStack {
+                            if isEndingParking {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .red))
+                            } else {
+                                Image(systemName: "xmark.circle.fill")
+                                Text("End Parking Session")
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.red.opacity(0.1))
+                        .foregroundColor(.red)
+                        .cornerRadius(12)
+                    }
+                    .disabled(isEndingParking)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
             }
         }
         .onReceive(timer) { _ in
@@ -262,12 +266,6 @@ struct RulesCard: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(rule.description)
                             .font(.subheadline)
-
-                        if let deadline = rule.deadline {
-                            Text("Until \(formatDeadline(deadline))")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
                     }
 
                     Spacer()
@@ -320,6 +318,7 @@ struct RulesCard: View {
                 )
             ]
         ),
+        userLocation: CLLocationCoordinate2D(latitude: 37.7750, longitude: -122.4195),  // 100m away
         onDismiss: {},
         onEndParking: {},
         onGetDirections: {}
@@ -343,6 +342,7 @@ struct RulesCard: View {
                 )
             ]
         ),
+        userLocation: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),  // At car (< 40m)
         onDismiss: {},
         onEndParking: {},
         onGetDirections: {}

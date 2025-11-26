@@ -243,6 +243,7 @@ struct MainResultView: View {
                     Spacer()
                     BottomNavigationBar(
                         isDeveloperModeActive: devSettings.developerModeUnlocked,
+                        hasActiveSession: viewModel.getActiveSession() != nil,
                         onDeveloperTap: {
                             print("🔧 DEBUG: Developer button tapped! Panel will expand")
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -331,6 +332,7 @@ struct MainResultView: View {
             if let session = viewModel.getActiveSession() {
                 ActiveParkingView(
                     session: session,
+                    userLocation: viewModel.currentCoordinate,
                     onDismiss: {
                         showingActiveParkingView = false
                     },
@@ -1975,6 +1977,7 @@ struct OverlappingZonesSheet: View {
 /// Fixed bottom navigation with four buttons
 private struct BottomNavigationBar: View {
     let isDeveloperModeActive: Bool
+    let hasActiveSession: Bool
     let onDeveloperTap: () -> Void
     let onParkTap: () -> Void
     let onSettingsTap: () -> Void
@@ -2042,7 +2045,7 @@ private struct BottomNavigationBar: View {
                     HStack(spacing: 8) {
                         Image(systemName: "parkingsign.circle.fill")
                             .font(.system(size: 18, weight: .semibold))
-                        Text("Park")
+                        Text(hasActiveSession ? "Parked" : "Park")
                             .font(.system(size: 16, weight: .semibold))
                     }
                     .foregroundColor(.white)
