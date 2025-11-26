@@ -475,8 +475,14 @@ private struct AnimatedZoneCard: View {
                     // After enforcement ends today - find next enforcement start
                     return findNextEnforcementStart(from: now, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
                 } else {
-                    // During enforcement - normal time limit applies
-                    return calculateTimeLimitEnd(from: now, endTime: endTime)
+                    // During enforcement - check if time limit extends beyond enforcement end
+                    return calculateTimeLimitEndWithEnforcementAwareness(
+                        from: now,
+                        endTime: endTime,
+                        startTime: startTime,
+                        days: enforcementDays,
+                        currentDay: currentDayOfWeek
+                    )
                 }
             } else {
                 // Not an enforcement day - find next enforcement start
@@ -557,6 +563,43 @@ private struct AnimatedZoneCard: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a"
         return "Park until \(formatter.string(from: parkUntil))"
+    }
+
+    /// Calculate when time limit expires with enforcement awareness
+    /// If time limit extends beyond enforcement end, returns next enforcement start instead
+    private func calculateTimeLimitEndWithEnforcementAwareness(
+        from now: Date,
+        endTime: TimeOfDay,
+        startTime: TimeOfDay,
+        days: [DayOfWeek]?,
+        currentDay: DayOfWeek?
+    ) -> String {
+        guard let limit = timeLimitMinutes else { return "Check posted signs" }
+
+        let calendar = Calendar.current
+        let parkUntil = now.addingTimeInterval(TimeInterval(limit * 60))
+
+        // Get enforcement end time for today
+        guard let endDate = calendar.date(bySettingHour: endTime.hour, minute: endTime.minute, second: 0, of: now) else {
+            // Fallback if we can't calculate enforcement end
+            let formatter = DateFormatter()
+            formatter.dateFormat = "h:mm a"
+            return "Park until \(formatter.string(from: parkUntil))"
+        }
+
+        // Check if time limit extends beyond enforcement end
+        if parkUntil > endDate {
+            // Time limit would expire after enforcement ends
+            // So you can park until enforcement starts again!
+            return findNextEnforcementStart(from: now, startTime: startTime, days: days, currentDay: currentDay)
+        } else {
+            // Time limit expires during enforcement - show time limit end
+            return formatParkUntil(
+                hour: calendar.component(.hour, from: parkUntil),
+                minute: calendar.component(.minute, from: parkUntil),
+                on: parkUntil
+            )
+        }
     }
 
     /// Responsive card height for large mode
@@ -1329,18 +1372,123 @@ private struct TappedSpotInfoCard: View {
         return allPermitAreas.contains { userPermitAreas.contains($0.uppercased()) }
     }
 
-    /// Calculate "Park Until" time based on time limit
+    /// Calculate "Park Until" time based on time limit with enforcement awareness
     private var parkUntilText: String? {
         guard !hasValidPermit, zone.zoneType == .residentialPermit else { return nil }
         guard let minutes = zone.nonPermitTimeLimit else { return nil }
 
         let calendar = Calendar.current
         let now = Date()
-        let parkUntil = calendar.date(byAdding: .minute, value: minutes, to: now) ?? now
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
 
+        // Get enforcement hours from the primary rule
+        let primaryRule = zone.rules.first(where: { $0.enforcementStartTime != nil })
+        let startTime = primaryRule?.enforcementStartTime
+        let endTime = primaryRule?.enforcementEndTime
+        let enforcementDays = primaryRule?.enforcementDays
+
+        // Check if enforcement is currently active
+        if let start = startTime, let end = endTime {
+            let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+            let startMinutes = start.totalMinutes
+            let endMinutes = end.totalMinutes
+
+            // Check if today is an enforcement day
+            var isEnforcementDay = true
+            var currentDayOfWeek: DayOfWeek?
+            if let days = enforcementDays, !days.isEmpty,
+               let weekday = components.weekday,
+               let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+                currentDayOfWeek = dayOfWeek
+                isEnforcementDay = days.contains(dayOfWeek)
+            }
+
+            if isEnforcementDay {
+                if currentMinutes < startMinutes {
+                    // Before enforcement starts today - can park until enforcement begins
+                    return formatParkUntilTime(hour: start.hour, minute: start.minute, on: now)
+                } else if currentMinutes >= endMinutes {
+                    // After enforcement ends today - find next enforcement start
+                    return findNextEnforcementStartTime(from: now, startTime: start, days: enforcementDays, currentDay: currentDayOfWeek)
+                } else {
+                    // During enforcement - check if time limit extends beyond enforcement end
+                    let parkUntil = now.addingTimeInterval(TimeInterval(minutes * 60))
+
+                    if let endDate = calendar.date(bySettingHour: end.hour, minute: end.minute, second: 0, of: now) {
+                        if parkUntil > endDate {
+                            // Time limit extends beyond enforcement end - can park until next enforcement start!
+                            return findNextEnforcementStartTime(from: now, startTime: start, days: enforcementDays, currentDay: currentDayOfWeek)
+                        } else {
+                            // Time limit expires during enforcement - show time limit end
+                            return formatParkUntilTime(
+                                hour: calendar.component(.hour, from: parkUntil),
+                                minute: calendar.component(.minute, from: parkUntil),
+                                on: parkUntil
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Not an enforcement day - find next enforcement start
+                return findNextEnforcementStartTime(from: now, startTime: start, days: enforcementDays, currentDay: currentDayOfWeek)
+            }
+        }
+
+        // No enforcement hours defined - just use time limit
+        let parkUntil = now.addingTimeInterval(TimeInterval(minutes * 60))
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a"
         return "Park Until \(formatter.string(from: parkUntil))"
+    }
+
+    /// Format "Park until" with day if not today (for TappedSpotInfoCard)
+    private func formatParkUntilTime(hour: Int, minute: Int, on date: Date) -> String {
+        let calendar = Calendar.current
+        guard let targetDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date) else {
+            return "Park Until \(hour):\(String(format: "%02d", minute))"
+        }
+
+        let formatter = DateFormatter()
+        if calendar.isDateInToday(targetDate) {
+            formatter.dateFormat = "h:mm a"
+            return "Park Until \(formatter.string(from: targetDate))"
+        } else {
+            formatter.dateFormat = "EEE h:mm a"
+            return "Park Until \(formatter.string(from: targetDate))"
+        }
+    }
+
+    /// Find the next enforcement start time (for TappedSpotInfoCard)
+    private func findNextEnforcementStartTime(from now: Date, startTime: TimeOfDay, days: [DayOfWeek]?, currentDay: DayOfWeek?) -> String {
+        let calendar = Calendar.current
+
+        // If no specific days, enforcement is daily - next enforcement is tomorrow
+        guard let enforcementDays = days, !enforcementDays.isEmpty, let current = currentDay else {
+            if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) {
+                return formatParkUntilTime(hour: startTime.hour, minute: startTime.minute, on: tomorrow)
+            }
+            return "Park Until tomorrow"
+        }
+
+        // Find the next enforcement day
+        let allDays: [DayOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        guard let currentIndex = allDays.firstIndex(of: current) else {
+            return "Park Until tomorrow"
+        }
+
+        // Look for the next enforcement day (starting from tomorrow)
+        for offset in 1...7 {
+            let nextIndex = (currentIndex + offset) % 7
+            let nextDay = allDays[nextIndex]
+            if enforcementDays.contains(nextDay) {
+                if let targetDate = calendar.date(byAdding: .day, value: offset, to: now) {
+                    return formatParkUntilTime(hour: startTime.hour, minute: startTime.minute, on: targetDate)
+                }
+                break
+            }
+        }
+
+        return "Park Until tomorrow"
     }
 
     /// Animated ellipsis dots
