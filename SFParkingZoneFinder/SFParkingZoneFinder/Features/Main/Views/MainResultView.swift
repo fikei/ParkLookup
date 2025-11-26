@@ -1983,59 +1983,25 @@ private struct BottomNavigationBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Left: Developer tools button (when developer mode is active) OR Settings button (when not active)
-            if isDeveloperModeActive {
-                Button {
-                    HapticFeedback.selection()
-                    onDeveloperTap()
-                } label: {
-                    Image(systemName: "chevron.left.forwardslash.chevron.right")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.black.opacity(0.6))
-                        .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            // Left section: Developer tools button OR Settings button
+            HStack(spacing: 12) {
+                if isDeveloperModeActive {
+                    // Developer tools button
+                    Button {
+                        HapticFeedback.selection()
+                        onDeveloperTap()
+                    } label: {
+                        Image(systemName: "chevron.left.forwardslash.chevron.right")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                            .background(Color.black.opacity(0.6))
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                Button {
-                    HapticFeedback.selection()
-                    onSettingsTap()
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.black.opacity(0.6))
-                        .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
 
-            // Center: Park button (horizontal with label)
-            Button {
-                HapticFeedback.medium()
-                onParkTap()
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "parkingsign.circle.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Park")
-                        .font(.system(size: 16, weight: .semibold))
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(Color.blue)
-                .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-
-            // Center-Right: Settings button (only when developer mode is active)
-            if isDeveloperModeActive {
+                // Settings button (always visible)
                 Button {
                     HapticFeedback.selection()
                     onSettingsTap()
@@ -2048,23 +2014,45 @@ private struct BottomNavigationBar: View {
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            // Right: Expand/collapse button (driving mode toggle)
-            Button {
-                HapticFeedback.light()
-                onExpandTap()
-            } label: {
-                Image(systemName: "car.fill")
-                    .font(.system(size: 16, weight: .semibold))
+            Spacer()
+
+            // Right section: Drive and Park buttons grouped together
+            HStack(spacing: 12) {
+                // Drive button (expand/collapse - driving mode toggle)
+                Button {
+                    HapticFeedback.light()
+                    onExpandTap()
+                } label: {
+                    Image(systemName: "car.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(isExpanded ? Color.blue : Color.black.opacity(0.6))
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+
+                // Park button (horizontal with label) - rightmost
+                Button {
+                    HapticFeedback.medium()
+                    onParkTap()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "parkingsign.circle.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                        Text("Park")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
                     .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(isExpanded ? Color.blue : Color.black.opacity(0.6))
-                    .clipShape(Circle())
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.blue)
+                    .clipShape(Capsule())
                     .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 16)
