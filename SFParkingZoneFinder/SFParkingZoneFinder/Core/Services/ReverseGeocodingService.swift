@@ -2,7 +2,7 @@ import Foundation
 import CoreLocation
 import MapKit
 
-/// Reverse geocoding service using MapKit
+/// Reverse geocoding service using MapKit MKLocalSearch
 final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
 
     private var cache: [String: Address] = [:]
@@ -17,47 +17,52 @@ final class ReverseGeocodingService: ReverseGeocodingServiceProtocol {
             return cached
         }
 
-        do {
-            // Use MapKit's reverse geocoding request (iOS 26+)
-            var request = MKReverseGeocodingRequest()
-            request.coordinate = location.coordinate
-            let result = try await request.submit()
+        // Use MKLocalSearch with coordinate region for reverse geocoding
+        let request = MKLocalSearch.Request()
+        request.region = MKCoordinateRegion(
+            center: location.coordinate,
+            latitudinalMeters: 50,
+            longitudinalMeters: 50
+        )
+        request.resultTypes = .address
 
-            guard let mapItem = result.mapItem else {
+        let search = MKLocalSearch(request: request)
+
+        do {
+            let response = try await search.start()
+
+            guard let mapItem = response.mapItems.first else {
                 throw GeocodingError.noResults
             }
 
-            // Use MKMapItem's properties instead of deprecated MKPlacemark (iOS 26+)
-            let addressDict = mapItem.addressDictionary ?? [:]
+            let placemark = mapItem.placemark
 
             let address = Address(
-                streetNumber: addressDict["SubThoroughfare"] as? String,
-                streetName: addressDict["Thoroughfare"] as? String,
-                neighborhood: addressDict["SubLocality"] as? String,
-                city: addressDict["City"] as? String,
-                formattedAddress: formatAddress(from: addressDict)
+                streetNumber: placemark.subThoroughfare,
+                streetName: placemark.thoroughfare,
+                neighborhood: placemark.subLocality,
+                city: placemark.locality,
+                formattedAddress: formatAddress(from: placemark)
             )
 
             cache[cacheKey] = address
             return address
 
-        } catch let error as GeocodingError {
-            throw error
         } catch {
             throw GeocodingError.networkError
         }
     }
 
-    private func formatAddress(from addressDict: [String: Any]) -> String {
+    private func formatAddress(from placemark: CLPlacemark) -> String {
         var components: [String] = []
 
-        if let subThoroughfare = addressDict["SubThoroughfare"] as? String {
+        if let subThoroughfare = placemark.subThoroughfare {
             components.append(subThoroughfare)
         }
-        if let thoroughfare = addressDict["Thoroughfare"] as? String {
+        if let thoroughfare = placemark.thoroughfare {
             components.append(thoroughfare)
         }
-        if let locality = addressDict["City"] as? String {
+        if let locality = placemark.locality {
             if !components.isEmpty {
                 components.append(",")
             }
