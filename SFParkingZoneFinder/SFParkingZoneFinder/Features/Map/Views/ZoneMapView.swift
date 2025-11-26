@@ -125,6 +125,42 @@ struct ZoneMapView: UIViewRepresentable {
         // Handle searched location annotation
         updateSearchedAnnotation(mapView: mapView, context: context)
 
+        // Check if user coordinate changed - recenter map if user returned to GPS location
+        let coordinateChanged: Bool
+        if let prevCoord = context.coordinator.lastUserCoordinate, let newCoord = userCoordinate {
+            // Compare coordinates with small tolerance for floating point differences
+            let latDiff = abs(prevCoord.latitude - newCoord.latitude)
+            let lonDiff = abs(prevCoord.longitude - newCoord.longitude)
+            coordinateChanged = latDiff > 0.00001 || lonDiff > 0.00001
+        } else {
+            coordinateChanged = (context.coordinator.lastUserCoordinate == nil) != (userCoordinate == nil)
+        }
+
+        if coordinateChanged && isValidCoordinate(userCoordinate) {
+            logger.info("📍 User coordinate changed - recentering map to (\(userCoordinate!.latitude), \(userCoordinate!.longitude))")
+            context.coordinator.lastUserCoordinate = userCoordinate
+
+            // Recenter map with animation
+            let baseSpan = 0.006
+            let desiredSpan = MKCoordinateSpan(
+                latitudeDelta: baseSpan * zoomMultiplier,
+                longitudeDelta: baseSpan * zoomMultiplier
+            )
+
+            // Apply vertical bias
+            let latOffset = desiredSpan.latitudeDelta * verticalBias
+            let center = CLLocationCoordinate2D(
+                latitude: userCoordinate!.latitude + latOffset,
+                longitude: userCoordinate!.longitude
+            )
+
+            let region = MKCoordinateRegion(center: center, span: desiredSpan)
+            mapView.setRegion(region, animated: true)
+        } else if !coordinateChanged && context.coordinator.lastUserCoordinate == nil && isValidCoordinate(userCoordinate) {
+            // First time setting coordinate
+            context.coordinator.lastUserCoordinate = userCoordinate
+        }
+
         // Check if reload trigger changed - force reload if so
         let currentReloadTrigger = DeveloperSettings.shared.reloadTrigger
         if context.coordinator.overlaysLoaded && currentReloadTrigger != context.coordinator.lastReloadTrigger {
@@ -894,6 +930,9 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Track reload trigger to detect manual refresh requests
         var lastReloadTrigger: Int = 0
+
+        // Track last user coordinate to detect when user returns to GPS location
+        var lastUserCoordinate: CLLocationCoordinate2D?
 
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?) {
             self.currentZoneId = currentZoneId

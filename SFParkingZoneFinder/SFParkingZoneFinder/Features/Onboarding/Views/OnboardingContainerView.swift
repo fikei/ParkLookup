@@ -29,6 +29,18 @@ struct OnboardingContainerView: View {
                         removal: .move(edge: .leading)
                     ))
 
+                case .notificationPermission:
+                    NotificationPermissionView(
+                        notificationStatus: viewModel.notificationStatus,
+                        isRequesting: viewModel.isRequestingNotification,
+                        onRequestPermission: viewModel.requestNotificationPermission,
+                        onContinue: viewModel.nextStep
+                    )
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
+
                 case .permitSetup:
                     PermitSetupView(
                         selectedAreas: $viewModel.selectedPermitAreas,

@@ -1,6 +1,7 @@
 import Foundation
 import CoreLocation
 import Combine
+import UserNotifications
 
 /// Manages onboarding flow state and user selections
 @MainActor
@@ -12,6 +13,8 @@ final class OnboardingViewModel: ObservableObject {
     @Published var selectedPermitAreas: Set<String> = []
     @Published var locationStatus: CLAuthorizationStatus = .notDetermined
     @Published var isRequestingLocation = false
+    @Published var notificationStatus: UNAuthorizationStatus = .notDetermined
+    @Published var isRequestingNotification = false
 
     // MARK: - Dependencies
 
@@ -47,6 +50,8 @@ final class OnboardingViewModel: ObservableObject {
         case .welcome:
             currentStep = .locationPermission
         case .locationPermission:
+            currentStep = .notificationPermission
+        case .notificationPermission:
             currentStep = .permitSetup
         case .permitSetup:
             savePermitsAndComplete()
@@ -60,6 +65,32 @@ final class OnboardingViewModel: ObservableObject {
     func requestLocationPermission() {
         isRequestingLocation = true
         locationService.requestWhenInUseAuthorization()
+    }
+
+    func requestNotificationPermission() {
+        isRequestingNotification = true
+        Task {
+            do {
+                let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+                await updateNotificationStatus()
+                isRequestingNotification = false
+            } catch {
+                isRequestingNotification = false
+            }
+        }
+    }
+
+    func checkNotificationStatus() {
+        Task {
+            await updateNotificationStatus()
+        }
+    }
+
+    private func updateNotificationStatus() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        await MainActor.run {
+            self.notificationStatus = settings.authorizationStatus
+        }
     }
 
     func togglePermitArea(_ area: String) {
@@ -85,13 +116,26 @@ final class OnboardingViewModel: ObservableObject {
         locationService.authorizationPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
-                self?.locationStatus = status
-                self?.isRequestingLocation = false
+                guard let self = self else { return }
+                self.locationStatus = status
+                self.isRequestingLocation = false
+
+                // Auto-advance to next screen when location permission is granted
+                if (status == .authorizedWhenInUse || status == .authorizedAlways) &&
+                   self.currentStep == .locationPermission {
+                    // Add small delay for better UX - let user see success state briefly
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        self.nextStep()
+                    }
+                }
             }
             .store(in: &cancellables)
 
         // Get initial status
         locationStatus = locationService.authorizationStatus
+
+        // Check initial notification status
+        checkNotificationStatus()
     }
 
     private func savePermitsAndComplete() {
@@ -120,12 +164,14 @@ final class OnboardingViewModel: ObservableObject {
 enum OnboardingStep: Int, CaseIterable {
     case welcome = 0
     case locationPermission = 1
-    case permitSetup = 2
+    case notificationPermission = 2
+    case permitSetup = 3
 
     var title: String {
         switch self {
         case .welcome: return "Welcome"
         case .locationPermission: return "Location"
+        case .notificationPermission: return "Notifications"
         case .permitSetup: return "Permits"
         }
     }

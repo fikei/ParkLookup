@@ -1269,9 +1269,17 @@ private struct MiniZoneCardView: View {
                         .font(.caption)
                         .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
                 } else {
-                    Text(zoneName)
-                        .font(.headline)
-                        .foregroundColor(isValidStyle ? .white : .primary)
+                    HStack(spacing: 4) {
+                        // Dollar icon for paid/metered zones
+                        if zone.zoneType == .metered {
+                            Image(systemName: "dollarsign.circle.fill")
+                                .font(.headline)
+                                .foregroundColor(ZoneColorProvider.swiftUIColor(for: .metered))
+                        }
+                        Text(zoneName)
+                            .font(.headline)
+                            .foregroundColor(isValidStyle ? .white : .primary)
+                    }
                 }
 
                 // Status or Park Until
