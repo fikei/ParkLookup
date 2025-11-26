@@ -87,10 +87,12 @@ struct MainResultView: View {
                         zones: viewModel.allLoadedZones,
                         currentZoneId: viewModel.currentZoneId,
                         userCoordinate: activeCoordinate,
-                        onZoneTapped: { zone, permitAreas in
+                        onZoneTapped: { zone, permitAreas, coordinate in
                             if isMapExpanded {
                                 selectedZone = zone
                                 tappedPermitAreas = permitAreas
+                                // Update address for the tapped location
+                                viewModel.lookupZone(at: coordinate)
                             }
                         },
                         userPermitAreas: userPermitAreaCodes,
@@ -178,26 +180,29 @@ struct MainResultView: View {
                     }
 
                     // Animated zone card that morphs between large and mini states
-                    AnimatedZoneCard(
-                        isExpanded: isMapExpanded,
-                        namespace: cardAnimation,
-                        zoneName: viewModel.zoneName,
-                        zoneCode: currentPermitArea,
-                        zoneType: viewModel.zoneType,
-                        validityStatus: viewModel.validityStatus,
-                        applicablePermits: viewModel.applicablePermits,
-                        allValidPermitAreas: viewModel.allValidPermitAreas,
-                        meteredSubtitle: viewModel.meteredSubtitle,
-                        timeLimitMinutes: viewModel.timeLimitMinutes,
-                        ruleSummaryLines: viewModel.ruleSummaryLines,
-                        enforcementStartTime: viewModel.enforcementStartTime,
-                        enforcementEndTime: viewModel.enforcementEndTime,
-                        enforcementDays: viewModel.enforcementDays
-                    )
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    .opacity(contentAppeared ? 1 : 0)
-                    .offset(y: contentAppeared ? 0 : 20)
+                    // Hidden when TappedSpotInfoCard is showing
+                    if selectedZone == nil {
+                        AnimatedZoneCard(
+                            isExpanded: isMapExpanded,
+                            namespace: cardAnimation,
+                            zoneName: viewModel.zoneName,
+                            zoneCode: currentPermitArea,
+                            zoneType: viewModel.zoneType,
+                            validityStatus: viewModel.validityStatus,
+                            applicablePermits: viewModel.applicablePermits,
+                            allValidPermitAreas: viewModel.allValidPermitAreas,
+                            meteredSubtitle: viewModel.meteredSubtitle,
+                            timeLimitMinutes: viewModel.timeLimitMinutes,
+                            ruleSummaryLines: viewModel.ruleSummaryLines,
+                            enforcementStartTime: viewModel.enforcementStartTime,
+                            enforcementEndTime: viewModel.enforcementEndTime,
+                            enforcementDays: viewModel.enforcementDays
+                        )
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .opacity(contentAppeared ? 1 : 0)
+                        .offset(y: contentAppeared ? 0 : 20)
+                    }
 
                     Spacer()
 

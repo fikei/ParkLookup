@@ -69,7 +69,7 @@ struct ExpandedMapView: View {
                     zones: zones,
                     currentZoneId: currentZoneId,
                     userCoordinate: coordinate,
-                    onZoneTapped: { zone, _ in
+                    onZoneTapped: { zone, _, _ in
                         selectedZone = zone
                     },
                     userPermitAreas: userPermitAreaCodes,

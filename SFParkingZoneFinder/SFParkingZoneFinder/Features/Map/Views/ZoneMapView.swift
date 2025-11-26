@@ -10,7 +10,7 @@ struct ZoneMapView: UIViewRepresentable {
     let zones: [ParkingZone]
     let currentZoneId: String?
     let userCoordinate: CLLocationCoordinate2D?
-    let onZoneTapped: ((ParkingZone, [String]?) -> Void)?  // Pass zone and specific boundary's permit areas
+    let onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?  // Pass zone, permit areas, and tap coordinate
 
     /// User's valid permit areas (uppercase codes like "Q", "AA")
     /// Zones matching these will be colored green, others orange
@@ -867,7 +867,7 @@ struct ZoneMapView: UIViewRepresentable {
     class Coordinator: NSObject, MKMapViewDelegate {
         var currentZoneId: String?
         var zones: [ParkingZone]
-        var onZoneTapped: ((ParkingZone, [String]?) -> Void)?
+        var onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?
         var userPermitAreas: Set<String> = []
         var lastUserPermitAreas: Set<String> = []  // Track previous permits to detect changes
 
@@ -895,7 +895,7 @@ struct ZoneMapView: UIViewRepresentable {
         // Track reload trigger to detect manual refresh requests
         var lastReloadTrigger: Int = 0
 
-        init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?) -> Void)?) {
+        init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?) {
             self.currentZoneId = currentZoneId
             self.zones = zones
             self.onZoneTapped = onZoneTapped
@@ -1132,8 +1132,8 @@ struct ZoneMapView: UIViewRepresentable {
                 if renderer.path?.contains(polygonPoint) == true {
                     // Found the tapped zone
                     if let zone = zones.first(where: { $0.id == polygon.zoneId }) {
-                        // Pass the zone and the specific boundary's valid permit areas
-                        onZoneTapped?(zone, polygon.allValidPermitAreas)
+                        // Pass the zone, permit areas, and tap coordinate
+                        onZoneTapped?(zone, polygon.allValidPermitAreas, coordinate)
                     }
 
                     // Store overlay debug info if developer mode is active
@@ -1209,8 +1209,8 @@ class SearchedLocationAnnotation: NSObject, MKAnnotation {
         zones: [],
         currentZoneId: nil,
         userCoordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
-        onZoneTapped: { zone, permitAreas in
-            print("Tapped zone: \(zone.displayName), permits: \(permitAreas?.description ?? "nil")")
+        onZoneTapped: { zone, permitAreas, coordinate in
+            print("Tapped zone: \(zone.displayName), permits: \(permitAreas?.description ?? "nil"), at: \(coordinate.latitude),\(coordinate.longitude)")
         }
     )
 }
