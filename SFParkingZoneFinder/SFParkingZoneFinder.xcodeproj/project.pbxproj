@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3C3898E92ED3F68D006C780C /* DeveloperMapOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */; };
 		3C3898EC2ED3F696006C780C /* PolygonSimplifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */; };
 		3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */; };
 		3C3898F02ED405C4006C780C /* PolygonClipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EF2ED405C4006C780C /* PolygonClipper.swift */; };
@@ -48,7 +47,6 @@
 		3C4146012ED14A70001BDE61 /* ZoneService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D52ED14A6F001BDE61 /* ZoneService.swift */; };
 		3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145D82ED14A6F001BDE61 /* MainResultViewModel.swift */; };
 		3C4146032ED14A70001BDE61 /* AdditionalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DA2ED14A6F001BDE61 /* AdditionalInfoView.swift */; };
-		3C4146042ED14A70001BDE61 /* MainResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DB2ED14A6F001BDE61 /* MainResultView.swift */; };
 		3C4146052ED14A70001BDE61 /* RulesSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DC2ED14A6F001BDE61 /* RulesSummaryView.swift */; };
 		3C4146062ED14A70001BDE61 /* ValidityBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DD2ED14A6F001BDE61 /* ValidityBadgeView.swift */; };
 		3C4146072ED14A70001BDE61 /* ZoneStatusCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4145DE2ED14A6F001BDE61 /* ZoneStatusCardView.swift */; };
@@ -65,13 +63,8 @@
 		3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146212ED16803001BDE61 /* SettingsViewModel.swift */; };
 		3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146232ED16803001BDE61 /* AddPermitView.swift */; };
 		3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146242ED16803001BDE61 /* SettingsView.swift */; };
-		3C9E4FF22ED52D6300EE643B /* AdditionalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEA2ED52D6300EE643B /* AdditionalInfoView.swift */; };
-		3C9E4FF32ED52D6400EE643B /* AddressSearchCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEB2ED52D6300EE643B /* AddressSearchCard.swift */; };
 		3C9E4FF42ED52D6400EE643B /* DeveloperMapOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEC2ED52D6300EE643B /* DeveloperMapOverlay.swift */; };
 		3C9E4FF52ED52D6400EE643B /* MainResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FED2ED52D6300EE643B /* MainResultView.swift */; };
-		3C9E4FF62ED52D6400EE643B /* RulesSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEE2ED52D6300EE643B /* RulesSummaryView.swift */; };
-		3C9E4FF72ED52D6400EE643B /* ValidityBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEF2ED52D6300EE643B /* ValidityBadgeView.swift */; };
-		3C9E4FF82ED52D6400EE643B /* ZoneStatusCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FF02ED52D6300EE643B /* ZoneStatusCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -485,7 +478,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					3C4144FA2ED1413F001BDE61 = {
 						CreatedOnToolsVersion = 15.4;
@@ -546,7 +539,6 @@
 				3C4145ED2ED14A6F001BDE61 /* CityIdentifier.swift in Sources */,
 				3C4146072ED14A70001BDE61 /* ZoneStatusCardView.swift in Sources */,
 				3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */,
-				3C9E4FF32ED52D6400EE643B /* AddressSearchCard.swift in Sources */,
 				3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */,
 				3C9E4FF42ED52D6400EE643B /* DeveloperMapOverlay.swift in Sources */,
 				3C4145EF2ED14A6F001BDE61 /* ParkingPermit.swift in Sources */,
@@ -556,7 +548,6 @@
 				3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */,
 				3C4146012ED14A70001BDE61 /* ZoneService.swift in Sources */,
 				3C4145F32ED14A70001BDE61 /* ZoneLookupResult.swift in Sources */,
-				3C9E4FF82ED52D6400EE643B /* ZoneStatusCardView.swift in Sources */,
 				3C4146202ED15702001BDE61 /* ExpandedMapView.swift in Sources */,
 				3C4145F62ED14A70001BDE61 /* PermitServiceProtocol.swift in Sources */,
 				3C4146002ED14A70001BDE61 /* ZoneLookupEngine.swift in Sources */,
@@ -568,23 +559,18 @@
 				3C4145EB2ED14A6F001BDE61 /* Color+Theme.swift in Sources */,
 				3C4145F52ED14A70001BDE61 /* MapProviderProtocol.swift in Sources */,
 				3C41460E2ED14AC3001BDE61 /* DependencyContainer.swift in Sources */,
-				3C3898E92ED3F68D006C780C /* DeveloperMapOverlay.swift in Sources */,
 				3C4146062ED14A70001BDE61 /* ValidityBadgeView.swift in Sources */,
-				3C9E4FF62ED52D6400EE643B /* RulesSummaryView.swift in Sources */,
 				3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */,
 				3C4146022ED14A70001BDE61 /* MainResultViewModel.swift in Sources */,
 				3C4145F92ED14A70001BDE61 /* ZoneDataSourceProtocol.swift in Sources */,
 				3C4145E72ED14A6F001BDE61 /* ZoneRepository.swift in Sources */,
 				3C3898F02ED405C4006C780C /* PolygonClipper.swift in Sources */,
-				3C9E4FF22ED52D6300EE643B /* AdditionalInfoView.swift in Sources */,
 				3C3D50FD2ED26CCA002208EF /* ZoneMapView.swift in Sources */,
 				3C4145FB2ED14A70001BDE61 /* ZoneServiceProtocol.swift in Sources */,
-				3C9E4FF72ED52D6400EE643B /* ValidityBadgeView.swift in Sources */,
 				3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */,
 				3C4145E52ED14A6F001BDE61 /* ZoneCache.swift in Sources */,
 				3C4145FF2ED14A70001BDE61 /* RuleInterpreter.swift in Sources */,
 				3C4145F22ED14A70001BDE61 /* RuleInterpretationResult.swift in Sources */,
-				3C4146042ED14A70001BDE61 /* MainResultView.swift in Sources */,
 				3C4145F72ED14A70001BDE61 /* ReverseGeocodingServiceProtocol.swift in Sources */,
 				3C4145EC2ED14A6F001BDE61 /* Address.swift in Sources */,
 				3C41460D2ED14AC3001BDE61 /* AppDelegate.swift in Sources */,
@@ -631,6 +617,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = RJ8FB5M6HX;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -654,6 +641,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -694,6 +682,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = RJ8FB5M6HX;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -710,6 +699,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -723,7 +713,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SFParkingZoneFinder/Preview Content\"";
-				DEVELOPMENT_TEAM = RJ8FB5M6HX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SFParkingZoneFinder/Info.plist;
@@ -742,7 +731,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -754,7 +743,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SFParkingZoneFinder/Preview Content\"";
-				DEVELOPMENT_TEAM = RJ8FB5M6HX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SFParkingZoneFinder/Info.plist;
@@ -773,7 +761,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
