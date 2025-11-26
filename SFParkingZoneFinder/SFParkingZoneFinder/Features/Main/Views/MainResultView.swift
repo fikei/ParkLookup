@@ -359,18 +359,9 @@ struct MainResultView: View {
     private func openDirectionsToParking(session: ParkingSession) {
         let coordinate = session.location.coordinate
 
-        // Create MKMapItem with support for both iOS 18 and future iOS 26+
-        let mapItem: MKMapItem
-        if #available(iOS 26.0, *) {
-            // iOS 26+: Use new initializer
-            let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-            mapItem = MKMapItem(location: location, address: nil)
-        } else {
-            // iOS 18-25: Use MKPlacemark approach
-            let placemark = MKPlacemark(coordinate: coordinate)
-            mapItem = MKMapItem(placemark: placemark)
-        }
-
+        // Create MKMapItem using MKPlacemark (compatible with all iOS versions)
+        let placemark = MKPlacemark(coordinate: coordinate)
+        let mapItem = MKMapItem(placemark: placemark)
         mapItem.name = session.location.address ?? "Parked Car"
         mapItem.openInMaps(launchOptions: [
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
