@@ -203,6 +203,8 @@ struct DeveloperMapOverlay: View {
                     Divider()
 
                     // Debug visualization toggles
+                    experimentalToggles
+
                     debugToggles
 
                     Divider()
@@ -466,6 +468,20 @@ struct DeveloperMapOverlay: View {
                 step: 0.5,
                 formatter: { $0 == 0.0 ? "Solid" : String(format: "%.1f", $0) }
             )
+        }
+    }
+
+    // MARK: - Experimental Features
+
+    private var experimentalToggles: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Experimental")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            compactToggle("Street Cleaning (PoC)", isOn: $devSettings.showBlockfaceOverlays, icon: "calendar.badge.exclamationmark")
         }
     }
 

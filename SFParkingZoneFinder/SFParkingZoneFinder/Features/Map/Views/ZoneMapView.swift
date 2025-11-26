@@ -950,6 +950,13 @@ struct ZoneMapView: UIViewRepresentable {
 
     /// PoC: Load and render blockface data for street cleaning visualization
     private func loadBlockfaceOverlays(mapView: MKMapView) {
+        // Check feature flag - only load if enabled in developer settings
+        let devSettings = DeveloperSettings.shared
+        guard devSettings.showBlockfaceOverlays else {
+            logger.debug("🚧 PoC: Blockface overlays disabled (feature flag off)")
+            return
+        }
+
         do {
             let blockfaces = try BlockfaceLoader.shared.loadBlockfaces()
             logger.info("🚧 PoC: Loaded \(blockfaces.count) blockfaces")

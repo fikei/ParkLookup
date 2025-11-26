@@ -220,6 +220,14 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(showVertexCounts, forKey: Keys.showVertexCounts) }
     }
 
+    // MARK: - Experimental Features
+
+    /// Show blockface overlays with street cleaning visualization (PoC)
+    /// Renders street segments with active/inactive street cleaning status
+    @Published var showBlockfaceOverlays: Bool {
+        didSet { UserDefaults.standard.set(showBlockfaceOverlays, forKey: Keys.showBlockfaceOverlays) }
+    }
+
     // MARK: - Performance Logging
 
     /// Log polygon simplification stats (input/output vertex counts)
@@ -312,6 +320,7 @@ final class DeveloperSettings: ObservableObject {
         static let lookupBoundaryOpacity = "dev.lookupBoundaryOpacity"
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
+        static let showBlockfaceOverlays = "dev.showBlockfaceOverlays"
         static let logSimplificationStats = "dev.logSimplificationStats"
         static let logLookupPerformance = "dev.logLookupPerformance"
         static let developerModeUnlocked = "dev.developerModeUnlocked"
@@ -355,6 +364,7 @@ final class DeveloperSettings: ObservableObject {
         static let lookupBoundaryOpacity = 0.4  // Default 40% opacity for purple overlay
         static let showOriginalOverlay = false
         static let showVertexCounts = false
+        static let showBlockfaceOverlays = false  // PoC - disabled by default
         static let logSimplificationStats = false
         static let logLookupPerformance = true  // Default on for perf monitoring
         static let developerModeUnlocked = false
@@ -401,6 +411,7 @@ final class DeveloperSettings: ObservableObject {
         lookupBoundaryOpacity = defaults.object(forKey: Keys.lookupBoundaryOpacity) as? Double ?? Defaults.lookupBoundaryOpacity
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
+        showBlockfaceOverlays = defaults.object(forKey: Keys.showBlockfaceOverlays) as? Bool ?? Defaults.showBlockfaceOverlays
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
         developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
@@ -451,6 +462,7 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(lookupBoundaryOpacity)
         hasher.combine(showOriginalOverlay)
         hasher.combine(showVertexCounts)
+        hasher.combine(showBlockfaceOverlays)
         return hasher.finalize()
     }
 
@@ -541,6 +553,7 @@ final class DeveloperSettings: ObservableObject {
         lookupBoundaryOpacity = Defaults.lookupBoundaryOpacity
         showOriginalOverlay = Defaults.showOriginalOverlay
         showVertexCounts = Defaults.showVertexCounts
+        showBlockfaceOverlays = Defaults.showBlockfaceOverlays
         logSimplificationStats = Defaults.logSimplificationStats
         logLookupPerformance = Defaults.logLookupPerformance
         // Don't reset developerModeUnlocked
