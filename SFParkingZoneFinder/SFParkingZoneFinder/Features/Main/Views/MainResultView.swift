@@ -237,6 +237,9 @@ struct MainResultView: View {
                                 developerPanelExpanded.toggle()
                             }
                         },
+                        onParkTap: {
+                            // TODO: Show ActiveParkingView
+                        },
                         onSettingsTap: {
                             showingSettings = true
                         },
@@ -1908,10 +1911,11 @@ struct OverlappingZonesSheet: View {
 
 // MARK: - Bottom Navigation Bar
 
-/// Fixed bottom navigation with three evenly distributed buttons
+/// Fixed bottom navigation with four buttons
 private struct BottomNavigationBar: View {
     let isDeveloperModeActive: Bool
     let onDeveloperTap: () -> Void
+    let onParkTap: () -> Void
     let onSettingsTap: () -> Void
     let onExpandTap: () -> Void
     let isExpanded: Bool
@@ -1949,7 +1953,22 @@ private struct BottomNavigationBar: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            // Center: Settings button (only when developer mode is active)
+            // Center-Left: Park button
+            Button {
+                HapticFeedback.medium()
+                onParkTap()
+            } label: {
+                Image(systemName: "parkingsign.circle.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 52, height: 52)
+                    .background(Color.accentColor)
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+
+            // Center-Right: Settings button (only when developer mode is active)
             if isDeveloperModeActive {
                 Button {
                     HapticFeedback.selection()
@@ -1964,6 +1983,8 @@ private struct BottomNavigationBar: View {
                         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
+            }
+
             }
 
             // Right: Expand/collapse button (driving mode toggle)
