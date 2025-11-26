@@ -743,16 +743,9 @@ private struct AnimatedZoneCard: View {
             } else if isValidStyle {
                 // IN PERMIT ZONE - valid (checkmark already in header, zone name in subtitle)
                 EmptyView()
-            } else if let parkUntil = parkUntilText {
-                // OUT OF PERMIT - show time limit
-                HStack(spacing: 6) {
-                    Image(systemName: "clock")
-                        .font(.caption)
-                    Text(parkUntil)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                }
-                .foregroundColor(.orange)
+            } else if let _ = parkUntilText {
+                // OUT OF PERMIT - park until time already shown in header, no badge needed
+                EmptyView()
             } else {
                 // Default status
                 HStack(spacing: 6) {
