@@ -2039,7 +2039,7 @@ private struct BottomNavigationBar: View {
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(isExpanded ? Color.blue : buttonBackgroundColor)
+                        .background(isExpanded ? buttonBackgroundColor : Color.blue)
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 }
