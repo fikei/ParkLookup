@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3CBD00022EDBF000001BDE61 /* Blockface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00012EDBF000001BDE61 /* Blockface.swift */; };
+		3CBD00042EDBF000001BDE61 /* BlockfaceMapOverlays.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */; };
+		3CBD00062EDBF000001BDE61 /* BlockfaceLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */; };
+		3CBD00082EDBF000001BDE61 /* sample_blockfaces.json in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */; };
 		3C3898EC2ED3F696006C780C /* PolygonSimplifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */; };
 		3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */; };
 		3C3898F02ED405C4006C780C /* PolygonClipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EF2ED405C4006C780C /* PolygonClipper.swift */; };
@@ -74,6 +78,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3CBD00012EDBF000001BDE61 /* Blockface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Blockface.swift; sourceTree = "<group>"; };
+		3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockfaceMapOverlays.swift; sourceTree = "<group>"; };
+		3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockfaceLoader.swift; sourceTree = "<group>"; };
+		3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sample_blockfaces.json; sourceTree = "<group>"; };
 		3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperMapOverlay.swift; sourceTree = "<group>"; };
 		3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolygonSimplifier.swift; sourceTree = "<group>"; };
 		3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperSettings.swift; sourceTree = "<group>"; };
@@ -237,6 +245,7 @@
 		3C4145BB2ED14A6F001BDE61 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */,
 				3C4145B82ED14A6F001BDE61 /* Assets.xcassets */,
 				3C4145B92ED14A6F001BDE61 /* Config.plist.template */,
 				3C4145BA2ED14A6F001BDE61 /* sf_parking_zones.json */,
@@ -256,6 +265,7 @@
 		3C4145C62ED14A6F001BDE61 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				3CBD00012EDBF000001BDE61 /* Blockface.swift */,
 				3C70DDCB2ED7943200D53137 /* ParkingSession.swift */,
 				3C4145BE2ED14A6F001BDE61 /* Address.swift */,
 				3C4145BF2ED14A6F001BDE61 /* CityIdentifier.swift */,
@@ -287,6 +297,7 @@
 		3C4145D62ED14A6F001BDE61 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */,
 				3C70DDC52ED7927D00D53137 /* NotificationService.swift */,
 				3C70DDC62ED7927D00D53137 /* ParkingSessionManager.swift */,
 				3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */,
@@ -420,6 +431,7 @@
 		3C41461F2ED15702001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */,
 				3C3D51022ED26D3C002208EF /* MapCardView.swift */,
 				3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */,
 				3C41461E2ED15702001BDE61 /* ExpandedMapView.swift */,
@@ -526,6 +538,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CBD00082EDBF000001BDE61 /* sample_blockfaces.json in Resources */,
 				3C4145E82ED14A6F001BDE61 /* Assets.xcassets in Resources */,
 				3C4145EA2ED14A6F001BDE61 /* sf_parking_zones.json in Resources */,
 				3C4145E92ED14A6F001BDE61 /* Config.plist.template in Resources */,
@@ -539,6 +552,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CBD00022EDBF000001BDE61 /* Blockface.swift in Sources */,
+				3CBD00042EDBF000001BDE61 /* BlockfaceMapOverlays.swift in Sources */,
+				3CBD00062EDBF000001BDE61 /* BlockfaceLoader.swift in Sources */,
 				3C4145FA2ED14A70001BDE61 /* ZoneLookupEngineProtocol.swift in Sources */,
 				3C3D51012ED26CFC002208EF /* PrivacyPolicyView.swift in Sources */,
 				3C4145EE2ED14A6F001BDE61 /* Coordinate.swift in Sources */,

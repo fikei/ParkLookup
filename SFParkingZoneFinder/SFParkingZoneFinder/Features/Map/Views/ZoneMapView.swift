@@ -941,7 +941,24 @@ struct ZoneMapView: UIViewRepresentable {
                     coordinator.isLoadingOverlays = false
                     coordinator.overlayLoadingMessage = ""
                 }
+
+                // PoC: Load blockface data and add street cleaning overlays
+                loadBlockfaceOverlays(mapView: mapView)
             }
+        }
+    }
+
+    /// PoC: Load and render blockface data for street cleaning visualization
+    private func loadBlockfaceOverlays(mapView: MKMapView) {
+        do {
+            let blockfaces = try BlockfaceLoader.shared.loadBlockfaces()
+            logger.info("🚧 PoC: Loaded \(blockfaces.count) blockfaces")
+
+            // Add blockface overlays to map
+            mapView.addBlockfaceOverlays(blockfaces)
+            logger.info("✅ PoC: Added blockface overlays to map")
+        } catch {
+            logger.error("❌ PoC: Failed to load blockfaces: \(error.localizedDescription)")
         }
     }
 
@@ -1000,6 +1017,12 @@ struct ZoneMapView: UIViewRepresentable {
         private var rendererCallCount = 0
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            // Handle blockface polylines (PoC)
+            if let polyline = overlay as? BlockfacePolyline,
+               let blockface = polyline.blockface {
+                return BlockfacePolylineRenderer(polyline: polyline, blockface: blockface)
+            }
+
             guard let polygon = overlay as? ZonePolygon else {
                 return MKOverlayRenderer(overlay: overlay)
             }
