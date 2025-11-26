@@ -80,6 +80,7 @@ final class MainResultViewModel: ObservableObject {
     private let zoneService: ZoneServiceProtocol
     private let reverseGeocodingService: ReverseGeocodingServiceProtocol
     private let permitService: PermitServiceProtocol
+    private let parkingSessionManager: ParkingSessionManagerProtocol
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -89,12 +90,14 @@ final class MainResultViewModel: ObservableObject {
         locationService: LocationServiceProtocol,
         zoneService: ZoneServiceProtocol,
         reverseGeocodingService: ReverseGeocodingServiceProtocol,
-        permitService: PermitServiceProtocol
+        permitService: PermitServiceProtocol,
+        parkingSessionManager: ParkingSessionManagerProtocol
     ) {
         self.locationService = locationService
         self.zoneService = zoneService
         self.reverseGeocodingService = reverseGeocodingService
         self.permitService = permitService
+        self.parkingSessionManager = parkingSessionManager
 
         // Load map preferences from UserDefaults
         self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
@@ -113,7 +116,8 @@ final class MainResultViewModel: ObservableObject {
             locationService: container.locationService,
             zoneService: container.zoneService,
             reverseGeocodingService: container.reverseGeocodingService,
-            permitService: container.permitService
+            permitService: container.permitService,
+            parkingSessionManager: container.parkingSessionManager
         )
     }
 
@@ -264,6 +268,41 @@ final class MainResultViewModel: ObservableObject {
     func reportIssue() {
         // TODO: Implement issue reporting (email, feedback form)
         print("Report issue tapped")
+    }
+
+    // MARK: - Parking Session
+
+    /// Start a parking session at the current location
+    func startParkingSession() async {
+        guard let coordinate = currentCoordinate else {
+            logger.warning("Cannot start parking session: no current location")
+            return
+        }
+
+        // Convert current zone rules to session rules
+        let rules = createSessionRules()
+
+        // Start the session
+        await parkingSessionManager.startSession(
+            location: coordinate,
+            address: currentAddress != "Locating..." ? currentAddress : nil,
+            zoneName: zoneName,
+            zoneType: zoneType,
+            rules: rules
+        )
+
+        logger.info("Started parking session at \(zoneName)")
+    }
+
+    /// Get the current active parking session
+    func getActiveSession() -> ParkingSession? {
+        parkingSessionManager.getActiveSession()
+    }
+
+    /// End the active parking session
+    func endParkingSession() async {
+        await parkingSessionManager.endSession()
+        logger.info("Ended parking session")
     }
 
     // MARK: - Private Methods
@@ -497,6 +536,118 @@ final class MainResultViewModel: ObservableObject {
             // Fallback to a user-friendly message instead of coordinates
             currentAddress = "Address unavailable"
         }
+    }
+
+    /// Create session rules from current zone information
+    private func createSessionRules() -> [SessionRule] {
+        var rules: [SessionRule] = []
+
+        // Add time limit rule if present
+        if let timeLimit = timeLimitMinutes,
+           let startTime = enforcementStartTime,
+           let endTime = enforcementEndTime {
+
+            // Calculate deadline based on current time and enforcement hours
+            let deadline = calculateParkingDeadline(
+                timeLimitMinutes: timeLimit,
+                enforcementStart: startTime,
+                enforcementEnd: endTime,
+                enforcementDays: enforcementDays
+            )
+
+            let description: String
+            let hours = timeLimit / 60
+            if hours > 0 {
+                description = "\(hours)-hour limit"
+            } else {
+                description = "\(timeLimit)-minute limit"
+            }
+
+            rules.append(SessionRule(
+                type: .timeLimit,
+                description: description,
+                deadline: deadline
+            ))
+        }
+
+        // Add enforcement hours info
+        if let start = enforcementStartTime,
+           let end = enforcementEndTime {
+            let daysText: String
+            if let days = enforcementDays, !days.isEmpty {
+                if days == [.monday, .tuesday, .wednesday, .thursday, .friday] {
+                    daysText = "Mon-Fri"
+                } else if days == [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday] {
+                    daysText = "Mon-Sat"
+                } else {
+                    daysText = days.map { $0.shortName }.joined(separator: ", ")
+                }
+            } else {
+                daysText = "Daily"
+            }
+
+            rules.append(SessionRule(
+                type: .enforcement,
+                description: "Enforced \(daysText), \(start.formatted) - \(end.formatted)",
+                deadline: nil
+            ))
+        }
+
+        // Add metered zone info if applicable
+        if let subtitle = meteredSubtitle {
+            rules.append(SessionRule(
+                type: .meter,
+                description: subtitle,
+                deadline: nil
+            ))
+        }
+
+        return rules
+    }
+
+    /// Calculate the parking deadline based on time limit and enforcement hours
+    private func calculateParkingDeadline(
+        timeLimitMinutes: Int,
+        enforcementStart: TimeOfDay,
+        enforcementEnd: TimeOfDay,
+        enforcementDays: [DayOfWeek]?
+    ) -> Date {
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
+
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = enforcementStart.totalMinutes
+        let endMinutes = enforcementEnd.totalMinutes
+
+        // Check if today is an enforcement day
+        var isEnforcementDay = true
+        if let days = enforcementDays, !days.isEmpty,
+           let weekday = components.weekday,
+           let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+            isEnforcementDay = days.contains(dayOfWeek)
+        }
+
+        // If currently in enforcement window, deadline is time limit from now or enforcement end (whichever is sooner)
+        if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
+            let timeLimitEnd = now.addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
+            let todayEndDate = calendar.date(bySettingHour: enforcementEnd.hour, minute: enforcementEnd.minute, second: 0, of: now) ?? now
+            return min(timeLimitEnd, todayEndDate)
+        }
+
+        // Otherwise, parking is allowed until next enforcement start
+        // For simplicity, return enforcement start time today or tomorrow
+        if let nextEnforcement = calendar.date(bySettingHour: enforcementStart.hour, minute: enforcementStart.minute, second: 0, of: now) {
+            if nextEnforcement > now {
+                return nextEnforcement
+            } else {
+                // Next enforcement is tomorrow
+                return calendar.date(byAdding: .day, value: 1, to: nextEnforcement) ?? now
+            }
+        }
+
+        // Fallback: time limit from now
+        return now.addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
     }
 }
 
