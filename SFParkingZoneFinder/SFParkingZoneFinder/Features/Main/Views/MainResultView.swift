@@ -346,7 +346,16 @@ struct MainResultView: View {
     private func openDirectionsToParking(session: ParkingSession) {
         let coordinate = session.location.coordinate
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        let mapItem = MKMapItem(location: location, address: session.location.address)
+
+        // Create MKMapItem with location and optional address
+        let mapItem: MKMapItem
+        if let addressString = session.location.address {
+            let address = MKAddress(addressString: addressString)
+            mapItem = MKMapItem(location: location, address: address)
+        } else {
+            mapItem = MKMapItem(location: location, address: nil)
+        }
+
         mapItem.name = session.location.address ?? "Parked Car"
         mapItem.openInMaps(launchOptions: [
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
