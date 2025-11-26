@@ -2017,8 +2017,6 @@ private struct BottomNavigationBar: View {
                 .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            }
-
             // Right: Expand/collapse button (driving mode toggle)
             Button {
                 HapticFeedback.light()
