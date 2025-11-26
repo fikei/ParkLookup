@@ -136,7 +136,7 @@ struct MainResultView: View {
                     }
                 }
                 .ignoresSafeArea()
-                .onChange(of: viewModel.allLoadedZones.count) { newCount in
+                .onChange(of: viewModel.allLoadedZones.count) { _, newCount in
                     // Simulate overlay loading state
                     if newCount > 0 && !isLoadingOverlays {
                         isLoadingOverlays = true
