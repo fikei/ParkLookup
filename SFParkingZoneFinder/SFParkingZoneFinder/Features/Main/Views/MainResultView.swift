@@ -1399,10 +1399,15 @@ private struct TappedSpotInfoCard: View {
 
                         // Second line: Shows permit validity or time limit
                         if hasValidPermit {
-                            // User has valid permit: Show "Your Permit is Valid Here"
-                            Text("Your Permit is Valid Here")
+                            // User has valid permit: Show badge
+                            Text("Permit Valid")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.green)
+                                .cornerRadius(6)
                         } else if let timeLimit = timeLimitText {
                             // No valid permit: Show time limit
                             Text(timeLimit)
