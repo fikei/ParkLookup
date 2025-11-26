@@ -8,52 +8,8 @@ struct OnboardingContainerView: View {
     var body: some View {
         ZStack {
             // Content based on current step
-            Group {
-                switch viewModel.currentStep {
-                case .welcome:
-                    WelcomeView(onContinue: viewModel.nextStep)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading)
-                        ))
-
-                case .locationPermission:
-                    LocationPermissionView(
-                        locationStatus: viewModel.locationStatus,
-                        isRequesting: viewModel.isRequestingLocation,
-                        onRequestPermission: viewModel.requestLocationPermission,
-                        onContinue: viewModel.nextStep
-                    )
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .leading)
-                    ))
-
-                case .notificationPermission:
-                    NotificationPermissionView(
-                        notificationStatus: viewModel.notificationStatus,
-                        isRequesting: viewModel.isRequestingNotification,
-                        onRequestPermission: viewModel.requestNotificationPermission,
-                        onContinue: viewModel.nextStep
-                    )
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .leading)
-                    ))
-
-                case .permitSetup:
-                    PermitSetupView(
-                        selectedAreas: $viewModel.selectedPermitAreas,
-                        onContinue: viewModel.nextStep,
-                        onSkip: viewModel.skipPermitSetup
-                    )
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .leading)
-                    ))
-                }
-            }
-            .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
+            currentStepView
+                .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
 
             // Progress indicator
             VStack {
@@ -68,6 +24,53 @@ struct OnboardingContainerView: View {
         }
         .onChange(of: hasCompletedOnboarding) { _, newValue in
             // This will trigger ContentView to show MainResultView
+        }
+    }
+
+    @ViewBuilder
+    private var currentStepView: some View {
+        switch viewModel.currentStep {
+        case .welcome:
+            WelcomeView(onContinue: viewModel.nextStep)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing),
+                    removal: .move(edge: .leading)
+                ))
+
+        case .locationPermission:
+            LocationPermissionView(
+                locationStatus: viewModel.locationStatus,
+                isRequesting: viewModel.isRequestingLocation,
+                onRequestPermission: viewModel.requestLocationPermission,
+                onContinue: viewModel.nextStep
+            )
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing),
+                removal: .move(edge: .leading)
+            ))
+
+        case .notificationPermission:
+            NotificationPermissionView(
+                notificationStatus: viewModel.notificationStatus,
+                isRequesting: viewModel.isRequestingNotification,
+                onRequestPermission: viewModel.requestNotificationPermission,
+                onContinue: viewModel.nextStep
+            )
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing),
+                removal: .move(edge: .leading)
+            ))
+
+        case .permitSetup:
+            PermitSetupView(
+                selectedAreas: $viewModel.selectedPermitAreas,
+                onContinue: viewModel.nextStep,
+                onSkip: viewModel.skipPermitSetup
+            )
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing),
+                removal: .move(edge: .leading)
+            ))
         }
     }
 }
