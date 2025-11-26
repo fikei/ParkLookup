@@ -347,15 +347,8 @@ struct MainResultView: View {
         let coordinate = session.location.coordinate
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
 
-        // Create MKMapItem with location and optional address
-        let mapItem: MKMapItem
-        if let addressString = session.location.address {
-            let address = MKAddress(addressString: addressString)
-            mapItem = MKMapItem(location: location, address: address)
-        } else {
-            mapItem = MKMapItem(location: location, address: nil)
-        }
-
+        // Create MKMapItem with location only (address will be set via name property)
+        let mapItem = MKMapItem(location: location, address: nil)
         mapItem.name = session.location.address ?? "Parked Car"
         mapItem.openInMaps(launchOptions: [
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
