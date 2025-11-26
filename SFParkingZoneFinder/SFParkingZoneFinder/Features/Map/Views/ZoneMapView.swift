@@ -33,6 +33,9 @@ struct ZoneMapView: UIViewRepresentable {
     /// Coordinate from address search (shows a pin when set)
     var searchedCoordinate: CLLocationCoordinate2D? = nil
 
+    /// Coordinate where user tapped on map (shows a blue dot when set)
+    var tappedCoordinate: CLLocationCoordinate2D? = nil
+
     /// Validates a coordinate to ensure it won't cause NaN errors
     private func isValidCoordinate(_ coord: CLLocationCoordinate2D?) -> Bool {
         guard let c = coord else { return false }
@@ -124,6 +127,9 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Handle searched location annotation
         updateSearchedAnnotation(mapView: mapView, context: context)
+
+        // Handle tapped location annotation (blue dot)
+        updateTappedAnnotation(mapView: mapView, context: context)
 
         // Check if user coordinate changed - recenter map if user returned to GPS location
         let coordinateChanged: Bool
@@ -632,6 +638,36 @@ struct ZoneMapView: UIViewRepresentable {
         }
     }
 
+    private func updateTappedAnnotation(mapView: MKMapView, context: Context) {
+        let coordinator = context.coordinator
+
+        // Remove existing tapped annotation if coordinate changed or cleared
+        if let existingAnnotation = coordinator.tappedAnnotation {
+            // Check if we need to remove it (coordinate cleared or changed)
+            if tappedCoordinate == nil {
+                mapView.removeAnnotation(existingAnnotation)
+                coordinator.tappedAnnotation = nil
+            } else if let newCoord = tappedCoordinate,
+                      abs(existingAnnotation.coordinate.latitude - newCoord.latitude) > 0.000001 ||
+                      abs(existingAnnotation.coordinate.longitude - newCoord.longitude) > 0.000001 {
+                // Coordinate changed - remove old annotation
+                mapView.removeAnnotation(existingAnnotation)
+                coordinator.tappedAnnotation = nil
+            } else {
+                // Same coordinate, nothing to do
+                return
+            }
+        }
+
+        // Add new annotation if we have a tapped coordinate
+        if let coord = tappedCoordinate, isValidCoordinate(coord) {
+            let annotation = TappedLocationAnnotation(coordinate: coord)
+            mapView.addAnnotation(annotation)
+            coordinator.tappedAnnotation = annotation
+            logger.info("📍 Added tapped location dot at (\(coord.latitude), \(coord.longitude))")
+        }
+    }
+
     // MARK: - Overlay Loading
 
     private func loadOverlays(mapView: MKMapView, context: Context) {
@@ -925,6 +961,9 @@ struct ZoneMapView: UIViewRepresentable {
         // Track the searched location annotation
         weak var searchedAnnotation: SearchedLocationAnnotation?
 
+        // Track the tapped location annotation
+        weak var tappedAnnotation: TappedLocationAnnotation?
+
         // Track developer settings hash to detect changes and refresh overlays
         var lastSettingsHash: Int = 0
 
@@ -1089,6 +1128,25 @@ struct ZoneMapView: UIViewRepresentable {
                 return annotationView
             }
 
+            // Handle tapped location annotation (blue dot, smaller than pin)
+            if let tappedAnnotation = annotation as? TappedLocationAnnotation {
+                let identifier = "TappedLocation"
+                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+
+                if annotationView == nil {
+                    annotationView = MKMarkerAnnotationView(annotation: tappedAnnotation, reuseIdentifier: identifier)
+                    annotationView?.canShowCallout = false
+                    annotationView?.markerTintColor = .systemBlue
+                    annotationView?.glyphImage = nil  // No glyph, just a solid dot
+                    annotationView?.titleVisibility = .hidden
+                    annotationView?.displayPriority = .required
+                } else {
+                    annotationView?.annotation = tappedAnnotation
+                }
+
+                return annotationView
+            }
+
             // Handle zone label annotation
             guard let zoneAnnotation = annotation as? ZoneLabelAnnotation else {
                 return nil
@@ -1230,8 +1288,19 @@ class ZoneLabelAnnotation: NSObject, MKAnnotation {
     }
 }
 
-/// Annotation for searched address location (shows a blue pin)
+/// Annotation for searched address location (shows a pin)
 class SearchedLocationAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    var title: String? { nil }
+
+    init(coordinate: CLLocationCoordinate2D) {
+        self.coordinate = coordinate
+        super.init()
+    }
+}
+
+/// Annotation for tapped location (shows a blue dot)
+class TappedLocationAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     var title: String? { nil }
 

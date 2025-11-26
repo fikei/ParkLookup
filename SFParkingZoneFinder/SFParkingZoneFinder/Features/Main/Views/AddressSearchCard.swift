@@ -23,17 +23,20 @@ private func isWithinSF(_ coordinate: CLLocationCoordinate2D) -> Bool {
 /// Search card for address lookup with type-ahead suggestions
 struct AddressSearchCard: View {
     let currentAddress: String?
+    let isAtCurrentLocation: Bool
     let onAddressSelected: (CLLocationCoordinate2D) -> Void
     let onResetToCurrentLocation: () -> Void
     let onOutsideCoverage: (() -> Void)?
 
     init(
         currentAddress: String?,
+        isAtCurrentLocation: Bool = true,
         onAddressSelected: @escaping (CLLocationCoordinate2D) -> Void,
         onResetToCurrentLocation: @escaping () -> Void,
         onOutsideCoverage: (() -> Void)? = nil
     ) {
         self.currentAddress = currentAddress
+        self.isAtCurrentLocation = isAtCurrentLocation
         self.onAddressSelected = onAddressSelected
         self.onResetToCurrentLocation = onResetToCurrentLocation
         self.onOutsideCoverage = onOutsideCoverage
@@ -91,7 +94,7 @@ struct AddressSearchCard: View {
                         onResetToCurrentLocation()
                     } label: {
                         Image(systemName: "location.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(isAtCurrentLocation ? .blue : .gray)
                             .font(.system(size: 16))
                     }
                 }

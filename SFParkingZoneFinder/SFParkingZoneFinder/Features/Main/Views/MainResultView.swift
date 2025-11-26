@@ -41,6 +41,7 @@ struct MainResultView: View {
     @State private var selectedZone: ParkingZone?
     @State private var tappedPermitAreas: [String]?  // Specific permit areas for the tapped boundary
     @State private var searchedCoordinate: CLLocationCoordinate2D?
+    @State private var tappedCoordinate: CLLocationCoordinate2D?  // Coordinate where user tapped (for blue dot indicator)
     @State private var showOutsideCoverageAlert = false
     @State private var developerPanelExpanded = false
     @State private var isLoadingOverlays = false
@@ -93,8 +94,8 @@ struct MainResultView: View {
                             if isMapExpanded {
                                 selectedZone = zone
                                 tappedPermitAreas = permitAreas
-                                // Update address for the tapped location
-                                viewModel.lookupZone(at: coordinate)
+                                tappedCoordinate = coordinate
+                                // Don't call viewModel.lookupZone - it causes flash and we already have the zone info
                             }
                         },
                         userPermitAreas: userPermitAreaCodes,
@@ -107,7 +108,9 @@ struct MainResultView: View {
                         // Collapsed: 0.65, Expanded: 0.5
                         zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
                         // Show pin for searched address
-                        searchedCoordinate: searchedCoordinate
+                        searchedCoordinate: searchedCoordinate,
+                        // Show blue dot for tapped location
+                        tappedCoordinate: tappedCoordinate
                     )
                     // Use zone count in ID to allow updates when zones load, but prevent recreation on UI-only changes
                     .id("zoneMapView-\(viewModel.allLoadedZones.count)")
@@ -163,6 +166,7 @@ struct MainResultView: View {
                     if isMapExpanded {
                         AddressSearchCard(
                             currentAddress: viewModel.currentAddress,
+                            isAtCurrentLocation: searchedCoordinate == nil && tappedCoordinate == nil,
                             onAddressSelected: { coordinate in
                                 searchedCoordinate = coordinate
                                 // Trigger zone lookup for the new coordinate
@@ -170,6 +174,7 @@ struct MainResultView: View {
                             },
                             onResetToCurrentLocation: {
                                 searchedCoordinate = nil
+                                tappedCoordinate = nil
                                 viewModel.returnToGPSLocation()
                             },
                             onOutsideCoverage: {
@@ -218,6 +223,7 @@ struct MainResultView: View {
                         ) {
                             selectedZone = nil
                             tappedPermitAreas = nil
+                            tappedCoordinate = nil
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 80) // Padding to avoid overlap with bottom navigation
