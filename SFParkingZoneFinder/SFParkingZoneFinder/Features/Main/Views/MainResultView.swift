@@ -37,7 +37,7 @@ struct MainResultView: View {
     @ObservedObject private var devSettings = DeveloperSettings.shared
     @State private var showingSettings = false
     @State private var contentAppeared = false
-    @State private var isMapExpanded = false
+    @State private var isMapExpanded = true  // Default to expanded map view
     @State private var selectedZone: ParkingZone?
     @State private var tappedPermitAreas: [String]?  // Specific permit areas for the tapped boundary
     @State private var searchedCoordinate: CLLocationCoordinate2D?
@@ -1973,16 +1973,16 @@ private struct BottomNavigationBar: View {
                 .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            // Right: Expand/collapse button
+            // Right: Expand/collapse button (driving mode toggle)
             Button {
                 HapticFeedback.light()
                 onExpandTap()
             } label: {
-                Image(systemName: isExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                Image(systemName: "car.fill")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.6))
+                    .background(isExpanded ? Color.blue : Color.black.opacity(0.6))
                     .clipShape(Circle())
                     .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
             }
