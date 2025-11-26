@@ -7,7 +7,6 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingAddPermit = false
     @State private var showingPrivacyPolicy = false
-    @State private var versionTapCount = 0
 
     var body: some View {
         NavigationStack {
@@ -65,6 +64,23 @@ struct SettingsView: View {
                     }
                 }
 
+                // MARK: - Advanced Section
+                Section(header: Text("Advanced")) {
+                    Toggle("Developer Mode", isOn: $devSettings.developerModeUnlocked)
+                        .onChange(of: devSettings.developerModeUnlocked) { _, isEnabled in
+                            if isEnabled {
+                                // Haptic feedback when enabled
+                                let generator = UINotificationFeedbackGenerator()
+                                generator.notificationOccurred(.success)
+                                print("✅ DEBUG: Developer mode enabled")
+                            }
+                        }
+
+                    Text("Enable developer tools and overlay controls in the map view")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
                 // MARK: - About Section
                 Section(header: Text("About")) {
                     HStack {
@@ -72,19 +88,6 @@ struct SettingsView: View {
                         Spacer()
                         Text("\(viewModel.appVersion) (\(viewModel.buildNumber))")
                             .foregroundColor(.secondary)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        versionTapCount += 1
-                        print("🔧 DEBUG: Version tap count: \(versionTapCount)/5")
-                        if versionTapCount >= 5 {
-                            devSettings.developerModeUnlocked = true
-                            print("✅ DEBUG: Developer mode UNLOCKED! Value: \(devSettings.developerModeUnlocked)")
-                            versionTapCount = 0
-                            // Haptic feedback
-                            let generator = UINotificationFeedbackGenerator()
-                            generator.notificationOccurred(.success)
-                        }
                     }
 
                     HStack {
@@ -126,84 +129,8 @@ struct SettingsView: View {
                 }
                 #endif
 
-                // MARK: - Developer Settings Sections (Hidden)
-                if devSettings.developerModeUnlocked {
-                    // Simplification Algorithms
-                    Section(header: Text("Display Simplification"), footer: Text(DeveloperSettings.SettingInfo.douglasPeucker)) {
-                        Toggle("Douglas-Peucker", isOn: $devSettings.useDouglasPeucker)
-                        if devSettings.useDouglasPeucker {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Tolerance: \(String(format: "%.5f", devSettings.douglasPeuckerTolerance))° (~\(Int(devSettings.douglasPeuckerTolerance * 111000))m)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Slider(
-                                    value: $devSettings.douglasPeuckerTolerance,
-                                    in: 0.00001...0.001,
-                                    step: 0.00001
-                                )
-                            }
-                        }
-
-                        Toggle("Grid Snapping", isOn: $devSettings.useGridSnapping)
-                        if devSettings.useGridSnapping {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Grid: \(String(format: "%.5f", devSettings.gridSnapSize))° (~\(Int(devSettings.gridSnapSize * 111000))m)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Slider(
-                                    value: $devSettings.gridSnapSize,
-                                    in: 0.00001...0.0005,
-                                    step: 0.00001
-                                )
-                            }
-                        }
-
-                        Toggle("Convex Hull", isOn: $devSettings.useConvexHull)
-                    }
-
-                    // Curve Handling
-                    Section(header: Text("Curve Handling"), footer: Text(DeveloperSettings.SettingInfo.preserveCurves)) {
-                        Toggle("Preserve Curves", isOn: $devSettings.preserveCurves)
-                        if devSettings.preserveCurves {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Angle Threshold: \(Int(devSettings.curveAngleThreshold))°")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Slider(
-                                    value: $devSettings.curveAngleThreshold,
-                                    in: 5...45,
-                                    step: 1
-                                )
-                            }
-                        }
-                    }
-
-                    // Debug Visualization
-                    Section(header: Text("Debug Visualization"), footer: Text(devSettings.simplificationDescription)) {
-                        Toggle("Show Lookup Boundaries", isOn: $devSettings.showLookupBoundaries)
-                        Toggle("Show Original Overlay", isOn: $devSettings.showOriginalOverlay)
-                        Toggle("Show Vertex Counts", isOn: $devSettings.showVertexCounts)
-                    }
-
-                    // Performance Logging
-                    Section(header: Text("Performance Logging")) {
-                        Toggle("Log Simplification Stats", isOn: $devSettings.logSimplificationStats)
-                        Toggle("Log Lookup Performance", isOn: $devSettings.logLookupPerformance)
-                    }
-
-                    // Actions
-                    Section {
-                        Button("Reset to Defaults") {
-                            devSettings.resetToDefaults()
-                        }
-                        .foregroundColor(.orange)
-
-                        Button("Hide Developer Settings") {
-                            devSettings.developerModeUnlocked = false
-                        }
-                        .foregroundColor(.red)
-                    }
-                }
+                // Developer overlay controls are now only accessible via the map view's developer panel
+                // This keeps Settings clean and focused on user preferences
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Settings")
