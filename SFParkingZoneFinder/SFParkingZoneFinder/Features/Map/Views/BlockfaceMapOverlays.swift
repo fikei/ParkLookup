@@ -170,20 +170,12 @@ extension MKMapView {
         var polygonCoords = centerline
         polygonCoords.append(contentsOf: offsetSide.reversed())
 
-        // Debug: Print complete polygon shape for first blockface
+        // Debug: Print all polygon vertices
         if shouldDebug {
-            print("  🔷 POLYGON VERTICES (\(polygonCoords.count) total):")
-            print("    Centerline points (\(centerline.count)):")
-            for (i, coord) in centerline.enumerated() {
-                print("      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)")
-            }
-            print("    Offset points (\(offsetSide.count), reversed in polygon):")
-            for (i, coord) in offsetSide.enumerated() {
-                print("      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)")
-            }
-            print("    Final polygon order:")
-            for (i, coord) in polygonCoords.enumerated() {
-                print("      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)")
+            print("  🔷 COMPLETE POLYGON - Total vertices: " + String(polygonCoords.count))
+            for (idx, coord) in polygonCoords.enumerated() {
+                let label = idx < centerline.count ? "CENTER" : "OFFSET"
+                print("    [\(idx)] \(label): lat=\(coord.latitude), lon=\(coord.longitude)")
             }
         }
 
@@ -223,6 +215,11 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         fillColor = baseColor.withAlphaComponent(opacity)
         strokeColor = baseColor.withAlphaComponent(min(opacity + 0.3, 1.0))  // Slightly more opaque stroke
         lineWidth = devSettings.blockfaceStrokeWidth
+
+        // Debug: Log rendering configuration for first few polygons
+        if let bf = blockface {
+            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity), strokeWidth=\(lineWidth), color=\(devSettings.blockfaceColorHex)")
+        }
     }
 }
 
