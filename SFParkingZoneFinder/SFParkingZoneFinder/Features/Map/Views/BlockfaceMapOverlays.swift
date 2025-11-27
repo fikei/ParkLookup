@@ -172,18 +172,18 @@ extension MKMapView {
 
         // Debug: Print complete polygon shape for first blockface
         if shouldDebug {
-            print("  🔷 POLYGON VERTICES (\\(polygonCoords.count) total):")
-            print("    Centerline points (\\(centerline.count)):")
+            print("  🔷 POLYGON VERTICES (\(polygonCoords.count) total):")
+            print("    Centerline points (\(centerline.count)):")
             for (i, coord) in centerline.enumerated() {
-                print("      [\\(i)] lat=\\(coord.latitude), lon=\\(coord.longitude)")
+                print("      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)")
             }
-            print("    Offset points (\\(offsetSide.count), reversed in polygon):")
+            print("    Offset points (\(offsetSide.count), reversed in polygon):")
             for (i, coord) in offsetSide.enumerated() {
-                print("      [\\(i)] lat=\\(coord.latitude), lon=\\(coord.longitude)")
+                print("      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)")
             }
             print("    Final polygon order:")
             for (i, coord) in polygonCoords.enumerated() {
-                print("      [\\(i)] lat=\\(coord.latitude), lon=\\(coord.longitude)")
+                print("      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)")
             }
         }
 
