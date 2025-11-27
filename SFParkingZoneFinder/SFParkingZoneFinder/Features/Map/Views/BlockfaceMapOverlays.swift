@@ -68,7 +68,7 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         // 1. Active street cleaning - highest priority (can't park NOW)
         if blockface.hasActiveStreetCleaning() {
             strokeColor = UIColor.systemRed.withAlphaComponent(0.9)
-            lineWidth = 6
+            lineWidth = 12  // Wider to simulate parking lane
             lineDashPattern = [8, 4]  // Dashed to show urgency
             return
         }
@@ -77,11 +77,11 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         if let noParkingReg = blockface.regulations.first(where: { $0.type == "noParking" }) {
             if noParkingReg.isInEffect() {
                 strokeColor = UIColor.systemRed.withAlphaComponent(0.85)
-                lineWidth = 5
+                lineWidth = 10
                 lineDashPattern = [4, 4]  // Shorter dashes
             } else {
                 strokeColor = UIColor.systemPink.withAlphaComponent(0.6)
-                lineWidth = 4
+                lineWidth = 8
             }
             return
         }
@@ -89,7 +89,7 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         // 3. Tow-away zones
         if blockface.regulations.contains(where: { $0.type == "towAway" }) {
             strokeColor = UIColor.systemRed.withAlphaComponent(0.9)
-            lineWidth = 6
+            lineWidth = 12
             lineDashPattern = [6, 3, 2, 3]  // Distinctive dash-dot pattern
             return
         }
@@ -98,11 +98,11 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         if let loadingReg = blockface.regulations.first(where: { $0.type == "loadingZone" }) {
             if loadingReg.isInEffect() {
                 strokeColor = UIColor.systemPurple.withAlphaComponent(0.8)
-                lineWidth = 5
+                lineWidth = 10
                 lineDashPattern = [10, 5]
             } else {
                 strokeColor = UIColor.systemPurple.withAlphaComponent(0.5)
-                lineWidth = 3
+                lineWidth = 6
             }
             return
         }
@@ -110,34 +110,34 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         // 5. Metered parking
         if blockface.regulations.contains(where: { $0.type == "metered" }) {
             strokeColor = UIColor.systemGreen.withAlphaComponent(0.75)
-            lineWidth = 5
+            lineWidth = 10
             return
         }
 
         // 6. Inactive street cleaning (scheduled but not now)
         if blockface.regulations.contains(where: { $0.type == "streetCleaning" }) {
             strokeColor = UIColor.systemOrange.withAlphaComponent(0.8)
-            lineWidth = 5
+            lineWidth = 10
             return
         }
 
         // 7. Time limits
         if blockface.regulations.contains(where: { $0.type == "timeLimit" }) {
             strokeColor = UIColor.systemYellow.withAlphaComponent(0.8)
-            lineWidth = 4
+            lineWidth = 8
             return
         }
 
         // 8. Permit zones
         if let zone = blockface.permitZone {
             strokeColor = permitZoneColor(zone).withAlphaComponent(0.7)
-            lineWidth = 4
+            lineWidth = 8
             return
         }
 
         // Default - no specific regulation identified
         strokeColor = UIColor.systemGray.withAlphaComponent(0.6)
-        lineWidth = 3
+        lineWidth = 6
     }
 
     private func permitZoneColor(_ zone: String) -> UIColor {
