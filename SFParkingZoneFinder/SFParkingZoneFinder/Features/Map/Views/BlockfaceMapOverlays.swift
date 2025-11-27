@@ -109,8 +109,11 @@ extension MKMapView {
         let widthMeters = widthDegrees * 99_000.0
 
         // Determine offset direction based on side
-        // EVEN = right side, ODD = left side (SF standard)
-        let offsetToRight = side.uppercased() == "EVEN"
+        // The centerline is at the curb, and parking lane extends TOWARD street center
+        // EVEN = right curb → offset LEFT (toward center)
+        // ODD = left curb → offset RIGHT (toward center)
+        // So we use OPPOSITE of the side designation
+        let offsetToRight = side.uppercased() == "ODD"
 
         var offsetSide: [CLLocationCoordinate2D] = []
 
