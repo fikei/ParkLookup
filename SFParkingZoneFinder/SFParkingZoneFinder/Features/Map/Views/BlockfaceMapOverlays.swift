@@ -216,7 +216,7 @@ extension MKMapView {
 
             if shouldDebug && i < 2 {
                 print("  Point \(i): centerline=(\(point.latitude), \(point.longitude)), offset=(\(offsetPoint.latitude), \(offsetPoint.longitude))")
-                print("    Offset applied: dlat=\(normalized.lat * widthDegrees), dlon=\(normalized.lon * widthDegrees)")
+                print("    Offset applied: dlat=\(perpVector.lat * widthDegrees), dlon=\(perpVector.lon * widthDegrees)")
             }
         }
 
@@ -261,8 +261,6 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     }
 
     private func configureStyle() {
-        let devSettings = DeveloperSettings.shared
-
         // TESTING: Force full opacity and bright color to rule out visibility issues
         let baseColor = UIColor.systemOrange
         let opacity = 1.0  // 100% opacity for testing
