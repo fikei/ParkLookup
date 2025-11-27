@@ -903,13 +903,14 @@ struct ZoneMapView: UIViewRepresentable {
                 // Check if we should hide zone overlays when blockface mode is active
                 let shouldHideZoneOverlays = devSettings.showBlockfaceOverlays
 
+                // Set initial alpha based on coordinator's CURRENT showOverlays value
+                // Coordinator is updated in updateUIView, so this reflects real-time state
+                let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
+
                 // Conditionally add annotations based on zone overlay visibility
                 if !shouldHideZoneOverlays {
                     mapView.addAnnotations(annotations)
 
-                    // Set initial alpha based on coordinator's CURRENT showOverlays value
-                    // Coordinator is updated in updateUIView, so this reflects real-time state
-                    let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
                     for annotation in annotations {
                         if let view = mapView.view(for: annotation) {
                             view.alpha = initialAlpha
