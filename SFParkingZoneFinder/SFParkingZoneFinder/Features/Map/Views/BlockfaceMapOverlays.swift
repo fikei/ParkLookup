@@ -92,12 +92,6 @@ extension MKMapView {
         // EVEN = right side, ODD = left side (SF standard)
         let offsetToRight = side.uppercased() == "EVEN"
 
-        // Calculate latitude scale factor for longitude (lines converge toward poles)
-        // At SF latitude (~37.7°), cos(37.7°) ≈ 0.79
-        let avgLatitude = centerline.reduce(0.0) { $0 + $1.latitude } / Double(centerline.count)
-        let latitudeRadians = avgLatitude * .pi / 180.0
-        let lonScaleFactor = cos(latitudeRadians)
-
         var offsetSide: [CLLocationCoordinate2D] = []
 
         // Debug logging for first blockface
@@ -158,11 +152,17 @@ extension MKMapView {
             let normalized = (lat: perpVector.lat / magnitude, lon: perpVector.lon / magnitude)
 
             // Create offset point
-            // Scale longitude offset by 1/cos(latitude) to maintain constant physical width
-            offsetSide.append(CLLocationCoordinate2D(
+            // Don't scale - use raw offset since perpendicular is already in coordinate space
+            let offsetPoint = CLLocationCoordinate2D(
                 latitude: point.latitude + normalized.lat * widthDegrees,
-                longitude: point.longitude + (normalized.lon * widthDegrees) / lonScaleFactor
-            ))
+                longitude: point.longitude + normalized.lon * widthDegrees
+            )
+            offsetSide.append(offsetPoint)
+
+            if shouldDebug && i < 2 {
+                print("  Point \(i): centerline=(\(point.latitude), \(point.longitude)), offset=(\(offsetPoint.latitude), \(offsetPoint.longitude))")
+                print("    Offset applied: dlat=\(normalized.lat * widthDegrees), dlon=\(normalized.lon * widthDegrees)")
+            }
         }
 
         // Build polygon: centerline forward + offset side reversed to close the shape
