@@ -26,7 +26,8 @@ extension MKMapView {
 
             guard let polygonCoords = createParkingLanePolygon(
                 centerline: centerline,
-                widthDegrees: laneWidthDegrees
+                widthDegrees: laneWidthDegrees,
+                side: blockface.side
             ) else { continue }
 
             let polygon = BlockfacePolygon(
@@ -56,32 +57,48 @@ extension MKMapView {
     }
 
     /// Create a polygon representing a parking lane by offsetting a centerline
-    /// Offsets to the RIGHT side of the direction vector (assumes parking on right side of street)
+    /// Offsets to the appropriate side based on SF addressing convention:
+    /// - EVEN addresses = RIGHT side of street (when traveling in line direction)
+    /// - ODD addresses = LEFT side of street (when traveling in line direction)
     private func createParkingLanePolygon(
         centerline: [CLLocationCoordinate2D],
-        widthDegrees: Double
+        widthDegrees: Double,
+        side: String
     ) -> [CLLocationCoordinate2D]? {
         guard centerline.count >= 2 else { return nil }
+
+        // Determine offset direction based on side
+        // EVEN = right side, ODD = left side (SF standard)
+        let offsetToRight = side.uppercased() == "EVEN"
 
         var offsetSide: [CLLocationCoordinate2D] = []
 
         for i in 0..<centerline.count {
             let point = centerline[i]
 
-            // Calculate perpendicular offset direction (to the RIGHT of forward vector)
+            // Calculate perpendicular offset direction
             var perpVector: (lat: Double, lon: Double)
 
             if i == 0 {
                 // First point - use direction to next point
                 let next = centerline[i + 1]
                 let forward = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
-                // Right perpendicular is (-forward.lon, forward.lat) rotated 90° clockwise: (forward.lon, -forward.lat)
-                perpVector = (lat: forward.lon, lon: -forward.lat)
+                // Right perpendicular: (forward.lon, -forward.lat)
+                // Left perpendicular: (-forward.lon, forward.lat)
+                if offsetToRight {
+                    perpVector = (lat: forward.lon, lon: -forward.lat)
+                } else {
+                    perpVector = (lat: -forward.lon, lon: forward.lat)
+                }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
                 let prev = centerline[i - 1]
                 let forward = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
-                perpVector = (lat: forward.lon, lon: -forward.lat)
+                if offsetToRight {
+                    perpVector = (lat: forward.lon, lon: -forward.lat)
+                } else {
+                    perpVector = (lat: -forward.lon, lon: forward.lat)
+                }
             } else {
                 // Middle point - average of incoming and outgoing directions
                 let prev = centerline[i - 1]
@@ -89,7 +106,11 @@ extension MKMapView {
                 let forwardIn = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
                 let forwardOut = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
                 let avgForward = (lat: (forwardIn.lat + forwardOut.lat) / 2, lon: (forwardIn.lon + forwardOut.lon) / 2)
-                perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
+                if offsetToRight {
+                    perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
+                } else {
+                    perpVector = (lat: -avgForward.lon, lon: avgForward.lat)
+                }
             }
 
             // Normalize perpendicular vector
@@ -97,7 +118,7 @@ extension MKMapView {
             guard magnitude > 0 else { continue }
             let normalized = (lat: perpVector.lat / magnitude, lon: perpVector.lon / magnitude)
 
-            // Create offset point to the right side (toward street)
+            // Create offset point
             offsetSide.append(CLLocationCoordinate2D(
                 latitude: point.latitude + normalized.lat * widthDegrees,
                 longitude: point.longitude + normalized.lon * widthDegrees
