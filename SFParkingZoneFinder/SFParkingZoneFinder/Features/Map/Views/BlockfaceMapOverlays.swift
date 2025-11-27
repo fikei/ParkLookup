@@ -119,29 +119,65 @@ extension MKMapView {
                 // First point - use direction to next point
                 let next = centerline[i + 1]
                 let forward = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
-                // For geographic coordinates where north=+lat, east=+lon:
-                // 90° clockwise (RIGHT turn): (dlat, dlon) → (+dlon, -dlat)
-                // 90° counter-clockwise (LEFT turn): (dlat, dlon) → (-dlon, +dlat)
+
+                // Account for latitude/longitude scaling
+                // At higher latitudes, longitude degrees are "shorter" than latitude degrees
+                // 1° lon = 1° lat × cos(latitude) in ground distance
+                let latRadians = point.latitude * .pi / 180
+                let lonScaleFactor = cos(latRadians)
+
+                // Scale longitude to metric space where 1° lon = 1° lat in actual distance
+                let forwardMetric = (lat: forward.lat, lon: forward.lon * lonScaleFactor)
+
+                // Calculate perpendicular in metric space
+                // 90° clockwise (RIGHT): (dlat, dlon) → (+dlon, -dlat)
+                // 90° counter-clockwise (LEFT): (dlat, dlon) → (-dlon, +dlat)
+                var perpMetric: (lat: Double, lon: Double)
                 if offsetToRight {
-                    perpVector = (lat: forward.lon, lon: -forward.lat)
+                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
                 } else {
-                    perpVector = (lat: -forward.lon, lon: forward.lat)
+                    perpMetric = (lat: -forwardMetric.lon, lon: forwardMetric.lat)
                 }
+
+                // Normalize in metric space (where lat and lon have same scale)
+                let magnitudeMetric = sqrt(perpMetric.lat * perpMetric.lat + perpMetric.lon * perpMetric.lon)
+                guard magnitudeMetric > 0 else { continue }
+                let normalizedMetric = (lat: perpMetric.lat / magnitudeMetric, lon: perpMetric.lon / magnitudeMetric)
+
+                // Convert back to geographic space by unscaling longitude
+                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
 
                 if shouldDebug {
                     print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
+                    print("  Latitude: \(point.latitude)°, lonScaleFactor: \(lonScaleFactor)")
                     print("  Forward vector: dlat=\(forward.lat), dlon=\(forward.lon)")
-                    print("  Perp vector: dlat=\(perpVector.lat), dlon=\(perpVector.lon)")
+                    print("  Forward (metric): dlat=\(forwardMetric.lat), dlon=\(forwardMetric.lon)")
+                    print("  Perp (metric): dlat=\(perpMetric.lat), dlon=\(perpMetric.lon)")
+                    print("  Perp (geographic): dlat=\(perpVector.lat), dlon=\(perpVector.lon)")
                 }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
                 let prev = centerline[i - 1]
                 let forward = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
+
+                // Account for latitude/longitude scaling
+                let latRadians = point.latitude * .pi / 180
+                let lonScaleFactor = cos(latRadians)
+                let forwardMetric = (lat: forward.lat, lon: forward.lon * lonScaleFactor)
+
+                var perpMetric: (lat: Double, lon: Double)
                 if offsetToRight {
-                    perpVector = (lat: forward.lon, lon: -forward.lat)
+                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
                 } else {
-                    perpVector = (lat: -forward.lon, lon: forward.lat)
+                    perpMetric = (lat: -forwardMetric.lon, lon: forwardMetric.lat)
                 }
+
+                // Normalize in metric space
+                let magnitudeMetric = sqrt(perpMetric.lat * perpMetric.lat + perpMetric.lon * perpMetric.lon)
+                guard magnitudeMetric > 0 else { continue }
+                let normalizedMetric = (lat: perpMetric.lat / magnitudeMetric, lon: perpMetric.lon / magnitudeMetric)
+
+                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
             } else {
                 // Middle point - average of incoming and outgoing directions
                 let prev = centerline[i - 1]
@@ -149,23 +185,32 @@ extension MKMapView {
                 let forwardIn = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
                 let forwardOut = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
                 let avgForward = (lat: (forwardIn.lat + forwardOut.lat) / 2, lon: (forwardIn.lon + forwardOut.lon) / 2)
+
+                // Account for latitude/longitude scaling
+                let latRadians = point.latitude * .pi / 180
+                let lonScaleFactor = cos(latRadians)
+                let forwardMetric = (lat: avgForward.lat, lon: avgForward.lon * lonScaleFactor)
+
+                var perpMetric: (lat: Double, lon: Double)
                 if offsetToRight {
-                    perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
+                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
                 } else {
-                    perpVector = (lat: -avgForward.lon, lon: avgForward.lat)
+                    perpMetric = (lat: -forwardMetric.lon, lon: forwardMetric.lat)
                 }
+
+                // Normalize in metric space
+                let magnitudeMetric = sqrt(perpMetric.lat * perpMetric.lat + perpMetric.lon * perpMetric.lon)
+                guard magnitudeMetric > 0 else { continue }
+                let normalizedMetric = (lat: perpMetric.lat / magnitudeMetric, lon: perpMetric.lon / magnitudeMetric)
+
+                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
             }
 
-            // Normalize perpendicular vector
-            let magnitude = sqrt(perpVector.lat * perpVector.lat + perpVector.lon * perpVector.lon)
-            guard magnitude > 0 else { continue }
-            let normalized = (lat: perpVector.lat / magnitude, lon: perpVector.lon / magnitude)
-
-            // Create offset point
-            // Don't scale - use raw offset since perpendicular is already in coordinate space
+            // perpVector is already normalized from metric space calculation above
+            // Create offset point by scaling the normalized perpVector by desired width
             let offsetPoint = CLLocationCoordinate2D(
-                latitude: point.latitude + normalized.lat * widthDegrees,
-                longitude: point.longitude + normalized.lon * widthDegrees
+                latitude: point.latitude + perpVector.lat * widthDegrees,
+                longitude: point.longitude + perpVector.lon * widthDegrees
             )
             offsetSide.append(offsetPoint)
 
