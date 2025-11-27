@@ -900,21 +900,32 @@ struct ZoneMapView: UIViewRepresentable {
 
             DispatchQueue.main.async {
 
-                mapView.addAnnotations(annotations)
+                // Check if we should hide zone overlays when blockface mode is active
+                let shouldHideZoneOverlays = devSettings.showBlockfaceOverlays && !devSettings.showZoneOverlaysWithBlockfaces
 
-                // Set initial alpha based on coordinator's CURRENT showOverlays value
-                // Coordinator is updated in updateUIView, so this reflects real-time state
-                let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
-                for annotation in annotations {
-                    if let view = mapView.view(for: annotation) {
-                        view.alpha = initialAlpha
+                // Conditionally add annotations based on zone overlay visibility
+                if !shouldHideZoneOverlays {
+                    mapView.addAnnotations(annotations)
+
+                    // Set initial alpha based on coordinator's CURRENT showOverlays value
+                    // Coordinator is updated in updateUIView, so this reflects real-time state
+                    let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
+                    for annotation in annotations {
+                        if let view = mapView.view(for: annotation) {
+                            view.alpha = initialAlpha
+                        }
                     }
                 }
 
                 let batchSize = 500
                 // Ordered polygons: metered first, then non-permitted, then permitted (later additions render on top)
-                let orderedPolygons = meteredPolygons + nonPermittedPolygons + permittedPolygons
+                // Skip zone polygons if blockface mode is active and user disabled zone overlays
+                let orderedPolygons = shouldHideZoneOverlays ? [] : (meteredPolygons + nonPermittedPolygons + permittedPolygons)
                 let totalPolygons = orderedPolygons.count
+
+                if shouldHideZoneOverlays {
+                    logger.info("🚧 PoC: Hiding zone overlays (blockface mode active, showZoneOverlaysWithBlockfaces=false)")
+                }
 
                 func addBatch(startIndex: Int) {
                     let endIndex = min(startIndex + batchSize, totalPolygons)

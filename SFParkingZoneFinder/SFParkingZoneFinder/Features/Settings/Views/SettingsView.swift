@@ -115,6 +115,16 @@ struct SettingsView: View {
                         Text("Show blockface-based street cleaning visualization on map")
                             .font(.caption)
                             .foregroundColor(.secondary)
+
+                        Toggle("Show Zone Overlays", isOn: $devSettings.showZoneOverlaysWithBlockfaces)
+                            .onChange(of: devSettings.showZoneOverlaysWithBlockfaces) { _, isEnabled in
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
+                            }
+
+                        Text("Display zone polygons alongside blockface visualization")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
 
