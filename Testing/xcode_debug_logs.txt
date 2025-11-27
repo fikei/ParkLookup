@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/B3901AC3-FB10-4028-B82E-BB38683454C8/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/F584B975-B054-4E3E-939B-26037C09446E/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 397.1ms
+Loaded 421 zones from disk cache in 287.5ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,12 +18,12 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d5d590 with 374 allocations still alive
+Resetting GeoCodec zone allocator at address 0x600003d621c0 with 377 allocations still alive
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-✅ Loaded 421 zones in 8.1ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 7.4ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
@@ -165,24 +165,24 @@ Loaded 15 blockfaces
 🔧 DEBUG: Perpendicular calculation for EVEN side (offsetToRight=true)
   Forward vector: dlat=0.0005999999999986017, dlon=0.0002000000000066393
   Perp vector: dlat=-0.0002000000000066393, dlon=0.0005999999999986017
-  Point 0: centerline=(37.7564, -122.4193), offset=(37.75638893202819, -122.41926679608457)
-    Offset applied: dlat=-1.106797181094322e-05, dlon=3.320391543165002e-05
-  Point 1: centerline=(37.757, -122.4191), offset=(37.756988932028186, -122.41906679608456)
-    Offset applied: dlat=-1.106797181094322e-05, dlon=3.320391543165002e-05
+  Point 0: centerline=(37.7564, -122.4193), offset=(37.75630513167019, -122.41901539501059)
+    Offset applied: dlat=-9.486832980808473e-05, dlon=0.000284604989414143
+  Point 1: centerline=(37.757, -122.4191), offset=(37.75690513167019, -122.41881539501058)
+    Offset applied: dlat=-9.486832980808473e-05, dlon=0.000284604989414143
   🔷 COMPLETE POLYGON - Total vertices: 8
     [0] CENTER: lat=37.7564, lon=-122.4193
     [1] CENTER: lat=37.757, lon=-122.4191
     [2] CENTER: lat=37.7576, lon=-122.4189
     [3] CENTER: lat=37.7582, lon=-122.4187
-    [4] OFFSET: lat=37.75818893202819, lon=-122.41866679608457
-    [5] OFFSET: lat=37.757588932028185, lon=-122.41886679608456
-    [6] OFFSET: lat=37.756988932028186, lon=-122.41906679608456
-    [7] OFFSET: lat=37.75638893202819, lon=-122.41926679608457
+    [4] OFFSET: lat=37.7581051316702, lon=-122.41841539501058
+    [5] OFFSET: lat=37.75750513167019, lon=-122.41861539501058
+    [6] OFFSET: lat=37.75690513167019, lon=-122.41881539501058
+    [7] OFFSET: lat=37.75630513167019, lon=-122.41901539501059
   Created polygon with 8 points
-  Width setting: 3.5000000000000004e-05 degrees
+  Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
 📍 Creating BlockfacePolygonRenderer for Mission St EVEN
-  🎨 Renderer config for Mission St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
   ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
 🔧 DEBUG: Blockface 1 (Mission St, ODD side)
   Centerline points: 4
@@ -192,24 +192,24 @@ Loaded 15 blockfaces
 🔧 DEBUG: Perpendicular calculation for ODD side (offsetToRight=false)
   Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
   Perp vector: dlat=0.00019999999999242846, dlon=-0.0005999999999986017
-  Point 0: centerline=(37.7565, -122.4189), offset=(37.756511067971815, -122.41893320391543)
-    Offset applied: dlat=1.1067971810235438e-05, dlon=-3.3203915431885955e-05
-  Point 1: centerline=(37.7571, -122.4187), offset=(37.75711106797181, -122.41873320391544)
-    Offset applied: dlat=1.106797181058933e-05, dlon=-3.320391543176799e-05
+  Point 0: centerline=(37.7565, -122.4189), offset=(37.756594868329806, -122.41918460498941)
+    Offset applied: dlat=9.486832980201801e-05, dlon=-0.00028460498941616525
+  Point 1: centerline=(37.7571, -122.4187), offset=(37.757194868329805, -122.41898460498942)
+    Offset applied: dlat=9.486832980505138e-05, dlon=-0.0002846049894151541
   🔷 COMPLETE POLYGON - Total vertices: 8
     [0] CENTER: lat=37.7565, lon=-122.4189
     [1] CENTER: lat=37.7571, lon=-122.4187
     [2] CENTER: lat=37.7577, lon=-122.4185
     [3] CENTER: lat=37.7583, lon=-122.4183
-    [4] OFFSET: lat=37.75831106797181, lon=-122.41833320391544
-    [5] OFFSET: lat=37.75771106797181, lon=-122.41853320391543
-    [6] OFFSET: lat=37.75711106797181, lon=-122.41873320391544
-    [7] OFFSET: lat=37.756511067971815, lon=-122.41893320391543
+    [4] OFFSET: lat=37.7583948683298, lon=-122.41858460498942
+    [5] OFFSET: lat=37.7577948683298, lon=-122.41878460498941
+    [6] OFFSET: lat=37.757194868329805, lon=-122.41898460498942
+    [7] OFFSET: lat=37.756594868329806, lon=-122.41918460498941
   Created polygon with 8 points
-  Width setting: 3.5000000000000004e-05 degrees
+  Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
 📍 Creating BlockfacePolygonRenderer for Mission St ODD
-  🎨 Renderer config for Mission St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
   ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
 🔧 DEBUG: Blockface 2 (Mission St, EVEN side)
   Centerline points: 4
@@ -217,49 +217,49 @@ Loaded 15 blockfaces
   Second point: lat=37.7588, lon=-122.4185
   Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
   Created polygon with 8 points
-  Width setting: 3.5000000000000004e-05 degrees
+  Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
 📍 Creating BlockfacePolygonRenderer for Mission St EVEN
-  🎨 Renderer config for Mission St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
   ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
 📍 Creating BlockfacePolygonRenderer for Mission St ODD
-  🎨 Renderer config for Mission St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Mission St EVEN
-  🎨 Renderer config for Mission St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Mission St ODD
-  🎨 Renderer config for Mission St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
-  🎨 Renderer config for Valencia St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 🔧 DEBUG: Perpendicular calculation for ODD side (offsetToRight=false)
   Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
   Perp vector: dlat=0.00019999999999242846, dlon=-0.0005999999999986017
-  Point 0: centerline=(37.7565, -122.4203), offset=(37.756511067971815, -122.42033320391543)
-    Offset applied: dlat=1.1067971810235438e-05, dlon=-3.3203915431885955e-05
-  Point 1: centerline=(37.7571, -122.4201), offset=(37.75711106797181, -122.42013320391544)
-    Offset applied: dlat=1.106797181058933e-05, dlon=-3.320391543176799e-05
+  Point 0: centerline=(37.7565, -122.4203), offset=(37.756594868329806, -122.42058460498941)
+    Offset applied: dlat=9.486832980201801e-05, dlon=-0.00028460498941616525
+  Point 1: centerline=(37.7571, -122.4201), offset=(37.757194868329805, -122.42038460498942)
+    Offset applied: dlat=9.486832980505138e-05, dlon=-0.0002846049894151541
   🔷 COMPLETE POLYGON - Total vertices: 8
     [0] CENTER: lat=37.7565, lon=-122.4203
     [1] CENTER: lat=37.7571, lon=-122.4201
     [2] CENTER: lat=37.7577, lon=-122.4199
     [3] CENTER: lat=37.7583, lon=-122.4197
-    [4] OFFSET: lat=37.75831106797181, lon=-122.41973320391544
-    [5] OFFSET: lat=37.75771106797181, lon=-122.41993320391543
-    [6] OFFSET: lat=37.75711106797181, lon=-122.42013320391544
-    [7] OFFSET: lat=37.756511067971815, lon=-122.42033320391543
+    [4] OFFSET: lat=37.7583948683298, lon=-122.41998460498942
+    [5] OFFSET: lat=37.7577948683298, lon=-122.42018460498942
+    [6] OFFSET: lat=37.757194868329805, lon=-122.42038460498942
+    [7] OFFSET: lat=37.756594868329806, lon=-122.42058460498941
 📍 Creating BlockfacePolygonRenderer for Valencia St ODD
-  🎨 Renderer config for Valencia St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
-  🎨 Renderer config for Valencia St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Valencia St ODD
-  🎨 Renderer config for Valencia St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
-  🎨 Renderer config for Valencia St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Valencia St ODD
-  🎨 Renderer config for Valencia St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for 24th St NORTH
-  🎨 Renderer config for 24th St NORTH: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for 24th St NORTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for 24th St SOUTH
-  🎨 Renderer config for 24th St SOUTH: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for 24th St SOUTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Capp St EVEN
-  🎨 Renderer config for Capp St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  🎨 Renderer config for Capp St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 ✅ PoC: Added blockface overlays to map
