@@ -18,9 +18,21 @@ extension MKMapView {
     func addBlockfaceOverlays(_ blockfaces: [Blockface]) {
         let devSettings = DeveloperSettings.shared
 
-        for blockface in blockfaces {
+        print("🔧 DEBUG: Adding \(blockfaces.count) blockface overlays")
+
+        for (index, blockface) in blockfaces.enumerated() {
             let centerline = blockface.geometry.locationCoordinates
             guard centerline.count >= 2 else { continue }
+
+            if index < 3 {  // Log first 3 blockfaces for debugging
+                print("🔧 DEBUG: Blockface \(index) (\(blockface.street), \(blockface.side) side)")
+                print("  Centerline points: \(centerline.count)")
+                print("  First point: lat=\(centerline[0].latitude), lon=\(centerline[0].longitude)")
+                print("  Second point: lat=\(centerline[1].latitude), lon=\(centerline[1].longitude)")
+                let dlat = centerline[1].latitude - centerline[0].latitude
+                let dlon = centerline[1].longitude - centerline[0].longitude
+                print("  Direction: dlat=\(dlat), dlon=\(dlon)")
+            }
 
             // Add polygons if enabled
             if devSettings.showBlockfacePolygons {
@@ -32,6 +44,11 @@ extension MKMapView {
                     widthDegrees: laneWidthDegrees,
                     side: blockface.side
                 ) else { continue }
+
+                if index < 3 {
+                    print("  Created polygon with \(polygonCoords.count) points")
+                    print("  Width setting: \(laneWidthDegrees) degrees")
+                }
 
                 let polygon = BlockfacePolygon(
                     coordinates: polygonCoords,
@@ -83,6 +100,11 @@ extension MKMapView {
 
         var offsetSide: [CLLocationCoordinate2D] = []
 
+        // Debug logging for first blockface
+        let shouldDebug = centerline.count >= 2 &&
+                         abs(centerline[0].latitude - 37.7564) < 0.001 &&
+                         abs(centerline[0].longitude - (-122.4193)) < 0.001
+
         for i in 0..<centerline.count {
             let point = centerline[i]
 
@@ -100,6 +122,12 @@ extension MKMapView {
                     perpVector = (lat: -forward.lon, lon: forward.lat)
                 } else {
                     perpVector = (lat: forward.lon, lon: -forward.lat)
+                }
+
+                if shouldDebug {
+                    print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
+                    print("  Forward vector: dlat=\(forward.lat), dlon=\(forward.lon)")
+                    print("  Perp vector: dlat=\(perpVector.lat), dlon=\(perpVector.lon)")
                 }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
