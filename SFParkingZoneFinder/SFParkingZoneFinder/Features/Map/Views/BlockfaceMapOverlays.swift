@@ -213,12 +213,15 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         let opacity = devSettings.blockfaceOpacity
 
         fillColor = baseColor.withAlphaComponent(opacity)
-        strokeColor = baseColor.withAlphaComponent(min(opacity + 0.3, 1.0))  // Slightly more opaque stroke
-        lineWidth = devSettings.blockfaceStrokeWidth
+
+        // Disable stroke for thin polygons - the stroke creates visible diagonal lines
+        // between centerline and offset that look wrong on the map
+        strokeColor = nil
+        lineWidth = 0
 
         // Debug: Log rendering configuration for first few polygons
         if let bf = blockface {
-            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity), strokeWidth=\(lineWidth), color=\(devSettings.blockfaceColorHex)")
+            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity), stroke=DISABLED, color=\(devSettings.blockfaceColorHex)")
         }
     }
 }

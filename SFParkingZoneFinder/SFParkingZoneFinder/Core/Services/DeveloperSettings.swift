@@ -416,9 +416,9 @@ final class DeveloperSettings: ObservableObject {
         static let showBlockfaceCenterlines = false  // Hide centerlines by default
         static let showBlockfacePolygons = true  // Show polygons by default
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
-        static let blockfacePolygonWidth = 0.00002  // ~2.4m / 8 feet parking lane
+        static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)
-        static let blockfaceOpacity = 0.5  // 50% opacity
+        static let blockfaceOpacity = 0.7  // 70% opacity - increased for visibility
         static let logSimplificationStats = false
         static let logLookupPerformance = true  // Default on for perf monitoring
         static let developerModeUnlocked = false
