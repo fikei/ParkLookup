@@ -220,6 +220,14 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(showVertexCounts, forKey: Keys.showVertexCounts) }
     }
 
+    // MARK: - Map Overlay Visibility
+
+    /// Show zone polygon overlays on the map
+    /// When false, only shows the base map without parking zone overlays
+    @Published var showZoneOverlays: Bool {
+        didSet { UserDefaults.standard.set(showZoneOverlays, forKey: Keys.showZoneOverlays) }
+    }
+
     // MARK: - Experimental Features
 
     /// Show blockface overlays with street cleaning visualization (PoC)
@@ -352,6 +360,7 @@ final class DeveloperSettings: ObservableObject {
         static let lookupBoundaryOpacity = "dev.lookupBoundaryOpacity"
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
+        static let showZoneOverlays = "dev.showZoneOverlays"
         static let showBlockfaceOverlays = "dev.showBlockfaceOverlays"
         static let showBlockfaceCenterlines = "dev.showBlockfaceCenterlines"
         static let showBlockfacePolygons = "dev.showBlockfacePolygons"
@@ -402,6 +411,7 @@ final class DeveloperSettings: ObservableObject {
         static let lookupBoundaryOpacity = 0.4  // Default 40% opacity for purple overlay
         static let showOriginalOverlay = false
         static let showVertexCounts = false
+        static let showZoneOverlays = true  // Show zone overlays by default
         static let showBlockfaceOverlays = false  // PoC - disabled by default
         static let showBlockfaceCenterlines = false  // Hide centerlines by default
         static let showBlockfacePolygons = true  // Show polygons by default
@@ -455,6 +465,7 @@ final class DeveloperSettings: ObservableObject {
         lookupBoundaryOpacity = defaults.object(forKey: Keys.lookupBoundaryOpacity) as? Double ?? Defaults.lookupBoundaryOpacity
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
+        showZoneOverlays = defaults.object(forKey: Keys.showZoneOverlays) as? Bool ?? Defaults.showZoneOverlays
         showBlockfaceOverlays = defaults.object(forKey: Keys.showBlockfaceOverlays) as? Bool ?? Defaults.showBlockfaceOverlays
         showBlockfaceCenterlines = defaults.object(forKey: Keys.showBlockfaceCenterlines) as? Bool ?? Defaults.showBlockfaceCenterlines
         showBlockfacePolygons = defaults.object(forKey: Keys.showBlockfacePolygons) as? Bool ?? Defaults.showBlockfacePolygons
@@ -512,6 +523,7 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(lookupBoundaryOpacity)
         hasher.combine(showOriginalOverlay)
         hasher.combine(showVertexCounts)
+        hasher.combine(showZoneOverlays)
         hasher.combine(showBlockfaceOverlays)
         hasher.combine(showBlockfaceCenterlines)
         hasher.combine(showBlockfacePolygons)
@@ -609,6 +621,7 @@ final class DeveloperSettings: ObservableObject {
         lookupBoundaryOpacity = Defaults.lookupBoundaryOpacity
         showOriginalOverlay = Defaults.showOriginalOverlay
         showVertexCounts = Defaults.showVertexCounts
+        showZoneOverlays = Defaults.showZoneOverlays
         showBlockfaceOverlays = Defaults.showBlockfaceOverlays
         showBlockfaceCenterlines = Defaults.showBlockfaceCenterlines
         showBlockfacePolygons = Defaults.showBlockfacePolygons

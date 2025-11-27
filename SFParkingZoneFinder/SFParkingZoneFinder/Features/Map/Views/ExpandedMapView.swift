@@ -73,7 +73,8 @@ struct ExpandedMapView: View {
                         selectedZone = zone
                     },
                     userPermitAreas: userPermitAreaCodes,
-                    devSettingsHash: devSettings.settingsHash
+                    devSettingsHash: devSettings.settingsHash,
+                    showOverlays: devSettings.showZoneOverlays
                 )
                 .ignoresSafeArea()
 

@@ -100,19 +100,27 @@ struct SettingsView: View {
                     Text("Enable developer tools and overlay controls in the map view")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                }
 
-                    // Blockface PoC toggle - only visible when developer mode is enabled
-                    if devSettings.developerModeUnlocked {
-                        Toggle("BlockFace** (PoC)", isOn: $devSettings.showBlockfaceOverlays)
-                            .onChange(of: devSettings.showBlockfaceOverlays) { _, isEnabled in
-                                if isEnabled {
-                                    // Haptic feedback when enabled
-                                    let generator = UIImpactFeedbackGenerator(style: .light)
-                                    generator.impactOccurred()
-                                }
+                // MARK: - Map Overlays Section (Developer Mode Only)
+                if devSettings.developerModeUnlocked {
+                    Section(
+                        header: Text("Map Overlays"),
+                        footer: Text("Control which parking data layers are displayed on the map. Zone overlays show parking zones, blockface overlays show street-level parking segments (experimental).")
+                    ) {
+                        Toggle("Zone Overlays", isOn: $devSettings.showZoneOverlays)
+                            .onChange(of: devSettings.showZoneOverlays) { _, isEnabled in
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
                             }
 
-                        Text("Show blockface-based parking regulation visualization on map. Use developer overlay to configure.")
+                        Toggle("Blockface Overlays (PoC)", isOn: $devSettings.showBlockfaceOverlays)
+                            .onChange(of: devSettings.showBlockfaceOverlays) { _, isEnabled in
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
+                            }
+
+                        Text("Use the developer overlay on the map to fine-tune overlay appearance and behavior.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
