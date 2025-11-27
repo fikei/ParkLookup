@@ -53,16 +53,18 @@ struct LineStringGeometry: Codable, Hashable {
 /// Individual parking regulation on a blockface
 struct BlockfaceRegulation: Codable, Hashable, Identifiable {
     let id = UUID()
-    let type: String  // "streetCleaning", "timeLimit", "residentialPermit", etc.
+    let type: String  // "streetCleaning", "timeLimit", "residentialPermit", "metered", "towAway", "noParking", "loadingZone"
     let permitZone: String?
     let timeLimit: Int?  // Minutes
+    let meterRate: Decimal?  // Dollars per hour
     let enforcementDays: [String]?  // ["monday", "thursday"]
     let enforcementStart: String?   // "08:00"
     let enforcementEnd: String?     // "10:00"
+    let specialConditions: String?
 
     enum CodingKeys: String, CodingKey {
-        case type, permitZone, timeLimit
-        case enforcementDays, enforcementStart, enforcementEnd
+        case type, permitZone, timeLimit, meterRate
+        case enforcementDays, enforcementStart, enforcementEnd, specialConditions
     }
 
     /// Human-readable description
@@ -74,6 +76,14 @@ struct BlockfaceRegulation: Codable, Hashable, Identifiable {
             return timeLimitDescription
         case "residentialPermit":
             return permitDescription
+        case "metered":
+            return meteredDescription
+        case "towAway":
+            return "Tow-away zone"
+        case "noParking":
+            return noParkingDescription
+        case "loadingZone":
+            return loadingZoneDescription
         default:
             return "Parking regulation"
         }
@@ -99,28 +109,107 @@ struct BlockfaceRegulation: Codable, Hashable, Identifiable {
         }
 
         let hours = limit / 60
-        return "\(hours) hour limit"
+        let minutes = limit % 60
+
+        if minutes == 0 {
+            return "\(hours) hour limit"
+        } else {
+            return "\(hours)h \(minutes)m limit"
+        }
     }
 
     private var permitDescription: String {
+        var parts: [String] = []
+
         if let zone = permitZone {
-            return "Zone \(zone) permit required"
+            parts.append("Zone \(zone) permit")
         } else {
-            return "Permit required"
+            parts.append("Permit required")
+        }
+
+        if let limit = timeLimit {
+            let hours = limit / 60
+            parts.append("\(hours) hour limit for visitors")
+        }
+
+        return parts.joined(separator: ", ")
+    }
+
+    private var meteredDescription: String {
+        guard let rate = meterRate else {
+            return "Metered parking"
+        }
+
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        let rateStr = formatter.string(from: rate as NSDecimalNumber) ?? "$\(rate)"
+
+        if let start = enforcementStart, let end = enforcementEnd {
+            return "Metered \(rateStr)/hr, \(start)-\(end)"
+        } else {
+            return "Metered parking \(rateStr)/hr"
+        }
+    }
+
+    private var noParkingDescription: String {
+        if let start = enforcementStart, let end = enforcementEnd {
+            return "No parking \(start)-\(end)"
+        } else if let days = enforcementDays, !days.isEmpty {
+            let dayNames = days.map { $0.capitalized }.joined(separator: ", ")
+            return "No parking \(dayNames)"
+        } else {
+            return "No parking anytime"
+        }
+    }
+
+    private var loadingZoneDescription: String {
+        if let start = enforcementStart, let end = enforcementEnd {
+            return "Loading zone \(start)-\(end)"
+        } else {
+            return "Loading zone"
         }
     }
 
     /// Check if this regulation is in effect at a given date
     func isInEffect(at date: Date) -> Bool {
-        guard let days = enforcementDays else { return true }
+        // Check day of week if specified
+        if let days = enforcementDays, !days.isEmpty {
+            let calendar = Calendar.current
+            let weekday = calendar.component(.weekday, from: date)
+            let dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+            let dayName = dayNames[weekday - 1]
 
-        let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: date)
+            if !days.contains(dayName) {
+                return false
+            }
+        }
 
-        // Convert weekday to day name
-        let dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
-        let dayName = dayNames[weekday - 1]
+        // Check time of day if specified
+        if let startStr = enforcementStart, let endStr = enforcementEnd {
+            let calendar = Calendar.current
+            let components = calendar.dateComponents([.hour, .minute], from: date)
+            guard let currentHour = components.hour, let currentMinute = components.minute else {
+                return true
+            }
 
-        return days.contains(dayName)
+            let currentMinutes = currentHour * 60 + currentMinute
+
+            // Parse start time
+            let startParts = startStr.split(separator: ":").compactMap { Int($0) }
+            guard startParts.count == 2 else { return true }
+            let startMinutes = startParts[0] * 60 + startParts[1]
+
+            // Parse end time
+            let endParts = endStr.split(separator: ":").compactMap { Int($0) }
+            guard endParts.count == 2 else { return true }
+            let endMinutes = endParts[0] * 60 + endParts[1]
+
+            // Check if current time is within range
+            if currentMinutes < startMinutes || currentMinutes >= endMinutes {
+                return false
+            }
+        }
+
+        return true
     }
 }

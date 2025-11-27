@@ -209,10 +209,10 @@ struct ZoneMapView: UIViewRepresentable {
 
             // Check if blockface overlays were just enabled - zoom to sample location
             if blockfaceOverlaysJustEnabled {
-                logger.info("🚧 PoC: Blockface overlays enabled - zooming to Mission St sample location")
-                // Mission St between 24th-26th (center of sample blockfaces)
-                let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7531, longitude: -122.4182)
-                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.002, longitudeDelta: 0.002) // ~220m, tight zoom
+                logger.info("🚧 PoC: Blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area")
+                // Center between Mission & Valencia, 22nd-25th Streets (covers full test area)
+                let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7541, longitude: -122.4193)
+                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m, shows multiple blocks
                 let blockfaceRegion = MKCoordinateRegion(center: blockfaceCenter, span: blockfaceSpan)
                 mapView.setRegion(blockfaceRegion, animated: true)
             }
