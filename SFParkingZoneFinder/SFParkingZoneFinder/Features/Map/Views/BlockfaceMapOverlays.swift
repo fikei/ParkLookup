@@ -141,15 +141,14 @@ extension MKMapView {
                 let forward = (x: next.x - point.x, y: next.y - point.y)
 
                 // Calculate perpendicular in map point space (already in meters, Mercator-projected)
-                // NOTE: MKMapPoint y-axis points SOUTH (inverted from typical Cartesian)
-                // So rotation formulas are inverted from standard math
-                // 90° clockwise (RIGHT): (dx, dy) → (-dy, dx)
-                // 90° counter-clockwise (LEFT): (dx, dy) → (dy, -dx)
-                // TESTING: Try swapped formulas
+                // MKMapPoint: x=east (right), y=south (DOWN - inverted from normal Cartesian!)
+                // For a vector pointing north (dy<0), rotating 90° clockwise should point east (dx>0)
+                // Formula: 90° clockwise (RIGHT): (dx, dy) → (-dy, dx)
+                // Formula: 90° counter-clockwise (LEFT): (dx, dy) → (dy, -dx)
                 if offsetToRight {
-                    perpVector = (x: forward.y, y: -forward.x)
-                } else {
                     perpVector = (x: -forward.y, y: forward.x)
+                } else {
+                    perpVector = (x: forward.y, y: -forward.x)
                 }
 
                 if shouldDebug && i == 0 {
@@ -171,9 +170,9 @@ extension MKMapView {
                 let forward = (x: point.x - prev.x, y: point.y - prev.y)
 
                 if offsetToRight {
-                    perpVector = (x: forward.y, y: -forward.x)
-                } else {
                     perpVector = (x: -forward.y, y: forward.x)
+                } else {
+                    perpVector = (x: forward.y, y: -forward.x)
                 }
             } else {
                 // Middle point - average of incoming and outgoing directions
@@ -184,9 +183,9 @@ extension MKMapView {
                 let avgForward = (x: (forwardIn.x + forwardOut.x) / 2, y: (forwardIn.y + forwardOut.y) / 2)
 
                 if offsetToRight {
-                    perpVector = (x: avgForward.y, y: -avgForward.x)
-                } else {
                     perpVector = (x: -avgForward.y, y: avgForward.x)
+                } else {
+                    perpVector = (x: avgForward.y, y: -avgForward.x)
                 }
             }
 
