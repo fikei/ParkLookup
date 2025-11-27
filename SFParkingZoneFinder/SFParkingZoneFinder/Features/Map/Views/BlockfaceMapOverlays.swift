@@ -56,7 +56,12 @@ extension MKMapView {
                 )
                 polygon.blockface = blockface
 
+                if index < 3 {
+                    print("  ✅ Adding polygon overlay to map")
+                }
                 addOverlay(polygon)
+            } else if index < 3 {
+                print("  ⚠️ SKIPPING polygon - showBlockfacePolygons is OFF")
             }
 
             // Add centerline polylines if enabled
@@ -66,7 +71,12 @@ extension MKMapView {
                     count: centerline.count
                 )
                 polyline.blockface = blockface
+                if index < 3 {
+                    print("  ✅ Adding centerline polyline overlay to map")
+                }
                 addOverlay(polyline)
+            } else if index < 3 {
+                print("  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF")
             }
         }
     }
