@@ -1055,6 +1055,11 @@ struct ZoneMapView: UIViewRepresentable {
         private var rendererCallCount = 0
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            // Handle blockface centerline polylines (debug visualization)
+            if let blockfacePolyline = overlay as? BlockfacePolyline {
+                return BlockfacePolylineRenderer(polyline: blockfacePolyline, blockface: blockfacePolyline.blockface)
+            }
+
             // Handle blockface polygons (PoC) - check before ZonePolygon since BlockfacePolygon is also MKPolygon
             if let blockfacePolygon = overlay as? BlockfacePolygon,
                let blockface = blockfacePolygon.blockface {

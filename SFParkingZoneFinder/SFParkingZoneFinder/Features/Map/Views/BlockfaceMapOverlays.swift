@@ -7,6 +7,11 @@ class BlockfacePolygon: MKPolygon {
     var blockface: Blockface?
 }
 
+/// Custom polyline for blockface centerlines (debug visualization)
+class BlockfacePolyline: MKPolyline {
+    var blockface: Blockface?
+}
+
 /// Extension to add blockface rendering to existing map views
 extension MKMapView {
     /// Add blockface overlays to the map as polygons with actual width
@@ -31,6 +36,16 @@ extension MKMapView {
             polygon.blockface = blockface
 
             addOverlay(polygon)
+
+            // Optionally add centerline polyline for debugging
+            if DeveloperSettings.shared.showBlockfaceCenterlines {
+                let polyline = BlockfacePolyline(
+                    coordinates: centerline,
+                    count: centerline.count
+                )
+                polyline.blockface = blockface
+                addOverlay(polyline)
+            }
         }
     }
 
@@ -41,31 +56,32 @@ extension MKMapView {
     }
 
     /// Create a polygon representing a parking lane by offsetting a centerline
+    /// Offsets to the RIGHT side of the direction vector (assumes parking on right side of street)
     private func createParkingLanePolygon(
         centerline: [CLLocationCoordinate2D],
         widthDegrees: Double
     ) -> [CLLocationCoordinate2D]? {
         guard centerline.count >= 2 else { return nil }
 
-        var leftSide: [CLLocationCoordinate2D] = []
-        var rightSide: [CLLocationCoordinate2D] = []
+        var offsetSide: [CLLocationCoordinate2D] = []
 
         for i in 0..<centerline.count {
             let point = centerline[i]
 
-            // Calculate perpendicular offset direction
+            // Calculate perpendicular offset direction (to the RIGHT of forward vector)
             var perpVector: (lat: Double, lon: Double)
 
             if i == 0 {
                 // First point - use direction to next point
                 let next = centerline[i + 1]
                 let forward = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
-                perpVector = (lat: -forward.lon, lon: forward.lat)
+                // Right perpendicular is (-forward.lon, forward.lat) rotated 90° clockwise: (forward.lon, -forward.lat)
+                perpVector = (lat: forward.lon, lon: -forward.lat)
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
                 let prev = centerline[i - 1]
                 let forward = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
-                perpVector = (lat: -forward.lon, lon: forward.lat)
+                perpVector = (lat: forward.lon, lon: -forward.lat)
             } else {
                 // Middle point - average of incoming and outgoing directions
                 let prev = centerline[i - 1]
@@ -73,7 +89,7 @@ extension MKMapView {
                 let forwardIn = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
                 let forwardOut = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
                 let avgForward = (lat: (forwardIn.lat + forwardOut.lat) / 2, lon: (forwardIn.lon + forwardOut.lon) / 2)
-                perpVector = (lat: -avgForward.lon, lon: avgForward.lat)
+                perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
             }
 
             // Normalize perpendicular vector
@@ -81,21 +97,17 @@ extension MKMapView {
             guard magnitude > 0 else { continue }
             let normalized = (lat: perpVector.lat / magnitude, lon: perpVector.lon / magnitude)
 
-            // Create offset points on both sides
-            let offset = widthDegrees / 2  // Half width on each side
-            leftSide.append(CLLocationCoordinate2D(
-                latitude: point.latitude + normalized.lat * offset,
-                longitude: point.longitude + normalized.lon * offset
-            ))
-            rightSide.append(CLLocationCoordinate2D(
-                latitude: point.latitude - normalized.lat * offset,
-                longitude: point.longitude - normalized.lon * offset
+            // Create offset point to the right side (toward street)
+            offsetSide.append(CLLocationCoordinate2D(
+                latitude: point.latitude + normalized.lat * widthDegrees,
+                longitude: point.longitude + normalized.lon * widthDegrees
             ))
         }
 
-        // Build polygon: left side forward + right side reversed to close the shape
-        var polygonCoords = leftSide
-        polygonCoords.append(contentsOf: rightSide.reversed())
+        // Build polygon: centerline forward + offset side reversed to close the shape
+        // This creates a polygon between the curb (centerline) and the street edge (offset)
+        var polygonCoords = centerline
+        polygonCoords.append(contentsOf: offsetSide.reversed())
 
         return polygonCoords.count >= 3 ? polygonCoords : nil
     }
@@ -228,5 +240,33 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         let hash = zone.hashValue
         let hue = CGFloat(abs(hash) % 360) / 360.0
         return UIColor(hue: hue, saturation: 0.7, brightness: 0.8, alpha: 1.0)
+    }
+}
+
+/// Renderer for blockface centerline polylines (debug visualization)
+class BlockfacePolylineRenderer: MKPolylineRenderer {
+    let blockface: Blockface?
+
+    init(polyline: MKPolyline, blockface: Blockface?) {
+        self.blockface = blockface
+        super.init(polyline: polyline)
+        configureStyle()
+    }
+
+    override init(overlay: MKOverlay) {
+        self.blockface = nil
+        super.init(overlay: overlay)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        self.blockface = nil
+        super.init(coder: aDecoder)
+    }
+
+    private func configureStyle() {
+        // Simple black centerline for debugging
+        strokeColor = UIColor.black.withAlphaComponent(0.7)
+        lineWidth = 2
+        lineDashPattern = [2, 2]  // Dashed to distinguish from polygon borders
     }
 }

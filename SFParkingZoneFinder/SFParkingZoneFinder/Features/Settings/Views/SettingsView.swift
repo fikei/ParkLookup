@@ -125,6 +125,16 @@ struct SettingsView: View {
                         Text("Display zone polygons alongside blockface visualization")
                             .font(.caption)
                             .foregroundColor(.secondary)
+
+                        Toggle("Show Centerlines", isOn: $devSettings.showBlockfaceCenterlines)
+                            .onChange(of: devSettings.showBlockfaceCenterlines) { _, isEnabled in
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
+                            }
+
+                        Text("Display blockface centerline polylines alongside dimensional polygons")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
 
