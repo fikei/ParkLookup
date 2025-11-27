@@ -987,8 +987,8 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Zoom to blockface test area on initial load
         if isInitialLoad {
+            logger.info("🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area")
             DispatchQueue.main.async {
-                logger.info("🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area")
                 let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7541, longitude: -122.4193)
                 let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m, shows multiple blocks
                 let blockfaceRegion = MKCoordinateRegion(center: blockfaceCenter, span: blockfaceSpan)
