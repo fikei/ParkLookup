@@ -103,7 +103,7 @@ struct SettingsView: View {
 
                     // Blockface PoC toggle - only visible when developer mode is enabled
                     if devSettings.developerModeUnlocked {
-                        Toggle("Street Cleaning (PoC)", isOn: $devSettings.showBlockfaceOverlays)
+                        Toggle("BlockGrid (PoC)", isOn: $devSettings.showBlockfaceOverlays)
                             .onChange(of: devSettings.showBlockfaceOverlays) { _, isEnabled in
                                 if isEnabled {
                                     // Haptic feedback when enabled
