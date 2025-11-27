@@ -1,9 +1,10 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
+Failed to send CA Event for app launch measurements for ca_event_type: 0 event_name: com.apple.app_launch_measurement.FirstFramePresentationMetric
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/F584B975-B054-4E3E-939B-26037C09446E/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/ED463E6B-D30F-4274-AE92-32E01210D838/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 287.5ms
+Loaded 421 zones from disk cache in 312.2ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,18 +19,16 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d621c0 with 377 allocations still alive
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-✅ Loaded 421 zones in 7.4ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 44.8ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🚀 BUILD VERIFICATION: makeUIView called with 421 zones - DUPLICATE FIX ACTIVE
-Failed to locate resource named "default.csv"
 CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 updateUIView called: overlaysLoaded=false, userPermitAreas=["I"], lastUserPermitAreas=[]
 🔍 Updating coordinator userPermitAreas: [] -> ["I"]
@@ -54,9 +53,13 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
   🎯 Multi-permit boundary matched: zone=G, boundaryIndex=15, validAreas=["F", "G"]
   🎯 Multi-permit boundary matched: zone=G, boundaryIndex=16, validAreas=["F", "G"]
   🎯 Multi-permit boundary matched: zone=G, boundaryIndex=29, validAreas=["C", "G"]
+🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
   🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=12, validAreas=["HV", "S"]
   🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=13, validAreas=["HV", "S"]
   🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=14, validAreas=["HV", "Q"]
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
   🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=15, validAreas=["HV", "Q"]
   🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=16, validAreas=["HV", "Q"]
   🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=17, validAreas=["HV", "Q"]
@@ -147,10 +150,6 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=41, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=42, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=43, validAreas=["I", "Z"]
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🚧 PoC: Hiding zone overlays (blockface mode active)
 🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area
 Loading blockfaces from sample JSON
@@ -164,20 +163,20 @@ Loaded 15 blockfaces
   Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
 🔧 DEBUG: Perpendicular calculation for EVEN side (offsetToRight=true)
   Forward vector: dlat=0.0005999999999986017, dlon=0.0002000000000066393
-  Perp vector: dlat=-0.0002000000000066393, dlon=0.0005999999999986017
-  Point 0: centerline=(37.7564, -122.4193), offset=(37.75630513167019, -122.41901539501059)
-    Offset applied: dlat=-9.486832980808473e-05, dlon=0.000284604989414143
-  Point 1: centerline=(37.757, -122.4191), offset=(37.75690513167019, -122.41881539501058)
-    Offset applied: dlat=-9.486832980808473e-05, dlon=0.000284604989414143
+  Perp vector: dlat=0.0002000000000066393, dlon=-0.0005999999999986017
+  Point 0: centerline=(37.7564, -122.4193), offset=(37.75649486832981, -122.41958460498942)
+    Offset applied: dlat=9.486832980808473e-05, dlon=-0.000284604989414143
+  Point 1: centerline=(37.757, -122.4191), offset=(37.75709486832981, -122.41938460498942)
+    Offset applied: dlat=9.486832980808473e-05, dlon=-0.000284604989414143
   🔷 COMPLETE POLYGON - Total vertices: 8
     [0] CENTER: lat=37.7564, lon=-122.4193
     [1] CENTER: lat=37.757, lon=-122.4191
     [2] CENTER: lat=37.7576, lon=-122.4189
     [3] CENTER: lat=37.7582, lon=-122.4187
-    [4] OFFSET: lat=37.7581051316702, lon=-122.41841539501058
-    [5] OFFSET: lat=37.75750513167019, lon=-122.41861539501058
-    [6] OFFSET: lat=37.75690513167019, lon=-122.41881539501058
-    [7] OFFSET: lat=37.75630513167019, lon=-122.41901539501059
+    [4] OFFSET: lat=37.758294868329806, lon=-122.41898460498942
+    [5] OFFSET: lat=37.7576948683298, lon=-122.41918460498941
+    [6] OFFSET: lat=37.75709486832981, lon=-122.41938460498942
+    [7] OFFSET: lat=37.75649486832981, lon=-122.41958460498942
   Created polygon with 8 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
@@ -191,20 +190,20 @@ Loaded 15 blockfaces
   Direction: dlat=0.0005999999999986017, dlon=0.00019999999999242846
 🔧 DEBUG: Perpendicular calculation for ODD side (offsetToRight=false)
   Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
-  Perp vector: dlat=0.00019999999999242846, dlon=-0.0005999999999986017
-  Point 0: centerline=(37.7565, -122.4189), offset=(37.756594868329806, -122.41918460498941)
-    Offset applied: dlat=9.486832980201801e-05, dlon=-0.00028460498941616525
-  Point 1: centerline=(37.7571, -122.4187), offset=(37.757194868329805, -122.41898460498942)
-    Offset applied: dlat=9.486832980505138e-05, dlon=-0.0002846049894151541
+  Perp vector: dlat=-0.00019999999999242846, dlon=0.0005999999999986017
+  Point 0: centerline=(37.7565, -122.4189), offset=(37.7564051316702, -122.41861539501058)
+    Offset applied: dlat=-9.486832980201801e-05, dlon=0.00028460498941616525
+  Point 1: centerline=(37.7571, -122.4187), offset=(37.7570051316702, -122.41841539501058)
+    Offset applied: dlat=-9.486832980505138e-05, dlon=0.0002846049894151541
   🔷 COMPLETE POLYGON - Total vertices: 8
     [0] CENTER: lat=37.7565, lon=-122.4189
     [1] CENTER: lat=37.7571, lon=-122.4187
     [2] CENTER: lat=37.7577, lon=-122.4185
     [3] CENTER: lat=37.7583, lon=-122.4183
-    [4] OFFSET: lat=37.7583948683298, lon=-122.41858460498942
-    [5] OFFSET: lat=37.7577948683298, lon=-122.41878460498941
-    [6] OFFSET: lat=37.757194868329805, lon=-122.41898460498942
-    [7] OFFSET: lat=37.756594868329806, lon=-122.41918460498941
+    [4] OFFSET: lat=37.758205131670195, lon=-122.41801539501058
+    [5] OFFSET: lat=37.757605131670196, lon=-122.41821539501058
+    [6] OFFSET: lat=37.7570051316702, lon=-122.41841539501058
+    [7] OFFSET: lat=37.7564051316702, lon=-122.41861539501058
   Created polygon with 8 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
@@ -232,20 +231,20 @@ Loaded 15 blockfaces
   🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 🔧 DEBUG: Perpendicular calculation for ODD side (offsetToRight=false)
   Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
-  Perp vector: dlat=0.00019999999999242846, dlon=-0.0005999999999986017
-  Point 0: centerline=(37.7565, -122.4203), offset=(37.756594868329806, -122.42058460498941)
-    Offset applied: dlat=9.486832980201801e-05, dlon=-0.00028460498941616525
-  Point 1: centerline=(37.7571, -122.4201), offset=(37.757194868329805, -122.42038460498942)
-    Offset applied: dlat=9.486832980505138e-05, dlon=-0.0002846049894151541
+  Perp vector: dlat=-0.00019999999999242846, dlon=0.0005999999999986017
+  Point 0: centerline=(37.7565, -122.4203), offset=(37.7564051316702, -122.42001539501058)
+    Offset applied: dlat=-9.486832980201801e-05, dlon=0.00028460498941616525
+  Point 1: centerline=(37.7571, -122.4201), offset=(37.7570051316702, -122.41981539501059)
+    Offset applied: dlat=-9.486832980505138e-05, dlon=0.0002846049894151541
   🔷 COMPLETE POLYGON - Total vertices: 8
     [0] CENTER: lat=37.7565, lon=-122.4203
     [1] CENTER: lat=37.7571, lon=-122.4201
     [2] CENTER: lat=37.7577, lon=-122.4199
     [3] CENTER: lat=37.7583, lon=-122.4197
-    [4] OFFSET: lat=37.7583948683298, lon=-122.41998460498942
-    [5] OFFSET: lat=37.7577948683298, lon=-122.42018460498942
-    [6] OFFSET: lat=37.757194868329805, lon=-122.42038460498942
-    [7] OFFSET: lat=37.756594868329806, lon=-122.42058460498941
+    [4] OFFSET: lat=37.758205131670195, lon=-122.41941539501059
+    [5] OFFSET: lat=37.757605131670196, lon=-122.41961539501058
+    [6] OFFSET: lat=37.7570051316702, lon=-122.41981539501059
+    [7] OFFSET: lat=37.7564051316702, lon=-122.42001539501058
 📍 Creating BlockfacePolygonRenderer for Valencia St ODD
   🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
@@ -263,3 +262,12 @@ Loaded 15 blockfaces
 📍 Creating BlockfacePolygonRenderer for Capp St EVEN
   🎨 Renderer config for Capp St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 ✅ PoC: Added blockface overlays to map
+🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=15
+Failed to send CA Event for app launch measurements for ca_event_type: 1 event_name: com.apple.app_launch_measurement.ExtendedLaunchMetrics
+🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=15
