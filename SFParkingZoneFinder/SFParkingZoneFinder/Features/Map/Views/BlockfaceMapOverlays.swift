@@ -156,9 +156,9 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         super.init(overlay: overlay)
     }
 
-    required init?(coder aDecoder: NSCoder) {
+    required init?(coder: NSCoder) {
         self.blockface = nil
-        super.init(coder: aDecoder)
+        super.init(coder: coder)
     }
 
     private func configureStyle() {
@@ -189,9 +189,9 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         super.init(overlay: overlay)
     }
 
-    required init?(coder aDecoder: NSCoder) {
+    required init?(coder: NSCoder) {
         self.blockface = nil
-        super.init(coder: aDecoder)
+        super.init(coder: coder)
     }
 
     private func configureStyle() {
