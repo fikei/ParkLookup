@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/609B0BA9-EB99-4D6D-A39B-7B859972AFAF/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/B3901AC3-FB10-4028-B82E-BB38683454C8/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 256.4ms
+Loaded 421 zones from disk cache in 397.1ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,12 +18,12 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d705a0 with 374 allocations still alive
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+Resetting GeoCodec zone allocator at address 0x600003d5d590 with 374 allocations still alive
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 7.7ms: 33 RPP, 388 metered, 0 other
+🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+✅ Loaded 421 zones in 8.1ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
@@ -180,7 +180,10 @@ Loaded 15 blockfaces
     [7] OFFSET: lat=37.75638893202819, lon=-122.41926679608457
   Created polygon with 8 points
   Width setting: 3.5000000000000004e-05 degrees
+  ✅ Adding polygon overlay to map
+📍 Creating BlockfacePolygonRenderer for Mission St EVEN
   🎨 Renderer config for Mission St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
 🔧 DEBUG: Blockface 1 (Mission St, ODD side)
   Centerline points: 4
   First point: lat=37.7565, lon=-122.4189
@@ -204,7 +207,10 @@ Loaded 15 blockfaces
     [7] OFFSET: lat=37.756511067971815, lon=-122.41893320391543
   Created polygon with 8 points
   Width setting: 3.5000000000000004e-05 degrees
+  ✅ Adding polygon overlay to map
+📍 Creating BlockfacePolygonRenderer for Mission St ODD
   🎨 Renderer config for Mission St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
 🔧 DEBUG: Blockface 2 (Mission St, EVEN side)
   Centerline points: 4
   First point: lat=37.7582, lon=-122.4187
@@ -212,10 +218,17 @@ Loaded 15 blockfaces
   Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
   Created polygon with 8 points
   Width setting: 3.5000000000000004e-05 degrees
+  ✅ Adding polygon overlay to map
+📍 Creating BlockfacePolygonRenderer for Mission St EVEN
   🎨 Renderer config for Mission St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
+📍 Creating BlockfacePolygonRenderer for Mission St ODD
   🎨 Renderer config for Mission St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Mission St EVEN
   🎨 Renderer config for Mission St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Mission St ODD
   🎨 Renderer config for Mission St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
   🎨 Renderer config for Valencia St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
 🔧 DEBUG: Perpendicular calculation for ODD side (offsetToRight=false)
   Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
@@ -233,12 +246,20 @@ Loaded 15 blockfaces
     [5] OFFSET: lat=37.75771106797181, lon=-122.41993320391543
     [6] OFFSET: lat=37.75711106797181, lon=-122.42013320391544
     [7] OFFSET: lat=37.756511067971815, lon=-122.42033320391543
+📍 Creating BlockfacePolygonRenderer for Valencia St ODD
   🎨 Renderer config for Valencia St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
   🎨 Renderer config for Valencia St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Valencia St ODD
   🎨 Renderer config for Valencia St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
   🎨 Renderer config for Valencia St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Valencia St ODD
   🎨 Renderer config for Valencia St ODD: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for 24th St NORTH
   🎨 Renderer config for 24th St NORTH: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for 24th St SOUTH
   🎨 Renderer config for 24th St SOUTH: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
+📍 Creating BlockfacePolygonRenderer for Capp St EVEN
   🎨 Renderer config for Capp St EVEN: fillOpacity=0.35000000000000003, stroke=DISABLED, color=FF9500
 ✅ PoC: Added blockface overlays to map
