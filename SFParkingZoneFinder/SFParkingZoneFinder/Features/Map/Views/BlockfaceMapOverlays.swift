@@ -75,6 +75,12 @@ extension MKMapView {
         // EVEN = right side, ODD = left side (SF standard)
         let offsetToRight = side.uppercased() == "EVEN"
 
+        // Calculate latitude scale factor for longitude (lines converge toward poles)
+        // At SF latitude (~37.7°), cos(37.7°) ≈ 0.79
+        let avgLatitude = centerline.reduce(0.0) { $0 + $1.latitude } / Double(centerline.count)
+        let latitudeRadians = avgLatitude * .pi / 180.0
+        let lonScaleFactor = cos(latitudeRadians)
+
         var offsetSide: [CLLocationCoordinate2D] = []
 
         for i in 0..<centerline.count {
@@ -87,21 +93,21 @@ extension MKMapView {
                 // First point - use direction to next point
                 let next = centerline[i + 1]
                 let forward = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
-                // Right perpendicular: (forward.lon, -forward.lat)
-                // Left perpendicular: (-forward.lon, forward.lat)
+                // Right perpendicular: 90° clockwise rotation: (lon,lat) → (lat,-lon)
+                // Left perpendicular: 90° counter-clockwise: (lon,lat) → (-lat,lon)
                 if offsetToRight {
-                    perpVector = (lat: forward.lon, lon: -forward.lat)
-                } else {
                     perpVector = (lat: -forward.lon, lon: forward.lat)
+                } else {
+                    perpVector = (lat: forward.lon, lon: -forward.lat)
                 }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
                 let prev = centerline[i - 1]
                 let forward = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
                 if offsetToRight {
-                    perpVector = (lat: forward.lon, lon: -forward.lat)
-                } else {
                     perpVector = (lat: -forward.lon, lon: forward.lat)
+                } else {
+                    perpVector = (lat: forward.lon, lon: -forward.lat)
                 }
             } else {
                 // Middle point - average of incoming and outgoing directions
@@ -111,9 +117,9 @@ extension MKMapView {
                 let forwardOut = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
                 let avgForward = (lat: (forwardIn.lat + forwardOut.lat) / 2, lon: (forwardIn.lon + forwardOut.lon) / 2)
                 if offsetToRight {
-                    perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
-                } else {
                     perpVector = (lat: -avgForward.lon, lon: avgForward.lat)
+                } else {
+                    perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
                 }
             }
 
@@ -123,9 +129,10 @@ extension MKMapView {
             let normalized = (lat: perpVector.lat / magnitude, lon: perpVector.lon / magnitude)
 
             // Create offset point
+            // Scale longitude offset by 1/cos(latitude) to maintain constant physical width
             offsetSide.append(CLLocationCoordinate2D(
                 latitude: point.latitude + normalized.lat * widthDegrees,
-                longitude: point.longitude + normalized.lon * widthDegrees
+                longitude: point.longitude + (normalized.lon * widthDegrees) / lonScaleFactor
             ))
         }
 
