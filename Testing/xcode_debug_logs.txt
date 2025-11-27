@@ -1,9 +1,10 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
+Failed to send CA Event for app launch measurements for ca_event_type: 0 event_name: com.apple.app_launch_measurement.FirstFramePresentationMetric
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/D3F82348-D701-4EBF-949E-38BB6BF334F4/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/570AB12D-8B31-4132-B7F2-3893C018D95A/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 296.0ms
+Loaded 421 zones from disk cache in 242.0ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,14 +19,15 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d59770 with 20 allocations still alive
+Failed to send CA Event for app launch measurements for ca_event_type: 1 event_name: com.apple.app_launch_measurement.ExtendedLaunchMetrics
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 18.9ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 11.6ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
+Resetting GeoCodec zone allocator at address 0x600003d5e940 with 374 allocations still alive
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🚀 BUILD VERIFICATION: makeUIView called with 421 zones - DUPLICATE FIX ACTIVE
@@ -147,7 +149,12 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=41, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=42, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=43, validAreas=["I", "Z"]
+🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🚧 PoC: Hiding zone overlays (blockface mode active)
+🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area
 Loading blockfaces from sample JSON
 Loaded 15 blockfaces
 🚧 PoC: Loaded 15 blockfaces
@@ -183,8 +190,3 @@ Loaded 15 blockfaces
   Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
   Perp vector: dlat=0.00019999999999242846, dlon=-0.0005999999999986017
 ✅ PoC: Added blockface overlays to map
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=15
-🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area
