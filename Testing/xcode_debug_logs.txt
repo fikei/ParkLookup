@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/D9EFADCA-7435-4F21-899F-EA77D6029444/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/F18969D8-3317-4A2E-A475-4AB9971BC729/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 281.8ms
+Loaded 421 zones from disk cache in 285.2ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,12 +18,12 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d5dd10 with 374 allocations still alive
+Resetting GeoCodec zone allocator at address 0x600003d67480 with 374 allocations still alive
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 6.6ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 9.1ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
@@ -169,6 +169,26 @@ Loaded 15 blockfaces
     Offset applied: dlat=-1.106797181094322e-05, dlon=3.320391543165002e-05
   Point 1: centerline=(37.757, -122.4191), offset=(37.756988932028186, -122.41906679608456)
     Offset applied: dlat=-1.106797181094322e-05, dlon=3.320391543165002e-05
+  🔷 POLYGON VERTICES (\(polygonCoords.count) total):
+    Centerline points (\(centerline.count)):
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+    Offset points (\(offsetSide.count), reversed in polygon):
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+    Final polygon order:
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
   Created polygon with 8 points
   Width setting: 3.5000000000000004e-05 degrees
 🔧 DEBUG: Blockface 1 (Mission St, ODD side)
@@ -183,6 +203,26 @@ Loaded 15 blockfaces
     Offset applied: dlat=1.1067971810235438e-05, dlon=-3.3203915431885955e-05
   Point 1: centerline=(37.7571, -122.4187), offset=(37.75711106797181, -122.41873320391544)
     Offset applied: dlat=1.106797181058933e-05, dlon=-3.320391543176799e-05
+  🔷 POLYGON VERTICES (\(polygonCoords.count) total):
+    Centerline points (\(centerline.count)):
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+    Offset points (\(offsetSide.count), reversed in polygon):
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+    Final polygon order:
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
   Created polygon with 8 points
   Width setting: 3.5000000000000004e-05 degrees
 🔧 DEBUG: Blockface 2 (Mission St, EVEN side)
@@ -199,4 +239,24 @@ Loaded 15 blockfaces
     Offset applied: dlat=1.1067971810235438e-05, dlon=-3.3203915431885955e-05
   Point 1: centerline=(37.7571, -122.4201), offset=(37.75711106797181, -122.42013320391544)
     Offset applied: dlat=1.106797181058933e-05, dlon=-3.320391543176799e-05
+  🔷 POLYGON VERTICES (\(polygonCoords.count) total):
+    Centerline points (\(centerline.count)):
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+    Offset points (\(offsetSide.count), reversed in polygon):
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+    Final polygon order:
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
 ✅ PoC: Added blockface overlays to map
