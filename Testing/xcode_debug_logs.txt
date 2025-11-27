@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/F18969D8-3317-4A2E-A475-4AB9971BC729/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/73D69EC1-20BA-4951-9E1A-98C76B8329F8/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 285.2ms
+Loaded 421 zones from disk cache in 490.2ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,15 +18,15 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d67480 with 374 allocations still alive
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 9.1ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 181.3ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+Resetting GeoCodec zone allocator at address 0x600003d55950 with 374 allocations still alive
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🚀 BUILD VERIFICATION: makeUIView called with 421 zones - DUPLICATE FIX ACTIVE
 Failed to locate resource named "default.csv"
@@ -147,10 +147,6 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=41, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=42, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=43, validAreas=["I", "Z"]
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🚧 PoC: Hiding zone overlays (blockface mode active)
 🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area
 Loading blockfaces from sample JSON
@@ -169,26 +165,26 @@ Loaded 15 blockfaces
     Offset applied: dlat=-1.106797181094322e-05, dlon=3.320391543165002e-05
   Point 1: centerline=(37.757, -122.4191), offset=(37.756988932028186, -122.41906679608456)
     Offset applied: dlat=-1.106797181094322e-05, dlon=3.320391543165002e-05
-  🔷 POLYGON VERTICES (\(polygonCoords.count) total):
-    Centerline points (\(centerline.count)):
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-    Offset points (\(offsetSide.count), reversed in polygon):
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+  🔷 POLYGON VERTICES (8 total):
+    Centerline points (4):
+      [0] lat=37.7564, lon=-122.4193
+      [1] lat=37.757, lon=-122.4191
+      [2] lat=37.7576, lon=-122.4189
+      [3] lat=37.7582, lon=-122.4187
+    Offset points (4, reversed in polygon):
+      [0] lat=37.75638893202819, lon=-122.41926679608457
+      [1] lat=37.756988932028186, lon=-122.41906679608456
+      [2] lat=37.757588932028185, lon=-122.41886679608456
+      [3] lat=37.75818893202819, lon=-122.41866679608457
     Final polygon order:
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [0] lat=37.7564, lon=-122.4193
+      [1] lat=37.757, lon=-122.4191
+      [2] lat=37.7576, lon=-122.4189
+      [3] lat=37.7582, lon=-122.4187
+      [4] lat=37.75818893202819, lon=-122.41866679608457
+      [5] lat=37.757588932028185, lon=-122.41886679608456
+      [6] lat=37.756988932028186, lon=-122.41906679608456
+      [7] lat=37.75638893202819, lon=-122.41926679608457
   Created polygon with 8 points
   Width setting: 3.5000000000000004e-05 degrees
 🔧 DEBUG: Blockface 1 (Mission St, ODD side)
@@ -203,26 +199,26 @@ Loaded 15 blockfaces
     Offset applied: dlat=1.1067971810235438e-05, dlon=-3.3203915431885955e-05
   Point 1: centerline=(37.7571, -122.4187), offset=(37.75711106797181, -122.41873320391544)
     Offset applied: dlat=1.106797181058933e-05, dlon=-3.320391543176799e-05
-  🔷 POLYGON VERTICES (\(polygonCoords.count) total):
-    Centerline points (\(centerline.count)):
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-    Offset points (\(offsetSide.count), reversed in polygon):
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+  🔷 POLYGON VERTICES (8 total):
+    Centerline points (4):
+      [0] lat=37.7565, lon=-122.4189
+      [1] lat=37.7571, lon=-122.4187
+      [2] lat=37.7577, lon=-122.4185
+      [3] lat=37.7583, lon=-122.4183
+    Offset points (4, reversed in polygon):
+      [0] lat=37.756511067971815, lon=-122.41893320391543
+      [1] lat=37.75711106797181, lon=-122.41873320391544
+      [2] lat=37.75771106797181, lon=-122.41853320391543
+      [3] lat=37.75831106797181, lon=-122.41833320391544
     Final polygon order:
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [0] lat=37.7565, lon=-122.4189
+      [1] lat=37.7571, lon=-122.4187
+      [2] lat=37.7577, lon=-122.4185
+      [3] lat=37.7583, lon=-122.4183
+      [4] lat=37.75831106797181, lon=-122.41833320391544
+      [5] lat=37.75771106797181, lon=-122.41853320391543
+      [6] lat=37.75711106797181, lon=-122.41873320391544
+      [7] lat=37.756511067971815, lon=-122.41893320391543
   Created polygon with 8 points
   Width setting: 3.5000000000000004e-05 degrees
 🔧 DEBUG: Blockface 2 (Mission St, EVEN side)
@@ -239,24 +235,28 @@ Loaded 15 blockfaces
     Offset applied: dlat=1.1067971810235438e-05, dlon=-3.3203915431885955e-05
   Point 1: centerline=(37.7571, -122.4201), offset=(37.75711106797181, -122.42013320391544)
     Offset applied: dlat=1.106797181058933e-05, dlon=-3.320391543176799e-05
-  🔷 POLYGON VERTICES (\(polygonCoords.count) total):
-    Centerline points (\(centerline.count)):
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-    Offset points (\(offsetSide.count), reversed in polygon):
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+  🔷 POLYGON VERTICES (8 total):
+    Centerline points (4):
+      [0] lat=37.7565, lon=-122.4203
+      [1] lat=37.7571, lon=-122.4201
+      [2] lat=37.7577, lon=-122.4199
+      [3] lat=37.7583, lon=-122.4197
+    Offset points (4, reversed in polygon):
+      [0] lat=37.756511067971815, lon=-122.42033320391543
+      [1] lat=37.75711106797181, lon=-122.42013320391544
+      [2] lat=37.75771106797181, lon=-122.41993320391543
+      [3] lat=37.75831106797181, lon=-122.41973320391544
     Final polygon order:
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
-      [\(i)] lat=\(coord.latitude), lon=\(coord.longitude)
+      [0] lat=37.7565, lon=-122.4203
+      [1] lat=37.7571, lon=-122.4201
+      [2] lat=37.7577, lon=-122.4199
+      [3] lat=37.7583, lon=-122.4197
+      [4] lat=37.75831106797181, lon=-122.41973320391544
+      [5] lat=37.75771106797181, lon=-122.41993320391543
+      [6] lat=37.75711106797181, lon=-122.42013320391544
+      [7] lat=37.756511067971815, lon=-122.42033320391543
 ✅ PoC: Added blockface overlays to map
+🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
+✓ Overlay parameters updated (no reload needed)
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=15
