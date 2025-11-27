@@ -1067,6 +1067,11 @@ struct ZoneMapView: UIViewRepresentable {
         private var rendererCallCount = 0
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            // Handle perpendicular direction markers (debug visualization)
+            if overlay is PerpendicularMarker {
+                return PerpendicularMarkerRenderer(overlay: overlay)
+            }
+
             // Handle blockface centerline polylines (debug visualization)
             if let blockfacePolyline = overlay as? BlockfacePolyline {
                 print("📍 Creating BlockfacePolylineRenderer for \(blockfacePolyline.blockface?.street ?? "unknown")")

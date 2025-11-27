@@ -12,6 +12,11 @@ class BlockfacePolyline: MKPolyline {
     var blockface: Blockface?
 }
 
+/// Custom polyline for perpendicular direction markers (debug visualization)
+class PerpendicularMarker: MKPolyline {
+    // Just a marker class to distinguish from centerlines
+}
+
 /// Extension to add blockface rendering to existing map views
 extension MKMapView {
     /// Add blockface overlays to the map as polygons with actual width
@@ -109,19 +114,19 @@ extension MKMapView {
 
         var offsetSide: [CLLocationCoordinate2D] = []
 
-        // Debug logging for first blockface
-        let shouldDebug = centerline.count >= 2 &&
-                         abs(centerline[0].latitude - 37.7564) < 0.001 &&
-                         abs(centerline[0].longitude - (-122.4193)) < 0.001
+        // Debug logging for ALL blockfaces to help diagnose rotation issues
+        let shouldDebug = true
+        let devSettings = DeveloperSettings.shared
 
         // Convert centerline to map points (Mercator projection coordinates in meters)
         let centerlineMapPoints = centerline.map { MKMapPoint($0) }
 
         if shouldDebug {
-            print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
+            print("\n🔧 DEBUG: Perpendicular calculation")
+            print("  Side: \(side) (offsetToRight=\(offsetToRight))")
             print("  Width: \(widthDegrees)° ≈ \(widthMeters)m")
-            print("  First coord: \(centerline[0].latitude), \(centerline[0].longitude)")
-            print("  First map point: \(centerlineMapPoints[0].x), \(centerlineMapPoints[0].y)")
+            print("  First coord: lat=\(centerline[0].latitude), lon=\(centerline[0].longitude)")
+            print("  First map point: x=\(centerlineMapPoints[0].x)m, y=\(centerlineMapPoints[0].y)m")
         }
 
         for i in 0..<centerlineMapPoints.count {
@@ -147,9 +152,18 @@ extension MKMapView {
                     perpVector = (x: -forward.y, y: forward.x)
                 }
 
-                if shouldDebug {
-                    print("  Point 0 forward vector: dx=\(forward.x)m, dy=\(forward.y)m")
-                    print("  Point 0 perp vector (raw): dx=\(perpVector.x)m, dy=\(perpVector.y)m")
+                if shouldDebug && i == 0 {
+                    // Calculate angles for debugging
+                    let forwardAngle = atan2(forward.y, forward.x) * 180 / .pi
+                    let perpAngle = atan2(perpVector.y, perpVector.x) * 180 / .pi
+                    let angleDiff = perpAngle - forwardAngle
+
+                    print("  Point 0:")
+                    print("    Forward vector: dx=\(String(format: "%.2f", forward.x))m, dy=\(String(format: "%.2f", forward.y))m")
+                    print("    Forward angle: \(String(format: "%.1f", forwardAngle))° (0°=east, 90°=south, -90°=north)")
+                    print("    Perp vector (raw): dx=\(String(format: "%.2f", perpVector.x))m, dy=\(String(format: "%.2f", perpVector.y))m")
+                    print("    Perp angle: \(String(format: "%.1f", perpAngle))°")
+                    print("    Angle difference: \(String(format: "%.1f", angleDiff))° (should be ±90°)")
                 }
             } else if i == centerlineMapPoints.count - 1 {
                 // Last point - use direction from previous point
@@ -192,12 +206,25 @@ extension MKMapView {
             offsetSide.append(offsetCoord)
 
             if shouldDebug && i < 2 {
-                print("  Point \(i):")
-                print("    Center map point: (\(point.x), \(point.y))")
-                print("    Normalized perp: (\(normalized.x), \(normalized.y))")
-                print("    Offset map point: (\(offsetMapPoint.x), \(offsetMapPoint.y))")
-                print("    Center coord: (\(centerline[i].latitude), \(centerline[i].longitude))")
-                print("    Offset coord: (\(offsetCoord.latitude), \(offsetCoord.longitude))")
+                print("  Point \(i) offset:")
+                print("    Normalized perp: dx=\(String(format: "%.3f", normalized.x)), dy=\(String(format: "%.3f", normalized.y))")
+                print("    Offset distance: \(String(format: "%.1f", widthMeters))m")
+                print("    Center coord: (\(String(format: "%.6f", centerline[i].latitude)), \(String(format: "%.6f", centerline[i].longitude)))")
+                print("    Offset coord: (\(String(format: "%.6f", offsetCoord.latitude)), \(String(format: "%.6f", offsetCoord.longitude)))")
+                let latDiff = offsetCoord.latitude - centerline[i].latitude
+                let lonDiff = offsetCoord.longitude - centerline[i].longitude
+                print("    Coord delta: dlat=\(String(format: "%.8f", latDiff)), dlon=\(String(format: "%.8f", lonDiff))")
+            }
+
+            // Add visual debug markers: short perpendicular lines at each point
+            if devSettings.showBlockfaceCenterlines && i < centerlineMapPoints.count {
+                let debugLength = widthMeters * 0.3  // 30% of width for visibility
+                let debugEndpoint = MKMapPoint(
+                    x: point.x + normalized.x * debugLength,
+                    y: point.y + normalized.y * debugLength
+                )
+                let marker = PerpendicularMarker(coordinates: [centerline[i], debugEndpoint.coordinate], count: 2)
+                addOverlay(marker)
             }
         }
 
@@ -284,5 +311,24 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         strokeColor = UIColor.black.withAlphaComponent(0.7)
         lineWidth = 2
         lineDashPattern = [2, 2]  // Dashed to distinguish from polygon borders
+    }
+}
+
+/// Renderer for perpendicular direction markers (debug visualization)
+class PerpendicularMarkerRenderer: MKPolylineRenderer {
+    override init(overlay: MKOverlay) {
+        super.init(overlay: overlay)
+        configureStyle()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func configureStyle() {
+        // Bright red arrows showing perpendicular offset direction
+        strokeColor = UIColor.systemRed.withAlphaComponent(0.9)
+        lineWidth = 3
+        // Solid line to distinguish from dashed centerline
     }
 }
