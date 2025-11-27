@@ -93,22 +93,22 @@ extension MKMapView {
                 // First point - use direction to next point
                 let next = centerline[i + 1]
                 let forward = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
-                // For geographic coordinates (lat, lon) where north=+lat, east=+lon:
-                // Right perpendicular (90° clockwise): (dlat, dlon) → (dlon, -dlat)
-                // Left perpendicular (90° counter-clockwise): (dlat, dlon) → (-dlon, dlat)
+                // For geographic coordinates where north=+lat, east=+lon:
+                // 90° clockwise (RIGHT turn): (dlat, dlon) → (-dlon, dlat)
+                // 90° counter-clockwise (LEFT turn): (dlat, dlon) → (dlon, -dlat)
                 if offsetToRight {
-                    perpVector = (lat: forward.lon, lon: -forward.lat)
-                } else {
                     perpVector = (lat: -forward.lon, lon: forward.lat)
+                } else {
+                    perpVector = (lat: forward.lon, lon: -forward.lat)
                 }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
                 let prev = centerline[i - 1]
                 let forward = (lat: point.latitude - prev.latitude, lon: point.longitude - prev.longitude)
                 if offsetToRight {
-                    perpVector = (lat: forward.lon, lon: -forward.lat)
-                } else {
                     perpVector = (lat: -forward.lon, lon: forward.lat)
+                } else {
+                    perpVector = (lat: forward.lon, lon: -forward.lat)
                 }
             } else {
                 // Middle point - average of incoming and outgoing directions
@@ -118,9 +118,9 @@ extension MKMapView {
                 let forwardOut = (lat: next.latitude - point.latitude, lon: next.longitude - point.longitude)
                 let avgForward = (lat: (forwardIn.lat + forwardOut.lat) / 2, lon: (forwardIn.lon + forwardOut.lon) / 2)
                 if offsetToRight {
-                    perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
-                } else {
                     perpVector = (lat: -avgForward.lon, lon: avgForward.lat)
+                } else {
+                    perpVector = (lat: avgForward.lon, lon: -avgForward.lat)
                 }
             }
 
