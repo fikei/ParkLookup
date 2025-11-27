@@ -71,9 +71,18 @@ final class OnboardingViewModel: ObservableObject {
         isRequestingNotification = true
         Task {
             do {
-                let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+                let _ = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
                 await updateNotificationStatus()
                 isRequestingNotification = false
+
+                // Auto-advance to next screen after notification permission is granted/denied
+                if currentStep == .notificationPermission {
+                    // Add small delay for better UX - let user see success/denied state briefly
+                    try? await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds
+                    await MainActor.run {
+                        self.nextStep()
+                    }
+                }
             } catch {
                 isRequestingNotification = false
             }

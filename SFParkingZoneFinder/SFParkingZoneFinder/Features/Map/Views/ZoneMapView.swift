@@ -1184,9 +1184,12 @@ struct ZoneMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            // Skip user location annotation
+            // Hide user location pin/callout (keep blue dot only)
             if annotation is MKUserLocation {
-                return nil
+                let view = MKAnnotationView(annotation: annotation, reuseIdentifier: "UserLocation")
+                view.canShowCallout = false
+                view.isEnabled = false  // Disable interaction
+                return view
             }
 
             // Handle searched location annotation (blue pin, no label)

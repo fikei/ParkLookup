@@ -543,8 +543,13 @@ final class MainResultViewModel: ObservableObject {
     private func createSessionRules() -> [SessionRule] {
         var rules: [SessionRule] = []
 
-        // Add time limit rule if present
-        if let timeLimit = timeLimitMinutes,
+        // Only add time limit rule if user doesn't have applicable permit for this zone
+        // Users with valid permits typically have no time limits
+        let hasApplicablePermit = !applicablePermits.isEmpty
+
+        // Add time limit rule if present and user doesn't have a permit
+        if !hasApplicablePermit,
+           let timeLimit = timeLimitMinutes,
            let startTime = enforcementStartTime,
            let endTime = enforcementEndTime {
 
