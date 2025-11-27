@@ -228,18 +228,36 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(showBlockfaceOverlays, forKey: Keys.showBlockfaceOverlays) }
     }
 
-    /// Show zone polygon overlays when blockface overlays are enabled
-    /// When true, both zone polygons and blockface lines render together
-    /// When false, only blockface lines render (cleaner visualization)
-    @Published var showZoneOverlaysWithBlockfaces: Bool {
-        didSet { UserDefaults.standard.set(showZoneOverlaysWithBlockfaces, forKey: Keys.showZoneOverlaysWithBlockfaces) }
-    }
-
     /// Show blockface centerline polylines alongside blockface polygons
     /// When true, renders both the dimensional polygons and the original centerlines
     /// Useful for debugging and understanding the offset geometry
     @Published var showBlockfaceCenterlines: Bool {
         didSet { UserDefaults.standard.set(showBlockfaceCenterlines, forKey: Keys.showBlockfaceCenterlines) }
+    }
+
+    /// Show blockface polygons (dimensional parking lanes)
+    @Published var showBlockfacePolygons: Bool {
+        didSet { UserDefaults.standard.set(showBlockfacePolygons, forKey: Keys.showBlockfacePolygons) }
+    }
+
+    /// Blockface polygon stroke width
+    @Published var blockfaceStrokeWidth: Double {
+        didSet { UserDefaults.standard.set(blockfaceStrokeWidth, forKey: Keys.blockfaceStrokeWidth) }
+    }
+
+    /// Blockface polygon width (parking lane width in degrees)
+    @Published var blockfacePolygonWidth: Double {
+        didSet { UserDefaults.standard.set(blockfacePolygonWidth, forKey: Keys.blockfacePolygonWidth) }
+    }
+
+    /// Blockface polygon color (hex string)
+    @Published var blockfaceColorHex: String {
+        didSet { UserDefaults.standard.set(blockfaceColorHex, forKey: Keys.blockfaceColorHex) }
+    }
+
+    /// Blockface polygon opacity (0.0 - 1.0)
+    @Published var blockfaceOpacity: Double {
+        didSet { UserDefaults.standard.set(blockfaceOpacity, forKey: Keys.blockfaceOpacity) }
     }
 
     // MARK: - Performance Logging
@@ -335,8 +353,12 @@ final class DeveloperSettings: ObservableObject {
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
         static let showBlockfaceOverlays = "dev.showBlockfaceOverlays"
-        static let showZoneOverlaysWithBlockfaces = "dev.showZoneOverlaysWithBlockfaces"
         static let showBlockfaceCenterlines = "dev.showBlockfaceCenterlines"
+        static let showBlockfacePolygons = "dev.showBlockfacePolygons"
+        static let blockfaceStrokeWidth = "dev.blockfaceStrokeWidth"
+        static let blockfacePolygonWidth = "dev.blockfacePolygonWidth"
+        static let blockfaceColorHex = "dev.blockfaceColorHex"
+        static let blockfaceOpacity = "dev.blockfaceOpacity"
         static let logSimplificationStats = "dev.logSimplificationStats"
         static let logLookupPerformance = "dev.logLookupPerformance"
         static let developerModeUnlocked = "dev.developerModeUnlocked"
@@ -381,8 +403,12 @@ final class DeveloperSettings: ObservableObject {
         static let showOriginalOverlay = false
         static let showVertexCounts = false
         static let showBlockfaceOverlays = false  // PoC - disabled by default
-        static let showZoneOverlaysWithBlockfaces = true  // Show zone overlays by default
         static let showBlockfaceCenterlines = false  // Hide centerlines by default
+        static let showBlockfacePolygons = true  // Show polygons by default
+        static let blockfaceStrokeWidth = 1.5  // Default stroke width
+        static let blockfacePolygonWidth = 0.00002  // ~2.4m / 8 feet parking lane
+        static let blockfaceColorHex = "FF9500"  // Orange (SF orange)
+        static let blockfaceOpacity = 0.5  // 50% opacity
         static let logSimplificationStats = false
         static let logLookupPerformance = true  // Default on for perf monitoring
         static let developerModeUnlocked = false
@@ -430,8 +456,12 @@ final class DeveloperSettings: ObservableObject {
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
         showBlockfaceOverlays = defaults.object(forKey: Keys.showBlockfaceOverlays) as? Bool ?? Defaults.showBlockfaceOverlays
-        showZoneOverlaysWithBlockfaces = defaults.object(forKey: Keys.showZoneOverlaysWithBlockfaces) as? Bool ?? Defaults.showZoneOverlaysWithBlockfaces
         showBlockfaceCenterlines = defaults.object(forKey: Keys.showBlockfaceCenterlines) as? Bool ?? Defaults.showBlockfaceCenterlines
+        showBlockfacePolygons = defaults.object(forKey: Keys.showBlockfacePolygons) as? Bool ?? Defaults.showBlockfacePolygons
+        blockfaceStrokeWidth = defaults.object(forKey: Keys.blockfaceStrokeWidth) as? Double ?? Defaults.blockfaceStrokeWidth
+        blockfacePolygonWidth = defaults.object(forKey: Keys.blockfacePolygonWidth) as? Double ?? Defaults.blockfacePolygonWidth
+        blockfaceColorHex = defaults.object(forKey: Keys.blockfaceColorHex) as? String ?? Defaults.blockfaceColorHex
+        blockfaceOpacity = defaults.object(forKey: Keys.blockfaceOpacity) as? Double ?? Defaults.blockfaceOpacity
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
         developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
@@ -483,8 +513,12 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(showOriginalOverlay)
         hasher.combine(showVertexCounts)
         hasher.combine(showBlockfaceOverlays)
-        hasher.combine(showZoneOverlaysWithBlockfaces)
         hasher.combine(showBlockfaceCenterlines)
+        hasher.combine(showBlockfacePolygons)
+        hasher.combine(blockfaceStrokeWidth)
+        hasher.combine(blockfacePolygonWidth)
+        hasher.combine(blockfaceColorHex)
+        hasher.combine(blockfaceOpacity)
         return hasher.finalize()
     }
 
@@ -576,8 +610,12 @@ final class DeveloperSettings: ObservableObject {
         showOriginalOverlay = Defaults.showOriginalOverlay
         showVertexCounts = Defaults.showVertexCounts
         showBlockfaceOverlays = Defaults.showBlockfaceOverlays
-        showZoneOverlaysWithBlockfaces = Defaults.showZoneOverlaysWithBlockfaces
         showBlockfaceCenterlines = Defaults.showBlockfaceCenterlines
+        showBlockfacePolygons = Defaults.showBlockfacePolygons
+        blockfaceStrokeWidth = Defaults.blockfaceStrokeWidth
+        blockfacePolygonWidth = Defaults.blockfacePolygonWidth
+        blockfaceColorHex = Defaults.blockfaceColorHex
+        blockfaceOpacity = Defaults.blockfaceOpacity
         logSimplificationStats = Defaults.logSimplificationStats
         logLookupPerformance = Defaults.logLookupPerformance
         // Don't reset developerModeUnlocked

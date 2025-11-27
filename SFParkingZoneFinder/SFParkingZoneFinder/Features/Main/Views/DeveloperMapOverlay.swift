@@ -180,51 +180,16 @@ struct DeveloperMapOverlay: View {
             .padding(.vertical, 8)
             .background(Color(.systemGray6))
 
-            // Scrollable content
+            // Scrollable content - conditionally show blockface or zone controls
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    // Merging section (top)
-                    mergingToggles
-
-                    Divider()
-
-                    // Simplification toggles
-                    simplificationToggles
-
-                    // Sliders section (always shown - overlap tolerance is always available)
-                    Divider()
-                    slidersSection
-
-                    Divider()
-
-                    // Color and opacity settings
-                    colorSettings
-
-                    Divider()
-
-                    // Debug visualization toggles
-                    debugToggles
-
-                    Divider()
-
-                    // Pipeline status summary
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Summary")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-                            .textCase(.uppercase)
-
-                        Text(devSettings.simplificationDescription)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                    if devSettings.showBlockfaceOverlays {
+                        // Blockface-specific controls
+                        blockfaceControls
+                    } else {
+                        // Original zone polygon controls
+                        zonePolygonControls
                     }
-
-                    Divider()
-
-                    // Save profile button
-                    saveProfileButton
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -495,6 +460,119 @@ struct DeveloperMapOverlay: View {
 
             compactToggle("Original Overlay", isOn: $devSettings.showOriginalOverlay, icon: "square.on.square.dashed")
             compactToggle("Vertex Counts", isOn: $devSettings.showVertexCounts, icon: "number")
+        }
+    }
+
+    // MARK: - Blockface Controls
+
+    private var blockfaceControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Visibility toggles
+            Text("Visibility")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            compactToggle("Blockface Polygons", isOn: $devSettings.showBlockfacePolygons, icon: "rectangle.fill")
+            compactToggle("Blockface Centerlines", isOn: $devSettings.showBlockfaceCenterlines, icon: "line.diagonal")
+
+            Divider()
+
+            // Styling controls
+            Text("Polygon Style")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            sliderControl(
+                label: "Stroke Width",
+                value: $devSettings.blockfaceStrokeWidth,
+                range: 0.0...5.0,
+                step: 0.25,
+                formatter: { String(format: "%.2f", $0) }
+            )
+
+            sliderControl(
+                label: "Polygon Width",
+                value: $devSettings.blockfacePolygonWidth,
+                range: 0.00001...0.0001,
+                step: 0.000005,
+                formatter: { String(format: "%.5f° (~%.1fm)", $0, $0 * 111000) }
+            )
+
+            Divider()
+
+            // Color and opacity
+            Text("Color & Opacity")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            hexColorField(
+                label: "Color",
+                value: $devSettings.blockfaceColorHex,
+                previewColor: UIColor(hex: devSettings.blockfaceColorHex) ?? UIColor.systemOrange
+            )
+
+            sliderControl(
+                label: "Opacity",
+                value: $devSettings.blockfaceOpacity,
+                range: 0.0...1.0,
+                step: 0.05,
+                formatter: { String(format: "%.0f%%", $0 * 100) }
+            )
+        }
+    }
+
+    // MARK: - Zone Polygon Controls
+
+    private var zonePolygonControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Merging section (top)
+            mergingToggles
+
+            Divider()
+
+            // Simplification toggles
+            simplificationToggles
+
+            // Sliders section (always shown - overlap tolerance is always available)
+            Divider()
+            slidersSection
+
+            Divider()
+
+            // Color and opacity settings
+            colorSettings
+
+            Divider()
+
+            // Debug visualization toggles
+            debugToggles
+
+            Divider()
+
+            // Pipeline status summary
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Summary")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+
+                Text(devSettings.simplificationDescription)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Divider()
+
+            // Save profile button
+            saveProfileButton
         }
     }
 

@@ -103,7 +103,7 @@ struct SettingsView: View {
 
                     // Blockface PoC toggle - only visible when developer mode is enabled
                     if devSettings.developerModeUnlocked {
-                        Toggle("BlockFace**", isOn: $devSettings.showBlockfaceOverlays)
+                        Toggle("BlockFace** (PoC)", isOn: $devSettings.showBlockfaceOverlays)
                             .onChange(of: devSettings.showBlockfaceOverlays) { _, isEnabled in
                                 if isEnabled {
                                     // Haptic feedback when enabled
@@ -112,27 +112,7 @@ struct SettingsView: View {
                                 }
                             }
 
-                        Text("Show blockface-based street cleaning visualization on map")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        Toggle("Show Zone Overlays", isOn: $devSettings.showZoneOverlaysWithBlockfaces)
-                            .onChange(of: devSettings.showZoneOverlaysWithBlockfaces) { _, isEnabled in
-                                let generator = UIImpactFeedbackGenerator(style: .light)
-                                generator.impactOccurred()
-                            }
-
-                        Text("Display zone polygons alongside blockface visualization")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        Toggle("Show Centerlines", isOn: $devSettings.showBlockfaceCenterlines)
-                            .onChange(of: devSettings.showBlockfaceCenterlines) { _, isEnabled in
-                                let generator = UIImpactFeedbackGenerator(style: .light)
-                                generator.impactOccurred()
-                            }
-
-                        Text("Display blockface centerline polylines alongside dimensional polygons")
+                        Text("Show blockface-based parking regulation visualization on map. Use developer overlay to configure.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

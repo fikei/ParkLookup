@@ -16,30 +16,34 @@ class BlockfacePolyline: MKPolyline {
 extension MKMapView {
     /// Add blockface overlays to the map as polygons with actual width
     func addBlockfaceOverlays(_ blockfaces: [Blockface]) {
+        let devSettings = DeveloperSettings.shared
+
         for blockface in blockfaces {
             let centerline = blockface.geometry.locationCoordinates
             guard centerline.count >= 2 else { continue }
 
-            // Create a parking lane polygon by offsetting the centerline perpendicular to the street
-            // Width represents ~8 feet parking lane (approximately 0.00002 degrees latitude ≈ 2.4m)
-            let laneWidthDegrees = 0.00002
+            // Add polygons if enabled
+            if devSettings.showBlockfacePolygons {
+                // Use developer-configured polygon width
+                let laneWidthDegrees = devSettings.blockfacePolygonWidth
 
-            guard let polygonCoords = createParkingLanePolygon(
-                centerline: centerline,
-                widthDegrees: laneWidthDegrees,
-                side: blockface.side
-            ) else { continue }
+                guard let polygonCoords = createParkingLanePolygon(
+                    centerline: centerline,
+                    widthDegrees: laneWidthDegrees,
+                    side: blockface.side
+                ) else { continue }
 
-            let polygon = BlockfacePolygon(
-                coordinates: polygonCoords,
-                count: polygonCoords.count
-            )
-            polygon.blockface = blockface
+                let polygon = BlockfacePolygon(
+                    coordinates: polygonCoords,
+                    count: polygonCoords.count
+                )
+                polygon.blockface = blockface
 
-            addOverlay(polygon)
+                addOverlay(polygon)
+            }
 
-            // Optionally add centerline polyline for debugging
-            if DeveloperSettings.shared.showBlockfaceCenterlines {
+            // Add centerline polylines if enabled
+            if devSettings.showBlockfaceCenterlines {
                 let polyline = BlockfacePolyline(
                     coordinates: centerline,
                     count: centerline.count
@@ -158,109 +162,15 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     }
 
     private func configureStyle() {
-        guard let blockface = blockface else {
-            // Default style if no blockface data
-            fillColor = UIColor.systemGray.withAlphaComponent(0.3)
-            strokeColor = UIColor.systemGray.withAlphaComponent(0.6)
-            lineWidth = 1
-            return
-        }
+        let devSettings = DeveloperSettings.shared
 
-        // Priority order: street cleaning (active) > no parking > metered > time limit > permit > other
-        // This ensures the most restrictive/important rules are visually prominent
+        // Use developer-configured color and opacity
+        let baseColor = UIColor(hex: devSettings.blockfaceColorHex) ?? UIColor.systemOrange
+        let opacity = devSettings.blockfaceOpacity
 
-        // 1. Active street cleaning - highest priority (can't park NOW)
-        if blockface.hasActiveStreetCleaning() {
-            fillColor = UIColor.systemRed.withAlphaComponent(0.6)
-            strokeColor = UIColor.systemRed.withAlphaComponent(0.9)
-            lineWidth = 2
-            lineDashPattern = [8, 4]  // Dashed border to show urgency
-            return
-        }
-
-        // 2. No parking zones
-        if let noParkingReg = blockface.regulations.first(where: { $0.type == "noParking" }) {
-            if noParkingReg.isInEffect() {
-                fillColor = UIColor.systemRed.withAlphaComponent(0.5)
-                strokeColor = UIColor.systemRed.withAlphaComponent(0.85)
-                lineWidth = 2
-                lineDashPattern = [4, 4]  // Shorter dashes
-            } else {
-                fillColor = UIColor.systemPink.withAlphaComponent(0.3)
-                strokeColor = UIColor.systemPink.withAlphaComponent(0.6)
-                lineWidth = 1
-            }
-            return
-        }
-
-        // 3. Tow-away zones
-        if blockface.regulations.contains(where: { $0.type == "towAway" }) {
-            fillColor = UIColor.systemRed.withAlphaComponent(0.6)
-            strokeColor = UIColor.systemRed.withAlphaComponent(0.9)
-            lineWidth = 2
-            lineDashPattern = [6, 3, 2, 3]  // Distinctive dash-dot pattern
-            return
-        }
-
-        // 4. Loading zones (commercial hours)
-        if let loadingReg = blockface.regulations.first(where: { $0.type == "loadingZone" }) {
-            if loadingReg.isInEffect() {
-                fillColor = UIColor.systemPurple.withAlphaComponent(0.5)
-                strokeColor = UIColor.systemPurple.withAlphaComponent(0.8)
-                lineWidth = 2
-                lineDashPattern = [10, 5]
-            } else {
-                fillColor = UIColor.systemPurple.withAlphaComponent(0.2)
-                strokeColor = UIColor.systemPurple.withAlphaComponent(0.5)
-                lineWidth = 1
-            }
-            return
-        }
-
-        // 5. Metered parking
-        if blockface.regulations.contains(where: { $0.type == "metered" }) {
-            fillColor = UIColor.systemGreen.withAlphaComponent(0.4)
-            strokeColor = UIColor.systemGreen.withAlphaComponent(0.75)
-            lineWidth = 1.5
-            return
-        }
-
-        // 6. Inactive street cleaning (scheduled but not now)
-        if blockface.regulations.contains(where: { $0.type == "streetCleaning" }) {
-            fillColor = UIColor.systemOrange.withAlphaComponent(0.4)
-            strokeColor = UIColor.systemOrange.withAlphaComponent(0.8)
-            lineWidth = 1.5
-            return
-        }
-
-        // 7. Time limits
-        if blockface.regulations.contains(where: { $0.type == "timeLimit" }) {
-            fillColor = UIColor.systemYellow.withAlphaComponent(0.4)
-            strokeColor = UIColor.systemYellow.withAlphaComponent(0.8)
-            lineWidth = 1.5
-            return
-        }
-
-        // 8. Permit zones
-        if let zone = blockface.permitZone {
-            let color = permitZoneColor(zone)
-            fillColor = color.withAlphaComponent(0.35)
-            strokeColor = color.withAlphaComponent(0.7)
-            lineWidth = 1.5
-            return
-        }
-
-        // Default - no specific regulation identified
-        fillColor = UIColor.systemGray.withAlphaComponent(0.3)
-        strokeColor = UIColor.systemGray.withAlphaComponent(0.6)
-        lineWidth = 1
-    }
-
-    private func permitZoneColor(_ zone: String) -> UIColor {
-        // Simple hash-based color for permit zones
-        let hash = zone.hashValue
-        let hue = CGFloat(abs(hash) % 360) / 360.0
-        return UIColor(hue: hue, saturation: 0.7, brightness: 0.8, alpha: 1.0)
+        fillColor = baseColor.withAlphaComponent(opacity)
+        strokeColor = baseColor.withAlphaComponent(min(opacity + 0.3, 1.0))  // Slightly more opaque stroke
+        lineWidth = devSettings.blockfaceStrokeWidth
     }
 }
 

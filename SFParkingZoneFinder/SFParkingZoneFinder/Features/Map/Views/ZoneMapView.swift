@@ -901,7 +901,7 @@ struct ZoneMapView: UIViewRepresentable {
             DispatchQueue.main.async {
 
                 // Check if we should hide zone overlays when blockface mode is active
-                let shouldHideZoneOverlays = devSettings.showBlockfaceOverlays && !devSettings.showZoneOverlaysWithBlockfaces
+                let shouldHideZoneOverlays = devSettings.showBlockfaceOverlays
 
                 // Conditionally add annotations based on zone overlay visibility
                 if !shouldHideZoneOverlays {
@@ -919,12 +919,12 @@ struct ZoneMapView: UIViewRepresentable {
 
                 let batchSize = 500
                 // Ordered polygons: metered first, then non-permitted, then permitted (later additions render on top)
-                // Skip zone polygons if blockface mode is active and user disabled zone overlays
+                // Skip zone polygons when blockface mode is active
                 let orderedPolygons = shouldHideZoneOverlays ? [] : (meteredPolygons + nonPermittedPolygons + permittedPolygons)
                 let totalPolygons = orderedPolygons.count
 
                 if shouldHideZoneOverlays {
-                    logger.info("🚧 PoC: Hiding zone overlays (blockface mode active, showZoneOverlaysWithBlockfaces=false)")
+                    logger.info("🚧 PoC: Hiding zone overlays (blockface mode active)")
                 }
 
                 func addBatch(startIndex: Int) {
