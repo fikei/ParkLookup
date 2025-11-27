@@ -10,9 +10,7 @@
         "type": "LineString",
         "coordinates": [
           [-122.4193, 37.7564],
-          [-122.4191, 37.7570],
-          [-122.4189, 37.7576],
-          [-122.4187, 37.7582]
+          [-122.4191, 37.7570]
         ]
       },
       "regulations": [
@@ -29,13 +27,6 @@
           "enforcementDays": ["tuesday", "friday"],
           "enforcementStart": "08:00",
           "enforcementEnd": "10:00"
-        },
-        {
-          "type": "noParking",
-          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-          "enforcementStart": "07:00",
-          "enforcementEnd": "09:00",
-          "specialConditions": "Morning commute - tow-away zone"
         }
       ]
     },
@@ -49,9 +40,7 @@
         "type": "LineString",
         "coordinates": [
           [-122.4189, 37.7565],
-          [-122.4187, 37.7571],
-          [-122.4185, 37.7577],
-          [-122.4183, 37.7583]
+          [-122.4187, 37.7571]
         ]
       },
       "regulations": [
@@ -69,12 +58,6 @@
           "enforcementStart": "07:00",
           "enforcementEnd": "11:00",
           "specialConditions": "Commercial loading only, 30 min limit"
-        },
-        {
-          "type": "streetCleaning",
-          "enforcementDays": ["monday", "thursday"],
-          "enforcementStart": "08:00",
-          "enforcementEnd": "10:00"
         }
       ]
     },
@@ -87,10 +70,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4187, 37.7582],
-          [-122.4185, 37.7588],
-          [-122.4183, 37.7594],
-          [-122.4181, 37.7600]
+          [-122.4191, 37.7570],
+          [-122.4189, 37.7576]
         ]
       },
       "regulations": [
@@ -119,10 +100,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4183, 37.7583],
-          [-122.4181, 37.7589],
-          [-122.4179, 37.7595],
-          [-122.4177, 37.7601]
+          [-122.4187, 37.7571],
+          [-122.4185, 37.7577]
         ]
       },
       "regulations": [
@@ -148,10 +127,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4185, 37.7522],
-          [-122.4183, 37.7528],
-          [-122.4181, 37.7534],
-          [-122.4179, 37.7540]
+          [-122.4189, 37.7576],
+          [-122.4187, 37.7582]
         ]
       },
       "regulations": [
@@ -169,18 +146,16 @@
       ]
     },
     {
-      "id": "mission_25th_26th_odd",
+      "id": "mission_24th_25th_odd",
       "street": "Mission St",
-      "fromStreet": "25th St",
-      "toStreet": "26th St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
       "side": "ODD",
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4181, 37.7541],
-          [-122.4179, 37.7547],
-          [-122.4177, 37.7553],
-          [-122.4175, 37.7559]
+          [-122.4185, 37.7577],
+          [-122.4183, 37.7583]
         ]
       },
       "regulations": [
@@ -207,9 +182,7 @@
         "type": "LineString",
         "coordinates": [
           [-122.4207, 37.7564],
-          [-122.4205, 37.7570],
-          [-122.4203, 37.7576],
-          [-122.4201, 37.7582]
+          [-122.4205, 37.7570]
         ]
       },
       "regulations": [
@@ -238,9 +211,7 @@
         "type": "LineString",
         "coordinates": [
           [-122.4203, 37.7565],
-          [-122.4201, 37.7571],
-          [-122.4199, 37.7577],
-          [-122.4197, 37.7583]
+          [-122.4201, 37.7571]
         ]
       },
       "regulations": [
@@ -266,10 +237,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4201, 37.7582],
-          [-122.4199, 37.7588],
-          [-122.4197, 37.7594],
-          [-122.4195, 37.7600]
+          [-122.4205, 37.7570],
+          [-122.4203, 37.7576]
         ]
       },
       "regulations": [
@@ -295,10 +264,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4197, 37.7583],
-          [-122.4195, 37.7589],
-          [-122.4193, 37.7595],
-          [-122.4191, 37.7601]
+          [-122.4201, 37.7571],
+          [-122.4199, 37.7577]
         ]
       },
       "regulations": [
@@ -324,10 +291,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4199, 37.7522],
-          [-122.4197, 37.7528],
-          [-122.4195, 37.7534],
-          [-122.4193, 37.7540]
+          [-122.4203, 37.7576],
+          [-122.4201, 37.7582]
         ]
       },
       "regulations": [
@@ -353,10 +318,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4195, 37.7523],
-          [-122.4193, 37.7529],
-          [-122.4191, 37.7535],
-          [-122.4189, 37.7541]
+          [-122.4199, 37.7577],
+          [-122.4197, 37.7583]
         ]
       },
       "regulations": [
@@ -382,10 +345,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4181, 37.7520],
-          [-122.4185, 37.7520],
-          [-122.4190, 37.7520],
-          [-122.4195, 37.7520]
+          [-122.4195, 37.7576],
+          [-122.4189, 37.7576]
         ]
       },
       "regulations": [
@@ -402,13 +363,6 @@
           "enforcementDays": ["wednesday"],
           "enforcementStart": "12:00",
           "enforcementEnd": "15:00"
-        },
-        {
-          "type": "noParking",
-          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-          "enforcementStart": "16:00",
-          "enforcementEnd": "18:00",
-          "specialConditions": "Evening commute - tow-away zone"
         }
       ]
     },
@@ -421,10 +375,8 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4195, 37.7518],
-          [-122.4190, 37.7518],
-          [-122.4185, 37.7518],
-          [-122.4181, 37.7518]
+          [-122.4189, 37.7574],
+          [-122.4195, 37.7574]
         ]
       },
       "regulations": [
@@ -445,38 +397,48 @@
       ]
     },
     {
-      "id": "capp_24th_25th_even",
-      "street": "Capp St",
-      "fromStreet": "24th St",
-      "toStreet": "25th St",
-      "side": "EVEN",
+      "id": "23rd_mission_valencia_north",
+      "street": "23rd St",
+      "fromStreet": "Mission St",
+      "toStreet": "Valencia St",
+      "side": "NORTH",
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [-122.4172, 37.7522],
-          [-122.4170, 37.7528],
-          [-122.4168, 37.7534],
-          [-122.4166, 37.7540]
+          [-122.4195, 37.7570],
+          [-122.4189, 37.7570]
         ]
       },
       "regulations": [
         {
-          "type": "residentialPermit",
-          "permitZone": "Q",
-          "timeLimit": 180
-        },
-        {
           "type": "timeLimit",
-          "timeLimit": 180,
+          "timeLimit": 120,
           "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
           "enforcementStart": "08:00",
           "enforcementEnd": "18:00"
-        },
+        }
+      ]
+    },
+    {
+      "id": "23rd_mission_valencia_south",
+      "street": "23rd St",
+      "fromStreet": "Mission St",
+      "toStreet": "Valencia St",
+      "side": "SOUTH",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4189, 37.7568],
+          [-122.4195, 37.7568]
+        ]
+      },
+      "regulations": [
         {
-          "type": "streetCleaning",
-          "enforcementDays": ["friday"],
+          "type": "timeLimit",
+          "timeLimit": 120,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
           "enforcementStart": "08:00",
-          "enforcementEnd": "10:00"
+          "enforcementEnd": "18:00"
         }
       ]
     }
