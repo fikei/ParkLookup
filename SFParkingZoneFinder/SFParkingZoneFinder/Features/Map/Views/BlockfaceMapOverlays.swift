@@ -157,8 +157,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     }
 
     required init?(coder: NSCoder) {
-        self.blockface = nil
-        super.init(coder: coder)
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func configureStyle() {
@@ -190,8 +189,7 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
     }
 
     required init?(coder: NSCoder) {
-        self.blockface = nil
-        super.init(coder: coder)
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func configureStyle() {
