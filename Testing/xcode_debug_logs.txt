@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/F34502D3-247E-41C8-A27F-B27F24A11950/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/8DE0375E-3A86-4A78-AE7C-F117A7328AA8/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 218.0ms
+Loaded 421 zones from disk cache in 267.5ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,12 +18,12 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d4e670 with 377 allocations still alive
+Resetting GeoCodec zone allocator at address 0x600003d54a50 with 377 allocations still alive
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 13.6ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 7.2ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
@@ -147,18 +147,14 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=41, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=42, validAreas=["I", "Z"]
   🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=43, validAreas=["I", "Z"]
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🚧 PoC: Hiding zone overlays (blockface mode active)
 🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area
 Loading blockfaces from sample JSON
-Loaded 15 blockfaces
-🚧 PoC: Loaded 15 blockfaces
-🔧 DEBUG: Adding 15 blockface overlays
+Loaded 16 blockfaces
+🚧 PoC: Loaded 16 blockfaces
+🔧 DEBUG: Adding 16 blockface overlays
 🔧 DEBUG: Blockface 0 (Mission St, EVEN side)
-  Centerline points: 4
+  Centerline points: 2
   First point: lat=37.7564, lon=-122.4193
   Second point: lat=37.757, lon=-122.4191
   Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
@@ -186,23 +182,20 @@ Loaded 15 blockfaces
     Center coord: (37.757000, -122.419100)
     Offset coord: (37.757008, -122.419139)
     Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
+  🔷 COMPLETE POLYGON - Total vertices: 4
     [0] CENTER: lat=37.7564, lon=-122.4193
     [1] CENTER: lat=37.757, lon=-122.4191
-    [2] CENTER: lat=37.7576, lon=-122.4189
-    [3] CENTER: lat=37.7582, lon=-122.4187
-    [4] OFFSET: lat=37.75820802481307, lon=-122.41873851577866
-    [5] OFFSET: lat=37.75760802490858, lon=-122.4189385157685
-    [6] OFFSET: lat=37.757008025034516, lon=-122.41913851574823
-    [7] OFFSET: lat=37.75640802513003, lon=-122.41933851573809
-  Created polygon with 8 points
+    [2] OFFSET: lat=37.75700802506495, lon=-122.41913851573808
+    [3] OFFSET: lat=37.75640802513003, lon=-122.41933851573809
+  Created polygon with 4 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
 📍 Creating BlockfacePolygonRenderer for Mission St EVEN
   🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
+  ✅ Adding centerline polyline overlay to map
+📍 Creating BlockfacePolylineRenderer for Mission St
 🔧 DEBUG: Blockface 1 (Mission St, ODD side)
-  Centerline points: 4
+  Centerline points: 2
   First point: lat=37.7565, lon=-122.4189
   Second point: lat=37.7571, lon=-122.4187
   Direction: dlat=0.0005999999999986017, dlon=0.00019999999999242846
@@ -230,176 +223,29 @@ Loaded 15 blockfaces
     Center coord: (37.757100, -122.418700)
     Offset coord: (37.757092, -122.418661)
     Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
+  🔷 COMPLETE POLYGON - Total vertices: 4
     [0] CENTER: lat=37.7565, lon=-122.4189
     [1] CENTER: lat=37.7571, lon=-122.4187
-    [2] CENTER: lat=37.7577, lon=-122.4185
-    [3] CENTER: lat=37.7583, lon=-122.4183
-    [4] OFFSET: lat=37.75829197520706, lon=-122.41826148421795
-    [5] OFFSET: lat=37.75769197511154, lon=-122.41846148422809
-    [6] OFFSET: lat=37.757091974985606, lon=-122.41866148424839
-    [7] OFFSET: lat=37.756491974890075, lon=-122.41886148425853
-  Created polygon with 8 points
+    [2] OFFSET: lat=37.75709197495517, lon=-122.41866148425854
+    [3] OFFSET: lat=37.756491974890075, lon=-122.41886148425853
+  Created polygon with 4 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
 📍 Creating BlockfacePolygonRenderer for Mission St ODD
   🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
+  ✅ Adding centerline polyline overlay to map
+📍 Creating BlockfacePolylineRenderer for Mission St
 🔧 DEBUG: Blockface 2 (Mission St, EVEN side)
-  Centerline points: 4
-  First point: lat=37.7582, lon=-122.4187
-  Second point: lat=37.7588, lon=-122.4185
+  Centerline points: 2
+  First point: lat=37.757, lon=-122.4191
+  Second point: lat=37.7576, lon=-122.4189
   Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
 
 🔧 DEBUG: Perpendicular calculation
   Side: EVEN (offsetToRight=true)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7582, lon=-122.4187
-  First map point: x=42935729.22936889m, y=103771676.23966803m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.89m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.89m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.758200, -122.418700)
-    Offset coord: (37.758208, -122.418739)
-    Coord delta: dlat=0.00000802, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.758800, -122.418500)
-    Offset coord: (37.758808, -122.418539)
-    Coord delta: dlat=0.00000802, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7582, lon=-122.4187
-    [1] CENTER: lat=37.7588, lon=-122.4185
-    [2] CENTER: lat=37.7594, lon=-122.4183
-    [3] CENTER: lat=37.76, lon=-122.4181
-    [4] OFFSET: lat=37.76000802443522, lon=-122.41813851583952
-    [5] OFFSET: lat=37.75940802453074, lon=-122.41833851582938
-    [6] OFFSET: lat=37.75880802465667, lon=-122.41853851580908
-    [7] OFFSET: lat=37.758208024752214, lon=-122.41873851579895
-  Created polygon with 8 points
-  Width setting: 0.0003 degrees (TESTING: forced large)
-  ✅ Adding polygon overlay to map
-📍 Creating BlockfacePolygonRenderer for Mission St EVEN
-  🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF
-
-🔧 DEBUG: Perpendicular calculation
-  Side: ODD (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7583, lon=-122.4183
-  First map point: x=42936027.49098667m, y=103771581.92488027m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.89m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=565.89m, dy=149.13m
-    Perp angle: 14.8°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.758300, -122.418300)
-    Offset coord: (37.758292, -122.418261)
-    Coord delta: dlat=-0.00000802, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.758900, -122.418100)
-    Offset coord: (37.758892, -122.418061)
-    Coord delta: dlat=-0.00000802, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7583, lon=-122.4183
-    [1] CENTER: lat=37.7589, lon=-122.4181
-    [2] CENTER: lat=37.7595, lon=-122.4179
-    [3] CENTER: lat=37.7601, lon=-122.4177
-    [4] OFFSET: lat=37.76009197558489, lon=-122.4176614841571
-    [5] OFFSET: lat=37.75949197548939, lon=-122.41786148416725
-    [6] OFFSET: lat=37.758891975363426, lon=-122.41806148418753
-    [7] OFFSET: lat=37.75829197526791, lon=-122.41826148419767
-📍 Creating BlockfacePolygonRenderer for Mission St ODD
-  🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7522, lon=-122.4185
-  First map point: x=42935878.360177785m, y=103777334.89364603m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.84m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.84m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752200, -122.418500)
-    Offset coord: (37.752208, -122.418539)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752800, -122.418300)
-    Offset coord: (37.752808, -122.418339)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7522, lon=-122.4185
-    [1] CENTER: lat=37.7528, lon=-122.4183
-    [2] CENTER: lat=37.7534, lon=-122.4181
-    [3] CENTER: lat=37.754, lon=-122.4179
-    [4] OFFSET: lat=37.754008025694674, lon=-122.41793851563665
-    [5] OFFSET: lat=37.75340802579015, lon=-122.41813851562651
-    [6] OFFSET: lat=37.752808025916124, lon=-122.41833851560624
-    [7] OFFSET: lat=37.75220802601162, lon=-122.41853851559607
-📍 Creating BlockfacePolygonRenderer for Mission St EVEN
-  🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: ODD (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7541, lon=-122.4181
-  First map point: x=42936176.62179556m, y=103775543.03620306m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.86m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=565.86m, dy=149.13m
-    Perp angle: 14.8°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.754100, -122.418100)
-    Offset coord: (37.754092, -122.418061)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.754700, -122.417900)
-    Offset coord: (37.754692, -122.417861)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7541, lon=-122.4181
-    [1] CENTER: lat=37.7547, lon=-122.4179
-    [2] CENTER: lat=37.7553, lon=-122.4177
-    [3] CENTER: lat=37.7559, lon=-122.4175
-    [4] OFFSET: lat=37.75589197470327, lon=-122.41746148429911
-    [5] OFFSET: lat=37.755291974607765, lon=-122.41766148430924
-    [6] OFFSET: lat=37.75469197448184, lon=-122.41786148432953
-    [7] OFFSET: lat=37.75409197438632, lon=-122.41806148433967
-📍 Creating BlockfacePolygonRenderer for Mission St ODD
-  🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7564, lon=-122.4207
-  First map point: x=42934237.921280004m, y=103773373.88404742m
+  First coord: lat=37.757, lon=-122.4191
+  First map point: x=42935430.967751116m, y=103772808.00717713m
   Point 0:
     Forward vector: dx=149.13m, dy=-565.88m
     Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
@@ -407,506 +253,35 @@ Loaded 15 blockfaces
     Perp angle: -165.2°
     Angle difference: -90.0° (should be ±90°)
   Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.756400, -122.420700)
-    Offset coord: (37.756408, -122.420739)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.757000, -122.420500)
-    Offset coord: (37.757008, -122.420539)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7564, lon=-122.4207
-    [1] CENTER: lat=37.757, lon=-122.4205
-    [2] CENTER: lat=37.7576, lon=-122.4203
-    [3] CENTER: lat=37.7582, lon=-122.4201
-    [4] OFFSET: lat=37.75820802481307, lon=-122.42013851577866
-    [5] OFFSET: lat=37.75760802490858, lon=-122.4203385157685
-    [6] OFFSET: lat=37.757008025034516, lon=-122.42053851574822
-    [7] OFFSET: lat=37.75640802513003, lon=-122.42073851573808
-📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
-  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: ODD (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7565, lon=-122.4203
-  First map point: x=42934536.182897784m, y=103773279.57155441m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.88m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=565.88m, dy=149.13m
-    Perp angle: 14.8°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.756500, -122.420300)
-    Offset coord: (37.756492, -122.420261)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.757100, -122.420100)
-    Offset coord: (37.757092, -122.420061)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7565, lon=-122.4203
-    [1] CENTER: lat=37.7571, lon=-122.4201
-    [2] CENTER: lat=37.7577, lon=-122.4199
-    [3] CENTER: lat=37.7583, lon=-122.4197
-    [4] OFFSET: lat=37.75829197520706, lon=-122.41966148421795
-    [5] OFFSET: lat=37.75769197511154, lon=-122.4198614842281
-    [6] OFFSET: lat=37.757091974985606, lon=-122.42006148424841
-    [7] OFFSET: lat=37.756491974890075, lon=-122.42026148425853
-📍 Creating BlockfacePolygonRenderer for Valencia St ODD
-  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7582, lon=-122.4201
-  First map point: x=42934685.31370666m, y=103771676.23966803m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.89m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.89m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.758200, -122.420100)
-    Offset coord: (37.758208, -122.420139)
-    Coord delta: dlat=0.00000802, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.758800, -122.419900)
-    Offset coord: (37.758808, -122.419939)
-    Coord delta: dlat=0.00000802, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7582, lon=-122.4201
-    [1] CENTER: lat=37.7588, lon=-122.4199
-    [2] CENTER: lat=37.7594, lon=-122.4197
-    [3] CENTER: lat=37.76, lon=-122.4195
-    [4] OFFSET: lat=37.76000802443522, lon=-122.41953851583952
-    [5] OFFSET: lat=37.75940802453074, lon=-122.41973851582938
-    [6] OFFSET: lat=37.75880802465667, lon=-122.41993851580908
-    [7] OFFSET: lat=37.758208024752214, lon=-122.42013851579897
-📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
-  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: ODD (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7583, lon=-122.4197
-  First map point: x=42934983.575324446m, y=103771581.92488027m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.89m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=565.89m, dy=149.13m
-    Perp angle: 14.8°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.758300, -122.419700)
-    Offset coord: (37.758292, -122.419661)
-    Coord delta: dlat=-0.00000802, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.758900, -122.419500)
-    Offset coord: (37.758892, -122.419461)
-    Coord delta: dlat=-0.00000802, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7583, lon=-122.4197
-    [1] CENTER: lat=37.7589, lon=-122.4195
-    [2] CENTER: lat=37.7595, lon=-122.4193
-    [3] CENTER: lat=37.7601, lon=-122.4191
-    [4] OFFSET: lat=37.76009197558489, lon=-122.41906148415708
-    [5] OFFSET: lat=37.75949197548939, lon=-122.41926148416724
-    [6] OFFSET: lat=37.758891975363426, lon=-122.41946148418752
-    [7] OFFSET: lat=37.75829197526791, lon=-122.41966148419768
-📍 Creating BlockfacePolygonRenderer for Valencia St ODD
-  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7522, lon=-122.4199
-  First map point: x=42934834.44451556m, y=103777334.89364603m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.84m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.84m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752200, -122.419900)
-    Offset coord: (37.752208, -122.419939)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752800, -122.419700)
-    Offset coord: (37.752808, -122.419739)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7522, lon=-122.4199
-    [1] CENTER: lat=37.7528, lon=-122.4197
-    [2] CENTER: lat=37.7534, lon=-122.4195
-    [3] CENTER: lat=37.754, lon=-122.4193
-    [4] OFFSET: lat=37.754008025694674, lon=-122.41933851563665
-    [5] OFFSET: lat=37.75340802579015, lon=-122.41953851562651
-    [6] OFFSET: lat=37.752808025916124, lon=-122.41973851560623
-    [7] OFFSET: lat=37.75220802601162, lon=-122.41993851559607
-📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
-  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: ODD (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7523, lon=-122.4195
-  First map point: x=42935132.706133336m, y=103777240.5865067m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.85m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=565.85m, dy=149.13m
-    Perp angle: 14.8°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.752300, -122.419500)
-    Offset coord: (37.752292, -122.419461)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.752900, -122.419300)
-    Offset coord: (37.752892, -122.419261)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7523, lon=-122.4195
-    [1] CENTER: lat=37.7529, lon=-122.4193
-    [2] CENTER: lat=37.7535, lon=-122.4191
-    [3] CENTER: lat=37.7541, lon=-122.4189
-    [4] OFFSET: lat=37.75409197432546, lon=-122.41886148435995
-    [5] OFFSET: lat=37.753491974229945, lon=-122.4190614843701
-    [6] OFFSET: lat=37.75289197410399, lon=-122.41926148439039
-    [7] OFFSET: lat=37.752291974008486, lon=-122.41946148440053
-📍 Creating BlockfacePolygonRenderer for Valencia St ODD
-  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: NORTH (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.752, lon=-122.4181
-  First map point: x=42936176.62179556m, y=103777523.50754236m
-  Point 0:
-    Forward vector: dx=-298.26m, dy=0.00m
-    Forward angle: 180.0° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-0.00m, dy=-298.26m
-    Perp angle: -90.0°
-    Angle difference: -270.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.000, dy=-1.000
-    Offset distance: 29.7m
-    Center coord: (37.752000, -122.418100)
-    Offset coord: (37.752031, -122.418100)
-    Coord delta: dlat=0.00003149, dlon=0.00000000
-  Point 1 offset:
-    Normalized perp: dx=-0.000, dy=-1.000
-    Offset distance: 29.7m
-    Center coord: (37.752000, -122.418500)
-    Offset coord: (37.752031, -122.418500)
-    Coord delta: dlat=0.00003149, dlon=0.00000000
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.752, lon=-122.4181
-    [1] CENTER: lat=37.752, lon=-122.4185
-    [2] CENTER: lat=37.752, lon=-122.419
-    [3] CENTER: lat=37.752, lon=-122.4195
-    [4] OFFSET: lat=37.75203149294341, lon=-122.4195
-    [5] OFFSET: lat=37.75203149294341, lon=-122.419
-    [6] OFFSET: lat=37.75203149294341, lon=-122.4185
-    [7] OFFSET: lat=37.75203149294341, lon=-122.4181
-📍 Creating BlockfacePolygonRenderer for 24th St NORTH
-  🎨 Renderer config for 24th St NORTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: SOUTH (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7518, lon=-122.4195
-  First map point: x=42935132.706133336m, y=103777712.12092885m
-  Point 0:
-    Forward vector: dx=372.83m, dy=0.00m
-    Forward angle: 0.0° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-0.00m, dy=372.83m
-    Perp angle: 90.0°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.000, dy=1.000
-    Offset distance: 29.7m
-    Center coord: (37.751800, -122.419500)
-    Offset coord: (37.751769, -122.419500)
-    Coord delta: dlat=-0.00003149, dlon=0.00000000
-  Point 1 offset:
-    Normalized perp: dx=-0.000, dy=1.000
-    Offset distance: 29.7m
-    Center coord: (37.751800, -122.419000)
-    Offset coord: (37.751769, -122.419000)
-    Coord delta: dlat=-0.00003149, dlon=0.00000000
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7518, lon=-122.4195
-    [1] CENTER: lat=37.7518, lon=-122.419
-    [2] CENTER: lat=37.7518, lon=-122.4185
-    [3] CENTER: lat=37.7518, lon=-122.4181
-    [4] OFFSET: lat=37.751768506958065, lon=-122.4181
-    [5] OFFSET: lat=37.751768506958065, lon=-122.4185
-    [6] OFFSET: lat=37.751768506958065, lon=-122.419
-    [7] OFFSET: lat=37.751768506958065, lon=-122.4195
-📍 Creating BlockfacePolygonRenderer for 24th St SOUTH
-  🎨 Renderer config for 24th St SOUTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7522, lon=-122.4172
-  First map point: x=42936847.71043556m, y=103777334.89364603m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.84m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.84m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752200, -122.417200)
-    Offset coord: (37.752208, -122.417239)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752800, -122.417000)
-    Offset coord: (37.752808, -122.417039)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7522, lon=-122.4172
-    [1] CENTER: lat=37.7528, lon=-122.417
-    [2] CENTER: lat=37.7534, lon=-122.4168
-    [3] CENTER: lat=37.754, lon=-122.4166
-    [4] OFFSET: lat=37.754008025694674, lon=-122.41663851563666
-    [5] OFFSET: lat=37.75340802579015, lon=-122.41683851562652
-    [6] OFFSET: lat=37.752808025916124, lon=-122.41703851560624
-    [7] OFFSET: lat=37.75220802601162, lon=-122.41723851559607
-📍 Creating BlockfacePolygonRenderer for Capp St EVEN
-  🎨 Renderer config for Capp St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-✅ PoC: Added blockface overlays to map
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=15
-🔧 DEBUG: Developer button tapped! Panel will expand
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=15
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=15
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-🔄 Developer settings changed - reloading overlays
-🔧 loadOverlays called with shouldShowOverlays=false
-🔧 loadOverlays: initialized lastUserPermitAreas=["I"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=0, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=1, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=2, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=3, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=4, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=5, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=6, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=7, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=BB, boundaryIndex=8, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=C, boundaryIndex=6, validAreas=["C", "G"]
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
-  🎯 Multi-permit boundary matched: zone=F, boundaryIndex=6, validAreas=["F", "G"]
-  🎯 Multi-permit boundary matched: zone=F, boundaryIndex=7, validAreas=["F", "G"]
-  🎯 Multi-permit boundary matched: zone=F, boundaryIndex=8, validAreas=["F", "G"]
-  🎯 Multi-permit boundary matched: zone=G, boundaryIndex=14, validAreas=["F", "G"]
-  🎯 Multi-permit boundary matched: zone=G, boundaryIndex=15, validAreas=["F", "G"]
-  🎯 Multi-permit boundary matched: zone=G, boundaryIndex=16, validAreas=["F", "G"]
-  🎯 Multi-permit boundary matched: zone=G, boundaryIndex=29, validAreas=["C", "G"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=12, validAreas=["HV", "S"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=13, validAreas=["HV", "S"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=14, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=15, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=16, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=17, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=18, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=19, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=20, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=21, validAreas=["HV", "Q", "S"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=22, validAreas=["HV", "Q", "S"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=23, validAreas=["HV", "R"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=24, validAreas=["HV", "R"]
-  🎯 Multi-permit boundary matched: zone=HV, boundaryIndex=25, validAreas=["HV", "R"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=46, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=47, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=48, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=49, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=50, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=51, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=52, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=53, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=54, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=I, boundaryIndex=55, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=26, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=27, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=28, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=29, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=30, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=31, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=32, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=33, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=L, boundaryIndex=34, validAreas=["BB", "L"]
-  🎯 Multi-permit boundary matched: zone=P, boundaryIndex=10, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=P, boundaryIndex=11, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=P, boundaryIndex=12, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=P, boundaryIndex=13, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=13, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=14, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=15, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=16, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=17, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=18, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=19, validAreas=["HV", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=20, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=21, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=22, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=23, validAreas=["P", "Q"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=24, validAreas=["HV", "Q", "S"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=25, validAreas=["HV", "Q", "S"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=26, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=27, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=28, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=29, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=30, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=31, validAreas=["Q", "R"]
-  🎯 Multi-permit boundary matched: zone=Q, boundaryIndex=32, validAreas=["Q", "R"]
-  🎯 Multi-permit boundary matched: zone=R, boundaryIndex=14, validAreas=["HV", "R"]
-  🎯 Multi-permit boundary matched: zone=R, boundaryIndex=15, validAreas=["HV", "R"]
-  🎯 Multi-permit boundary matched: zone=R, boundaryIndex=16, validAreas=["HV", "R"]
-  🎯 Multi-permit boundary matched: zone=R, boundaryIndex=17, validAreas=["Q", "R"]
-  🎯 Multi-permit boundary matched: zone=R, boundaryIndex=18, validAreas=["Q", "R"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=0, validAreas=["HV", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=1, validAreas=["HV", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=63, validAreas=["HV", "Q", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=64, validAreas=["HV", "Q", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=65, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=66, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=67, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=68, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=69, validAreas=["Q", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=70, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=71, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=72, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=73, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=74, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=75, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=76, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=77, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=78, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=S, boundaryIndex=79, validAreas=["I", "S"]
-  🎯 Multi-permit boundary matched: zone=W, boundaryIndex=26, validAreas=["W", "X"]
-  🎯 Multi-permit boundary matched: zone=X, boundaryIndex=17, validAreas=["W", "X"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=34, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=35, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=36, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=37, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=38, validAreas=["S", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=39, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=40, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=41, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=42, validAreas=["I", "Z"]
-  🎯 Multi-permit boundary matched: zone=Z, boundaryIndex=43, validAreas=["I", "Z"]
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
-🚧 PoC: Hiding zone overlays (blockface mode active)
-🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area
-Returning cached blockfaces
-🚧 PoC: Loaded 15 blockfaces
-🔧 DEBUG: Adding 15 blockface overlays
-🔧 DEBUG: Blockface 0 (Mission St, EVEN side)
-  Centerline points: 4
-  First point: lat=37.7564, lon=-122.4193
-  Second point: lat=37.757, lon=-122.4191
-  Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7564, lon=-122.4193
-  First map point: x=42935281.836942226m, y=103773373.88404742m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.88m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.88m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.756400, -122.419300)
-    Offset coord: (37.756408, -122.419339)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  Point 1 offset:
     Normalized perp: dx=-0.967, dy=-0.255
     Offset distance: 29.7m
     Center coord: (37.757000, -122.419100)
     Offset coord: (37.757008, -122.419139)
     Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7564, lon=-122.4193
-    [1] CENTER: lat=37.757, lon=-122.4191
-    [2] CENTER: lat=37.7576, lon=-122.4189
-    [3] CENTER: lat=37.7582, lon=-122.4187
-    [4] OFFSET: lat=37.75820802481307, lon=-122.41873851577866
-    [5] OFFSET: lat=37.75760802490858, lon=-122.4189385157685
-    [6] OFFSET: lat=37.757008025034516, lon=-122.41913851574823
-    [7] OFFSET: lat=37.75640802513003, lon=-122.41933851573809
-  Created polygon with 8 points
+  Point 1 offset:
+    Normalized perp: dx=-0.967, dy=-0.255
+    Offset distance: 29.7m
+    Center coord: (37.757600, -122.418900)
+    Offset coord: (37.757608, -122.418939)
+    Coord delta: dlat=0.00000802, dlon=-0.00003852
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.757, lon=-122.4191
+    [1] CENTER: lat=37.7576, lon=-122.4189
+    [2] OFFSET: lat=37.75760802493902, lon=-122.41893851575837
+    [3] OFFSET: lat=37.75700802500409, lon=-122.41913851575836
+  Created polygon with 4 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
 📍 Creating BlockfacePolygonRenderer for Mission St EVEN
   🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
   ✅ Adding centerline polyline overlay to map
 📍 Creating BlockfacePolylineRenderer for Mission St
-🔧 DEBUG: Blockface 1 (Mission St, ODD side)
-  Centerline points: 4
-  First point: lat=37.7565, lon=-122.4189
-  Second point: lat=37.7571, lon=-122.4187
-  Direction: dlat=0.0005999999999986017, dlon=0.00019999999999242846
 
 🔧 DEBUG: Perpendicular calculation
   Side: ODD (offsetToRight=false)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7565, lon=-122.4189
-  First map point: x=42935580.098560005m, y=103773279.57155441m
+  First coord: lat=37.7571, lon=-122.4187
+  First map point: x=42935729.22936889m, y=103772713.69391921m
   Point 0:
     Forward vector: dx=149.13m, dy=-565.88m
     Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
@@ -916,42 +291,29 @@ Returning cached blockfaces
   Point 0 offset:
     Normalized perp: dx=0.967, dy=0.255
     Offset distance: 29.7m
-    Center coord: (37.756500, -122.418900)
-    Offset coord: (37.756492, -122.418861)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
+    Center coord: (37.757100, -122.418700)
+    Offset coord: (37.757092, -122.418661)
+    Coord delta: dlat=-0.00000802, dlon=0.00003852
   Point 1 offset:
     Normalized perp: dx=0.967, dy=0.255
     Offset distance: 29.7m
-    Center coord: (37.757100, -122.418700)
-    Offset coord: (37.757092, -122.418661)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7565, lon=-122.4189
-    [1] CENTER: lat=37.7571, lon=-122.4187
-    [2] CENTER: lat=37.7577, lon=-122.4185
-    [3] CENTER: lat=37.7583, lon=-122.4183
-    [4] OFFSET: lat=37.75829197520706, lon=-122.41826148421795
-    [5] OFFSET: lat=37.75769197511154, lon=-122.41846148422809
-    [6] OFFSET: lat=37.757091974985606, lon=-122.41866148424839
-    [7] OFFSET: lat=37.756491974890075, lon=-122.41886148425853
-  Created polygon with 8 points
-  Width setting: 0.0003 degrees (TESTING: forced large)
-  ✅ Adding polygon overlay to map
+    Center coord: (37.757700, -122.418500)
+    Offset coord: (37.757692, -122.418461)
+    Coord delta: dlat=-0.00000802, dlon=0.00003852
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7571, lon=-122.4187
+    [1] CENTER: lat=37.7577, lon=-122.4185
+    [2] OFFSET: lat=37.757691975081116, lon=-122.41846148423824
+    [3] OFFSET: lat=37.75709197501603, lon=-122.41866148423826
 📍 Creating BlockfacePolygonRenderer for Mission St ODD
   🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-  ✅ Adding centerline polyline overlay to map
 📍 Creating BlockfacePolylineRenderer for Mission St
-🔧 DEBUG: Blockface 2 (Mission St, EVEN side)
-  Centerline points: 4
-  First point: lat=37.7582, lon=-122.4187
-  Second point: lat=37.7588, lon=-122.4185
-  Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
 
 🔧 DEBUG: Perpendicular calculation
   Side: EVEN (offsetToRight=true)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7582, lon=-122.4187
-  First map point: x=42935729.22936889m, y=103771676.23966803m
+  First coord: lat=37.7576, lon=-122.4189
+  First map point: x=42935580.098560005m, y=103772242.12571737m
   Point 0:
     Forward vector: dx=149.13m, dy=-565.89m
     Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
@@ -961,37 +323,29 @@ Returning cached blockfaces
   Point 0 offset:
     Normalized perp: dx=-0.967, dy=-0.255
     Offset distance: 29.7m
-    Center coord: (37.758200, -122.418700)
-    Offset coord: (37.758208, -122.418739)
+    Center coord: (37.757600, -122.418900)
+    Offset coord: (37.757608, -122.418939)
     Coord delta: dlat=0.00000802, dlon=-0.00003852
   Point 1 offset:
     Normalized perp: dx=-0.967, dy=-0.255
     Offset distance: 29.7m
-    Center coord: (37.758800, -122.418500)
-    Offset coord: (37.758808, -122.418539)
+    Center coord: (37.758200, -122.418700)
+    Offset coord: (37.758208, -122.418739)
     Coord delta: dlat=0.00000802, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7582, lon=-122.4187
-    [1] CENTER: lat=37.7588, lon=-122.4185
-    [2] CENTER: lat=37.7594, lon=-122.4183
-    [3] CENTER: lat=37.76, lon=-122.4181
-    [4] OFFSET: lat=37.76000802443522, lon=-122.41813851583952
-    [5] OFFSET: lat=37.75940802453074, lon=-122.41833851582938
-    [6] OFFSET: lat=37.75880802465667, lon=-122.41853851580908
-    [7] OFFSET: lat=37.758208024752214, lon=-122.41873851579895
-  Created polygon with 8 points
-  Width setting: 0.0003 degrees (TESTING: forced large)
-  ✅ Adding polygon overlay to map
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7576, lon=-122.4189
+    [1] CENTER: lat=37.7582, lon=-122.4187
+    [2] OFFSET: lat=37.75820802481307, lon=-122.41873851577866
+    [3] OFFSET: lat=37.75760802487815, lon=-122.41893851577865
 📍 Creating BlockfacePolygonRenderer for Mission St EVEN
   🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-  ✅ Adding centerline polyline overlay to map
 📍 Creating BlockfacePolylineRenderer for Mission St
 
 🔧 DEBUG: Perpendicular calculation
   Side: ODD (offsetToRight=false)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7583, lon=-122.4183
-  First map point: x=42936027.49098667m, y=103771581.92488027m
+  First coord: lat=37.7577, lon=-122.4185
+  First map point: x=42935878.360177785m, y=103772147.81169455m
   Point 0:
     Forward vector: dx=149.13m, dy=-565.89m
     Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
@@ -1001,96 +355,20 @@ Returning cached blockfaces
   Point 0 offset:
     Normalized perp: dx=0.967, dy=0.255
     Offset distance: 29.7m
+    Center coord: (37.757700, -122.418500)
+    Offset coord: (37.757692, -122.418461)
+    Coord delta: dlat=-0.00000802, dlon=0.00003852
+  Point 1 offset:
+    Normalized perp: dx=0.967, dy=0.255
+    Offset distance: 29.7m
     Center coord: (37.758300, -122.418300)
     Offset coord: (37.758292, -122.418261)
     Coord delta: dlat=-0.00000802, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.758900, -122.418100)
-    Offset coord: (37.758892, -122.418061)
-    Coord delta: dlat=-0.00000802, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7583, lon=-122.4183
-    [1] CENTER: lat=37.7589, lon=-122.4181
-    [2] CENTER: lat=37.7595, lon=-122.4179
-    [3] CENTER: lat=37.7601, lon=-122.4177
-    [4] OFFSET: lat=37.76009197558489, lon=-122.4176614841571
-    [5] OFFSET: lat=37.75949197548939, lon=-122.41786148416725
-    [6] OFFSET: lat=37.758891975363426, lon=-122.41806148418753
-    [7] OFFSET: lat=37.75829197526791, lon=-122.41826148419767
-📍 Creating BlockfacePolygonRenderer for Mission St ODD
-  🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-📍 Creating BlockfacePolylineRenderer for Mission St
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7522, lon=-122.4185
-  First map point: x=42935878.360177785m, y=103777334.89364603m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.84m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.84m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752200, -122.418500)
-    Offset coord: (37.752208, -122.418539)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752800, -122.418300)
-    Offset coord: (37.752808, -122.418339)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7522, lon=-122.4185
-    [1] CENTER: lat=37.7528, lon=-122.4183
-    [2] CENTER: lat=37.7534, lon=-122.4181
-    [3] CENTER: lat=37.754, lon=-122.4179
-    [4] OFFSET: lat=37.754008025694674, lon=-122.41793851563665
-    [5] OFFSET: lat=37.75340802579015, lon=-122.41813851562651
-    [6] OFFSET: lat=37.752808025916124, lon=-122.41833851560624
-    [7] OFFSET: lat=37.75220802601162, lon=-122.41853851559607
-📍 Creating BlockfacePolygonRenderer for Mission St EVEN
-  🎨 Renderer config for Mission St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-📍 Creating BlockfacePolylineRenderer for Mission St
-
-🔧 DEBUG: Perpendicular calculation
-  Side: ODD (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7541, lon=-122.4181
-  First map point: x=42936176.62179556m, y=103775543.03620306m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.86m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=565.86m, dy=149.13m
-    Perp angle: 14.8°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.754100, -122.418100)
-    Offset coord: (37.754092, -122.418061)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.754700, -122.417900)
-    Offset coord: (37.754692, -122.417861)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7541, lon=-122.4181
-    [1] CENTER: lat=37.7547, lon=-122.4179
-    [2] CENTER: lat=37.7553, lon=-122.4177
-    [3] CENTER: lat=37.7559, lon=-122.4175
-    [4] OFFSET: lat=37.75589197470327, lon=-122.41746148429911
-    [5] OFFSET: lat=37.755291974607765, lon=-122.41766148430924
-    [6] OFFSET: lat=37.75469197448184, lon=-122.41786148432953
-    [7] OFFSET: lat=37.75409197438632, lon=-122.41806148433967
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7577, lon=-122.4185
+    [1] CENTER: lat=37.7583, lon=-122.4183
+    [2] OFFSET: lat=37.75829197520706, lon=-122.41826148421795
+    [3] OFFSET: lat=37.757691975141974, lon=-122.41846148421794
 📍 Creating BlockfacePolygonRenderer for Mission St ODD
   🎨 Renderer config for Mission St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for Mission St
@@ -1118,15 +396,11 @@ Returning cached blockfaces
     Center coord: (37.757000, -122.420500)
     Offset coord: (37.757008, -122.420539)
     Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
+  🔷 COMPLETE POLYGON - Total vertices: 4
     [0] CENTER: lat=37.7564, lon=-122.4207
     [1] CENTER: lat=37.757, lon=-122.4205
-    [2] CENTER: lat=37.7576, lon=-122.4203
-    [3] CENTER: lat=37.7582, lon=-122.4201
-    [4] OFFSET: lat=37.75820802481307, lon=-122.42013851577866
-    [5] OFFSET: lat=37.75760802490858, lon=-122.4203385157685
-    [6] OFFSET: lat=37.757008025034516, lon=-122.42053851574822
-    [7] OFFSET: lat=37.75640802513003, lon=-122.42073851573808
+    [2] OFFSET: lat=37.75700802506495, lon=-122.42053851573809
+    [3] OFFSET: lat=37.75640802513003, lon=-122.42073851573808
 📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
   🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for Valencia St
@@ -1154,15 +428,11 @@ Returning cached blockfaces
     Center coord: (37.757100, -122.420100)
     Offset coord: (37.757092, -122.420061)
     Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
+  🔷 COMPLETE POLYGON - Total vertices: 4
     [0] CENTER: lat=37.7565, lon=-122.4203
     [1] CENTER: lat=37.7571, lon=-122.4201
-    [2] CENTER: lat=37.7577, lon=-122.4199
-    [3] CENTER: lat=37.7583, lon=-122.4197
-    [4] OFFSET: lat=37.75829197520706, lon=-122.41966148421795
-    [5] OFFSET: lat=37.75769197511154, lon=-122.4198614842281
-    [6] OFFSET: lat=37.757091974985606, lon=-122.42006148424841
-    [7] OFFSET: lat=37.756491974890075, lon=-122.42026148425853
+    [2] OFFSET: lat=37.75709197495517, lon=-122.42006148425854
+    [3] OFFSET: lat=37.756491974890075, lon=-122.42026148425853
 📍 Creating BlockfacePolygonRenderer for Valencia St ODD
   🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for Valencia St
@@ -1170,8 +440,72 @@ Returning cached blockfaces
 🔧 DEBUG: Perpendicular calculation
   Side: EVEN (offsetToRight=true)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7582, lon=-122.4201
-  First map point: x=42934685.31370666m, y=103771676.23966803m
+  First coord: lat=37.757, lon=-122.4205
+  First map point: x=42934387.052088894m, y=103772808.00717713m
+  Point 0:
+    Forward vector: dx=149.13m, dy=-565.88m
+    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
+    Perp vector (raw): dx=-565.88m, dy=-149.13m
+    Perp angle: -165.2°
+    Angle difference: -90.0° (should be ±90°)
+  Point 0 offset:
+    Normalized perp: dx=-0.967, dy=-0.255
+    Offset distance: 29.7m
+    Center coord: (37.757000, -122.420500)
+    Offset coord: (37.757008, -122.420539)
+    Coord delta: dlat=0.00000803, dlon=-0.00003852
+  Point 1 offset:
+    Normalized perp: dx=-0.967, dy=-0.255
+    Offset distance: 29.7m
+    Center coord: (37.757600, -122.420300)
+    Offset coord: (37.757608, -122.420339)
+    Coord delta: dlat=0.00000802, dlon=-0.00003852
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.757, lon=-122.4205
+    [1] CENTER: lat=37.7576, lon=-122.4203
+    [2] OFFSET: lat=37.75760802493902, lon=-122.42033851575836
+    [3] OFFSET: lat=37.75700802500409, lon=-122.42053851575837
+📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
+  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
+📍 Creating BlockfacePolylineRenderer for Valencia St
+
+🔧 DEBUG: Perpendicular calculation
+  Side: ODD (offsetToRight=false)
+  Width: 0.0003° ≈ 29.699999999999996m
+  First coord: lat=37.7571, lon=-122.4201
+  First map point: x=42934685.31370666m, y=103772713.69391921m
+  Point 0:
+    Forward vector: dx=149.13m, dy=-565.88m
+    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
+    Perp vector (raw): dx=565.88m, dy=149.13m
+    Perp angle: 14.8°
+    Angle difference: 90.0° (should be ±90°)
+  Point 0 offset:
+    Normalized perp: dx=0.967, dy=0.255
+    Offset distance: 29.7m
+    Center coord: (37.757100, -122.420100)
+    Offset coord: (37.757092, -122.420061)
+    Coord delta: dlat=-0.00000802, dlon=0.00003852
+  Point 1 offset:
+    Normalized perp: dx=0.967, dy=0.255
+    Offset distance: 29.7m
+    Center coord: (37.757700, -122.419900)
+    Offset coord: (37.757692, -122.419861)
+    Coord delta: dlat=-0.00000802, dlon=0.00003852
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7571, lon=-122.4201
+    [1] CENTER: lat=37.7577, lon=-122.4199
+    [2] OFFSET: lat=37.757691975081116, lon=-122.41986148423824
+    [3] OFFSET: lat=37.75709197501603, lon=-122.42006148423826
+📍 Creating BlockfacePolygonRenderer for Valencia St ODD
+  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
+📍 Creating BlockfacePolylineRenderer for Valencia St
+
+🔧 DEBUG: Perpendicular calculation
+  Side: EVEN (offsetToRight=true)
+  Width: 0.0003° ≈ 29.699999999999996m
+  First coord: lat=37.7576, lon=-122.4203
+  First map point: x=42934536.182897784m, y=103772242.12571737m
   Point 0:
     Forward vector: dx=149.13m, dy=-565.89m
     Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
@@ -1181,24 +515,20 @@ Returning cached blockfaces
   Point 0 offset:
     Normalized perp: dx=-0.967, dy=-0.255
     Offset distance: 29.7m
-    Center coord: (37.758200, -122.420100)
-    Offset coord: (37.758208, -122.420139)
+    Center coord: (37.757600, -122.420300)
+    Offset coord: (37.757608, -122.420339)
     Coord delta: dlat=0.00000802, dlon=-0.00003852
   Point 1 offset:
     Normalized perp: dx=-0.967, dy=-0.255
     Offset distance: 29.7m
-    Center coord: (37.758800, -122.419900)
-    Offset coord: (37.758808, -122.419939)
+    Center coord: (37.758200, -122.420100)
+    Offset coord: (37.758208, -122.420139)
     Coord delta: dlat=0.00000802, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7582, lon=-122.4201
-    [1] CENTER: lat=37.7588, lon=-122.4199
-    [2] CENTER: lat=37.7594, lon=-122.4197
-    [3] CENTER: lat=37.76, lon=-122.4195
-    [4] OFFSET: lat=37.76000802443522, lon=-122.41953851583952
-    [5] OFFSET: lat=37.75940802453074, lon=-122.41973851582938
-    [6] OFFSET: lat=37.75880802465667, lon=-122.41993851580908
-    [7] OFFSET: lat=37.758208024752214, lon=-122.42013851579897
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7576, lon=-122.4203
+    [1] CENTER: lat=37.7582, lon=-122.4201
+    [2] OFFSET: lat=37.75820802481307, lon=-122.42013851577866
+    [3] OFFSET: lat=37.75760802487815, lon=-122.42033851577865
 📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
   🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for Valencia St
@@ -1206,8 +536,8 @@ Returning cached blockfaces
 🔧 DEBUG: Perpendicular calculation
   Side: ODD (offsetToRight=false)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7583, lon=-122.4197
-  First map point: x=42934983.575324446m, y=103771581.92488027m
+  First coord: lat=37.7577, lon=-122.4199
+  First map point: x=42934834.44451556m, y=103772147.81169455m
   Point 0:
     Forward vector: dx=149.13m, dy=-565.89m
     Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
@@ -1217,96 +547,20 @@ Returning cached blockfaces
   Point 0 offset:
     Normalized perp: dx=0.967, dy=0.255
     Offset distance: 29.7m
+    Center coord: (37.757700, -122.419900)
+    Offset coord: (37.757692, -122.419861)
+    Coord delta: dlat=-0.00000802, dlon=0.00003852
+  Point 1 offset:
+    Normalized perp: dx=0.967, dy=0.255
+    Offset distance: 29.7m
     Center coord: (37.758300, -122.419700)
     Offset coord: (37.758292, -122.419661)
     Coord delta: dlat=-0.00000802, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.758900, -122.419500)
-    Offset coord: (37.758892, -122.419461)
-    Coord delta: dlat=-0.00000802, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7583, lon=-122.4197
-    [1] CENTER: lat=37.7589, lon=-122.4195
-    [2] CENTER: lat=37.7595, lon=-122.4193
-    [3] CENTER: lat=37.7601, lon=-122.4191
-    [4] OFFSET: lat=37.76009197558489, lon=-122.41906148415708
-    [5] OFFSET: lat=37.75949197548939, lon=-122.41926148416724
-    [6] OFFSET: lat=37.758891975363426, lon=-122.41946148418752
-    [7] OFFSET: lat=37.75829197526791, lon=-122.41966148419768
-📍 Creating BlockfacePolygonRenderer for Valencia St ODD
-  🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-📍 Creating BlockfacePolylineRenderer for Valencia St
-
-🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7522, lon=-122.4199
-  First map point: x=42934834.44451556m, y=103777334.89364603m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.84m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.84m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752200, -122.419900)
-    Offset coord: (37.752208, -122.419939)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
-    Offset distance: 29.7m
-    Center coord: (37.752800, -122.419700)
-    Offset coord: (37.752808, -122.419739)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7522, lon=-122.4199
-    [1] CENTER: lat=37.7528, lon=-122.4197
-    [2] CENTER: lat=37.7534, lon=-122.4195
-    [3] CENTER: lat=37.754, lon=-122.4193
-    [4] OFFSET: lat=37.754008025694674, lon=-122.41933851563665
-    [5] OFFSET: lat=37.75340802579015, lon=-122.41953851562651
-    [6] OFFSET: lat=37.752808025916124, lon=-122.41973851560623
-    [7] OFFSET: lat=37.75220802601162, lon=-122.41993851559607
-📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
-  🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-📍 Creating BlockfacePolylineRenderer for Valencia St
-
-🔧 DEBUG: Perpendicular calculation
-  Side: ODD (offsetToRight=false)
-  Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7523, lon=-122.4195
-  First map point: x=42935132.706133336m, y=103777240.5865067m
-  Point 0:
-    Forward vector: dx=149.13m, dy=-565.85m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=565.85m, dy=149.13m
-    Perp angle: 14.8°
-    Angle difference: 90.0° (should be ±90°)
-  Point 0 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.752300, -122.419500)
-    Offset coord: (37.752292, -122.419461)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  Point 1 offset:
-    Normalized perp: dx=0.967, dy=0.255
-    Offset distance: 29.7m
-    Center coord: (37.752900, -122.419300)
-    Offset coord: (37.752892, -122.419261)
-    Coord delta: dlat=-0.00000803, dlon=0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7523, lon=-122.4195
-    [1] CENTER: lat=37.7529, lon=-122.4193
-    [2] CENTER: lat=37.7535, lon=-122.4191
-    [3] CENTER: lat=37.7541, lon=-122.4189
-    [4] OFFSET: lat=37.75409197432546, lon=-122.41886148435995
-    [5] OFFSET: lat=37.753491974229945, lon=-122.4190614843701
-    [6] OFFSET: lat=37.75289197410399, lon=-122.41926148439039
-    [7] OFFSET: lat=37.752291974008486, lon=-122.41946148440053
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7577, lon=-122.4199
+    [1] CENTER: lat=37.7583, lon=-122.4197
+    [2] OFFSET: lat=37.75829197520706, lon=-122.41966148421795
+    [3] OFFSET: lat=37.757691975141974, lon=-122.41986148421795
 📍 Creating BlockfacePolygonRenderer for Valencia St ODD
   🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for Valencia St
@@ -1314,35 +568,31 @@ Returning cached blockfaces
 🔧 DEBUG: Perpendicular calculation
   Side: NORTH (offsetToRight=false)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.752, lon=-122.4181
-  First map point: x=42936176.62179556m, y=103777523.50754236m
+  First coord: lat=37.7576, lon=-122.4195
+  First map point: x=42935132.706133336m, y=103772242.12571737m
   Point 0:
-    Forward vector: dx=-298.26m, dy=0.00m
-    Forward angle: 180.0° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-0.00m, dy=-298.26m
-    Perp angle: -90.0°
-    Angle difference: -270.0° (should be ±90°)
+    Forward vector: dx=447.39m, dy=0.00m
+    Forward angle: 0.0° (0°=east, 90°=south, -90°=north)
+    Perp vector (raw): dx=-0.00m, dy=447.39m
+    Perp angle: 90.0°
+    Angle difference: 90.0° (should be ±90°)
   Point 0 offset:
-    Normalized perp: dx=-0.000, dy=-1.000
+    Normalized perp: dx=-0.000, dy=1.000
     Offset distance: 29.7m
-    Center coord: (37.752000, -122.418100)
-    Offset coord: (37.752031, -122.418100)
-    Coord delta: dlat=0.00003149, dlon=0.00000000
+    Center coord: (37.757600, -122.419500)
+    Offset coord: (37.757569, -122.419500)
+    Coord delta: dlat=-0.00003149, dlon=0.00000000
   Point 1 offset:
-    Normalized perp: dx=-0.000, dy=-1.000
+    Normalized perp: dx=-0.000, dy=1.000
     Offset distance: 29.7m
-    Center coord: (37.752000, -122.418500)
-    Offset coord: (37.752031, -122.418500)
-    Coord delta: dlat=0.00003149, dlon=0.00000000
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.752, lon=-122.4181
-    [1] CENTER: lat=37.752, lon=-122.4185
-    [2] CENTER: lat=37.752, lon=-122.419
-    [3] CENTER: lat=37.752, lon=-122.4195
-    [4] OFFSET: lat=37.75203149294341, lon=-122.4195
-    [5] OFFSET: lat=37.75203149294341, lon=-122.419
-    [6] OFFSET: lat=37.75203149294341, lon=-122.4185
-    [7] OFFSET: lat=37.75203149294341, lon=-122.4181
+    Center coord: (37.757600, -122.418900)
+    Offset coord: (37.757569, -122.418900)
+    Coord delta: dlat=-0.00003149, dlon=0.00000000
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7576, lon=-122.4195
+    [1] CENTER: lat=37.7576, lon=-122.4189
+    [2] OFFSET: lat=37.75756850942681, lon=-122.4189
+    [3] OFFSET: lat=37.75756850942681, lon=-122.4195
 📍 Creating BlockfacePolygonRenderer for 24th St NORTH
   🎨 Renderer config for 24th St NORTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for 24th St
@@ -1350,82 +600,100 @@ Returning cached blockfaces
 🔧 DEBUG: Perpendicular calculation
   Side: SOUTH (offsetToRight=false)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7518, lon=-122.4195
-  First map point: x=42935132.706133336m, y=103777712.12092885m
+  First coord: lat=37.7574, lon=-122.4189
+  First map point: x=42935580.098560005m, y=103772430.7533806m
   Point 0:
-    Forward vector: dx=372.83m, dy=0.00m
-    Forward angle: 0.0° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-0.00m, dy=372.83m
-    Perp angle: 90.0°
-    Angle difference: 90.0° (should be ±90°)
+    Forward vector: dx=-447.39m, dy=0.00m
+    Forward angle: 180.0° (0°=east, 90°=south, -90°=north)
+    Perp vector (raw): dx=-0.00m, dy=-447.39m
+    Perp angle: -90.0°
+    Angle difference: -270.0° (should be ±90°)
   Point 0 offset:
-    Normalized perp: dx=-0.000, dy=1.000
+    Normalized perp: dx=-0.000, dy=-1.000
     Offset distance: 29.7m
-    Center coord: (37.751800, -122.419500)
-    Offset coord: (37.751769, -122.419500)
-    Coord delta: dlat=-0.00003149, dlon=0.00000000
+    Center coord: (37.757400, -122.418900)
+    Offset coord: (37.757431, -122.418900)
+    Coord delta: dlat=0.00003149, dlon=0.00000000
   Point 1 offset:
-    Normalized perp: dx=-0.000, dy=1.000
+    Normalized perp: dx=-0.000, dy=-1.000
     Offset distance: 29.7m
-    Center coord: (37.751800, -122.419000)
-    Offset coord: (37.751769, -122.419000)
-    Coord delta: dlat=-0.00003149, dlon=0.00000000
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7518, lon=-122.4195
-    [1] CENTER: lat=37.7518, lon=-122.419
-    [2] CENTER: lat=37.7518, lon=-122.4185
-    [3] CENTER: lat=37.7518, lon=-122.4181
-    [4] OFFSET: lat=37.751768506958065, lon=-122.4181
-    [5] OFFSET: lat=37.751768506958065, lon=-122.4185
-    [6] OFFSET: lat=37.751768506958065, lon=-122.419
-    [7] OFFSET: lat=37.751768506958065, lon=-122.4195
+    Center coord: (37.757400, -122.419500)
+    Offset coord: (37.757431, -122.419500)
+    Coord delta: dlat=0.00003149, dlon=0.00000000
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7574, lon=-122.4189
+    [1] CENTER: lat=37.7574, lon=-122.4195
+    [2] OFFSET: lat=37.75743149064491, lon=-122.4195
+    [3] OFFSET: lat=37.75743149064491, lon=-122.4189
 📍 Creating BlockfacePolygonRenderer for 24th St SOUTH
   🎨 Renderer config for 24th St SOUTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for 24th St
 
 🔧 DEBUG: Perpendicular calculation
-  Side: EVEN (offsetToRight=true)
+  Side: NORTH (offsetToRight=false)
   Width: 0.0003° ≈ 29.699999999999996m
-  First coord: lat=37.7522, lon=-122.4172
-  First map point: x=42936847.71043556m, y=103777334.89364603m
+  First coord: lat=37.757, lon=-122.4195
+  First map point: x=42935132.706133336m, y=103772808.00717713m
   Point 0:
-    Forward vector: dx=149.13m, dy=-565.84m
-    Forward angle: -75.2° (0°=east, 90°=south, -90°=north)
-    Perp vector (raw): dx=-565.84m, dy=-149.13m
-    Perp angle: -165.2°
-    Angle difference: -90.0° (should be ±90°)
+    Forward vector: dx=447.39m, dy=0.00m
+    Forward angle: 0.0° (0°=east, 90°=south, -90°=north)
+    Perp vector (raw): dx=-0.00m, dy=447.39m
+    Perp angle: 90.0°
+    Angle difference: 90.0° (should be ±90°)
   Point 0 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
+    Normalized perp: dx=-0.000, dy=1.000
     Offset distance: 29.7m
-    Center coord: (37.752200, -122.417200)
-    Offset coord: (37.752208, -122.417239)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
+    Center coord: (37.757000, -122.419500)
+    Offset coord: (37.756969, -122.419500)
+    Coord delta: dlat=-0.00003149, dlon=0.00000000
   Point 1 offset:
-    Normalized perp: dx=-0.967, dy=-0.255
+    Normalized perp: dx=-0.000, dy=1.000
     Offset distance: 29.7m
-    Center coord: (37.752800, -122.417000)
-    Offset coord: (37.752808, -122.417039)
-    Coord delta: dlat=0.00000803, dlon=-0.00003852
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7522, lon=-122.4172
-    [1] CENTER: lat=37.7528, lon=-122.417
-    [2] CENTER: lat=37.7534, lon=-122.4168
-    [3] CENTER: lat=37.754, lon=-122.4166
-    [4] OFFSET: lat=37.754008025694674, lon=-122.41663851563666
-    [5] OFFSET: lat=37.75340802579015, lon=-122.41683851562652
-    [6] OFFSET: lat=37.752808025916124, lon=-122.41703851560624
-    [7] OFFSET: lat=37.75220802601162, lon=-122.41723851559607
-📍 Creating BlockfacePolygonRenderer for Capp St EVEN
-  🎨 Renderer config for Capp St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-📍 Creating BlockfacePolylineRenderer for Capp St
+    Center coord: (37.757000, -122.418900)
+    Offset coord: (37.756969, -122.418900)
+    Coord delta: dlat=-0.00003149, dlon=0.00000000
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.757, lon=-122.4195
+    [1] CENTER: lat=37.757, lon=-122.4189
+    [2] OFFSET: lat=37.7569685091714, lon=-122.4189
+    [3] OFFSET: lat=37.7569685091714, lon=-122.4195
+📍 Creating BlockfacePolygonRenderer for 23rd St NORTH
+  🎨 Renderer config for 23rd St NORTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
+📍 Creating BlockfacePolylineRenderer for 23rd St
+
+🔧 DEBUG: Perpendicular calculation
+  Side: SOUTH (offsetToRight=false)
+  Width: 0.0003° ≈ 29.699999999999996m
+  First coord: lat=37.7568, lon=-122.4189
+  First map point: x=42935580.098560005m, y=103772996.6333105m
+  Point 0:
+    Forward vector: dx=-447.39m, dy=0.00m
+    Forward angle: 180.0° (0°=east, 90°=south, -90°=north)
+    Perp vector (raw): dx=-0.00m, dy=-447.39m
+    Perp angle: -90.0°
+    Angle difference: -270.0° (should be ±90°)
+  Point 0 offset:
+    Normalized perp: dx=-0.000, dy=-1.000
+    Offset distance: 29.7m
+    Center coord: (37.756800, -122.418900)
+    Offset coord: (37.756831, -122.418900)
+    Coord delta: dlat=0.00003149, dlon=0.00000000
+  Point 1 offset:
+    Normalized perp: dx=-0.000, dy=-1.000
+    Offset distance: 29.7m
+    Center coord: (37.756800, -122.419500)
+    Offset coord: (37.756831, -122.419500)
+    Coord delta: dlat=0.00003149, dlon=0.00000000
+  🔷 COMPLETE POLYGON - Total vertices: 4
+    [0] CENTER: lat=37.7568, lon=-122.4189
+    [1] CENTER: lat=37.7568, lon=-122.4195
+    [2] OFFSET: lat=37.75683149090032, lon=-122.4195
+    [3] OFFSET: lat=37.75683149090032, lon=-122.4189
+📍 Creating BlockfacePolygonRenderer for 23rd St SOUTH
+  🎨 Renderer config for 23rd St SOUTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
+📍 Creating BlockfacePolylineRenderer for 23rd St
 ✅ PoC: Added blockface overlays to map
-🔧 DEBUG: Developer button tapped! Panel will expand
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
 ✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=90
-🔧 DEBUG: Developer button tapped! Panel will expand
-🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: true
-🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
-✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=90
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=64
