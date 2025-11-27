@@ -36,8 +36,8 @@ extension MKMapView {
 
             // Add polygons if enabled
             if devSettings.showBlockfacePolygons {
-                // Use developer-configured polygon width
-                let laneWidthDegrees = devSettings.blockfacePolygonWidth
+                // TESTING: Force large width to rule out thin polygon rendering artifacts
+                let laneWidthDegrees = 0.0003  // ~36m / 118 feet - should be very visible
 
                 guard let polygonCoords = createParkingLanePolygon(
                     centerline: centerline,
@@ -47,7 +47,7 @@ extension MKMapView {
 
                 if index < 3 {
                     print("  Created polygon with \(polygonCoords.count) points")
-                    print("  Width setting: \(laneWidthDegrees) degrees")
+                    print("  Width setting: \(laneWidthDegrees) degrees (TESTING: forced large)")
                 }
 
                 let polygon = BlockfacePolygon(
@@ -218,9 +218,9 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     private func configureStyle() {
         let devSettings = DeveloperSettings.shared
 
-        // Use developer-configured color and opacity
-        let baseColor = UIColor(hex: devSettings.blockfaceColorHex) ?? UIColor.systemOrange
-        let opacity = devSettings.blockfaceOpacity
+        // TESTING: Force full opacity and bright color to rule out visibility issues
+        let baseColor = UIColor.systemOrange
+        let opacity = 1.0  // 100% opacity for testing
 
         fillColor = baseColor.withAlphaComponent(opacity)
 
@@ -231,7 +231,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
 
         // Debug: Log rendering configuration for first few polygons
         if let bf = blockface {
-            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity), stroke=DISABLED, color=\(devSettings.blockfaceColorHex)")
+            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity) (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)")
         }
     }
 }
