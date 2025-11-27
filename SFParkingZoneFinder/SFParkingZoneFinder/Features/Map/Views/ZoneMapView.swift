@@ -971,18 +971,29 @@ struct ZoneMapView: UIViewRepresentable {
                 }
 
                 // PoC: Load blockface data and add street cleaning overlays
-                loadBlockfaceOverlays(mapView: mapView)
+                loadBlockfaceOverlays(mapView: mapView, isInitialLoad: true)
             }
         }
     }
 
     /// PoC: Load and render blockface data for street cleaning visualization
-    private func loadBlockfaceOverlays(mapView: MKMapView) {
+    private func loadBlockfaceOverlays(mapView: MKMapView, isInitialLoad: Bool = false) {
         // Check feature flag - only load if enabled in developer settings
         let devSettings = DeveloperSettings.shared
         guard devSettings.showBlockfaceOverlays else {
             logger.debug("🚧 PoC: Blockface overlays disabled (feature flag off)")
             return
+        }
+
+        // Zoom to blockface test area on initial load
+        if isInitialLoad {
+            DispatchQueue.main.async {
+                self.logger.info("🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area")
+                let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7541, longitude: -122.4193)
+                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m, shows multiple blocks
+                let blockfaceRegion = MKCoordinateRegion(center: blockfaceCenter, span: blockfaceSpan)
+                mapView.setRegion(blockfaceRegion, animated: true)
+            }
         }
 
         do {
