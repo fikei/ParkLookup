@@ -131,7 +131,7 @@ extension MKMapView {
 
         // Get adjustment parameters from developer settings
         let lonScaleMultiplier = devSettings.blockfaceLonScaleMultiplier
-        let rotationAdjustment = devSettings.blockfaceRotationAdjustment
+        let perpendicularRotation = devSettings.blockfacePerpendicularRotation
 
         var offsetSide: [CLLocationCoordinate2D] = []
 
@@ -184,9 +184,9 @@ extension MKMapView {
                 // because longitude degrees are shorter at this latitude
                 perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
 
-                // Apply rotation adjustment (if any)
-                if abs(rotationAdjustment) > 0.01 {
-                    perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
+                // Apply perpendicular rotation adjustment (if any)
+                if abs(perpendicularRotation) > 0.01 {
+                    perpVector = rotateVector(perpVector, degrees: perpendicularRotation)
                 }
 
                 // Apply direct adjustments if enabled
@@ -241,9 +241,9 @@ extension MKMapView {
                 // Convert back: perpMetric.lon came from dlat, needs 1/cos to become geographic dlon
                 perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
 
-                // Apply rotation adjustment (if any)
-                if abs(rotationAdjustment) > 0.01 {
-                    perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
+                // Apply perpendicular rotation adjustment (if any)
+                if abs(perpendicularRotation) > 0.01 {
+                    perpVector = rotateVector(perpVector, degrees: perpendicularRotation)
                 }
 
                 // Apply direct adjustments if enabled
@@ -279,9 +279,9 @@ extension MKMapView {
                 // Convert back: perpMetric.lon came from dlat, needs 1/cos to become geographic dlon
                 perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
 
-                // Apply rotation adjustment (if any)
-                if abs(rotationAdjustment) > 0.01 {
-                    perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
+                // Apply perpendicular rotation adjustment (if any)
+                if abs(perpendicularRotation) > 0.01 {
+                    perpVector = rotateVector(perpVector, degrees: perpendicularRotation)
                 }
 
                 // Apply direct adjustments if enabled
@@ -423,31 +423,32 @@ private func describeDirection(dlat: Double, dlon: Double) -> String {
     return parts.isEmpty ? "UNCLEAR" : parts.joined(separator: "-")
 }
 
-/// Transform a centerline by applying global rotation and translation
+/// Transform a centerline by applying global rotation, scale, and translation
 private func transformCenterline(_ centerline: [CLLocationCoordinate2D], devSettings: DeveloperSettings) -> [CLLocationCoordinate2D] {
-    let globalRotation = devSettings.blockfaceRotationAdjustment
+    let globalRotation = devSettings.blockfaceGlobalRotation
+    let globalScale = devSettings.blockfaceGlobalScale
     let globalLatShift = devSettings.blockfaceGlobalLatShift
     let globalLonShift = devSettings.blockfaceGlobalLonShift
 
-    print("🔄 transformCenterline: rotation=\(globalRotation)°, latShift=\(globalLatShift), lonShift=\(globalLonShift)")
+    print("🔄 transformCenterline: rotation=\(globalRotation)°, scale=\(globalScale)x, latShift=\(globalLatShift), lonShift=\(globalLonShift)")
 
     // If no transformations, return original
-    if abs(globalRotation) < 0.01 && abs(globalLatShift) < 0.00001 && abs(globalLonShift) < 0.00001 {
+    if abs(globalRotation) < 0.01 && abs(globalScale - 1.0) < 0.001 && abs(globalLatShift) < 0.00001 && abs(globalLonShift) < 0.00001 {
         print("  ⏭️  No transformations needed, returning original")
         return centerline
     }
 
     print("  ✅ Applying transformations...")
 
-    // Calculate centroid for rotation
+    // Calculate centroid for rotation and scaling
     let centroidLat = centerline.map { $0.latitude }.reduce(0, +) / Double(centerline.count)
     let centroidLon = centerline.map { $0.longitude }.reduce(0, +) / Double(centerline.count)
 
     return centerline.map { point in
         var transformed = point
 
-        // Apply rotation around centroid if needed
-        if abs(globalRotation) > 0.01 {
+        // Apply rotation and scale around centroid if needed
+        if abs(globalRotation) > 0.01 || abs(globalScale - 1.0) > 0.001 {
             let radians = globalRotation * .pi / 180
             let cosTheta = cos(radians)
             let sinTheta = sin(radians)
@@ -460,9 +461,13 @@ private func transformCenterline(_ centerline: [CLLocationCoordinate2D], devSett
             let rotatedLat = dlat * cosTheta - dlon * sinTheta
             let rotatedLon = dlat * sinTheta + dlon * cosTheta
 
+            // Apply scale
+            let scaledLat = rotatedLat * globalScale
+            let scaledLon = rotatedLon * globalScale
+
             // Translate back
-            transformed.latitude = centroidLat + rotatedLat
-            transformed.longitude = centroidLon + rotatedLon
+            transformed.latitude = centroidLat + scaledLat
+            transformed.longitude = centroidLon + scaledLon
         }
 
         // Apply global translation

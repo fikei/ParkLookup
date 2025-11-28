@@ -277,12 +277,15 @@ final class DeveloperSettings: ObservableObject {
         }
     }
 
-    /// Blockface rotation adjustment in degrees (fine-tune perpendicular angle)
+    // MARK: - Per-Block Angle Correction (affects perpendicular offset)
+
+    /// Perpendicular rotation adjustment in degrees (fine-tune perpendicular angle for each block)
     /// Positive = rotate clockwise, Negative = rotate counter-clockwise
-    @Published var blockfaceRotationAdjustment: Double {
+    /// This affects the angle of the offset from each centerline
+    @Published var blockfacePerpendicularRotation: Double {
         didSet {
-            print("🔧 blockfaceRotationAdjustment changed: \(oldValue)° → \(blockfaceRotationAdjustment)°")
-            UserDefaults.standard.set(blockfaceRotationAdjustment, forKey: Keys.blockfaceRotationAdjustment)
+            print("🔧 blockfacePerpendicularRotation changed: \(oldValue)° → \(blockfacePerpendicularRotation)°")
+            UserDefaults.standard.set(blockfacePerpendicularRotation, forKey: Keys.blockfacePerpendicularRotation)
             forceReloadOverlays()
             print("  → forceReloadOverlays() called, reloadTrigger now: \(reloadTrigger)")
         }
@@ -308,6 +311,26 @@ final class DeveloperSettings: ObservableObject {
     @Published var blockfaceDirectLonAdjust: Double {
         didSet {
             UserDefaults.standard.set(blockfaceDirectLonAdjust, forKey: Keys.blockfaceDirectLonAdjust)
+            forceReloadOverlays()
+        }
+    }
+
+    // MARK: - Global Transformations (affects entire plotted area)
+
+    /// Global rotation of entire blockface dataset in degrees
+    /// Rotates all centerlines around their collective centroid
+    @Published var blockfaceGlobalRotation: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceGlobalRotation, forKey: Keys.blockfaceGlobalRotation)
+            forceReloadOverlays()
+        }
+    }
+
+    /// Global scale of entire blockface dataset
+    /// Scales all centerlines from their collective centroid
+    @Published var blockfaceGlobalScale: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceGlobalScale, forKey: Keys.blockfaceGlobalScale)
             forceReloadOverlays()
         }
     }
@@ -340,7 +363,7 @@ final class DeveloperSettings: ObservableObject {
     /// Capture current blockface calibration values
     func captureBlockfaceCalibration() {
         capturedLonScale = blockfaceLonScaleMultiplier
-        capturedRotation = blockfaceRotationAdjustment
+        capturedRotation = blockfacePerpendicularRotation
         capturedWidth = blockfacePolygonWidth
         capturedDirectLat = blockfaceDirectLatAdjust
         capturedDirectLon = blockfaceDirectLonAdjust
@@ -474,10 +497,12 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceColorHex = "dev.blockfaceColorHex"
         static let blockfaceOpacity = "dev.blockfaceOpacity"
         static let blockfaceLonScaleMultiplier = "dev.blockfaceLonScaleMultiplier"
-        static let blockfaceRotationAdjustment = "dev.blockfaceRotationAdjustment"
+        static let blockfacePerpendicularRotation = "dev.blockfacePerpendicularRotation"
         static let blockfaceUseDirectOffset = "dev.blockfaceUseDirectOffset"
         static let blockfaceDirectLatAdjust = "dev.blockfaceDirectLatAdjust"
         static let blockfaceDirectLonAdjust = "dev.blockfaceDirectLonAdjust"
+        static let blockfaceGlobalRotation = "dev.blockfaceGlobalRotation"
+        static let blockfaceGlobalScale = "dev.blockfaceGlobalScale"
         static let blockfaceGlobalLatShift = "dev.blockfaceGlobalLatShift"
         static let blockfaceGlobalLonShift = "dev.blockfaceGlobalLonShift"
         static let logSimplificationStats = "dev.logSimplificationStats"
@@ -532,10 +557,12 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)
         static let blockfaceOpacity = 0.7  // 70% opacity - increased for visibility
         static let blockfaceLonScaleMultiplier = 1.0  // Standard cos(lat) scaling
-        static let blockfaceRotationAdjustment = 0.0  // No rotation adjustment
+        static let blockfacePerpendicularRotation = 0.0  // No perpendicular rotation adjustment
         static let blockfaceUseDirectOffset = false  // Use perpendicular calculation by default
         static let blockfaceDirectLatAdjust = 1.0  // No adjustment
         static let blockfaceDirectLonAdjust = 1.0  // No adjustment
+        static let blockfaceGlobalRotation = 0.0  // No global rotation
+        static let blockfaceGlobalScale = 1.0  // No global scaling
         static let blockfaceGlobalLatShift = 0.0  // No global shift
         static let blockfaceGlobalLonShift = 0.0  // No global shift
         static let logSimplificationStats = false
@@ -593,10 +620,12 @@ final class DeveloperSettings: ObservableObject {
         blockfaceColorHex = defaults.object(forKey: Keys.blockfaceColorHex) as? String ?? Defaults.blockfaceColorHex
         blockfaceOpacity = defaults.object(forKey: Keys.blockfaceOpacity) as? Double ?? Defaults.blockfaceOpacity
         blockfaceLonScaleMultiplier = defaults.object(forKey: Keys.blockfaceLonScaleMultiplier) as? Double ?? Defaults.blockfaceLonScaleMultiplier
-        blockfaceRotationAdjustment = defaults.object(forKey: Keys.blockfaceRotationAdjustment) as? Double ?? Defaults.blockfaceRotationAdjustment
+        blockfacePerpendicularRotation = defaults.object(forKey: Keys.blockfacePerpendicularRotation) as? Double ?? Defaults.blockfacePerpendicularRotation
         blockfaceUseDirectOffset = defaults.object(forKey: Keys.blockfaceUseDirectOffset) as? Bool ?? Defaults.blockfaceUseDirectOffset
         blockfaceDirectLatAdjust = defaults.object(forKey: Keys.blockfaceDirectLatAdjust) as? Double ?? Defaults.blockfaceDirectLatAdjust
         blockfaceDirectLonAdjust = defaults.object(forKey: Keys.blockfaceDirectLonAdjust) as? Double ?? Defaults.blockfaceDirectLonAdjust
+        blockfaceGlobalRotation = defaults.object(forKey: Keys.blockfaceGlobalRotation) as? Double ?? Defaults.blockfaceGlobalRotation
+        blockfaceGlobalScale = defaults.object(forKey: Keys.blockfaceGlobalScale) as? Double ?? Defaults.blockfaceGlobalScale
         blockfaceGlobalLatShift = defaults.object(forKey: Keys.blockfaceGlobalLatShift) as? Double ?? Defaults.blockfaceGlobalLatShift
         blockfaceGlobalLonShift = defaults.object(forKey: Keys.blockfaceGlobalLonShift) as? Double ?? Defaults.blockfaceGlobalLonShift
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
@@ -658,10 +687,12 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(blockfaceColorHex)
         hasher.combine(blockfaceOpacity)
         hasher.combine(blockfaceLonScaleMultiplier)
-        hasher.combine(blockfaceRotationAdjustment)
+        hasher.combine(blockfacePerpendicularRotation)
         hasher.combine(blockfaceUseDirectOffset)
         hasher.combine(blockfaceDirectLatAdjust)
         hasher.combine(blockfaceDirectLonAdjust)
+        hasher.combine(blockfaceGlobalRotation)
+        hasher.combine(blockfaceGlobalScale)
         hasher.combine(blockfaceGlobalLatShift)
         hasher.combine(blockfaceGlobalLonShift)
         return hasher.finalize()
@@ -763,10 +794,12 @@ final class DeveloperSettings: ObservableObject {
         blockfaceColorHex = Defaults.blockfaceColorHex
         blockfaceOpacity = Defaults.blockfaceOpacity
         blockfaceLonScaleMultiplier = Defaults.blockfaceLonScaleMultiplier
-        blockfaceRotationAdjustment = Defaults.blockfaceRotationAdjustment
+        blockfacePerpendicularRotation = Defaults.blockfacePerpendicularRotation
         blockfaceUseDirectOffset = Defaults.blockfaceUseDirectOffset
         blockfaceDirectLatAdjust = Defaults.blockfaceDirectLatAdjust
         blockfaceDirectLonAdjust = Defaults.blockfaceDirectLonAdjust
+        blockfaceGlobalRotation = Defaults.blockfaceGlobalRotation
+        blockfaceGlobalScale = Defaults.blockfaceGlobalScale
         blockfaceGlobalLatShift = Defaults.blockfaceGlobalLatShift
         blockfaceGlobalLonShift = Defaults.blockfaceGlobalLonShift
         logSimplificationStats = Defaults.logSimplificationStats
