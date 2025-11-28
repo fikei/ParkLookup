@@ -1244,6 +1244,24 @@ struct ZoneMapView: UIViewRepresentable {
                 return annotationView
             }
 
+            // Handle blockface label annotation (shows callout with blockface info)
+            if let blockfaceAnnotation = annotation as? BlockfaceLabelAnnotation {
+                let identifier = "BlockfaceLabel"
+                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+
+                if annotationView == nil {
+                    annotationView = MKMarkerAnnotationView(annotation: blockfaceAnnotation, reuseIdentifier: identifier)
+                    annotationView?.canShowCallout = true
+                    annotationView?.markerTintColor = .systemOrange
+                    annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
+                    annotationView?.displayPriority = .required
+                } else {
+                    annotationView?.annotation = blockfaceAnnotation
+                }
+
+                return annotationView
+            }
+
             // Handle zone label annotation
             guard let zoneAnnotation = annotation as? ZoneLabelAnnotation else {
                 return nil
@@ -1312,6 +1330,39 @@ struct ZoneMapView: UIViewRepresentable {
 
             let point = gesture.location(in: mapView)
             let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
+
+            // Check blockface polygons first (higher priority when blockface mode is active)
+            for overlay in mapView.overlays {
+                if let blockfacePolygon = overlay as? BlockfacePolygon,
+                   let blockface = blockfacePolygon.blockface,
+                   let renderer = mapView.renderer(for: blockfacePolygon) as? MKPolygonRenderer {
+
+                    let mapPoint = MKMapPoint(coordinate)
+                    let polygonPoint = renderer.point(for: mapPoint)
+
+                    if renderer.path?.contains(polygonPoint) == true {
+                        // Found tapped blockface
+                        let label = "\(blockface.street) (\(blockface.fromStreet ?? "?") to \(blockface.toStreet ?? "?")) - \(blockface.side) side"
+                        logger.info("📍 Tapped blockface: \(label)")
+
+                        // Add temporary annotation to show blockface info
+                        let annotation = BlockfaceLabelAnnotation(
+                            coordinate: coordinate,
+                            label: label,
+                            blockface: blockface
+                        )
+
+                        // Remove any existing blockface label annotations
+                        let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
+                        mapView.removeAnnotations(existingLabels)
+
+                        // Add new annotation
+                        mapView.addAnnotation(annotation)
+
+                        return
+                    }
+                }
+            }
 
             // Find which zone polygon contains this point
             for overlay in mapView.overlays {
@@ -1403,6 +1454,21 @@ class TappedLocationAnnotation: NSObject, MKAnnotation {
 
     init(coordinate: CLLocationCoordinate2D) {
         self.coordinate = coordinate
+        super.init()
+    }
+}
+
+/// Annotation for tapped blockface (shows a label)
+class BlockfaceLabelAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    let label: String
+    let blockface: Blockface
+    var title: String? { label }
+
+    init(coordinate: CLLocationCoordinate2D, label: String, blockface: Blockface) {
+        self.coordinate = coordinate
+        self.label = label
+        self.blockface = blockface
         super.init()
     }
 }

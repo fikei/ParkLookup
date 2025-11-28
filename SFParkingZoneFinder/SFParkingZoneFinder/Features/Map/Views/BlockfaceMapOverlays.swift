@@ -115,8 +115,10 @@ extension MKMapView {
         guard centerline.count >= 2 else { return nil }
 
         // Determine offset direction based on side
-        // EVEN = right side, ODD = left side (SF standard)
-        let offsetToRight = side.uppercased() == "EVEN"
+        // The centerline represents the CURB, and we want to offset INWARD (toward street center)
+        // EVEN = right side curb, offset LEFT (inward) when traveling in line direction
+        // ODD = left side curb, offset RIGHT (inward) when traveling in line direction
+        let offsetToRight = side.uppercased() == "ODD"  // Reversed: ODD offsets right (inward)
 
         var offsetSide: [CLLocationCoordinate2D] = []
 
@@ -162,9 +164,12 @@ extension MKMapView {
                 guard magnitudeMetric > 0 else { continue }
                 let normalizedMetric = (lat: perpMetric.lat / magnitudeMetric, lon: perpMetric.lon / magnitudeMetric)
 
-                // Convert back to geographic space by scaling longitude back DOWN
-                // Since we divided by cos(lat) to go TO metric, we multiply to go back
-                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon * lonScaleFactor)
+                // Convert back to geographic space
+                // perpMetric.lat came from rotating dlon (already scaled by 1/cos in metric space)
+                // perpMetric.lon came from rotating dlat (in natural metric units)
+                // When perpMetric.lon becomes geographic lon, dlat → dlon needs division by cos
+                // because longitude degrees are shorter at this latitude
+                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
 
                 if shouldDebug {
                     print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
@@ -209,7 +214,8 @@ extension MKMapView {
                 guard magnitudeMetric > 0 else { continue }
                 let normalizedMetric = (lat: perpMetric.lat / magnitudeMetric, lon: perpMetric.lon / magnitudeMetric)
 
-                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon * lonScaleFactor)
+                // Convert back: perpMetric.lon came from dlat, needs 1/cos to become geographic dlon
+                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
             } else {
                 // Middle point - average of incoming and outgoing directions
                 let prev = centerline[i - 1]
@@ -235,7 +241,8 @@ extension MKMapView {
                 guard magnitudeMetric > 0 else { continue }
                 let normalizedMetric = (lat: perpMetric.lat / magnitudeMetric, lon: perpMetric.lon / magnitudeMetric)
 
-                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon * lonScaleFactor)
+                // Convert back: perpMetric.lon came from dlat, needs 1/cos to become geographic dlon
+                perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
             }
 
             // perpVector is already normalized from metric space calculation above
