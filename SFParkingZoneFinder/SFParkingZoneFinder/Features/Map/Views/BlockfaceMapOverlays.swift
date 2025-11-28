@@ -146,13 +146,14 @@ extension MKMapView {
                 let forwardMetric = (lat: forward.lat, lon: forward.lon * lonScaleFactor)
 
                 // Calculate perpendicular in metric space
-                // 90° clockwise (RIGHT): (dlat, dlon) → (+dlon, -dlat)
-                // 90° counter-clockwise (LEFT): (dlat, dlon) → (-dlon, +dlat)
+                // In metric space where coordinates are (lat, lon) representing (y, x):
+                // 90° clockwise RIGHT turn: (y, x) → (-x, y) → (lat: -lon, lon: lat)
+                // 90° counter-clockwise LEFT turn: (y, x) → (x, -y) → (lat: lon, lon: -lat)
                 var perpMetric: (lat: Double, lon: Double)
                 if offsetToRight {
-                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
-                } else {
                     perpMetric = (lat: -forwardMetric.lon, lon: forwardMetric.lat)
+                } else {
+                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
                 }
 
                 // Normalize in metric space (where lat and lon have same scale)
@@ -196,9 +197,9 @@ extension MKMapView {
 
                 var perpMetric: (lat: Double, lon: Double)
                 if offsetToRight {
-                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
-                } else {
                     perpMetric = (lat: -forwardMetric.lon, lon: forwardMetric.lat)
+                } else {
+                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
                 }
 
                 // Normalize in metric space
@@ -222,9 +223,9 @@ extension MKMapView {
 
                 var perpMetric: (lat: Double, lon: Double)
                 if offsetToRight {
-                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
-                } else {
                     perpMetric = (lat: -forwardMetric.lon, lon: forwardMetric.lat)
+                } else {
+                    perpMetric = (lat: forwardMetric.lon, lon: -forwardMetric.lat)
                 }
 
                 // Normalize in metric space
