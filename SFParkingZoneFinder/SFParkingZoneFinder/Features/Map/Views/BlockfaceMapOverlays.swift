@@ -21,13 +21,20 @@ extension MKMapView {
         print("🔧 DEBUG: Adding \(blockfaces.count) blockface overlays")
 
         for (index, blockface) in blockfaces.enumerated() {
-            let centerline = blockface.geometry.locationCoordinates
+            var centerline = blockface.geometry.locationCoordinates
             guard centerline.count >= 2 else { continue }
 
             if index < 3 {  // Log first 3 blockfaces for debugging
                 print("🔧 DEBUG: Blockface \(index) (\(blockface.street), \(blockface.side) side)")
-                print("  Centerline points: \(centerline.count)")
-                print("  First point: lat=\(centerline[0].latitude), lon=\(centerline[0].longitude)")
+                print("  Original centerline points: \(centerline.count)")
+                print("  Original first point: lat=\(centerline[0].latitude), lon=\(centerline[0].longitude)")
+            }
+
+            // Apply global transformations to centerline FIRST
+            centerline = transformCenterline(centerline, devSettings: devSettings)
+
+            if index < 3 {
+                print("  Transformed first point: lat=\(centerline[0].latitude), lon=\(centerline[0].longitude)")
                 print("  Second point: lat=\(centerline[1].latitude), lon=\(centerline[1].longitude)")
                 let dlat = centerline[1].latitude - centerline[0].latitude
                 let dlon = centerline[1].longitude - centerline[0].longitude
@@ -286,14 +293,11 @@ extension MKMapView {
 
             // perpVector is already normalized from metric space calculation above
             // Create offset point by scaling the normalized perpVector by desired width
-            var offsetPoint = CLLocationCoordinate2D(
+            // (Global transformations already applied to centerline)
+            let offsetPoint = CLLocationCoordinate2D(
                 latitude: point.latitude + perpVector.lat * widthDegrees,
                 longitude: point.longitude + perpVector.lon * widthDegrees
             )
-
-            // Apply global translation shift (moves all blockfaces by a constant amount)
-            offsetPoint.latitude += devSettings.blockfaceGlobalLatShift
-            offsetPoint.longitude += devSettings.blockfaceGlobalLonShift
 
             offsetSide.append(offsetPoint)
 
@@ -417,6 +421,51 @@ private func describeDirection(dlat: Double, dlon: Double) -> String {
     }
 
     return parts.isEmpty ? "UNCLEAR" : parts.joined(separator: "-")
+}
+
+/// Transform a centerline by applying global rotation and translation
+private func transformCenterline(_ centerline: [CLLocationCoordinate2D], devSettings: DeveloperSettings) -> [CLLocationCoordinate2D] {
+    let globalRotation = devSettings.blockfaceRotationAdjustment
+    let globalLatShift = devSettings.blockfaceGlobalLatShift
+    let globalLonShift = devSettings.blockfaceGlobalLonShift
+
+    // If no transformations, return original
+    if abs(globalRotation) < 0.01 && abs(globalLatShift) < 0.00001 && abs(globalLonShift) < 0.00001 {
+        return centerline
+    }
+
+    // Calculate centroid for rotation
+    let centroidLat = centerline.map { $0.latitude }.reduce(0, +) / Double(centerline.count)
+    let centroidLon = centerline.map { $0.longitude }.reduce(0, +) / Double(centerline.count)
+
+    return centerline.map { point in
+        var transformed = point
+
+        // Apply rotation around centroid if needed
+        if abs(globalRotation) > 0.01 {
+            let radians = globalRotation * .pi / 180
+            let cosTheta = cos(radians)
+            let sinTheta = sin(radians)
+
+            // Translate to origin
+            let dlat = point.latitude - centroidLat
+            let dlon = point.longitude - centroidLon
+
+            // Rotate (lat=y, lon=x)
+            let rotatedLat = dlat * cosTheta - dlon * sinTheta
+            let rotatedLon = dlat * sinTheta + dlon * cosTheta
+
+            // Translate back
+            transformed.latitude = centroidLat + rotatedLat
+            transformed.longitude = centroidLon + rotatedLon
+        }
+
+        // Apply global translation
+        transformed.latitude += globalLatShift
+        transformed.longitude += globalLonShift
+
+        return transformed
+    }
 }
 
 /// Determine if perpendicular is a LEFT or RIGHT turn from forward

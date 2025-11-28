@@ -523,8 +523,8 @@ final class DeveloperSettings: ObservableObject {
         static let showVertexCounts = false
         static let showZoneOverlays = true  // Show zone overlays by default
         static let showBlockfaceOverlays = false  // PoC - disabled by default
-        static let showBlockfaceCenterlines = false  // Hide centerlines by default
-        static let showBlockfacePolygons = true  // Show polygons by default
+        static let showBlockfaceCenterlines = true  // Show centerlines for alignment
+        static let showBlockfacePolygons = false  // Hide polygons until centerline is aligned
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)
