@@ -158,9 +158,9 @@ extension MKMapView {
     }
 
     /// Create a polygon representing a parking lane by offsetting a centerline
-    /// Offsets to the appropriate side based on SF addressing convention:
-    /// - EVEN addresses = RIGHT side of street (when traveling in line direction)
-    /// - ODD addresses = LEFT side of street (when traveling in line direction)
+    /// Uses perpendicular offset to create parking lane polygon from centerline
+    /// Basic implementation: always offsets to the right (when traveling in line direction)
+    /// This provides consistent rendering for all blockfaces regardless of side labels
     private func createParkingLanePolygon(
         centerline: [CLLocationCoordinate2D],
         widthDegrees: Double,
@@ -169,11 +169,10 @@ extension MKMapView {
     ) -> [CLLocationCoordinate2D]? {
         guard centerline.count >= 2 else { return nil }
 
-        // Determine offset direction based on side
-        // The centerline represents the CURB, and we want to offset INWARD (toward street center)
-        // EVEN = right side curb, offset LEFT (inward) when traveling in line direction
-        // ODD = left side curb, offset RIGHT (inward) when traveling in line direction
-        let offsetToRight = side.uppercased() == "ODD"  // Reversed: ODD offsets right (inward)
+        // Basic perpendicular offset: always offset to the right
+        // This creates consistent polygon rendering for all blockfaces
+        // Note: 95.9% of blockfaces have "UNKNOWN" side, so we can't rely on side labels
+        let offsetToRight = true  // Always offset right when traveling in line direction
 
         // Get adjustment parameters from developer settings
         let lonScaleMultiplier = devSettings.blockfaceLonScaleMultiplier
@@ -242,7 +241,7 @@ extension MKMapView {
                 }
 
                 if shouldDebug {
-                    print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
+                    print("🔧 DEBUG: Perpendicular calculation (offsetToRight=\(offsetToRight))")
                     print("  Latitude: \(point.latitude)°, lonScaleFactor: \(lonScaleFactor)")
                     print("  Forward vector: dlat=\(forward.lat), dlon=\(forward.lon)")
 
@@ -260,7 +259,7 @@ extension MKMapView {
 
                     // Determine if this is a left or right turn
                     let turn = determineTurn(forward: (forward.lat, forward.lon), perp: (perpVector.lat, perpVector.lon))
-                    print("  Turn direction: \(turn) (expected: \(offsetToRight ? "RIGHT" : "LEFT"))")
+                    print("  Turn direction: \(turn) (offset: RIGHT)")
                 }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
