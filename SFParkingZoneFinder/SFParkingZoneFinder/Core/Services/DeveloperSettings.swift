@@ -459,6 +459,11 @@ final class DeveloperSettings: ObservableObject {
     @Published var tappedIsMultiPermit: Bool = false
     @Published var tappedVertexCount: Int = 0
 
+    /// Blockface statistics
+    @Published var totalBlockfacesLoaded: Int = 0
+    @Published var blockfacesWithRegulations: Int = 0
+    @Published var blockfacesWithoutRegulations: Int = 0
+
     // MARK: - Keys
 
     private enum Keys {
@@ -559,9 +564,9 @@ final class DeveloperSettings: ObservableObject {
         static let showOriginalOverlay = false
         static let showVertexCounts = false
         static let showZoneOverlays = true  // Show zone overlays by default
-        static let showBlockfaceOverlays = false  // PoC - disabled by default
+        static let showBlockfaceOverlays = true  // Enable with new GeoJSON data
         static let showBlockfaceCenterlines = true  // Show centerlines for alignment
-        static let showBlockfacePolygons = false  // Hide polygons until centerline is aligned
+        static let showBlockfacePolygons = true  // Show polygons with new GeoJSON data
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)

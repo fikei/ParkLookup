@@ -103,32 +103,77 @@ struct DeveloperMapOverlay: View {
 
             // Stats display (fixed, above scroll)
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 12) {
-                    // Total zones and polygons
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Zones")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text("\(devSettings.totalZonesLoaded)")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .monospacedDigit()
+                // Conditional stats based on mode
+                if devSettings.showBlockfaceOverlays {
+                    // Blockface mode stats
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Blockfaces")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(devSettings.totalBlockfacesLoaded)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .monospacedDigit()
+                        }
+
+                        Divider()
+                            .frame(height: 32)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("With Regs")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                            Text("\(devSettings.blockfacesWithRegulations)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.orange)
+                                .monospacedDigit()
+                        }
+
+                        Divider()
+                            .frame(height: 32)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Without")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(devSettings.blockfacesWithoutRegulations)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .monospacedDigit()
+                        }
+
+                        Spacer()
                     }
+                } else {
+                    // Zone mode stats
+                    HStack(spacing: 12) {
+                        // Total zones and polygons
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Zones")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(devSettings.totalZonesLoaded)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .monospacedDigit()
+                        }
 
-                    Divider()
-                        .frame(height: 32)
+                        Divider()
+                            .frame(height: 32)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Polygons")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text("\(devSettings.totalPolygonsRendered)")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .monospacedDigit()
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Polygons")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(devSettings.totalPolygonsRendered)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .monospacedDigit()
+                        }
+
+                        Spacer()
                     }
-
-                    Spacer()
                 }
 
                 // Processing stats (only show if any are non-zero)

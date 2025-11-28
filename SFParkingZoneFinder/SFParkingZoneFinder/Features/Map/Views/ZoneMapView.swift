@@ -1255,8 +1255,16 @@ struct ZoneMapView: UIViewRepresentable {
                     annotationView?.markerTintColor = .systemOrange
                     annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
                     annotationView?.displayPriority = .required
+
+                    // Create custom callout with detailed content view
+                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                    annotationView?.detailCalloutAccessoryView = calloutView
                 } else {
                     annotationView?.annotation = blockfaceAnnotation
+
+                    // Update callout content
+                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                    annotationView?.detailCalloutAccessoryView = calloutView
                 }
 
                 return annotationView
@@ -1323,6 +1331,116 @@ struct ZoneMapView: UIViewRepresentable {
             return containerView
         }
 
+        private func createBlockfaceCalloutView(for blockface: Blockface) -> UIView {
+            let containerView = UIView()
+            containerView.translatesAutoresizingMaskIntoConstraints = false
+
+            // Street name (bold)
+            let streetLabel = UILabel()
+            streetLabel.text = blockface.street
+            streetLabel.font = .systemFont(ofSize: 16, weight: .bold)
+            streetLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            // Segment info (from → to)
+            let segmentLabel = UILabel()
+            if let from = blockface.fromStreet, let to = blockface.toStreet {
+                segmentLabel.text = "\(from) → \(to)"
+            } else {
+                segmentLabel.text = "Unknown segment"
+            }
+            segmentLabel.font = .systemFont(ofSize: 14)
+            segmentLabel.textColor = .secondaryLabel
+            segmentLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            // Side info
+            let sideLabel = UILabel()
+            let sideName: String
+            switch blockface.side {
+            case "EVEN":
+                sideName = "West side"
+            case "ODD":
+                sideName = "East side"
+            case "NORTH":
+                sideName = "North side"
+            case "SOUTH":
+                sideName = "South side"
+            default:
+                sideName = "\(blockface.side) side"
+            }
+            sideLabel.text = sideName
+            sideLabel.font = .systemFont(ofSize: 14)
+            sideLabel.textColor = .secondaryLabel
+            sideLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            // Regulations (if any)
+            let regulationsStack = UIStackView()
+            regulationsStack.axis = .vertical
+            regulationsStack.spacing = 4
+            regulationsStack.translatesAutoresizingMaskIntoConstraints = false
+
+            if !blockface.regulations.isEmpty {
+                // Regulations header
+                let regHeader = UILabel()
+                regHeader.text = "Regulations:"
+                regHeader.font = .systemFont(ofSize: 14, weight: .semibold)
+                regHeader.translatesAutoresizingMaskIntoConstraints = false
+                regulationsStack.addArrangedSubview(regHeader)
+
+                // Add each regulation
+                for reg in blockface.regulations {
+                    let regLabel = UILabel()
+                    regLabel.text = "• \(reg.description)"
+                    regLabel.font = .systemFont(ofSize: 13)
+                    regLabel.numberOfLines = 0  // Allow wrapping
+                    regLabel.translatesAutoresizingMaskIntoConstraints = false
+                    regulationsStack.addArrangedSubview(regLabel)
+                }
+            } else {
+                let noRegLabel = UILabel()
+                noRegLabel.text = "No parking regulations"
+                noRegLabel.font = .systemFont(ofSize: 13)
+                noRegLabel.textColor = .tertiaryLabel
+                noRegLabel.translatesAutoresizingMaskIntoConstraints = false
+                regulationsStack.addArrangedSubview(noRegLabel)
+            }
+
+            // Add all subviews
+            containerView.addSubview(streetLabel)
+            containerView.addSubview(segmentLabel)
+            containerView.addSubview(sideLabel)
+            containerView.addSubview(regulationsStack)
+
+            // Layout constraints
+            NSLayoutConstraint.activate([
+                // Street label
+                streetLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
+                streetLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                streetLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+
+                // Segment label
+                segmentLabel.topAnchor.constraint(equalTo: streetLabel.bottomAnchor, constant: 2),
+                segmentLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                segmentLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+
+                // Side label
+                sideLabel.topAnchor.constraint(equalTo: segmentLabel.bottomAnchor, constant: 2),
+                sideLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                sideLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+
+                // Regulations stack
+                regulationsStack.topAnchor.constraint(equalTo: sideLabel.bottomAnchor, constant: 8),
+                regulationsStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                regulationsStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+                regulationsStack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
+
+                // Container width
+                containerView.widthAnchor.constraint(greaterThanOrEqualToConstant: 250),
+                containerView.widthAnchor.constraint(lessThanOrEqualToConstant: 300)
+            ])
+
+            return containerView
+        }
+
         // MARK: - Tap Handling
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -1342,8 +1460,44 @@ struct ZoneMapView: UIViewRepresentable {
 
                     if renderer.path?.contains(polygonPoint) == true {
                         // Found tapped blockface
-                        let label = "\(blockface.street) (\(blockface.fromStreet ?? "?") to \(blockface.toStreet ?? "?")) - \(blockface.side) side"
-                        logger.info("📍 Tapped blockface: \(label)")
+                        // Build detailed label with street, side, and regulations
+                        var labelLines: [String] = []
+
+                        // Line 1: Street name and segment
+                        let streetLine = "\(blockface.street)"
+                        let segmentLine = "(\(blockface.fromStreet ?? "?") to \(blockface.toStreet ?? "?"))"
+                        labelLines.append(streetLine)
+                        labelLines.append(segmentLine)
+
+                        // Line 2: Side
+                        let sideName: String
+                        switch blockface.side {
+                        case "EVEN":
+                            sideName = "West side"
+                        case "ODD":
+                            sideName = "East side"
+                        case "NORTH":
+                            sideName = "North side"
+                        case "SOUTH":
+                            sideName = "South side"
+                        default:
+                            sideName = "\(blockface.side) side"
+                        }
+                        labelLines.append(sideName)
+
+                        // Lines 3+: Regulations
+                        if !blockface.regulations.isEmpty {
+                            labelLines.append("") // Blank line separator
+                            for reg in blockface.regulations {
+                                labelLines.append("• \(reg.description)")
+                            }
+                        } else {
+                            labelLines.append("")
+                            labelLines.append("No parking regulations")
+                        }
+
+                        let label = labelLines.joined(separator: "\n")
+                        logger.info("📍 Tapped blockface: \(blockface.street) \(sideName)")
 
                         // Add temporary annotation to show blockface info
                         let annotation = BlockfaceLabelAnnotation(

@@ -20,6 +20,16 @@ extension MKMapView {
 
         print("🔧 DEBUG: Adding \(blockfaces.count) blockface overlays")
 
+        // Update statistics
+        let withRegs = blockfaces.filter { !$0.regulations.isEmpty }.count
+        let withoutRegs = blockfaces.count - withRegs
+
+        DispatchQueue.main.async {
+            devSettings.totalBlockfacesLoaded = blockfaces.count
+            devSettings.blockfacesWithRegulations = withRegs
+            devSettings.blockfacesWithoutRegulations = withoutRegs
+        }
+
         for (index, blockface) in blockfaces.enumerated() {
             var centerline = blockface.geometry.locationCoordinates
             guard centerline.count >= 2 else { continue }
@@ -352,9 +362,19 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     private func configureStyle() {
         let devSettings = DeveloperSettings.shared
 
-        // TESTING: Force full opacity and bright color to rule out visibility issues
-        let baseColor = UIColor.systemOrange
-        let opacity = 1.0  // 100% opacity for testing
+        // Color coding: Orange = has regulations, Black = no regulations
+        let baseColor: UIColor
+        let opacity: Double
+
+        if let bf = blockface, !bf.regulations.isEmpty {
+            // Has regulations → Orange
+            baseColor = UIColor.systemOrange
+            opacity = devSettings.blockfaceOpacity
+        } else {
+            // No regulations → Black
+            baseColor = UIColor.black
+            opacity = devSettings.blockfaceOpacity
+        }
 
         fillColor = baseColor.withAlphaComponent(opacity)
 
@@ -365,7 +385,8 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
 
         // Debug: Log rendering configuration for first few polygons
         if let bf = blockface {
-            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity) (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)")
+            let colorName = bf.regulations.isEmpty ? "BLACK (no regs)" : "ORANGE (\(bf.regulations.count) regs)"
+            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity), stroke=DISABLED, color=\(colorName)")
         }
     }
 }
