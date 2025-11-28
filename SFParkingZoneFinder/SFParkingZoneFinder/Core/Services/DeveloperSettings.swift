@@ -281,8 +281,10 @@ final class DeveloperSettings: ObservableObject {
     /// Positive = rotate clockwise, Negative = rotate counter-clockwise
     @Published var blockfaceRotationAdjustment: Double {
         didSet {
+            print("🔧 blockfaceRotationAdjustment changed: \(oldValue)° → \(blockfaceRotationAdjustment)°")
             UserDefaults.standard.set(blockfaceRotationAdjustment, forKey: Keys.blockfaceRotationAdjustment)
             forceReloadOverlays()
+            print("  → forceReloadOverlays() called, reloadTrigger now: \(reloadTrigger)")
         }
     }
 
