@@ -1,9 +1,9 @@
 ℹ️ Google Maps SDK not installed. Map features will use placeholder.
 LocalZoneDataSource initialized
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/8274A311-3C99-410E-BDC5-DE907282A018/Library/Caches/ZoneData
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/C42BE977-001F-41B8-8CAB-DCA0923FAF0A/Library/Caches/ZoneData
 ZoneRepository initialized
 Getting zones for city: sf
-Loaded 421 zones from disk cache in 347.8ms
+Loaded 421 zones from disk cache in 225.2ms
 ✓ Returning 421 zones from cache
 No active session to load
 Loaded 10 sessions from history
@@ -18,15 +18,15 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=0
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
+Resetting GeoCodec zone allocator at address 0x600003d482d0 with 20 allocations still alive
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 Getting zones for city: sf
 Cache hit (memory) for city: sf
 ✓ Returning 421 zones from cache
-✅ Loaded 421 zones in 9.1ms: 33 RPP, 388 metered, 0 other
+✅ Loaded 421 zones in 11.7ms: 33 RPP, 388 metered, 0 other
 📊 Spatial index: 421 bounding boxes, 98 grid cells
 Returning result with primary zone: I, confidence: medium
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
-Resetting GeoCodec zone allocator at address 0x600003d09a40 with 377 allocations still alive
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🚀 BUILD VERIFICATION: makeUIView called with 421 zones - DUPLICATE FIX ACTIVE
 Failed to locate resource named "default.csv"
@@ -150,36 +150,14 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
 🚧 PoC: Hiding zone overlays (blockface mode active)
 🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area
 Loading blockfaces from sample JSON
-Loaded 15 blockfaces
-🚧 PoC: Loaded 15 blockfaces
-🔧 DEBUG: Adding 15 blockface overlays
+Loaded 14 blockfaces
+🚧 PoC: Loaded 14 blockfaces
+🔧 DEBUG: Adding 14 blockface overlays
 🔧 DEBUG: Blockface 0 (Mission St, EVEN side)
   Centerline points: 4
-  First point: lat=37.7564, lon=-122.4193
-  Second point: lat=37.757, lon=-122.4191
-  Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
-🔧 DEBUG: Perpendicular calculation for EVEN side (offsetToRight=true)
-  Latitude: 37.7564°, lonScaleFactor: 0.7906211834846626
-  Forward vector: dlat=0.0005999999999986017, dlon=0.0002000000000066393
-  Forward points: NORTH
-  Forward (metric): dlat=0.0005999999999986017, dlon=0.0001581242367021817
-  Perp (metric): dlat=-0.0001581242367021817, dlon=0.0005999999999986017
-  Perp (geographic): dlat=-0.25483919857003406, dlon=1.2230679688109718
-  Perpendicular points: EAST
-  Turn direction: RIGHT (expected: RIGHT)
-  Point 0: centerline=(37.7564, -122.4193), offset=(37.75632354824043, -122.41893307960936)
-    Offset applied: dlat=-7.645175956838557e-05, dlon=0.0003669203906468965
-  Point 1: centerline=(37.757, -122.4191), offset=(37.7569235488202, -122.41873307644028)
-    Offset applied: dlat=-7.645117980104033e-05, dlon=0.00036692355972434143
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7564, lon=-122.4193
-    [1] CENTER: lat=37.757, lon=-122.4191
-    [2] CENTER: lat=37.7576, lon=-122.4189
-    [3] CENTER: lat=37.7582, lon=-122.4187
-    [4] OFFSET: lat=37.75812354997978, lon=-122.41833307010184
-    [5] OFFSET: lat=37.757523549399984, lon=-122.41853307327109
-    [6] OFFSET: lat=37.7569235488202, lon=-122.41873307644028
-    [7] OFFSET: lat=37.75632354824043, lon=-122.41893307960936
+  First point: lat=37.7548280954945, lon=-122.41823046121091
+  Second point: lat=37.75524532822906, lon=-122.41839903417795
+  Direction: dlat=0.00041723273455573917, dlon=-0.00016857296704131386
   Created polygon with 8 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
@@ -189,31 +167,9 @@ Loaded 15 blockfaces
 📍 Creating BlockfacePolylineRenderer for Mission St
 🔧 DEBUG: Blockface 1 (Mission St, ODD side)
   Centerline points: 4
-  First point: lat=37.7565, lon=-122.4189
-  Second point: lat=37.7571, lon=-122.4187
-  Direction: dlat=0.0005999999999986017, dlon=0.00019999999999242846
-🔧 DEBUG: Perpendicular calculation for ODD side (offsetToRight=false)
-  Latitude: 37.7565°, lonScaleFactor: 0.7906201148085886
-  Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
-  Forward points: NORTH
-  Forward (metric): dlat=0.0005999999999986017, dlon=0.00015812402295573152
-  Perp (metric): dlat=0.00015812402295573152, dlon=-0.0005999999999986017
-  Perp (geographic): dlat=0.2548388764595694, dlon=-1.2230697293942288
-  Perpendicular points: WEST
-  Turn direction: LEFT (expected: LEFT)
-  Point 0: centerline=(37.7565, -122.4189), offset=(37.75657645166294, -122.41926692091882)
-    Offset applied: dlat=7.64516629345735e-05, dlon=-0.0003669209188217337
-  Point 1: centerline=(37.7571, -122.4187), offset=(37.75717645108317, -122.41906692408791)
-    Offset applied: dlat=7.645108316722826e-05, dlon=-0.0003669240879133895
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7565, lon=-122.4189
-    [1] CENTER: lat=37.7571, lon=-122.4187
-    [2] CENTER: lat=37.7577, lon=-122.4185
-    [3] CENTER: lat=37.7583, lon=-122.4183
-    [4] OFFSET: lat=37.75837644992359, lon=-122.41866693042638
-    [5] OFFSET: lat=37.757776450503385, lon=-122.4188669272571
-    [6] OFFSET: lat=37.75717645108317, lon=-122.41906692408791
-    [7] OFFSET: lat=37.75657645166294, lon=-122.41926692091882
+  First point: lat=37.75477190450549, lon=-122.4183695387891
+  Second point: lat=37.755189137240045, lon=-122.41853811175613
+  Direction: dlat=0.00041723273455573917, dlon=-0.00016857296704131386
   Created polygon with 8 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
@@ -223,9 +179,9 @@ Loaded 15 blockfaces
 📍 Creating BlockfacePolylineRenderer for Mission St
 🔧 DEBUG: Blockface 2 (Mission St, EVEN side)
   Centerline points: 4
-  First point: lat=37.7582, lon=-122.4187
-  Second point: lat=37.7588, lon=-122.4185
-  Direction: dlat=0.0005999999999986017, dlon=0.0002000000000066393
+  First point: lat=37.75347809549451, lon=-122.41823046121091
+  Second point: lat=37.75389532822906, lon=-122.41839903417795
+  Direction: dlat=0.00041723273455573917, dlon=-0.00016857296704131386
   Created polygon with 8 points
   Width setting: 0.0003 degrees (TESTING: forced large)
   ✅ Adding polygon overlay to map
@@ -245,28 +201,6 @@ Loaded 15 blockfaces
 📍 Creating BlockfacePolygonRenderer for Valencia St EVEN
   🎨 Renderer config for Valencia St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for Valencia St
-🔧 DEBUG: Perpendicular calculation for ODD side (offsetToRight=false)
-  Latitude: 37.7565°, lonScaleFactor: 0.7906201148085886
-  Forward vector: dlat=0.0005999999999986017, dlon=0.00019999999999242846
-  Forward points: NORTH
-  Forward (metric): dlat=0.0005999999999986017, dlon=0.00015812402295573152
-  Perp (metric): dlat=0.00015812402295573152, dlon=-0.0005999999999986017
-  Perp (geographic): dlat=0.2548388764595694, dlon=-1.2230697293942288
-  Perpendicular points: WEST
-  Turn direction: LEFT (expected: LEFT)
-  Point 0: centerline=(37.7565, -122.4203), offset=(37.75657645166294, -122.42066692091882)
-    Offset applied: dlat=7.64516629345735e-05, dlon=-0.0003669209188217337
-  Point 1: centerline=(37.7571, -122.4201), offset=(37.75717645108317, -122.42046692408792)
-    Offset applied: dlat=7.645108316722826e-05, dlon=-0.0003669240879133895
-  🔷 COMPLETE POLYGON - Total vertices: 8
-    [0] CENTER: lat=37.7565, lon=-122.4203
-    [1] CENTER: lat=37.7571, lon=-122.4201
-    [2] CENTER: lat=37.7577, lon=-122.4199
-    [3] CENTER: lat=37.7583, lon=-122.4197
-    [4] OFFSET: lat=37.75837644992359, lon=-122.42006693042639
-    [5] OFFSET: lat=37.757776450503385, lon=-122.4202669272571
-    [6] OFFSET: lat=37.75717645108317, lon=-122.42046692408792
-    [7] OFFSET: lat=37.75657645166294, lon=-122.42066692091882
 📍 Creating BlockfacePolygonRenderer for Valencia St ODD
   🎨 Renderer config for Valencia St ODD: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for Valencia St
@@ -288,11 +222,8 @@ Loaded 15 blockfaces
 📍 Creating BlockfacePolygonRenderer for 24th St SOUTH
   🎨 Renderer config for 24th St SOUTH: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
 📍 Creating BlockfacePolylineRenderer for 24th St
-📍 Creating BlockfacePolygonRenderer for Capp St EVEN
-  🎨 Renderer config for Capp St EVEN: fillOpacity=1.0 (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)
-📍 Creating BlockfacePolylineRenderer for Capp St
 ✅ PoC: Added blockface overlays to map
 🔧 DEBUG: MainResultView body - devMode: true, expanded: true, panel: false
 🔍 updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]
 ✓ Overlay parameters updated (no reload needed)
-🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=45
+🔍 Visibility check: showOverlays=false, overlaysVisible=false, overlays.count=42
