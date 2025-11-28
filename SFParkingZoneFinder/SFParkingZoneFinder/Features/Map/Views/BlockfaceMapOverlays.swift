@@ -423,47 +423,58 @@ private func describeDirection(dlat: Double, dlon: Double) -> String {
     return parts.isEmpty ? "UNCLEAR" : parts.joined(separator: "-")
 }
 
-/// Transform a centerline by applying global rotation, scale, and translation
+/// Transform a centerline by applying global rotation, scale, translation, and flip
 private func transformCenterline(_ centerline: [CLLocationCoordinate2D], devSettings: DeveloperSettings) -> [CLLocationCoordinate2D] {
+    let flipHorizontal = devSettings.blockfaceFlipHorizontal
     let globalRotation = devSettings.blockfaceGlobalRotation
     let globalScale = devSettings.blockfaceGlobalScale
     let globalLatShift = devSettings.blockfaceGlobalLatShift
     let globalLonShift = devSettings.blockfaceGlobalLonShift
 
-    print("🔄 transformCenterline: rotation=\(globalRotation)°, scale=\(globalScale)x, latShift=\(globalLatShift), lonShift=\(globalLonShift)")
+    print("🔄 transformCenterline: flip=\(flipHorizontal), rotation=\(globalRotation)°, scale=\(globalScale)x, latShift=\(globalLatShift), lonShift=\(globalLonShift)")
 
     // If no transformations, return original
-    if abs(globalRotation) < 0.01 && abs(globalScale - 1.0) < 0.001 && abs(globalLatShift) < 0.00001 && abs(globalLonShift) < 0.00001 {
+    if !flipHorizontal && abs(globalRotation) < 0.01 && abs(globalScale - 1.0) < 0.001 && abs(globalLatShift) < 0.00001 && abs(globalLonShift) < 0.00001 {
         print("  ⏭️  No transformations needed, returning original")
         return centerline
     }
 
     print("  ✅ Applying transformations...")
 
-    // Calculate centroid for rotation and scaling
+    // Calculate centroid for rotation, scaling, and flip
     let centroidLat = centerline.map { $0.latitude }.reduce(0, +) / Double(centerline.count)
     let centroidLon = centerline.map { $0.longitude }.reduce(0, +) / Double(centerline.count)
 
     return centerline.map { point in
         var transformed = point
 
-        // Apply rotation and scale around centroid if needed
-        if abs(globalRotation) > 0.01 || abs(globalScale - 1.0) > 0.001 {
-            let radians = globalRotation * .pi / 180
-            let cosTheta = cos(radians)
-            let sinTheta = sin(radians)
-
+        // Apply flip, rotation, and scale around centroid if needed
+        if flipHorizontal || abs(globalRotation) > 0.01 || abs(globalScale - 1.0) > 0.001 {
             // Translate to origin
-            let dlat = point.latitude - centroidLat
-            let dlon = point.longitude - centroidLon
+            var dlat = point.latitude - centroidLat
+            var dlon = point.longitude - centroidLon
 
-            // Rotate (lat=y, lon=x)
-            let rotatedLat = dlat * cosTheta - dlon * sinTheta
-            let rotatedLon = dlat * sinTheta + dlon * cosTheta
+            // Apply horizontal flip (mirror across vertical axis)
+            if flipHorizontal {
+                dlon = -dlon
+            }
+
+            // Apply rotation (lat=y, lon=x)
+            if abs(globalRotation) > 0.01 {
+                let radians = globalRotation * .pi / 180
+                let cosTheta = cos(radians)
+                let sinTheta = sin(radians)
+
+                let rotatedLat = dlat * cosTheta - dlon * sinTheta
+                let rotatedLon = dlat * sinTheta + dlon * cosTheta
+
+                dlat = rotatedLat
+                dlon = rotatedLon
+            }
 
             // Apply scale
-            let scaledLat = rotatedLat * globalScale
-            let scaledLon = rotatedLon * globalScale
+            let scaledLat = dlat * globalScale
+            let scaledLon = dlon * globalScale
 
             // Translate back
             transformed.latitude = centroidLat + scaledLat

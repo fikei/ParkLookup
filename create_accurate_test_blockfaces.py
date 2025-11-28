@@ -216,8 +216,9 @@ def main():
     # Valencia is parallel to Mission, offset by MISSION_TO_VALENCIA degrees west
 
     # Calculate Valencia positions by offsetting from Mission perpendicular to street direction
-    # Valencia is SW of Mission, which is "right" when heading SE along Mission
-    valencia_offset_bearing = MISSION_BEARING + 90  # Perpendicular right
+    # Valencia is SW of Mission, which is "LEFT" when heading NW along Mission (or "right" when heading SE)
+    # Since MISSION_BEARING is the NW direction (338°), we need to rotate LEFT (- 90°) to go west
+    valencia_offset_bearing = MISSION_BEARING - 90  # Perpendicular left (west)
 
     valencia_22nd_lat = mission_22nd_lat + MISSION_TO_VALENCIA * math.cos(math.radians(valencia_offset_bearing))
     valencia_22nd_lon = mission_22nd_lon + MISSION_TO_VALENCIA * math.sin(math.radians(valencia_offset_bearing))

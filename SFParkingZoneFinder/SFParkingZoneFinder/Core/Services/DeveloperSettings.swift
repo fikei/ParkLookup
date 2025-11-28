@@ -317,6 +317,15 @@ final class DeveloperSettings: ObservableObject {
 
     // MARK: - Global Transformations (affects entire plotted area)
 
+    /// Flip entire dataset horizontally (mirror longitude coordinates)
+    /// Useful when data has east/west coordinates swapped
+    @Published var blockfaceFlipHorizontal: Bool {
+        didSet {
+            UserDefaults.standard.set(blockfaceFlipHorizontal, forKey: Keys.blockfaceFlipHorizontal)
+            forceReloadOverlays()
+        }
+    }
+
     /// Global rotation of entire blockface dataset in degrees
     /// Rotates all centerlines around their collective centroid
     @Published var blockfaceGlobalRotation: Double {
@@ -501,6 +510,7 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceUseDirectOffset = "dev.blockfaceUseDirectOffset"
         static let blockfaceDirectLatAdjust = "dev.blockfaceDirectLatAdjust"
         static let blockfaceDirectLonAdjust = "dev.blockfaceDirectLonAdjust"
+        static let blockfaceFlipHorizontal = "dev.blockfaceFlipHorizontal"
         static let blockfaceGlobalRotation = "dev.blockfaceGlobalRotation"
         static let blockfaceGlobalScale = "dev.blockfaceGlobalScale"
         static let blockfaceGlobalLatShift = "dev.blockfaceGlobalLatShift"
@@ -561,6 +571,7 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceUseDirectOffset = false  // Use perpendicular calculation by default
         static let blockfaceDirectLatAdjust = 1.0  // No adjustment
         static let blockfaceDirectLonAdjust = 1.0  // No adjustment
+        static let blockfaceFlipHorizontal = false  // No horizontal flip by default
         static let blockfaceGlobalRotation = 0.0  // No global rotation
         static let blockfaceGlobalScale = 1.0  // No global scaling
         static let blockfaceGlobalLatShift = 0.0  // No global shift
@@ -624,6 +635,7 @@ final class DeveloperSettings: ObservableObject {
         blockfaceUseDirectOffset = defaults.object(forKey: Keys.blockfaceUseDirectOffset) as? Bool ?? Defaults.blockfaceUseDirectOffset
         blockfaceDirectLatAdjust = defaults.object(forKey: Keys.blockfaceDirectLatAdjust) as? Double ?? Defaults.blockfaceDirectLatAdjust
         blockfaceDirectLonAdjust = defaults.object(forKey: Keys.blockfaceDirectLonAdjust) as? Double ?? Defaults.blockfaceDirectLonAdjust
+        blockfaceFlipHorizontal = defaults.object(forKey: Keys.blockfaceFlipHorizontal) as? Bool ?? Defaults.blockfaceFlipHorizontal
         blockfaceGlobalRotation = defaults.object(forKey: Keys.blockfaceGlobalRotation) as? Double ?? Defaults.blockfaceGlobalRotation
         blockfaceGlobalScale = defaults.object(forKey: Keys.blockfaceGlobalScale) as? Double ?? Defaults.blockfaceGlobalScale
         blockfaceGlobalLatShift = defaults.object(forKey: Keys.blockfaceGlobalLatShift) as? Double ?? Defaults.blockfaceGlobalLatShift
@@ -691,6 +703,7 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(blockfaceUseDirectOffset)
         hasher.combine(blockfaceDirectLatAdjust)
         hasher.combine(blockfaceDirectLonAdjust)
+        hasher.combine(blockfaceFlipHorizontal)
         hasher.combine(blockfaceGlobalRotation)
         hasher.combine(blockfaceGlobalScale)
         hasher.combine(blockfaceGlobalLatShift)
@@ -798,6 +811,7 @@ final class DeveloperSettings: ObservableObject {
         blockfaceUseDirectOffset = Defaults.blockfaceUseDirectOffset
         blockfaceDirectLatAdjust = Defaults.blockfaceDirectLatAdjust
         blockfaceDirectLonAdjust = Defaults.blockfaceDirectLonAdjust
+        blockfaceFlipHorizontal = Defaults.blockfaceFlipHorizontal
         blockfaceGlobalRotation = Defaults.blockfaceGlobalRotation
         blockfaceGlobalScale = Defaults.blockfaceGlobalScale
         blockfaceGlobalLatShift = Defaults.blockfaceGlobalLatShift
