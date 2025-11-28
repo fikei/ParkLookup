@@ -310,12 +310,30 @@ final class DeveloperSettings: ObservableObject {
         }
     }
 
+    /// Global latitude translation (shift all blockfaces north/south by constant amount in degrees)
+    @Published var blockfaceGlobalLatShift: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceGlobalLatShift, forKey: Keys.blockfaceGlobalLatShift)
+            forceReloadOverlays()
+        }
+    }
+
+    /// Global longitude translation (shift all blockfaces east/west by constant amount in degrees)
+    @Published var blockfaceGlobalLonShift: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceGlobalLonShift, forKey: Keys.blockfaceGlobalLonShift)
+            forceReloadOverlays()
+        }
+    }
+
     /// Captured blockface calibration values (for debugging)
     @Published var capturedLonScale: Double = 1.0
     @Published var capturedRotation: Double = 0.0
     @Published var capturedWidth: Double = 0.0001
     @Published var capturedDirectLat: Double = 1.0
     @Published var capturedDirectLon: Double = 1.0
+    @Published var capturedGlobalLatShift: Double = 0.0
+    @Published var capturedGlobalLonShift: Double = 0.0
 
     /// Capture current blockface calibration values
     func captureBlockfaceCalibration() {
@@ -324,22 +342,32 @@ final class DeveloperSettings: ObservableObject {
         capturedWidth = blockfacePolygonWidth
         capturedDirectLat = blockfaceDirectLatAdjust
         capturedDirectLon = blockfaceDirectLonAdjust
+        capturedGlobalLatShift = blockfaceGlobalLatShift
+        capturedGlobalLonShift = blockfaceGlobalLonShift
         print("📸 CAPTURED BLOCKFACE CALIBRATION:")
         print("  Use Direct Offset: \(blockfaceUseDirectOffset)")
-        print("  Longitude Scale Multiplier: \(capturedLonScale)")
-        print("  Rotation Adjustment: \(capturedRotation)°")
-        print("  Direct Lat Adjust: \(capturedDirectLat)")
-        print("  Direct Lon Adjust: \(capturedDirectLon)")
         print("  Polygon Width: \(capturedWidth) degrees")
         print("  ===")
+        print("  TRANSFORMATIONS:")
+        print("  - Longitude Scale Multiplier: \(capturedLonScale)")
+        print("  - Rotation Adjustment: \(capturedRotation)°")
+        print("  - Direct Lat Adjust: \(capturedDirectLat)x")
+        print("  - Direct Lon Adjust: \(capturedDirectLon)x")
+        print("  - Global Lat Shift: \(capturedGlobalLatShift)° (\(capturedGlobalLatShift * 111000)m)")
+        print("  - Global Lon Shift: \(capturedGlobalLonShift)° (\(capturedGlobalLonShift * 85000)m at SF)")
+        print("  ===")
         if blockfaceUseDirectOffset {
-            print("  Copy these values for direct offset mode:")
+            print("  Code for direct offset mode:")
             print("  perpVector.lat *= \(capturedDirectLat)")
             print("  perpVector.lon *= \(capturedDirectLon)")
+            print("  offsetPoint.latitude += \(capturedGlobalLatShift)")
+            print("  offsetPoint.longitude += \(capturedGlobalLonShift)")
         } else {
-            print("  Copy these values for rotation mode:")
+            print("  Code for rotation mode:")
             print("  lonScaleFactor = cos(latRadians) * \(capturedLonScale)")
             print("  rotationAdjustment = \(capturedRotation)")
+            print("  offsetPoint.latitude += \(capturedGlobalLatShift)")
+            print("  offsetPoint.longitude += \(capturedGlobalLonShift)")
         }
     }
 
@@ -448,6 +476,8 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceUseDirectOffset = "dev.blockfaceUseDirectOffset"
         static let blockfaceDirectLatAdjust = "dev.blockfaceDirectLatAdjust"
         static let blockfaceDirectLonAdjust = "dev.blockfaceDirectLonAdjust"
+        static let blockfaceGlobalLatShift = "dev.blockfaceGlobalLatShift"
+        static let blockfaceGlobalLonShift = "dev.blockfaceGlobalLonShift"
         static let logSimplificationStats = "dev.logSimplificationStats"
         static let logLookupPerformance = "dev.logLookupPerformance"
         static let developerModeUnlocked = "dev.developerModeUnlocked"
@@ -504,6 +534,8 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceUseDirectOffset = false  // Use perpendicular calculation by default
         static let blockfaceDirectLatAdjust = 1.0  // No adjustment
         static let blockfaceDirectLonAdjust = 1.0  // No adjustment
+        static let blockfaceGlobalLatShift = 0.0  // No global shift
+        static let blockfaceGlobalLonShift = 0.0  // No global shift
         static let logSimplificationStats = false
         static let logLookupPerformance = true  // Default on for perf monitoring
         static let developerModeUnlocked = false
@@ -563,6 +595,8 @@ final class DeveloperSettings: ObservableObject {
         blockfaceUseDirectOffset = defaults.object(forKey: Keys.blockfaceUseDirectOffset) as? Bool ?? Defaults.blockfaceUseDirectOffset
         blockfaceDirectLatAdjust = defaults.object(forKey: Keys.blockfaceDirectLatAdjust) as? Double ?? Defaults.blockfaceDirectLatAdjust
         blockfaceDirectLonAdjust = defaults.object(forKey: Keys.blockfaceDirectLonAdjust) as? Double ?? Defaults.blockfaceDirectLonAdjust
+        blockfaceGlobalLatShift = defaults.object(forKey: Keys.blockfaceGlobalLatShift) as? Double ?? Defaults.blockfaceGlobalLatShift
+        blockfaceGlobalLonShift = defaults.object(forKey: Keys.blockfaceGlobalLonShift) as? Double ?? Defaults.blockfaceGlobalLonShift
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
         developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
@@ -626,6 +660,8 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(blockfaceUseDirectOffset)
         hasher.combine(blockfaceDirectLatAdjust)
         hasher.combine(blockfaceDirectLonAdjust)
+        hasher.combine(blockfaceGlobalLatShift)
+        hasher.combine(blockfaceGlobalLonShift)
         return hasher.finalize()
     }
 
@@ -729,6 +765,8 @@ final class DeveloperSettings: ObservableObject {
         blockfaceUseDirectOffset = Defaults.blockfaceUseDirectOffset
         blockfaceDirectLatAdjust = Defaults.blockfaceDirectLatAdjust
         blockfaceDirectLonAdjust = Defaults.blockfaceDirectLonAdjust
+        blockfaceGlobalLatShift = Defaults.blockfaceGlobalLatShift
+        blockfaceGlobalLonShift = Defaults.blockfaceGlobalLonShift
         logSimplificationStats = Defaults.logSimplificationStats
         logLookupPerformance = Defaults.logLookupPerformance
         // Don't reset developerModeUnlocked

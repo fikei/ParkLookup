@@ -504,39 +504,47 @@ struct DeveloperMapOverlay: View {
 
             Divider()
 
-            // Calibration controls
-            Text("Calibration (Experimental)")
+            // Global transformations
+            Text("Global Transformations")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
 
             sliderControl(
-                label: "Lon Scale Multiplier",
-                value: $devSettings.blockfaceLonScaleMultiplier,
-                range: 0.5...1.5,
-                step: 0.01,
-                formatter: { String(format: "%.2fx", $0) }
+                label: "Global Rotation",
+                value: $devSettings.blockfaceRotationAdjustment,
+                range: -10.0...10.0,
+                step: 0.1,
+                formatter: { String(format: "%.1f°", $0) }
             )
 
             sliderControl(
-                label: "Rotation Adjustment",
-                value: $devSettings.blockfaceRotationAdjustment,
-                range: -45.0...45.0,
-                step: 0.5,
-                formatter: { String(format: "%.1f°", $0) }
+                label: "Global Shift (Lat)",
+                value: $devSettings.blockfaceGlobalLatShift,
+                range: -0.001...0.001,
+                step: 0.00001,
+                formatter: { String(format: "%.5f° (~%.0fm)", $0, $0 * 111000) }
+            )
+
+            sliderControl(
+                label: "Global Shift (Lon)",
+                value: $devSettings.blockfaceGlobalLonShift,
+                range: -0.001...0.001,
+                step: 0.00001,
+                formatter: { String(format: "%.5f° (~%.0fm)", $0, abs($0) * 85000) }
             )
 
             Divider()
 
-            // Direct offset mode
-            Text("Direct Offset (Advanced)")
+            // Individual block angle correction
+            Text("Per-Block Angle Correction")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
 
-            compactToggle("Use Direct Offset", isOn: $devSettings.blockfaceUseDirectOffset, icon: "slider.horizontal.2.square")
+            compactToggle("Enable Direct Offset", isOn: $devSettings.blockfaceUseDirectOffset, icon: "slider.horizontal.2.square")
 
             if devSettings.blockfaceUseDirectOffset {
                 sliderControl(

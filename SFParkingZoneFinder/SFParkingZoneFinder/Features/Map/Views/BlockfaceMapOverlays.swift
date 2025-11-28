@@ -286,10 +286,15 @@ extension MKMapView {
 
             // perpVector is already normalized from metric space calculation above
             // Create offset point by scaling the normalized perpVector by desired width
-            let offsetPoint = CLLocationCoordinate2D(
+            var offsetPoint = CLLocationCoordinate2D(
                 latitude: point.latitude + perpVector.lat * widthDegrees,
                 longitude: point.longitude + perpVector.lon * widthDegrees
             )
+
+            // Apply global translation shift (moves all blockfaces by a constant amount)
+            offsetPoint.latitude += devSettings.blockfaceGlobalLatShift
+            offsetPoint.longitude += devSettings.blockfaceGlobalLonShift
+
             offsetSide.append(offsetPoint)
 
             if shouldDebug && i < 2 {
