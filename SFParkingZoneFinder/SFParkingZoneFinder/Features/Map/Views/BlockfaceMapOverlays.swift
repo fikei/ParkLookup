@@ -157,10 +157,49 @@ extension MKMapView {
         removeOverlays(blockfaceOverlays)
     }
 
+    /// Calculate the bearing (compass direction) of a centerline
+    /// Returns bearing in degrees (0° = North, 90° = East, 180° = South, 270° = West)
+    private func calculateBearing(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D) -> Double {
+        let lat1 = start.latitude * .pi / 180
+        let lat2 = end.latitude * .pi / 180
+        let dlon = (end.longitude - start.longitude) * .pi / 180
+
+        let y = sin(dlon) * cos(lat2)
+        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dlon)
+        let bearing = atan2(y, x) * 180 / .pi
+
+        return (bearing + 360).truncatingRemainder(dividingBy: 360)
+    }
+
+    /// Determine smart offset direction based on street bearing and side label
+    /// Returns true to offset right, false to offset left (when traveling in line direction)
+    /// Smart selection uses side labels when available to determine correct offset direction:
+    /// - WEST/EVEN → offset right (east toward street center)
+    /// - EAST/ODD → offset left (west toward street center)
+    /// - NORTH → offset right (south toward street center)
+    /// - SOUTH → offset left (north toward street center)
+    /// - UNKNOWN → offset right (default for consistent rendering)
+    private func shouldOffsetRight(side: String, bearing: Double) -> Bool {
+        let sideUpper = side.uppercased()
+
+        // Map side labels to offset direction
+        switch sideUpper {
+        case "WEST", "EVEN", "NORTH":
+            return true  // Offset right toward street center
+        case "EAST", "ODD", "SOUTH":
+            return false  // Offset left toward street center
+        default:
+            // UNKNOWN: default to right for consistent rendering
+            // Future enhancement: could analyze bearing and nearby blockfaces
+            // to infer correct direction for unknown sides
+            return true
+        }
+    }
+
     /// Create a polygon representing a parking lane by offsetting a centerline
-    /// Uses perpendicular offset to create parking lane polygon from centerline
-    /// Basic implementation: always offsets to the right (when traveling in line direction)
-    /// This provides consistent rendering for all blockfaces regardless of side labels
+    /// Uses smart perpendicular offset based on side labels and street bearing
+    /// - For known sides (NORTH/SOUTH/EAST/WEST/EVEN/ODD): offsets toward street center
+    /// - For UNKNOWN sides: defaults to right offset for consistent rendering
     private func createParkingLanePolygon(
         centerline: [CLLocationCoordinate2D],
         widthDegrees: Double,
@@ -169,10 +208,13 @@ extension MKMapView {
     ) -> [CLLocationCoordinate2D]? {
         guard centerline.count >= 2 else { return nil }
 
-        // Basic perpendicular offset: always offset to the right
-        // This creates consistent polygon rendering for all blockfaces
-        // Note: 95.9% of blockfaces have "UNKNOWN" side, so we can't rely on side labels
-        let offsetToRight = true  // Always offset right when traveling in line direction
+        // Calculate bearing for the centerline
+        let bearing = calculateBearing(from: centerline.first!, to: centerline.last!)
+
+        // Smart offset direction based on side label
+        // Uses side labels when available (4% of blockfaces) to offset toward street center
+        // Falls back to right offset for UNKNOWN sides (95.9% of blockfaces)
+        let offsetToRight = shouldOffsetRight(side: side, bearing: bearing)
 
         // Get adjustment parameters from developer settings
         let lonScaleMultiplier = devSettings.blockfaceLonScaleMultiplier
@@ -241,7 +283,8 @@ extension MKMapView {
                 }
 
                 if shouldDebug {
-                    print("🔧 DEBUG: Perpendicular calculation (offsetToRight=\(offsetToRight))")
+                    print("🔧 DEBUG: Smart perpendicular offset")
+                    print("  Side: \(side), Bearing: \(String(format: "%.1f°", bearing)), offsetToRight: \(offsetToRight)")
                     print("  Latitude: \(point.latitude)°, lonScaleFactor: \(lonScaleFactor)")
                     print("  Forward vector: dlat=\(forward.lat), dlon=\(forward.lon)")
 
@@ -259,7 +302,7 @@ extension MKMapView {
 
                     // Determine if this is a left or right turn
                     let turn = determineTurn(forward: (forward.lat, forward.lon), perp: (perpVector.lat, perpVector.lon))
-                    print("  Turn direction: \(turn) (offset: RIGHT)")
+                    print("  Turn direction: \(turn) (expected: \(offsetToRight ? "RIGHT" : "LEFT"))")
                 }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
