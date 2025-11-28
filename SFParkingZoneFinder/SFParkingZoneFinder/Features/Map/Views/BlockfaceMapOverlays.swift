@@ -429,10 +429,15 @@ private func transformCenterline(_ centerline: [CLLocationCoordinate2D], devSett
     let globalLatShift = devSettings.blockfaceGlobalLatShift
     let globalLonShift = devSettings.blockfaceGlobalLonShift
 
+    print("🔄 transformCenterline: rotation=\(globalRotation)°, latShift=\(globalLatShift), lonShift=\(globalLonShift)")
+
     // If no transformations, return original
     if abs(globalRotation) < 0.01 && abs(globalLatShift) < 0.00001 && abs(globalLonShift) < 0.00001 {
+        print("  ⏭️  No transformations needed, returning original")
         return centerline
     }
+
+    print("  ✅ Applying transformations...")
 
     // Calculate centroid for rotation
     let centroidLat = centerline.map { $0.latitude }.reduce(0, +) / Double(centerline.count)
