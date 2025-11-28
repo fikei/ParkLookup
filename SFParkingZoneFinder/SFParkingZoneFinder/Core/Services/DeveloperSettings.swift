@@ -286,24 +286,61 @@ final class DeveloperSettings: ObservableObject {
         }
     }
 
+    /// Use direct offset mode (bypass perpendicular calculation entirely)
+    @Published var blockfaceUseDirectOffset: Bool {
+        didSet {
+            UserDefaults.standard.set(blockfaceUseDirectOffset, forKey: Keys.blockfaceUseDirectOffset)
+            forceReloadOverlays()
+        }
+    }
+
+    /// Direct latitude offset adjustment (-2.0 to 2.0, multiplies the perpendicular lat component)
+    @Published var blockfaceDirectLatAdjust: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceDirectLatAdjust, forKey: Keys.blockfaceDirectLatAdjust)
+            forceReloadOverlays()
+        }
+    }
+
+    /// Direct longitude offset adjustment (-2.0 to 2.0, multiplies the perpendicular lon component)
+    @Published var blockfaceDirectLonAdjust: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceDirectLonAdjust, forKey: Keys.blockfaceDirectLonAdjust)
+            forceReloadOverlays()
+        }
+    }
+
     /// Captured blockface calibration values (for debugging)
     @Published var capturedLonScale: Double = 1.0
     @Published var capturedRotation: Double = 0.0
     @Published var capturedWidth: Double = 0.0001
+    @Published var capturedDirectLat: Double = 1.0
+    @Published var capturedDirectLon: Double = 1.0
 
     /// Capture current blockface calibration values
     func captureBlockfaceCalibration() {
         capturedLonScale = blockfaceLonScaleMultiplier
         capturedRotation = blockfaceRotationAdjustment
         capturedWidth = blockfacePolygonWidth
+        capturedDirectLat = blockfaceDirectLatAdjust
+        capturedDirectLon = blockfaceDirectLonAdjust
         print("📸 CAPTURED BLOCKFACE CALIBRATION:")
+        print("  Use Direct Offset: \(blockfaceUseDirectOffset)")
         print("  Longitude Scale Multiplier: \(capturedLonScale)")
         print("  Rotation Adjustment: \(capturedRotation)°")
+        print("  Direct Lat Adjust: \(capturedDirectLat)")
+        print("  Direct Lon Adjust: \(capturedDirectLon)")
         print("  Polygon Width: \(capturedWidth) degrees")
         print("  ===")
-        print("  Copy these values to fix the algorithm:")
-        print("  lonScaleFactor = cos(latRadians) * \(capturedLonScale)")
-        print("  rotationAdjustment = \(capturedRotation)")
+        if blockfaceUseDirectOffset {
+            print("  Copy these values for direct offset mode:")
+            print("  perpVector.lat *= \(capturedDirectLat)")
+            print("  perpVector.lon *= \(capturedDirectLon)")
+        } else {
+            print("  Copy these values for rotation mode:")
+            print("  lonScaleFactor = cos(latRadians) * \(capturedLonScale)")
+            print("  rotationAdjustment = \(capturedRotation)")
+        }
     }
 
     // MARK: - Performance Logging
@@ -408,6 +445,9 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceOpacity = "dev.blockfaceOpacity"
         static let blockfaceLonScaleMultiplier = "dev.blockfaceLonScaleMultiplier"
         static let blockfaceRotationAdjustment = "dev.blockfaceRotationAdjustment"
+        static let blockfaceUseDirectOffset = "dev.blockfaceUseDirectOffset"
+        static let blockfaceDirectLatAdjust = "dev.blockfaceDirectLatAdjust"
+        static let blockfaceDirectLonAdjust = "dev.blockfaceDirectLonAdjust"
         static let logSimplificationStats = "dev.logSimplificationStats"
         static let logLookupPerformance = "dev.logLookupPerformance"
         static let developerModeUnlocked = "dev.developerModeUnlocked"
@@ -461,6 +501,9 @@ final class DeveloperSettings: ObservableObject {
         static let blockfaceOpacity = 0.7  // 70% opacity - increased for visibility
         static let blockfaceLonScaleMultiplier = 1.0  // Standard cos(lat) scaling
         static let blockfaceRotationAdjustment = 0.0  // No rotation adjustment
+        static let blockfaceUseDirectOffset = false  // Use perpendicular calculation by default
+        static let blockfaceDirectLatAdjust = 1.0  // No adjustment
+        static let blockfaceDirectLonAdjust = 1.0  // No adjustment
         static let logSimplificationStats = false
         static let logLookupPerformance = true  // Default on for perf monitoring
         static let developerModeUnlocked = false
@@ -517,6 +560,9 @@ final class DeveloperSettings: ObservableObject {
         blockfaceOpacity = defaults.object(forKey: Keys.blockfaceOpacity) as? Double ?? Defaults.blockfaceOpacity
         blockfaceLonScaleMultiplier = defaults.object(forKey: Keys.blockfaceLonScaleMultiplier) as? Double ?? Defaults.blockfaceLonScaleMultiplier
         blockfaceRotationAdjustment = defaults.object(forKey: Keys.blockfaceRotationAdjustment) as? Double ?? Defaults.blockfaceRotationAdjustment
+        blockfaceUseDirectOffset = defaults.object(forKey: Keys.blockfaceUseDirectOffset) as? Bool ?? Defaults.blockfaceUseDirectOffset
+        blockfaceDirectLatAdjust = defaults.object(forKey: Keys.blockfaceDirectLatAdjust) as? Double ?? Defaults.blockfaceDirectLatAdjust
+        blockfaceDirectLonAdjust = defaults.object(forKey: Keys.blockfaceDirectLonAdjust) as? Double ?? Defaults.blockfaceDirectLonAdjust
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
         developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
@@ -577,6 +623,9 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(blockfaceOpacity)
         hasher.combine(blockfaceLonScaleMultiplier)
         hasher.combine(blockfaceRotationAdjustment)
+        hasher.combine(blockfaceUseDirectOffset)
+        hasher.combine(blockfaceDirectLatAdjust)
+        hasher.combine(blockfaceDirectLonAdjust)
         return hasher.finalize()
     }
 
@@ -677,6 +726,9 @@ final class DeveloperSettings: ObservableObject {
         blockfaceOpacity = Defaults.blockfaceOpacity
         blockfaceLonScaleMultiplier = Defaults.blockfaceLonScaleMultiplier
         blockfaceRotationAdjustment = Defaults.blockfaceRotationAdjustment
+        blockfaceUseDirectOffset = Defaults.blockfaceUseDirectOffset
+        blockfaceDirectLatAdjust = Defaults.blockfaceDirectLatAdjust
+        blockfaceDirectLonAdjust = Defaults.blockfaceDirectLonAdjust
         logSimplificationStats = Defaults.logSimplificationStats
         logLookupPerformance = Defaults.logLookupPerformance
         // Don't reset developerModeUnlocked

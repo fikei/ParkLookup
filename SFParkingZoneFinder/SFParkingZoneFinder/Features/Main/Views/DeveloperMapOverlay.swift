@@ -527,6 +527,37 @@ struct DeveloperMapOverlay: View {
                 formatter: { String(format: "%.1f°", $0) }
             )
 
+            Divider()
+
+            // Direct offset mode
+            Text("Direct Offset (Advanced)")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            compactToggle("Use Direct Offset", isOn: $devSettings.blockfaceUseDirectOffset, icon: "slider.horizontal.2.square")
+
+            if devSettings.blockfaceUseDirectOffset {
+                sliderControl(
+                    label: "Latitude Multiplier",
+                    value: $devSettings.blockfaceDirectLatAdjust,
+                    range: -2.0...2.0,
+                    step: 0.05,
+                    formatter: { String(format: "%.2fx", $0) }
+                )
+
+                sliderControl(
+                    label: "Longitude Multiplier",
+                    value: $devSettings.blockfaceDirectLonAdjust,
+                    range: -2.0...2.0,
+                    step: 0.05,
+                    formatter: { String(format: "%.2fx", $0) }
+                )
+            }
+
+            Divider()
+
             // Capture button
             Button {
                 devSettings.captureBlockfaceCalibration()

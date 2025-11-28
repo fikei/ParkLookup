@@ -182,6 +182,12 @@ extension MKMapView {
                     perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
                 }
 
+                // Apply direct adjustments if enabled
+                if devSettings.blockfaceUseDirectOffset {
+                    perpVector.lat *= devSettings.blockfaceDirectLatAdjust
+                    perpVector.lon *= devSettings.blockfaceDirectLonAdjust
+                }
+
                 if shouldDebug {
                     print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
                     print("  Latitude: \(point.latitude)°, lonScaleFactor: \(lonScaleFactor)")
@@ -232,6 +238,12 @@ extension MKMapView {
                 if abs(rotationAdjustment) > 0.01 {
                     perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
                 }
+
+                // Apply direct adjustments if enabled
+                if devSettings.blockfaceUseDirectOffset {
+                    perpVector.lat *= devSettings.blockfaceDirectLatAdjust
+                    perpVector.lon *= devSettings.blockfaceDirectLonAdjust
+                }
             } else {
                 // Middle point - average of incoming and outgoing directions
                 let prev = centerline[i - 1]
@@ -263,6 +275,12 @@ extension MKMapView {
                 // Apply rotation adjustment (if any)
                 if abs(rotationAdjustment) > 0.01 {
                     perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
+                }
+
+                // Apply direct adjustments if enabled
+                if devSettings.blockfaceUseDirectOffset {
+                    perpVector.lat *= devSettings.blockfaceDirectLatAdjust
+                    perpVector.lon *= devSettings.blockfaceDirectLonAdjust
                 }
             }
 
