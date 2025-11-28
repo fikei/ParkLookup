@@ -486,6 +486,8 @@ struct DeveloperMapOverlay: View {
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
 
+            compactToggle("Flip Horizontal", isOn: $devSettings.blockfaceFlipHorizontal, icon: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+
             editableSliderControl(
                 label: "Rotation",
                 value: $devSettings.blockfaceGlobalRotation,
