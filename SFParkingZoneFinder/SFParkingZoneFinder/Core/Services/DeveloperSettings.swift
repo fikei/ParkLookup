@@ -268,6 +268,44 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(blockfaceOpacity, forKey: Keys.blockfaceOpacity) }
     }
 
+    /// Blockface longitude scale multiplier (adjust cos(lat) factor for debugging)
+    /// 1.0 = use standard cos(lat), <1.0 = compress, >1.0 = expand
+    @Published var blockfaceLonScaleMultiplier: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceLonScaleMultiplier, forKey: Keys.blockfaceLonScaleMultiplier)
+            forceReloadOverlays()
+        }
+    }
+
+    /// Blockface rotation adjustment in degrees (fine-tune perpendicular angle)
+    /// Positive = rotate clockwise, Negative = rotate counter-clockwise
+    @Published var blockfaceRotationAdjustment: Double {
+        didSet {
+            UserDefaults.standard.set(blockfaceRotationAdjustment, forKey: Keys.blockfaceRotationAdjustment)
+            forceReloadOverlays()
+        }
+    }
+
+    /// Captured blockface calibration values (for debugging)
+    @Published var capturedLonScale: Double = 1.0
+    @Published var capturedRotation: Double = 0.0
+    @Published var capturedWidth: Double = 0.0001
+
+    /// Capture current blockface calibration values
+    func captureBlockfaceCalibration() {
+        capturedLonScale = blockfaceLonScaleMultiplier
+        capturedRotation = blockfaceRotationAdjustment
+        capturedWidth = blockfacePolygonWidth
+        print("📸 CAPTURED BLOCKFACE CALIBRATION:")
+        print("  Longitude Scale Multiplier: \(capturedLonScale)")
+        print("  Rotation Adjustment: \(capturedRotation)°")
+        print("  Polygon Width: \(capturedWidth) degrees")
+        print("  ===")
+        print("  Copy these values to fix the algorithm:")
+        print("  lonScaleFactor = cos(latRadians) * \(capturedLonScale)")
+        print("  rotationAdjustment = \(capturedRotation)")
+    }
+
     // MARK: - Performance Logging
 
     /// Log polygon simplification stats (input/output vertex counts)
@@ -368,6 +406,8 @@ final class DeveloperSettings: ObservableObject {
         static let blockfacePolygonWidth = "dev.blockfacePolygonWidth"
         static let blockfaceColorHex = "dev.blockfaceColorHex"
         static let blockfaceOpacity = "dev.blockfaceOpacity"
+        static let blockfaceLonScaleMultiplier = "dev.blockfaceLonScaleMultiplier"
+        static let blockfaceRotationAdjustment = "dev.blockfaceRotationAdjustment"
         static let logSimplificationStats = "dev.logSimplificationStats"
         static let logLookupPerformance = "dev.logLookupPerformance"
         static let developerModeUnlocked = "dev.developerModeUnlocked"
@@ -419,6 +459,8 @@ final class DeveloperSettings: ObservableObject {
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)
         static let blockfaceOpacity = 0.7  // 70% opacity - increased for visibility
+        static let blockfaceLonScaleMultiplier = 1.0  // Standard cos(lat) scaling
+        static let blockfaceRotationAdjustment = 0.0  // No rotation adjustment
         static let logSimplificationStats = false
         static let logLookupPerformance = true  // Default on for perf monitoring
         static let developerModeUnlocked = false
@@ -473,6 +515,8 @@ final class DeveloperSettings: ObservableObject {
         blockfacePolygonWidth = defaults.object(forKey: Keys.blockfacePolygonWidth) as? Double ?? Defaults.blockfacePolygonWidth
         blockfaceColorHex = defaults.object(forKey: Keys.blockfaceColorHex) as? String ?? Defaults.blockfaceColorHex
         blockfaceOpacity = defaults.object(forKey: Keys.blockfaceOpacity) as? Double ?? Defaults.blockfaceOpacity
+        blockfaceLonScaleMultiplier = defaults.object(forKey: Keys.blockfaceLonScaleMultiplier) as? Double ?? Defaults.blockfaceLonScaleMultiplier
+        blockfaceRotationAdjustment = defaults.object(forKey: Keys.blockfaceRotationAdjustment) as? Double ?? Defaults.blockfaceRotationAdjustment
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
         developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
@@ -629,6 +673,8 @@ final class DeveloperSettings: ObservableObject {
         blockfacePolygonWidth = Defaults.blockfacePolygonWidth
         blockfaceColorHex = Defaults.blockfaceColorHex
         blockfaceOpacity = Defaults.blockfaceOpacity
+        blockfaceLonScaleMultiplier = Defaults.blockfaceLonScaleMultiplier
+        blockfaceRotationAdjustment = Defaults.blockfaceRotationAdjustment
         logSimplificationStats = Defaults.logSimplificationStats
         logLookupPerformance = Defaults.logLookupPerformance
         // Don't reset developerModeUnlocked

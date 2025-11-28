@@ -36,13 +36,14 @@ extension MKMapView {
 
             // Add polygons if enabled
             if devSettings.showBlockfacePolygons {
-                // TESTING: Force large width to rule out thin polygon rendering artifacts
-                let laneWidthDegrees = 0.0003  // ~36m / 118 feet - should be very visible
+                // Use width from developer settings (adjustable via slider)
+                let laneWidthDegrees = devSettings.blockfacePolygonWidth
 
                 guard let polygonCoords = createParkingLanePolygon(
                     centerline: centerline,
                     widthDegrees: laneWidthDegrees,
-                    side: blockface.side
+                    side: blockface.side,
+                    devSettings: devSettings
                 ) else { continue }
 
                 if index < 3 {
@@ -110,7 +111,8 @@ extension MKMapView {
     private func createParkingLanePolygon(
         centerline: [CLLocationCoordinate2D],
         widthDegrees: Double,
-        side: String
+        side: String,
+        devSettings: DeveloperSettings
     ) -> [CLLocationCoordinate2D]? {
         guard centerline.count >= 2 else { return nil }
 
@@ -119,6 +121,10 @@ extension MKMapView {
         // EVEN = right side curb, offset LEFT (inward) when traveling in line direction
         // ODD = left side curb, offset RIGHT (inward) when traveling in line direction
         let offsetToRight = side.uppercased() == "ODD"  // Reversed: ODD offsets right (inward)
+
+        // Get adjustment parameters from developer settings
+        let lonScaleMultiplier = devSettings.blockfaceLonScaleMultiplier
+        let rotationAdjustment = devSettings.blockfaceRotationAdjustment
 
         var offsetSide: [CLLocationCoordinate2D] = []
 
@@ -142,7 +148,7 @@ extension MKMapView {
                 // At higher latitudes, longitude degrees are "shorter" than latitude degrees
                 // 1° lon = 1° lat × cos(latitude) in ground distance
                 let latRadians = point.latitude * .pi / 180
-                let lonScaleFactor = cos(latRadians)
+                let lonScaleFactor = cos(latRadians) * lonScaleMultiplier
 
                 // Scale longitude to metric space where 1° lon = 1° lat in actual distance
                 // Since 1° lon is shorter, we DIVIDE by cos(lat) to scale it UP
@@ -170,6 +176,11 @@ extension MKMapView {
                 // When perpMetric.lon becomes geographic lon, dlat → dlon needs division by cos
                 // because longitude degrees are shorter at this latitude
                 perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
+
+                // Apply rotation adjustment (if any)
+                if abs(rotationAdjustment) > 0.01 {
+                    perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
+                }
 
                 if shouldDebug {
                     print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
@@ -199,7 +210,7 @@ extension MKMapView {
 
                 // Account for latitude/longitude scaling
                 let latRadians = point.latitude * .pi / 180
-                let lonScaleFactor = cos(latRadians)
+                let lonScaleFactor = cos(latRadians) * lonScaleMultiplier
                 let forwardMetric = (lat: forward.lat, lon: forward.lon / lonScaleFactor)
 
                 var perpMetric: (lat: Double, lon: Double)
@@ -216,6 +227,11 @@ extension MKMapView {
 
                 // Convert back: perpMetric.lon came from dlat, needs 1/cos to become geographic dlon
                 perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
+
+                // Apply rotation adjustment (if any)
+                if abs(rotationAdjustment) > 0.01 {
+                    perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
+                }
             } else {
                 // Middle point - average of incoming and outgoing directions
                 let prev = centerline[i - 1]
@@ -226,7 +242,7 @@ extension MKMapView {
 
                 // Account for latitude/longitude scaling
                 let latRadians = point.latitude * .pi / 180
-                let lonScaleFactor = cos(latRadians)
+                let lonScaleFactor = cos(latRadians) * lonScaleMultiplier
                 let forwardMetric = (lat: avgForward.lat, lon: avgForward.lon / lonScaleFactor)
 
                 var perpMetric: (lat: Double, lon: Double)
@@ -243,6 +259,11 @@ extension MKMapView {
 
                 // Convert back: perpMetric.lon came from dlat, needs 1/cos to become geographic dlon
                 perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon / lonScaleFactor)
+
+                // Apply rotation adjustment (if any)
+                if abs(rotationAdjustment) > 0.01 {
+                    perpVector = rotateVector(perpVector, degrees: rotationAdjustment)
+                }
             }
 
             // perpVector is already normalized from metric space calculation above
@@ -384,4 +405,19 @@ private func determineTurn(forward: (lat: Double, lon: Double), perp: (lat: Doub
 
     if abs(cross) < 1e-10 { return "PARALLEL/OPPOSITE" }
     return cross > 0 ? "LEFT" : "RIGHT"
+}
+
+/// Rotate a vector by a given angle in degrees
+/// Positive angle = clockwise rotation
+private func rotateVector(_ vector: (lat: Double, lon: Double), degrees: Double) -> (lat: Double, lon: Double) {
+    let radians = degrees * .pi / 180
+    let cosTheta = cos(radians)
+    let sinTheta = sin(radians)
+
+    // Rotation matrix: [cos -sin; sin cos]
+    // In lat/lon space: lat=y, lon=x
+    return (
+        lat: vector.lat * cosTheta - vector.lon * sinTheta,
+        lon: vector.lat * sinTheta + vector.lon * cosTheta
+    )
 }

@@ -497,10 +497,52 @@ struct DeveloperMapOverlay: View {
             sliderControl(
                 label: "Polygon Width",
                 value: $devSettings.blockfacePolygonWidth,
-                range: 0.00001...0.0001,
+                range: 0.00001...0.0003,
                 step: 0.000005,
                 formatter: { String(format: "%.5f° (~%.1fm)", $0, $0 * 111000) }
             )
+
+            Divider()
+
+            // Calibration controls
+            Text("Calibration (Experimental)")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            sliderControl(
+                label: "Lon Scale Multiplier",
+                value: $devSettings.blockfaceLonScaleMultiplier,
+                range: 0.5...1.5,
+                step: 0.01,
+                formatter: { String(format: "%.2fx", $0) }
+            )
+
+            sliderControl(
+                label: "Rotation Adjustment",
+                value: $devSettings.blockfaceRotationAdjustment,
+                range: -45.0...45.0,
+                step: 0.5,
+                formatter: { String(format: "%.1f°", $0) }
+            )
+
+            // Capture button
+            Button {
+                devSettings.captureBlockfaceCalibration()
+            } label: {
+                HStack {
+                    Image(systemName: "camera.fill")
+                    Text("Capture Values")
+                        .fontWeight(.semibold)
+                }
+                .font(.subheadline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color.green)
+                .cornerRadius(8)
+            }
 
             Divider()
 
