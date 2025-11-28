@@ -20,14 +20,50 @@ extension MKMapView {
 
         print("🔧 DEBUG: Adding \(blockfaces.count) blockface overlays")
 
-        // Update statistics
-        let withRegs = blockfaces.filter { !$0.regulations.isEmpty }.count
-        let withoutRegs = blockfaces.count - withRegs
+        // Update statistics - count each category
+        var noRegs = 0
+        var noParking = 0
+        var rpp = 0
+        var timeLimit = 0
+
+        for bf in blockfaces {
+            if bf.regulations.isEmpty {
+                noRegs += 1
+            } else {
+                var hasNoParking = false
+                var hasRPP = false
+                var hasTimeLimit = false
+
+                for reg in bf.regulations {
+                    if reg.type == "noParking" {
+                        hasNoParking = true
+                    }
+                    if reg.permitZone != nil {
+                        hasRPP = true
+                    }
+                    if reg.type == "timeLimit" {
+                        hasTimeLimit = true
+                    }
+                }
+
+                // Priority: No Parking > RPP > Time Limited
+                if hasNoParking {
+                    noParking += 1
+                } else if hasRPP {
+                    rpp += 1
+                } else if hasTimeLimit {
+                    timeLimit += 1
+                }
+            }
+        }
 
         DispatchQueue.main.async {
             devSettings.totalBlockfacesLoaded = blockfaces.count
-            devSettings.blockfacesWithRegulations = withRegs
-            devSettings.blockfacesWithoutRegulations = withoutRegs
+            devSettings.blockfacesWithRegulations = blockfaces.count - noRegs
+            devSettings.blockfacesWithoutRegulations = noRegs
+            devSettings.blockfacesNoParking = noParking
+            devSettings.blockfacesRPP = rpp
+            devSettings.blockfacesTimeLimit = timeLimit
         }
 
         for (index, blockface) in blockfaces.enumerated() {
@@ -362,31 +398,80 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     private func configureStyle() {
         let devSettings = DeveloperSettings.shared
 
-        // Color coding: Orange = has regulations, Black = no regulations
+        // Color coding based on regulation type:
+        // 1. No restrictions → Transparent/Clear (no fill)
+        // 2. RPP (residential permit) → Orange
+        // 3. Time Limited → Grey
+        // 4. No Parking → Red
         let baseColor: UIColor
         let opacity: Double
 
-        if let bf = blockface, !bf.regulations.isEmpty {
-            // Has regulations → Orange
-            baseColor = UIColor.systemOrange
-            opacity = devSettings.blockfaceOpacity
-        } else {
-            // No regulations → Black
-            baseColor = UIColor.black
-            opacity = devSettings.blockfaceOpacity
-        }
-
-        fillColor = baseColor.withAlphaComponent(opacity)
-
-        // Disable stroke for thin polygons - the stroke creates visible diagonal lines
-        // between centerline and offset that look wrong on the map
-        strokeColor = nil
-        lineWidth = 0
-
-        // Debug: Log rendering configuration for first few polygons
         if let bf = blockface {
-            let colorName = bf.regulations.isEmpty ? "BLACK (no regs)" : "ORANGE (\(bf.regulations.count) regs)"
-            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity), stroke=DISABLED, color=\(colorName)")
+            if bf.regulations.isEmpty {
+                // No restrictions → Transparent
+                baseColor = .clear
+                opacity = 0.0
+            } else {
+                // Check regulation types to determine color
+                var hasRPP = false
+                var hasTimeLimit = false
+                var hasNoParking = false
+
+                for reg in bf.regulations {
+                    if let permitZone = reg.permitZone, !permitZone.isEmpty {
+                        hasRPP = true
+                    }
+                    if reg.type == "timeLimit" {
+                        hasTimeLimit = true
+                    }
+                    if reg.type == "noParking" {
+                        hasNoParking = true
+                    }
+                }
+
+                // Priority: No Parking > RPP > Time Limited
+                if hasNoParking {
+                    baseColor = UIColor.systemRed
+                    opacity = devSettings.blockfaceOpacity
+                } else if hasRPP {
+                    baseColor = UIColor.systemOrange
+                    opacity = devSettings.blockfaceOpacity
+                } else if hasTimeLimit {
+                    baseColor = UIColor.systemGray
+                    opacity = devSettings.blockfaceOpacity
+                } else {
+                    // Fallback for unknown regulation types
+                    baseColor = UIColor.systemBlue
+                    opacity = devSettings.blockfaceOpacity
+                }
+            }
+
+            fillColor = baseColor.withAlphaComponent(opacity)
+
+            // Disable stroke for thin polygons - the stroke creates visible diagonal lines
+            // between centerline and offset that look wrong on the map
+            strokeColor = nil
+            lineWidth = 0
+
+            // Debug: Log rendering configuration for first few polygons
+            let colorName: String
+            if bf.regulations.isEmpty {
+                colorName = "CLEAR (no restrictions)"
+            } else {
+                var types: [String] = []
+                if bf.regulations.contains(where: { $0.type == "noParking" }) { types.append("No Parking→RED") }
+                if bf.regulations.contains(where: { $0.permitZone != nil }) { types.append("RPP→ORANGE") }
+                if bf.regulations.contains(where: { $0.type == "timeLimit" }) { types.append("Time→GREY") }
+                colorName = types.joined(separator: ", ")
+            }
+            print("  🎨 Renderer config for \(bf.street) \(bf.side): \(colorName)")
+        } else {
+            // No blockface info - shouldn't happen
+            baseColor = .clear
+            opacity = 0.0
+            fillColor = baseColor.withAlphaComponent(opacity)
+            strokeColor = nil
+            lineWidth = 0
         }
     }
 }

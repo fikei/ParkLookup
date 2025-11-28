@@ -105,10 +105,10 @@ struct DeveloperMapOverlay: View {
             VStack(alignment: .leading, spacing: 6) {
                 // Conditional stats based on mode
                 if devSettings.showBlockfaceOverlays {
-                    // Blockface mode stats
+                    // Blockface mode stats - show total
                     HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Blockfaces")
+                            Text("Total")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                             Text("\(devSettings.totalBlockfacesLoaded)")
@@ -121,30 +121,32 @@ struct DeveloperMapOverlay: View {
                             .frame(height: 32)
 
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("With Regs")
-                                .font(.caption2)
-                                .foregroundColor(.orange)
-                            Text("\(devSettings.blockfacesWithRegulations)")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.orange)
-                                .monospacedDigit()
-                        }
-
-                        Divider()
-                            .frame(height: 32)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Without")
+                            Text("None")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                             Text("\(devSettings.blockfacesWithoutRegulations)")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.primary)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.secondary)
                                 .monospacedDigit()
                         }
 
                         Spacer()
                     }
+
+                    // Second row: Color-coded categories
+                    HStack(spacing: 8) {
+                        if devSettings.blockfacesNoParking > 0 {
+                            statsChip(label: "No Park", count: devSettings.blockfacesNoParking, color: .red)
+                        }
+                        if devSettings.blockfacesRPP > 0 {
+                            statsChip(label: "RPP", count: devSettings.blockfacesRPP, color: .orange)
+                        }
+                        if devSettings.blockfacesTimeLimit > 0 {
+                            statsChip(label: "Time", count: devSettings.blockfacesTimeLimit, color: .gray)
+                        }
+                        Spacer()
+                    }
+                    .padding(.top, 4)
                 } else {
                     // Zone mode stats
                     HStack(spacing: 12) {

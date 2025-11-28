@@ -463,6 +463,9 @@ final class DeveloperSettings: ObservableObject {
     @Published var totalBlockfacesLoaded: Int = 0
     @Published var blockfacesWithRegulations: Int = 0
     @Published var blockfacesWithoutRegulations: Int = 0
+    @Published var blockfacesNoParking: Int = 0        // Red
+    @Published var blockfacesRPP: Int = 0              // Orange
+    @Published var blockfacesTimeLimit: Int = 0        // Grey
 
     // MARK: - Keys
 
