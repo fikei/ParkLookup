@@ -1,0 +1,484 @@
+{
+  "blockfaces": [
+    {
+      "id": "mission_22nd_23rd_even",
+      "street": "Mission St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4193, 37.7564],
+          [-122.4191, 37.7570],
+          [-122.4189, 37.7576],
+          [-122.4187, 37.7582]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.50,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["tuesday", "friday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        },
+        {
+          "type": "noParking",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStart": "07:00",
+          "enforcementEnd": "09:00",
+          "specialConditions": "Morning commute - tow-away zone"
+        }
+      ]
+    },
+    {
+      "id": "mission_22nd_23rd_odd",
+      "street": "Mission St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4189, 37.7565],
+          [-122.4187, 37.7571],
+          [-122.4185, 37.7577],
+          [-122.4183, 37.7583]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.50,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        },
+        {
+          "type": "loadingZone",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStart": "07:00",
+          "enforcementEnd": "11:00",
+          "specialConditions": "Commercial loading only, 30 min limit"
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["monday", "thursday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "mission_23rd_24th_even",
+      "street": "Mission St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4187, 37.7582],
+          [-122.4185, 37.7588],
+          [-122.4183, 37.7594],
+          [-122.4181, 37.7600]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 3.50,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 180
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["wednesday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "mission_23rd_24th_odd",
+      "street": "Mission St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4183, 37.7583],
+          [-122.4181, 37.7589],
+          [-122.4179, 37.7595],
+          [-122.4177, 37.7601]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "residentialPermit",
+          "permitZone": "AA",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["monday", "thursday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "mission_24th_25th_even",
+      "street": "Mission St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4185, 37.7522],
+          [-122.4183, 37.7528],
+          [-122.4181, 37.7534],
+          [-122.4179, 37.7540]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["monday", "thursday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        },
+        {
+          "type": "residentialPermit",
+          "permitZone": "Q",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "mission_25th_26th_odd",
+      "street": "Mission St",
+      "fromStreet": "25th St",
+      "toStreet": "26th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4181, 37.7541],
+          [-122.4179, 37.7547],
+          [-122.4177, 37.7553],
+          [-122.4175, 37.7559]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["tuesday", "friday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        },
+        {
+          "type": "residentialPermit",
+          "permitZone": "Q",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "valencia_22nd_23rd_even",
+      "street": "Valencia St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4207, 37.7564],
+          [-122.4205, 37.7570],
+          [-122.4203, 37.7576],
+          [-122.4201, 37.7582]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "timeLimit",
+          "timeLimit": 120,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "18:00"
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["wednesday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "valencia_22nd_23rd_odd",
+      "street": "Valencia St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4203, 37.7565],
+          [-122.4201, 37.7571],
+          [-122.4199, 37.7577],
+          [-122.4197, 37.7583]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "residentialPermit",
+          "permitZone": "AA",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["thursday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "valencia_23rd_24th_even",
+      "street": "Valencia St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4201, 37.7582],
+          [-122.4199, 37.7588],
+          [-122.4197, 37.7594],
+          [-122.4195, 37.7600]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "residentialPermit",
+          "permitZone": "AA",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["tuesday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "valencia_23rd_24th_odd",
+      "street": "Valencia St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4197, 37.7583],
+          [-122.4195, 37.7589],
+          [-122.4193, 37.7595],
+          [-122.4191, 37.7601]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "residentialPermit",
+          "permitZone": "AA",
+          "timeLimit": 90
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["friday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "valencia_24th_25th_even",
+      "street": "Valencia St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4199, 37.7522],
+          [-122.4197, 37.7528],
+          [-122.4195, 37.7534],
+          [-122.4193, 37.7540]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "residentialPermit",
+          "permitZone": "Q",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["monday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "valencia_24th_25th_odd",
+      "street": "Valencia St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4195, 37.7523],
+          [-122.4193, 37.7529],
+          [-122.4191, 37.7535],
+          [-122.4189, 37.7541]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "residentialPermit",
+          "permitZone": "Q",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["thursday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    },
+    {
+      "id": "24th_mission_valencia_north",
+      "street": "24th St",
+      "fromStreet": "Mission St",
+      "toStreet": "Valencia St",
+      "side": "NORTH",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4181, 37.7520],
+          [-122.4185, 37.7520],
+          [-122.4190, 37.7520],
+          [-122.4195, 37.7520]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 2.50,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["wednesday"],
+          "enforcementStart": "12:00",
+          "enforcementEnd": "15:00"
+        },
+        {
+          "type": "noParking",
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStart": "16:00",
+          "enforcementEnd": "18:00",
+          "specialConditions": "Evening commute - tow-away zone"
+        }
+      ]
+    },
+    {
+      "id": "24th_mission_valencia_south",
+      "street": "24th St",
+      "fromStreet": "Mission St",
+      "toStreet": "Valencia St",
+      "side": "SOUTH",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4195, 37.7518],
+          [-122.4190, 37.7518],
+          [-122.4185, 37.7518],
+          [-122.4181, 37.7518]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 2.50,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["tuesday"],
+          "enforcementStart": "12:00",
+          "enforcementEnd": "15:00"
+        }
+      ]
+    },
+    {
+      "id": "capp_24th_25th_even",
+      "street": "Capp St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.4172, 37.7522],
+          [-122.4170, 37.7528],
+          [-122.4168, 37.7534],
+          [-122.4166, 37.7540]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "residentialPermit",
+          "permitZone": "Q",
+          "timeLimit": 180
+        },
+        {
+          "type": "timeLimit",
+          "timeLimit": 180,
+          "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "18:00"
+        },
+        {
+          "type": "streetCleaning",
+          "enforcementDays": ["friday"],
+          "enforcementStart": "08:00",
+          "enforcementEnd": "10:00"
+        }
+      ]
+    }
+  ]
+}
