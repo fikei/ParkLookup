@@ -198,41 +198,9 @@ struct ZoneMapView: UIViewRepresentable {
             return
         }
 
-        // Check if developer settings changed - reload overlays if so
-        let currentSettingsHash = DeveloperSettings.shared.settingsHash
-        let devSettings = DeveloperSettings.shared
-        let blockfaceOverlaysJustEnabled = !context.coordinator.lastBlockfaceOverlaysEnabled && devSettings.showBlockfaceOverlays
-
-        if context.coordinator.overlaysLoaded && currentSettingsHash != context.coordinator.lastSettingsHash {
-            logger.info("🔄 Developer settings changed - reloading overlays")
-            context.coordinator.lastSettingsHash = currentSettingsHash
-
-            // Check if blockface overlays were just enabled - zoom to sample location
-            if blockfaceOverlaysJustEnabled {
-                logger.info("🚧 PoC: Blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area")
-                // Center between Mission & Valencia, 22nd-25th Streets (covers full test area)
-                let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7541, longitude: -122.4193)
-                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m, shows multiple blocks
-                let blockfaceRegion = MKCoordinateRegion(center: blockfaceCenter, span: blockfaceSpan)
-                mapView.setRegion(blockfaceRegion, animated: true)
-            }
-
-            // Update tracking state
-            context.coordinator.lastBlockfaceOverlaysEnabled = devSettings.showBlockfaceOverlays
-
-            // Clear existing overlays and annotations (except user location and searched pin)
-            let overlaysToRemove = mapView.overlays
-            let annotationsToRemove = mapView.annotations.filter { annotation in
-                !(annotation is MKUserLocation) && !(annotation is SearchedLocationAnnotation)
-            }
-            mapView.removeOverlays(overlaysToRemove)
-            mapView.removeAnnotations(annotationsToRemove)
-
-            // Reload overlays (keep overlaysLoaded=true to prevent race condition)
-            context.coordinator.overlaysCurrentlyVisible = false
-            loadOverlays(mapView: mapView, context: context)
-            return
-        }
+        // NOTE: Developer settings changes NO LONGER trigger automatic reload
+        // User must click "Apply" button to apply changes (which increments reloadTrigger)
+        // This prevents unwanted refreshes while user is adjusting multiple settings
 
         // Load overlays if they haven't been loaded yet but zones are now available
         if !context.coordinator.overlaysLoaded && !zones.isEmpty {

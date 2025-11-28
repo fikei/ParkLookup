@@ -648,6 +648,13 @@ final class DeveloperSettings: ObservableObject {
         logSimplificationStats = defaults.object(forKey: Keys.logSimplificationStats) as? Bool ?? Defaults.logSimplificationStats
         logLookupPerformance = defaults.object(forKey: Keys.logLookupPerformance) as? Bool ?? Defaults.logLookupPerformance
         developerModeUnlocked = defaults.object(forKey: Keys.developerModeUnlocked) as? Bool ?? Defaults.developerModeUnlocked
+
+        // Reset lat/lon shift to defaults (0.0) - new GeoJSON data is correctly positioned
+        if blockfaceGlobalLatShift != 0.0 || blockfaceGlobalLonShift != 0.0 {
+            blockfaceGlobalLatShift = 0.0
+            blockfaceGlobalLonShift = 0.0
+            print("🔧 Reset blockface global shifts to 0.0 (new GeoJSON data is correctly positioned)")
+        }
     }
 
     // MARK: - Computed Properties

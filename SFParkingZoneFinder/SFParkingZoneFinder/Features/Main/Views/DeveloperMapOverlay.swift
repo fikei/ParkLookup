@@ -81,15 +81,15 @@ struct DeveloperMapOverlay: View {
 
                     Spacer()
 
-                    // Refresh button
+                    // Apply button - applies pending settings changes
                     Button {
                         refreshLayers()
                     } label: {
-                        Image(systemName: "arrow.clockwise")
+                        Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: 28, height: 28)
-                            .background(Color.blue)
+                            .background(Color.green)
                             .clipShape(Circle())
                     }
                 }
