@@ -399,7 +399,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         let devSettings = DeveloperSettings.shared
 
         // Color coding based on regulation type:
-        // 1. No restrictions → Transparent/Clear (no fill)
+        // 1. No parking limits (free parking) → Green
         // 2. RPP (residential permit) → Orange
         // 3. Time Limited → Grey
         // 4. No Parking → Red
@@ -408,9 +408,9 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
 
         if let bf = blockface {
             if bf.regulations.isEmpty {
-                // No restrictions → Transparent
-                baseColor = .clear
-                opacity = 0.0
+                // No restrictions = free parking → Green
+                baseColor = UIColor.systemGreen
+                opacity = devSettings.blockfaceOpacity
             } else {
                 // Check regulation types to determine color
                 var hasRPP = false
@@ -456,7 +456,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
             // Debug: Log rendering configuration for first few polygons
             let colorName: String
             if bf.regulations.isEmpty {
-                colorName = "CLEAR (no restrictions)"
+                colorName = "GREEN (free parking)"
             } else {
                 var types: [String] = []
                 if bf.regulations.contains(where: { $0.type == "noParking" }) { types.append("No Parking→RED") }

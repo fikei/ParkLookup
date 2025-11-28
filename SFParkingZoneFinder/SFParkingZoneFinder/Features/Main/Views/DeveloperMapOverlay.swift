@@ -117,24 +117,14 @@ struct DeveloperMapOverlay: View {
                                 .monospacedDigit()
                         }
 
-                        Divider()
-                            .frame(height: 32)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("None")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("\(devSettings.blockfacesWithoutRegulations)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
-                                .monospacedDigit()
-                        }
-
                         Spacer()
                     }
 
-                    // Second row: Color-coded categories
+                    // Color-coded categories
                     HStack(spacing: 8) {
+                        if devSettings.blockfacesWithoutRegulations > 0 {
+                            statsChip(label: "Free", count: devSettings.blockfacesWithoutRegulations, color: .green)
+                        }
                         if devSettings.blockfacesNoParking > 0 {
                             statsChip(label: "No Park", count: devSettings.blockfacesNoParking, color: .red)
                         }
