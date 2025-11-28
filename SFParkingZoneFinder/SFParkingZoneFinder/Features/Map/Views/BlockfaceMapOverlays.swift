@@ -78,6 +78,22 @@ extension MKMapView {
             } else if index < 3 {
                 print("  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF")
             }
+
+            // DIAGNOSTIC: Add direction arrow at start of each blockface
+            if devSettings.showBlockfaceCenterlines && centerline.count >= 2 {
+                let start = centerline[0]
+                let next = centerline[1]
+                let arrowLength = 0.00015  // Small arrow in degrees
+                let dx = next.longitude - start.longitude
+                let dy = next.latitude - start.latitude
+                let len = sqrt(dx*dx + dy*dy)
+                let endPoint = CLLocationCoordinate2D(
+                    latitude: start.latitude + (dy/len) * arrowLength,
+                    longitude: start.longitude + (dx/len) * arrowLength
+                )
+                let arrow = MKPolyline(coordinates: [start, endPoint], count: 2)
+                addOverlay(arrow)
+            }
         }
     }
 
@@ -151,9 +167,22 @@ extension MKMapView {
                     print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
                     print("  Latitude: \(point.latitude)°, lonScaleFactor: \(lonScaleFactor)")
                     print("  Forward vector: dlat=\(forward.lat), dlon=\(forward.lon)")
+
+                    // Diagnose forward direction
+                    let fwdDir = describeDirection(dlat: forward.lat, dlon: forward.lon)
+                    print("  Forward points: \(fwdDir)")
+
                     print("  Forward (metric): dlat=\(forwardMetric.lat), dlon=\(forwardMetric.lon)")
                     print("  Perp (metric): dlat=\(perpMetric.lat), dlon=\(perpMetric.lon)")
                     print("  Perp (geographic): dlat=\(perpVector.lat), dlon=\(perpVector.lon)")
+
+                    // Diagnose perpendicular direction
+                    let perpDir = describeDirection(dlat: perpVector.lat, dlon: perpVector.lon)
+                    print("  Perpendicular points: \(perpDir)")
+
+                    // Determine if this is a left or right turn
+                    let turn = determineTurn(forward: (forward.lat, forward.lon), perp: (perpVector.lat, perpVector.lon))
+                    print("  Turn direction: \(turn) (expected: \(offsetToRight ? "RIGHT" : "LEFT"))")
                 }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
@@ -215,8 +244,10 @@ extension MKMapView {
             offsetSide.append(offsetPoint)
 
             if shouldDebug && i < 2 {
+                let dlat = offsetPoint.latitude - point.latitude
+                let dlon = offsetPoint.longitude - point.longitude
                 print("  Point \(i): centerline=(\(point.latitude), \(point.longitude)), offset=(\(offsetPoint.latitude), \(offsetPoint.longitude))")
-                print("    Offset applied: dlat=\(normalized.lat * widthDegrees), dlon=\(normalized.lon * widthDegrees)")
+                print("    Offset applied: dlat=\(dlat), dlon=\(dlon)")
             }
         }
 
@@ -306,4 +337,41 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         lineWidth = 2
         lineDashPattern = [2, 2]  // Dashed to distinguish from polygon borders
     }
+}
+
+// MARK: - Diagnostic Helpers
+
+/// Describe the compass direction of a vector
+private func describeDirection(dlat: Double, dlon: Double) -> String {
+    let threshold = 0.3  // Ratio threshold for "mostly" one direction
+    let latAbs = abs(dlat)
+    let lonAbs = abs(dlon)
+    let total = latAbs + lonAbs
+
+    if total == 0 { return "ZERO" }
+
+    let latRatio = latAbs / total
+    let lonRatio = lonAbs / total
+
+    var parts: [String] = []
+
+    if latRatio > threshold {
+        parts.append(dlat > 0 ? "NORTH" : "SOUTH")
+    }
+    if lonRatio > threshold {
+        parts.append(dlon > 0 ? "EAST" : "WEST")
+    }
+
+    return parts.isEmpty ? "UNCLEAR" : parts.joined(separator: "-")
+}
+
+/// Determine if perpendicular is a LEFT or RIGHT turn from forward
+/// Uses cross product: forward × perp > 0 → left turn, < 0 → right turn
+private func determineTurn(forward: (lat: Double, lon: Double), perp: (lat: Double, lon: Double)) -> String {
+    // In lat/lon space: lat=y, lon=x
+    // Cross product z-component: forward.x * perp.y - forward.y * perp.x
+    let cross = forward.lon * perp.lat - forward.lat * perp.lon
+
+    if abs(cross) < 1e-10 { return "PARALLEL/OPPOSITE" }
+    return cross > 0 ? "LEFT" : "RIGHT"
 }
