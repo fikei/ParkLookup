@@ -575,6 +575,8 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(blockfacePolygonWidth)
         hasher.combine(blockfaceColorHex)
         hasher.combine(blockfaceOpacity)
+        hasher.combine(blockfaceLonScaleMultiplier)
+        hasher.combine(blockfaceRotationAdjustment)
         return hasher.finalize()
     }
 
