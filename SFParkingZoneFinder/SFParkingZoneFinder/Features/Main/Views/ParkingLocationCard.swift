@@ -86,6 +86,61 @@ struct ParkingLocationCard: View {
         return calculator.isOutsideEnforcement()
     }
 
+    /// Find when enforcement starts for valid permit holders (outside enforcement hours)
+    private func findNextEnforcementForValidPermit() -> ParkUntilDisplay? {
+        guard let startTime = data.enforcementStartTime,
+              let endTime = data.enforcementEndTime else {
+            return nil
+        }
+
+        let calendar = Calendar.current
+        let now = Date()
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: now)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.totalMinutes
+
+        // Check if enforcement starts later today
+        var currentDayOfWeek: DayOfWeek?
+        var isEnforcementDay = true
+        if let days = data.enforcementDays, !days.isEmpty,
+           let weekday = components.weekday,
+           let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+            currentDayOfWeek = dayOfWeek
+            isEnforcementDay = days.contains(dayOfWeek)
+        }
+
+        if isEnforcementDay && currentMinutes < startMinutes {
+            // Enforcement starts later today
+            return .enforcementStart(time: startTime, date: now)
+        }
+
+        // Find next enforcement day
+        guard let days = data.enforcementDays, !days.isEmpty, let current = currentDayOfWeek else {
+            if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) {
+                return .enforcementStart(time: startTime, date: tomorrow)
+            }
+            return nil
+        }
+
+        let allDays: [DayOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        guard let currentIndex = allDays.firstIndex(of: current) else {
+            return nil
+        }
+
+        for offset in 1...7 {
+            let nextIndex = (currentIndex + offset) % 7
+            let nextDay = allDays[nextIndex]
+            if days.contains(nextDay) {
+                if let targetDate = calendar.date(byAdding: .day, value: offset, to: now) {
+                    return .enforcementStart(time: startTime, date: targetDate)
+                }
+                break
+            }
+        }
+
+        return nil
+    }
+
     private var orderedPermitAreas: [String] {
         guard isMultiPermitLocation else {
             return data.allValidPermitAreas.isEmpty ? [singleLocationCode] : data.allValidPermitAreas
@@ -391,13 +446,24 @@ struct ParkingLocationCard: View {
             }
             .foregroundColor(.primary)
         } else if isValidStyle {
-            HStack(spacing: 6) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.headline)
-                Text("Unlimited Parking")
-                    .font(.headline)
+            // Valid permit - show "Valid Permit" or "Park Until" based on enforcement
+            if isOutsideEnforcement, let nextEnforcement = findNextEnforcementForValidPermit() {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.headline)
+                    Text(nextEnforcement.shortFormatted())
+                        .font(.headline)
+                }
+                .foregroundColor(.white)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.headline)
+                    Text("Valid Permit")
+                        .font(.headline)
+                }
+                .foregroundColor(.white)
             }
-            .foregroundColor(.white)
         } else if data.locationType == .metered {
             Text("Paid Parking")
                 .font(.headline)
@@ -421,9 +487,16 @@ struct ParkingLocationCard: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
         } else if isValidStyle {
-            Text(isMultiPermitLocation ? formattedLocationsList : data.locationName)
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
+            // For valid permits, show "No limit" or location name
+            if isOutsideEnforcement {
+                Text(isMultiPermitLocation ? formattedLocationsList : data.locationName)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.8))
+            } else {
+                Text("No limit")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.8))
+            }
         } else if isMultiPermitLocation {
             Text(formattedLocationsList)
                 .font(.caption)
