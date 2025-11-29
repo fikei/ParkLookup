@@ -316,13 +316,13 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
     private func configureStyle() {
         let devSettings = DeveloperSettings.shared
 
-        // Apply same color logic as polygons to centerlines
+        // Use zone color scheme for consistency with parking zone overlays
         let baseColor: UIColor
 
         if let bf = blockface {
             if bf.regulations.isEmpty {
-                // No restrictions = free parking → Green
-                baseColor = UIColor.systemGreen
+                // No restrictions = free parking → My Permit Zones color (Green)
+                baseColor = devSettings.myPermitZonesColor
             } else {
                 // Check regulation types to determine color (priority order)
                 var hasStreetCleaning = false
@@ -350,16 +350,24 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
                 }
 
                 // Priority: No Parking > Street Cleaning > Metered > RPP > Time Limited
+                // Use zone color scheme:
+                // - Metered = Paid Zones (grey)
+                // - RPP = Free Timed Zones (orange)
+                // - Free/Time Limited = My Permit Zones (green)
+                // - Restrictions (no parking/street cleaning) = Red (safety)
                 if hasNoParking {
                     baseColor = UIColor.systemRed
                 } else if hasStreetCleaning {
                     baseColor = UIColor.systemRed
                 } else if hasMetered {
-                    baseColor = ZoneColorProvider.meteredZoneColor
+                    // Paid/Metered parking → Paid Zones color (grey)
+                    baseColor = devSettings.paidZonesColor
                 } else if hasRPP {
-                    baseColor = UIColor.systemOrange
+                    // RPP without user permit → Free Timed Zones color (orange)
+                    baseColor = devSettings.freeTimedZonesColor
                 } else if hasTimeLimit {
-                    baseColor = UIColor.systemGray
+                    // Time limited free parking → My Permit Zones color (green)
+                    baseColor = devSettings.myPermitZonesColor
                 } else {
                     // Fallback for unknown regulation types
                     baseColor = UIColor.systemBlue
@@ -370,16 +378,16 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
             baseColor = UIColor.systemBlue
         }
 
-        // Updated styling per user requirements:
-        // - 75% opacity
-        // - 2px stroke width
-        // - Rounded line caps
+        // Styling optimized for visibility:
+        // - 2pt stroke width (visible but not overwhelming)
+        // - Rounded line caps and joins (smooth, professional appearance)
+        // - 75% opacity for subtle overlay effect
         // - Solid line (no dash pattern for cleaner look)
         strokeColor = baseColor.withAlphaComponent(0.75)
         lineWidth = 2.0
-        lineCap = .round  // Rounded end caps
-        lineJoin = .round  // Rounded corners for smoother appearance
-        lineDashPattern = nil  // Solid line
+        lineCap = .round
+        lineJoin = .round
+        lineDashPattern = nil
     }
 }
 
