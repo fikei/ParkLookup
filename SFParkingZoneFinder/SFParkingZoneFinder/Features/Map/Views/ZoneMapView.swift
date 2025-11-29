@@ -19,6 +19,9 @@ struct ZoneMapView: UIViewRepresentable {
     /// Developer settings hash - when this changes, overlays reload with new simplification
     var devSettingsHash: Int = DeveloperSettings.shared.settingsHash
 
+    /// Reload trigger - when this changes, overlays reload (used for overlay toggle changes)
+    var reloadTrigger: Int = DeveloperSettings.shared.reloadTrigger
+
     /// Vertical bias for user location position (0.0 = center, positive = user appears lower on screen)
     /// A value of 0.25 means the user appears at 75% from top (25% from bottom)
     var verticalBias: Double = 0.0
@@ -994,11 +997,11 @@ struct ZoneMapView: UIViewRepresentable {
         Task {
             do {
                 let startTime = Date()
-                // Increased radius and count for better coverage
+                // Large radius for full viewport coverage
                 let blockfaces = try await BlockfaceLoader.shared.loadBlockfacesNear(
                     coordinate: loadCenter,
-                    radiusMeters: 1500,  // Increased from 500m to 1500m (~15 blocks)
-                    maxCount: 300       // Increased from 150 to 300
+                    radiusMeters: 3000,  // 3km radius for full viewport coverage
+                    maxCount: 800       // Increased for dense areas
                 )
                 let elapsed = Date().timeIntervalSince(startTime)
                 logger.info("📍 Loaded \(blockfaces.count) nearby blockfaces in \(String(format: "%.3f", elapsed))s")
@@ -1641,7 +1644,6 @@ struct ZoneMapView: UIViewRepresentable {
 
         // MARK: - Region Change Handling
 
-        /* TEMPORARILY DISABLED - clipping too many blocks
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             // Check if blockface overlays are enabled
             guard DeveloperSettings.shared.showBlockfaceOverlays else { return }
@@ -1660,8 +1662,8 @@ struct ZoneMapView: UIViewRepresentable {
                 let currentLocation = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
                 let distance = lastLocation.distance(from: currentLocation)
 
-                // Reload if moved more than 300m from last load
-                if distance > 300 {
+                // Reload if moved more than 1km from last load (larger threshold to reduce reloads)
+                if distance > 1000 {
                     shouldReload = true
                 }
             } else {
@@ -1677,15 +1679,11 @@ struct ZoneMapView: UIViewRepresentable {
 
             // Load blockfaces for new region (async)
             Task { @MainActor in
-                // Find the parent ZoneMapView to call loadBlockfaceOverlays
-                // This is a bit tricky since Coordinator doesn't have direct reference to parent
-                // Instead, we'll directly load and add overlays here
-
                 do {
                     let blockfaces = try await BlockfaceLoader.shared.loadBlockfacesNear(
                         coordinate: currentCenter,
-                        radiusMeters: 1500,
-                        maxCount: 300
+                        radiusMeters: 3000,  // Same as initial load
+                        maxCount: 800
                     )
 
                     // Remove existing blockface overlays
@@ -1706,7 +1704,6 @@ struct ZoneMapView: UIViewRepresentable {
                 isLoadingBlockfaces = false
             }
         }
-        */
     }
 }
 

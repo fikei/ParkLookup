@@ -101,6 +101,7 @@ struct MainResultView: View {
                         },
                         userPermitAreas: userPermitAreaCodes,
                         devSettingsHash: devSettings.settingsHash,
+                        reloadTrigger: devSettings.reloadTrigger,
                         // When collapsed, shift user location below the card
                         // A bias of 0.5 places the user indicator well below the large card
                         verticalBias: isMapExpanded ? 0.0 : 0.5,
