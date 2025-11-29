@@ -60,6 +60,32 @@ struct ParkingLocationCard: View {
         data.allValidPermitAreas.count > 1
     }
 
+    /// Calculate "Park Until" time considering ALL regulations
+    private var parkUntilResult: ParkUntilDisplay? {
+        let calculator = ParkUntilCalculator(
+            timeLimitMinutes: data.timeLimitMinutes,
+            enforcementStartTime: data.enforcementStartTime,
+            enforcementEndTime: data.enforcementEndTime,
+            enforcementDays: data.enforcementDays,
+            validityStatus: data.validityStatus,
+            allRegulations: data.detailedRegulations
+        )
+        return calculator.calculateParkUntil()
+    }
+
+    /// Check if currently outside enforcement hours (for showing "unlimited" state)
+    private var isOutsideEnforcement: Bool {
+        let calculator = ParkUntilCalculator(
+            timeLimitMinutes: data.timeLimitMinutes,
+            enforcementStartTime: data.enforcementStartTime,
+            enforcementEndTime: data.enforcementEndTime,
+            enforcementDays: data.enforcementDays,
+            validityStatus: data.validityStatus,
+            allRegulations: data.detailedRegulations
+        )
+        return calculator.isOutsideEnforcement()
+    }
+
     private var orderedPermitAreas: [String] {
         guard isMultiPermitLocation else {
             return data.allValidPermitAreas.isEmpty ? [singleLocationCode] : data.allValidPermitAreas
@@ -357,10 +383,15 @@ struct ParkingLocationCard: View {
 
     @ViewBuilder
     private var compactMainText: some View {
-        if data.locationType == .metered {
-            Text(data.locationName)
-                .font(.headline)
-                .foregroundColor(.primary)
+        if let parkUntil = parkUntilResult {
+            // Show "Park Until" as main title when there's a time limit
+            HStack(spacing: 6) {
+                Image(systemName: "timer")
+                    .font(.headline)
+                Text(parkUntil.shortFormatted())
+                    .font(.headline)
+            }
+            .foregroundColor(.primary)
         } else if isValidStyle {
             HStack(spacing: 6) {
                 Image(systemName: "checkmark.circle.fill")
@@ -369,8 +400,8 @@ struct ParkingLocationCard: View {
                     .font(.headline)
             }
             .foregroundColor(.white)
-        } else if isMultiPermitLocation {
-            Text("Zone \(orderedPermitAreas[animationIndex])")
+        } else if data.locationType == .metered {
+            Text("Paid Parking")
                 .font(.headline)
                 .foregroundColor(.primary)
         } else {
@@ -382,7 +413,12 @@ struct ParkingLocationCard: View {
 
     @ViewBuilder
     private var compactSubtext: some View {
-        if data.locationType == .metered {
+        if parkUntilResult != nil {
+            // Show location name when Park Until is the main title
+            Text(data.locationName)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        } else if data.locationType == .metered {
             Text(data.meteredSubtitle ?? "$2/hr • 2hr max")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -409,18 +445,35 @@ struct ParkingLocationCard: View {
                 locationCircle(size: 48)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(data.locationName)
-                        .font(.headline)
+                    if let parkUntil = parkUntilResult {
+                        // Show "Park Until" as main title
+                        HStack(spacing: 6) {
+                            Image(systemName: "timer")
+                                .font(.headline)
+                            Text(parkUntil.shortFormatted())
+                                .font(.headline)
+                        }
                         .foregroundColor(.primary)
 
-                    HStack(spacing: 6) {
-                        Image(systemName: data.validityStatus.iconName)
+                        // Location name on second line
+                        Text(data.locationName)
                             .font(.caption)
-                        Text(data.validityStatus.shortText)
-                            .font(.caption)
-                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                    } else {
+                        // Original layout
+                        Text(data.locationName)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+
+                        HStack(spacing: 6) {
+                            Image(systemName: data.validityStatus.iconName)
+                                .font(.caption)
+                            Text(data.validityStatus.shortText)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(Color.forValidityStatus(data.validityStatus))
                     }
-                    .foregroundColor(Color.forValidityStatus(data.validityStatus))
                 }
 
                 Spacer()
