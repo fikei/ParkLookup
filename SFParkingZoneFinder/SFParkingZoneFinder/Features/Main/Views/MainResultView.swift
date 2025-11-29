@@ -162,8 +162,8 @@ struct MainResultView: View {
                     .ignoresSafeArea()
             }
 
-            // Layer 2: Card overlays (hidden when developer panel is open)
-            if !viewModel.isLoading && viewModel.error == nil && !developerPanelExpanded {
+            // Layer 2: Card overlays
+            if !viewModel.isLoading && viewModel.error == nil {
                 VStack {
                     // Address search card (only in expanded mode)
                     if isMapExpanded {

@@ -948,7 +948,7 @@ struct ZoneMapView: UIViewRepresentable {
                     coordinator.overlayLoadingMessage = ""
                 }
 
-                // PoC: Load blockface data and add street cleaning overlays
+                // Load blockface data and add overlays
                 loadBlockfaceOverlays(mapView: mapView, isInitialLoad: true)
 
                 // Load parking meter annotations
@@ -957,7 +957,7 @@ struct ZoneMapView: UIViewRepresentable {
         }
     }
 
-    /// PoC: Load and render blockface data for street cleaning visualization (OPTIMIZED)
+    /// Load and render blockface data overlays (OPTIMIZED)
     /// - Parameters:
     ///   - mapView: The map view to add overlays to
     ///   - isInitialLoad: Whether this is the first load
@@ -966,7 +966,7 @@ struct ZoneMapView: UIViewRepresentable {
         // Check feature flag - only load if enabled in developer settings
         let devSettings = DeveloperSettings.shared
         guard devSettings.showBlockfaceOverlays else {
-            logger.debug("🚧 PoC: Blockface overlays disabled (feature flag off)")
+            logger.debug("📍 Blockface overlays disabled (feature flag off)")
             return
         }
 
@@ -982,7 +982,7 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Zoom to user location on initial load (or test area if no location)
         if isInitialLoad {
-            logger.info("🚧 PoC: Initial load with blockface overlays enabled - centering on user location")
+            logger.info("📍 Initial load with blockface overlays enabled - centering on user location")
             DispatchQueue.main.async {
                 let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.008) // Larger initial view
                 let blockfaceRegion = MKCoordinateRegion(center: loadCenter, span: blockfaceSpan)
@@ -1001,12 +1001,12 @@ struct ZoneMapView: UIViewRepresentable {
                     maxCount: 300       // Increased from 150 to 300
                 )
                 let elapsed = Date().timeIntervalSince(startTime)
-                logger.info("🚧 PoC: Loaded \(blockfaces.count) nearby blockfaces in \(String(format: "%.3f", elapsed))s")
+                logger.info("📍 Loaded \(blockfaces.count) nearby blockfaces in \(String(format: "%.3f", elapsed))s")
 
                 // Add blockface overlays to map on main thread
                 await MainActor.run {
                     mapView.addBlockfaceOverlays(blockfaces)
-                    logger.info("✅ PoC: Added \(blockfaces.count) blockface overlays to map")
+                    logger.info("✅ Added \(blockfaces.count) blockface overlays to map")
 
                     // Update coordinator's last load center to prevent immediate reload
                     if let coordinator = mapView.delegate as? Coordinator {
@@ -1014,7 +1014,7 @@ struct ZoneMapView: UIViewRepresentable {
                     }
                 }
             } catch {
-                logger.error("❌ PoC: Failed to load blockfaces: \(error.localizedDescription)")
+                logger.error("❌ Failed to load blockfaces: \(error.localizedDescription)")
             }
         }
     }
@@ -1141,7 +1141,7 @@ struct ZoneMapView: UIViewRepresentable {
                 return BlockfacePolylineRenderer(polyline: blockfacePolyline, blockface: blockfacePolyline.blockface)
             }
 
-            // Handle blockface polygons (PoC) - check before ZonePolygon since BlockfacePolygon is also MKPolygon
+            // Handle blockface polygons - check before ZonePolygon since BlockfacePolygon is also MKPolygon
             if let blockfacePolygon = overlay as? BlockfacePolygon,
                let blockface = blockfacePolygon.blockface {
                 print("📍 Creating BlockfacePolygonRenderer for \(blockface.street) \(blockface.side)")

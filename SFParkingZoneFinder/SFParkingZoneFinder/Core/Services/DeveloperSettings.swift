@@ -244,8 +244,8 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(showZonePolygons, forKey: Keys.showZonePolygons) }
     }
 
-    /// Show blockface overlays with street cleaning visualization (PoC)
-    /// Renders street segments with active/inactive street cleaning status
+    /// Show blockface overlays on the map
+    /// Renders street segments with parking regulations
     @Published var showBlockfaceOverlays: Bool {
         didSet { UserDefaults.standard.set(showBlockfaceOverlays, forKey: Keys.showBlockfaceOverlays) }
     }

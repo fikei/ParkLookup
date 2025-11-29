@@ -107,7 +107,7 @@ struct SettingsView: View {
                                 generator.impactOccurred()
                             }
 
-                        Toggle("Blockface Overlays (PoC)", isOn: $devSettings.showBlockfaceOverlays)
+                        Toggle("Blockface Overlays", isOn: $devSettings.showBlockfaceOverlays)
                             .onChange(of: devSettings.showBlockfaceOverlays) { _, isEnabled in
                                 let generator = UIImpactFeedbackGenerator(style: .light)
                                 generator.impactOccurred()

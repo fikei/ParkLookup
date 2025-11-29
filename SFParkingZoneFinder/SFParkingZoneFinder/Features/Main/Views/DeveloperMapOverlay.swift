@@ -217,14 +217,25 @@ struct DeveloperMapOverlay: View {
             .padding(.vertical, 8)
             .background(Color(.systemGray6))
 
-            // Scrollable content - conditionally show blockface or zone controls
+            // Scrollable content
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    if devSettings.showBlockfaceOverlays {
-                        // Blockface-specific controls
+                    // Map Overlays Section
+                    mapOverlaysSection
+
+                    Divider()
+
+                    // Calculations Section
+                    calculationsSection
+
+                    Divider()
+
+                    // Mode-specific controls
+                    if devSettings.useBlockfaceForFeatures {
+                        // Blockface-specific calibration controls
                         blockfaceControls
                     } else {
-                        // Original zone polygon controls
+                        // Zone polygon optimization controls
                         zonePolygonControls
                     }
                 }
@@ -239,6 +250,71 @@ struct DeveloperMapOverlay: View {
                 .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
         )
         .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - Map Overlays Section
+
+    private var mapOverlaysSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Map Overlays")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            compactToggle("Zone Polygons", isOn: $devSettings.showZonePolygons, icon: "square.fill.on.square.fill")
+            compactToggle("BlockFaces", isOn: $devSettings.showBlockfaceOverlays, icon: "line.diagonal")
+        }
+    }
+
+    // MARK: - Calculations Section
+
+    private var calculationsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Calculations")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            // Zone-based calculations (mutually exclusive with BlockFace)
+            Button {
+                devSettings.useBlockfaceForFeatures = false
+            } label: {
+                HStack {
+                    Image(systemName: devSettings.useBlockfaceForFeatures ? "circle" : "circle.fill")
+                        .font(.caption)
+                        .foregroundColor(devSettings.useBlockfaceForFeatures ? .secondary : .accentColor)
+                        .frame(width: 20)
+
+                    Text("Use Zone Polygons")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+                }
+            }
+            .buttonStyle(.plain)
+
+            // BlockFace-based calculations (mutually exclusive with Zone)
+            Button {
+                devSettings.useBlockfaceForFeatures = true
+            } label: {
+                HStack {
+                    Image(systemName: devSettings.useBlockfaceForFeatures ? "circle.fill" : "circle")
+                        .font(.caption)
+                        .foregroundColor(devSettings.useBlockfaceForFeatures ? .accentColor : .secondary)
+                        .frame(width: 20)
+
+                    Text("Use BlockFaces")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+                }
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - Merging Toggles
