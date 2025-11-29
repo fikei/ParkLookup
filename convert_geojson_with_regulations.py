@@ -490,6 +490,41 @@ def load_street_sweeping(sweeping_path: str) -> List[Tuple[LineString, Dict]]:
     return sweeping_regs
 
 
+def load_metered_blockfaces(metered_path: str) -> List[Tuple[LineString, Dict]]:
+    """
+    Load metered blockfaces GeoJSON and extract geometries + properties.
+    Returns list of (geometry, properties) tuples with 'metered' marker.
+    """
+    print(f"Loading metered blockfaces from: {metered_path}")
+
+    with open(metered_path, 'r') as f:
+        data = json.load(f)
+
+    metered_faces = []
+    skipped = 0
+
+    for feature in data['features']:
+        geom = feature.get('geometry')
+        props = feature.get('properties', {})
+
+        if not geom or geom.get('type') != 'LineString':
+            skipped += 1
+            continue
+
+        try:
+            # Convert GeoJSON to Shapely geometry
+            shapely_geom = shape(geom)
+            # Add a marker that this is a metered blockface
+            props['_is_metered'] = True
+            metered_faces.append((shapely_geom, props))
+        except Exception as e:
+            skipped += 1
+            continue
+
+    print(f"  ✓ Loaded {len(metered_faces)} metered blockfaces ({skipped} skipped)")
+    return metered_faces
+
+
 def find_matching_regulations(blockface_geom: LineString,
                              regulations: List[Tuple[MultiLineString, Dict]],
                              buffer_distance: float = BUFFER_DISTANCE) -> List[Dict]:
@@ -512,14 +547,33 @@ def find_matching_regulations(blockface_geom: LineString,
     return matching_regs
 
 
+def extract_metered_regulation(props: Dict) -> Dict:
+    """Extract metered parking regulation from metered blockface data"""
+    return {
+        "type": "metered",
+        "permitZone": None,
+        "timeLimit": None,
+        "meterRate": None,  # Rate data not available in blockface dataset
+        "enforcementDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+        "enforcementStart": "09:00",  # Typical SF meter hours
+        "enforcementEnd": "18:00",
+        "specialConditions": "Metered parking - rates vary by location and time"
+    }
+
+
 def extract_regulation_from_props(props: Dict) -> List[Dict]:
     """
     Dispatch to appropriate extraction function based on source.
 
-    Heuristic: If props has 'weekday' and 'fromhour' fields, it's street sweeping.
-    Otherwise, it's a parking regulation.
+    Heuristics:
+    - If props has '_is_metered' marker, it's a metered blockface
+    - If props has 'weekday' and 'fromhour' fields, it's street sweeping
+    - Otherwise, it's a parking regulation
     """
-    if 'weekday' in props and 'fromhour' in props:
+    if props.get('_is_metered'):
+        # Metered blockface record
+        return [extract_metered_regulation(props)]
+    elif 'weekday' in props and 'fromhour' in props:
         # Street sweeping record
         return [extract_street_sweeping(props)]
     else:
@@ -531,12 +585,13 @@ def convert_with_regulations(blockfaces_path: str,
                              regulations_path: str,
                              output_path: str,
                              sweeping_path: Optional[str] = None,
+                             metered_path: Optional[str] = None,
                              bounds_filter: bool = True):
     """
     Convert GeoJSON blockfaces to app format with regulations populated.
 
     Algorithm:
-    1. Load all blockfaces and regulations (parking + sweeping)
+    1. Load all blockfaces and regulations (parking + sweeping + metered)
     2. For each regulation, find the CLOSEST blockface it intersects with
     3. Assign each regulation to only ONE blockface (prevents duplication)
     4. Build output with blockfaces containing their assigned regulations
@@ -550,11 +605,16 @@ def convert_with_regulations(blockfaces_path: str,
     if sweeping_path:
         sweeping_regs = load_street_sweeping(sweeping_path)
         print(f"  Street sweeping: {len(sweeping_regs)}")
-        # Combine datasets
-        all_regulations = regulations + sweeping_regs
-        print(f"  Total regulations: {len(all_regulations)}")
-    else:
-        all_regulations = regulations
+        regulations = regulations + sweeping_regs
+
+    # Load metered blockfaces if provided
+    if metered_path:
+        metered_faces = load_metered_blockfaces(metered_path)
+        print(f"  Metered blockfaces: {len(metered_faces)}")
+        regulations = regulations + metered_faces
+
+    all_regulations = regulations
+    print(f"  Total regulations: {len(all_regulations)}")
 
     if not all_regulations:
         print("ERROR: No regulations loaded. Aborting.")
@@ -783,24 +843,31 @@ def main():
     if len(sys.argv) > 4 and not sys.argv[4].startswith('--'):
         sweeping_file = sys.argv[4]
 
+    # Check for metered blockfaces dataset (5th argument)
+    metered_file = None
+    if len(sys.argv) > 5 and not sys.argv[5].startswith('--'):
+        metered_file = sys.argv[5]
+
     # Check for --no-bounds flag
     bounds_filter = "--no-bounds" not in sys.argv
 
     print("=" * 70)
     print("BLOCKFACE + REGULATIONS SPATIAL JOIN")
     print("=" * 70)
-    print(f"Blockfaces:      {blockfaces_file}")
-    print(f"Regulations:     {regulations_file}")
+    print(f"Blockfaces:         {blockfaces_file}")
+    print(f"Regulations:        {regulations_file}")
     if sweeping_file:
-        print(f"Street Sweeping: {sweeping_file}")
-    print(f"Output:          {output_file}")
+        print(f"Street Sweeping:    {sweeping_file}")
+    if metered_file:
+        print(f"Metered Blockfaces: {metered_file}")
+    print(f"Output:             {output_file}")
     print(f"Bounds filter: {'ON (Mission District only)' if bounds_filter else 'OFF (all SF)'}")
     print(f"Buffer distance: {BUFFER_DISTANCE} degrees (~{BUFFER_DISTANCE * 111000:.0f}m)")
     print("=" * 70)
     print()
 
     convert_with_regulations(blockfaces_file, regulations_file, output_file,
-                           sweeping_file, bounds_filter)
+                           sweeping_file, metered_file, bounds_filter)
 
 
 if __name__ == "__main__":
