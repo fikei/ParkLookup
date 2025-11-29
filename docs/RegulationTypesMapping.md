@@ -2,10 +2,25 @@
 
 ## Overview
 
-This document maps parking regulation types from the **DataSF CSV** (source data) to the **App's BlockfaceRegulation model** (target schema).
+This document maps parking regulation types from the **DataSF CSV** (regulation data) to the **App's BlockfaceRegulation model** (target schema) for spatial join to blockface geometries.
+
+**⚠️ IMPORTANT: Blockfaces GeoJSON is the SOURCE OF TRUTH for geometries.**
+
+The spatial join enriches blockface centerlines with regulation data:
+
+```
+Blockfaces GeoJSON (18,355 centerlines) ← SOURCE OF TRUTH
+       ↓
+   [SPATIAL JOIN]  ← Match regulations TO blockfaces
+       ↓
+Regulations CSV (7,784 with separate geometries)
+       ↓
+   RESULT: Blockfaces with populated regulations[]
+```
 
 **Data Sources:**
-- **CSV:** `Parking_regulations_(except_non-metered_color_curb)_20251128.csv` (7,784 records)
+- **Primary:** `Blockfaces_20251128.geojson` (18,355 blockface centerlines)
+- **Secondary:** `Parking_regulations_(except_non-metered_color_curb)_20251128.csv` (7,784 regulations)
 - **App Model:** `Core/Models/Blockface.swift` → `BlockfaceRegulation`
 
 ---
