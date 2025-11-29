@@ -660,14 +660,14 @@ struct ParkUntilCalculator {
 
         let calendar = Calendar.current
 
-        // 1. Check for upcoming street cleaning
+        // 1. Check for upcoming street cleaning and no parking zones
         for regulation in allRegulations {
-            if regulation.type == .streetCleaning || regulation.type == .towAway {
+            if regulation.type == .streetCleaning || regulation.type == .noParking {
                 if let nextOccurrence = findNextOccurrence(of: regulation, from: date) {
                     if earliestDate == nil || nextOccurrence < earliestDate! {
                         earliestDate = nextOccurrence
                         earliestRestriction = .restriction(
-                            type: regulation.type == .streetCleaning ? "Street cleaning" : "Tow-away zone",
+                            type: regulation.type == .streetCleaning ? "Street cleaning" : "No parking",
                             date: nextOccurrence
                         )
                     }
