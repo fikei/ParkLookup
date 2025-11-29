@@ -1,2 +1,5 @@
 SFParkingZoneFinder/SFParkingZoneFinder.xcodeproj/project.pbxproj
 .DS_Store
+__pycache__/
+*.pyc
+sample_blockfaces*.json
