@@ -451,7 +451,7 @@ final class MainResultViewModel: ObservableObject {
                 let zoneCanPark = result.primaryInterpretation?.validityStatus != .invalid
                 let blockfaceCanPark = ParkingDataAdapter.shared.canPark(
                     at: adapter,
-                    userPermits: Set(permitService.permits.map { $0.permitArea }),
+                    userPermits: Set(permitService.permits.map { $0.area }),
                     at: Date()
                 )
                 if zoneCanPark != blockfaceCanPark {
