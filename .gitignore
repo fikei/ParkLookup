@@ -7,6 +7,8 @@ spot_check_samples.json
 
 # Temporary conversion logs
 conversion*.log
+full_sf_*.log
+*.flag
 
 # Root-level data files (use Data Sets/ folder instead)
 /*.geojson
