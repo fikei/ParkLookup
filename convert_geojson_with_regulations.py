@@ -839,8 +839,7 @@ def convert_with_regulations(blockfaces_path: str,
 
     # Build spatial index for FAST lookups (100x+ speedup)
     print(f"  Building spatial index for {len(blockface_objects)} blockfaces...")
-    blockface_geometries = [bf['geometry'] for bf in blockface_objects]
-    spatial_index = STRtree(blockface_geometries)
+    spatial_index = STRtree([bf['geometry'] for bf in blockface_objects])
     print(f"  ✓ Spatial index built")
 
     regulations_matched = 0
@@ -854,15 +853,13 @@ def convert_with_regulations(blockfaces_path: str,
         buffered_reg = reg_geom.buffer(BUFFER_DISTANCE)
 
         # Use spatial index to find ONLY nearby blockfaces (not all 18K!)
-        nearby_geoms = spatial_index.query(buffered_reg)
+        nearby_geom_indices = spatial_index.query(buffered_reg, predicate='intersects')
 
         closest_blockface = None
         min_distance = float('inf')
 
         # Only check the nearby blockfaces (typically 1-10 instead of 18,355!)
-        for nearby_geom in nearby_geoms:
-            # Find the blockface object for this geometry
-            idx = blockface_geometries.index(nearby_geom)
+        for idx in nearby_geom_indices:
             bf = blockface_objects[idx]
             if buffered_reg.intersects(bf['geometry']):
                 # Side-aware matching: check if regulation is on the same side as blockface
