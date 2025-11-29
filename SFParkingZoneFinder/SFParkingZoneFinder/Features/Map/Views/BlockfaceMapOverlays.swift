@@ -12,6 +12,11 @@ class BlockfacePolyline: MKPolyline {
     var blockface: Blockface?
 }
 
+/// Custom polyline for perpendicular direction markers (debug visualization)
+class PerpendicularMarker: MKPolyline {
+    // Just a marker class to distinguish from centerlines
+}
+
 /// Extension to add blockface rendering to existing map views
 extension MKMapView {
     /// Add blockface overlays to the map as polygons with actual width
@@ -377,4 +382,23 @@ private func determineTurn(forward: (lat: Double, lon: Double), perp: (lat: Doub
 
     if abs(cross) < 1e-10 { return "PARALLEL/OPPOSITE" }
     return cross > 0 ? "LEFT" : "RIGHT"
+}
+
+/// Renderer for perpendicular direction markers (debug visualization)
+class PerpendicularMarkerRenderer: MKPolylineRenderer {
+    override init(overlay: MKOverlay) {
+        super.init(overlay: overlay)
+        configureStyle()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func configureStyle() {
+        // Bright red arrows showing perpendicular offset direction
+        strokeColor = UIColor.systemRed.withAlphaComponent(0.9)
+        lineWidth = 3
+        // Solid line to distinguish from dashed centerline
+    }
 }
