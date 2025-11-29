@@ -1011,6 +1011,11 @@ struct ZoneMapView: UIViewRepresentable {
             mapView.removeAnnotations(existingMeters)
         }
 
+        // TODO: Re-enable when ParkingMeterLoader is added to Xcode project
+        // For now, parking meters are disabled during BlockFace migration
+        logger.info("🅿️ Parking meters temporarily disabled during BlockFace migration")
+
+        /* Parking meter loading disabled - uncomment when ParkingMeter files are added to Xcode project
         do {
             let meters = try ParkingMeterLoader.shared.loadParkingMeters()
             logger.info("🅿️ Loaded \(meters.count) parking meters from dataset")
@@ -1035,6 +1040,7 @@ struct ZoneMapView: UIViewRepresentable {
         } catch {
             logger.error("❌ Failed to load parking meters: \(error.localizedDescription)")
         }
+        */
     }
 
     // MARK: - Coordinator
@@ -1278,6 +1284,7 @@ struct ZoneMapView: UIViewRepresentable {
                 return annotationView
             }
 
+            /* Parking meter annotations disabled - uncomment when ParkingMeter files are added to Xcode project
             // Handle parking meter annotation
             if let meterAnnotation = annotation as? ParkingMeterAnnotation {
                 let identifier = "ParkingMeter"
@@ -1295,11 +1302,9 @@ struct ZoneMapView: UIViewRepresentable {
                     annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
                 }
 
-                // Set subtitle with meter status
-                annotationView?.subtitle = meterAnnotation.meter.statusDescription
-
                 return annotationView
             }
+            */
 
             // Handle blockface label annotation (shows callout with blockface info)
             if let blockfaceAnnotation = annotation as? BlockfaceLabelAnnotation {
@@ -1684,6 +1689,7 @@ class BlockfaceLabelAnnotation: NSObject, MKAnnotation {
     }
 }
 
+/* Parking meter annotation disabled - uncomment when ParkingMeter files are added to Xcode project
 /// Annotation for parking meters
 class ParkingMeterAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
@@ -1693,6 +1699,18 @@ class ParkingMeterAnnotation: NSObject, MKAnnotation {
     init(coordinate: CLLocationCoordinate2D, meter: ParkingMeter) {
         self.coordinate = coordinate
         self.meter = meter
+        super.init()
+    }
+}
+*/
+
+// Stub class to satisfy existing references
+class ParkingMeterAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    var title: String? { nil }
+
+    init(coordinate: CLLocationCoordinate2D) {
+        self.coordinate = coordinate
         super.init()
     }
 }

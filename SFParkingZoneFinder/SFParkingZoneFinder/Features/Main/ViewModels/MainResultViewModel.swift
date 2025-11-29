@@ -66,8 +66,6 @@ final class MainResultViewModel: ObservableObject {
     private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
 
     // Map preferences (read from UserDefaults)
-    @Published var showFloatingMap: Bool
-    @Published var mapPosition: MapPosition
     @Published var showParkingMeters: Bool  // Individual meter pins (not zone polygons)
 
     /// All loaded zones for map display (metered zone polygons always shown)
@@ -101,9 +99,6 @@ final class MainResultViewModel: ObservableObject {
         self.parkingSessionManager = parkingSessionManager
 
         // Load map preferences from UserDefaults
-        self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
-        let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
-        self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
         // Show parking meters (individual pins) is OFF by default
         self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
 
@@ -326,9 +321,6 @@ final class MainResultViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
-                let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
-                self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
                 self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
             }
             .store(in: &cancellables)
@@ -654,30 +646,6 @@ final class MainResultViewModel: ObservableObject {
 
         // Fallback: time limit from now
         return now.addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
-    }
-}
-
-// MARK: - Map Position
-
-enum MapPosition: String, CaseIterable, Codable, Hashable {
-    case topLeft
-    case topRight
-    case bottomRight
-
-    var alignment: Alignment {
-        switch self {
-        case .topLeft: return .topLeading
-        case .topRight: return .topTrailing
-        case .bottomRight: return .bottomTrailing
-        }
-    }
-
-    var displayName: String {
-        switch self {
-        case .topLeft: return "Top Left"
-        case .topRight: return "Top Right"
-        case .bottomRight: return "Bottom Right"
-        }
     }
 }
 
