@@ -35,6 +35,7 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var validityStatus: PermitValidityStatus = .noPermitRequired
     @Published private(set) var ruleSummary: String = ""
     @Published private(set) var ruleSummaryLines: [String] = []
+    @Published private(set) var detailedRegulations: [RegulationInfo] = []  // Detailed regulations for bottom sheet
     @Published private(set) var warnings: [ParkingWarning] = []
     @Published private(set) var conditionalFlags: [ConditionalFlag] = []
 
@@ -625,6 +626,9 @@ final class MainResultViewModel: ObservableObject {
             validityStatus = .noPermitSet
             applicablePermits = []
         }
+
+        // Store detailed regulations for bottom sheet
+        detailedRegulations = result.allRegulations
 
         // Build rule summary from regulations
         ruleSummaryLines = result.allRegulations.map { reg in

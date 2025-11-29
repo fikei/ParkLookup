@@ -228,6 +228,7 @@ struct MainResultView: View {
                             meteredSubtitle: viewModel.meteredSubtitle,
                             timeLimitMinutes: viewModel.timeLimitMinutes,
                             ruleSummaryLines: viewModel.ruleSummaryLines,
+                            detailedRegulations: viewModel.detailedRegulations,
                             enforcementStartTime: viewModel.enforcementStartTime,
                             enforcementEndTime: viewModel.enforcementEndTime,
                             enforcementDays: viewModel.enforcementDays,
@@ -388,6 +389,7 @@ private struct AnimatedZoneCard: View {
     let meteredSubtitle: String?
     let timeLimitMinutes: Int?
     let ruleSummaryLines: [String]
+    let detailedRegulations: [RegulationInfo]  // Detailed regulations for drawer
 
     // Enforcement hours for "Park Until" calculation
     let enforcementStartTime: TimeOfDay?
@@ -398,6 +400,7 @@ private struct AnimatedZoneCard: View {
 
     @State private var animationIndex: Int = 0
     @State private var isFlipped: Bool = false
+    @State private var showRegulationsDrawer = false
 
     private var isMultiPermitLocation: Bool {
         allValidPermitAreas.count > 1
@@ -701,6 +704,16 @@ private struct AnimatedZoneCard: View {
         }
         .frame(height: isExpanded ? miniCardHeight : largeCardHeight)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isExpanded)
+        .sheet(isPresented: $showRegulationsDrawer) {
+            RegulationsDrawerView(
+                zoneName: zoneName,
+                zoneType: zoneType,
+                validityStatus: validityStatus,
+                applicablePermits: applicablePermits,
+                timeLimitMinutes: timeLimitMinutes,
+                regulations: detailedRegulations
+            )
+        }
     }
 
     /// Fixed height for mini card (reduced by 20%)
@@ -852,9 +865,24 @@ private struct AnimatedZoneCard: View {
                     Spacer()
                 }
 
-                // Bottom badge
+                // Bottom section: See regulations link + validity badge
                 VStack {
                     Spacer()
+
+                    // "See regulations" button
+                    if !detailedRegulations.isEmpty {
+                        Button {
+                            showRegulationsDrawer = true
+                        } label: {
+                            Text("See regulations")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
+                                .underline()
+                        }
+                        .padding(.bottom, 8)
+                    }
+
                     ValidityBadgeView(
                         status: validityStatus,
                         permits: applicablePermits,
