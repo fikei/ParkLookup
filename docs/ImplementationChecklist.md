@@ -53,18 +53,21 @@ For a functional Alpha release with real data, complete these in order:
 | S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | **COMPLETE** | 8/10 |
-| S17: Map Zone Boundaries | In Progress | 15/26 |
+| S17: Map Zone Boundaries & Blockface Viz | In Progress | 21/34 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | In Progress | 5/14 |
 | S21: Zone Card UI Refinements | In Progress | 25/28 |
 | S22: CarPlay Experience Update | Not Started | 0/10 |
+| S23: Parking Rules & Location Lookups | Not Started | 0/13 |
+| S24: Street Cleaning Data | Not Started | 0/13 |
+| S25: Metered Parking Layer | Not Started | 0/19 |
 
-**Beta Progress:** 66/136 tasks complete (49%)
+**Beta Progress:** 66/191 tasks complete (35%)
 
 ---
 
-**Overall Progress:** 167/241 tasks complete (69%)
+**Overall Progress:** 167/296 tasks complete (56%)
 
 *Note: Future Enhancement tasks (F-series) not included in progress counts*
 
@@ -640,15 +643,17 @@ For a functional Alpha release with real data, complete these in order:
 
 ---
 
-## Story 17 (S17): Map Zone Boundaries
+## Story 17 (S17): Map Zone Boundaries & Blockface Visualization
 
-**Goal:** Display parking zone boundaries as visual polygons on the expanded map view
+**Goal:** Display parking zone boundaries and blockface parking lanes as visual polygons on the expanded map view
 
 ### Technical Notes
 
 > **MapContentBuilder Limitations (discovered in Alpha):** SwiftUI's `@MapContentBuilder` has limited support for control flow (no `if let`, complex `ForEach` with conditionals). Initial attempts to render zone polygons using `MapPolygon` and `MapPolyline` with `foregroundStyle()` failed due to these limitations. Consider using `MKMapView` with `UIViewRepresentable` and `MKPolygonRenderer` for reliable polygon rendering, or explore MapKit overlay approach outside of `@MapContentBuilder`.
 
 > **Async Zone Loading Bug (discovered Nov 2025):** Zone overlays were only loaded in `makeUIView`. If zones arrived after map creation (async loading), overlays never appeared. Fixed by adding `overlaysLoaded` flag and `loadOverlays()` helper in `updateUIView` to load overlays when zones become available.
+
+> **Blockface Offset Strategy (Nov 2025):** Blockfaces represent parking lanes on one side of a street. To visualize them, centerlines must be offset perpendicular to create lane polygons. The challenge: determining which direction to offset based on side labels (NORTH/SOUTH/EAST/WEST/EVEN/ODD) and street bearing. Solution: bearing-aware algorithm that maps side labels to desired compass directions, calculates both perpendiculars, and selects the one that aligns best with the desired direction. This handles all street orientations correctly.
 
 ### Tasks
 
@@ -696,6 +701,16 @@ For a functional Alpha release with real data, complete these in order:
 
 - [ ] **17.26** Clean up boundary intersections at corners (resolve overlapping/jagged edges where zones meet)
 
+#### Blockface Visualization (PoC - Nov 2025)
+- [x] **17.27** Load blockface data from GeoJSON with centerline coordinates and parking regulations
+- [x] **17.28** Implement basic perpendicular offset to create parking lane polygons from centerlines
+- [x] **17.29** Add 4-category color coding for blockfaces (free, permit valid, permit invalid, paid)
+- [x] **17.30** Implement bearing-aware offset direction selection (fixes incorrect offsets for different street orientations)
+- [x] **17.31** Create blockface offset strategy design document
+- [x] **17.32** Add developer settings for blockface width, offset adjustments, and visualization toggles
+- [ ] **17.33** Evaluate blockface rendering performance with full dataset (18K+ blockfaces)
+- [ ] **17.34** Implement blockface simplification/clustering for better performance at city-wide zoom levels
+
 #### Map Provider Abstraction
 - [ ] **17.14** Create MapProviderProtocol abstraction layer for switching between map providers
 
@@ -716,6 +731,209 @@ For a functional Alpha release with real data, complete these in order:
 - [ ] Tapping a zone shows info card with zone details
 - [ ] User can switch between Apple Maps, Google Maps, and MapLibre in Settings
 - [ ] Zone boundaries render correctly on all supported map providers
+- [x] Blockface PoC demonstrates parking lane visualization with correct offset directions
+- [ ] Blockface layer performs well with full dataset (18K+ blockfaces)
+
+---
+
+## Story 23 (S23): Parking Rules & Location-Based Lookups
+
+**Goal:** Evaluate and implement methods for calculating parking rules and "Park Until" times based on map taps and current location, enabling blockface-based data layer
+
+### Context
+
+Currently, the app uses RPP zone polygons for lookups. To transition to blockface-based data, we need to determine parking rules and time limits for any tapped location or current GPS position. This is more complex than polygon lookup because:
+- Blockfaces are linear features (street segments), not area polygons
+- Users can tap/be located on the street itself or near it (sidewalk, building)
+- Multiple blockfaces may be nearby (both sides of street, intersections)
+- Rules may differ by side of street, time of day, and street cleaning schedules
+
+**Blocks:** Replacing current zone overlay layer with blockface data layer
+
+### Tasks
+
+#### Spatial Lookup Methods
+- [ ] **23.1** Research and document spatial lookup approaches:
+  - Nearest blockface by distance (buffer zone around tap point)
+  - Snap-to-street algorithm (project point to nearest street segment)
+  - Directional awareness (detect which side of street user is on)
+  - Intersection handling (multiple blockfaces within threshold)
+
+- [ ] **23.2** Prototype distance-based lookup (find all blockfaces within N meters of tap point)
+
+- [ ] **23.3** Evaluate snapping accuracy with different buffer distances (5m, 10m, 15m)
+
+- [ ] **23.4** Test lookup performance with full blockface dataset (18K+ segments)
+
+#### Rule Aggregation & Conflicts
+- [ ] **23.5** Design algorithm for handling multiple blockfaces at one location:
+  - Show all nearby blockfaces with distance indicators
+  - Rank by most restrictive / closest / most relevant
+  - Display conflicting rules clearly (different sides of street)
+
+- [ ] **23.6** Implement "Park Until" calculation from blockface time limits and enforcement hours
+
+- [ ] **23.7** Handle edge cases:
+  - Tap point equidistant from multiple streets (intersection)
+  - Blockface with no parking vs. permit parking vs. metered
+  - Conflicting data (RPP area + street cleaning + time limit)
+
+#### User Experience Design
+- [ ] **23.8** Design UI for tap-based blockface lookup results:
+  - Show primary blockface (closest/most relevant)
+  - Indicate "other side of street" if different rules
+  - Display nearby alternative parking if current spot is invalid
+
+- [ ] **23.9** Design current location indicator:
+  - GPS accuracy circle overlay
+  - "You are here" on specific blockface
+  - Confidence indicator for lookup (high/medium/low based on GPS accuracy)
+
+- [ ] **23.10** Create comparison document: zone-based vs blockface-based lookup tradeoffs
+
+#### Testing & Validation
+- [ ] **23.11** Test with real-world scenarios (Mission District, SOMA, Presidio)
+
+- [ ] **23.12** Validate against known ground truth (physical street signs)
+
+- [ ] **23.13** A/B test with users: zone polygons vs blockface lookups
+
+**Story 23 Complete When:**
+- [ ] Spatial lookup method selected and documented with tradeoffs
+- [ ] Prototype demonstrates accurate blockface selection for taps and GPS location
+- [ ] "Park Until" calculation works correctly with blockface time limits
+- [ ] UI design approved for blockface-based lookup results
+- [ ] Performance acceptable for real-time lookups (< 100ms)
+- [ ] Decision made: proceed with blockface layer or hybrid approach
+
+---
+
+## Story 24 (S24): Street Cleaning Data Integration
+
+**Goal:** Add street cleaning schedule data to base dataset and display in UI
+
+### Data Source
+- **DataSF:** Street Sweeping Schedule dataset (routes, days, times)
+
+### Tasks
+
+#### Data Pipeline
+- [ ] **24.1** Create DataSF street cleaning data fetcher
+
+- [ ] **24.2** Transform street cleaning data to match blockface schema (geometry + schedule)
+
+- [ ] **24.3** Join street cleaning schedules with blockface data (spatial or street name matching)
+
+- [ ] **24.4** Add validation for cleaning schedule fields (days, start time, end time)
+
+- [ ] **24.5** Update data pipeline to include street cleaning in daily runs
+
+#### Data Model
+- [ ] **24.6** Extend blockface/zone data model with street cleaning fields:
+  - `streetCleaningDays`: Array of weekdays
+  - `streetCleaningStartTime`: Time
+  - `streetCleaningEndTime`: Time
+  - `streetCleaningSide`: "BOTH", "NORTH", "SOUTH", "EAST", "WEST"
+
+- [ ] **24.7** Update GeoJSON parser to handle street cleaning fields
+
+#### UI Display
+- [ ] **24.8** Add street cleaning indicator to zone/blockface cards:
+  - "🧹 Street Cleaning: Wed 8AM-10AM" badge
+  - Warning color if cleaning is today/soon
+
+- [ ] **24.9** Update "Park Until" calculation to consider street cleaning times
+
+- [ ] **24.10** Show "next street cleaning" info in expanded card
+
+- [ ] **24.11** Add street cleaning overlay toggle to map (show all streets with upcoming cleaning)
+
+#### Notifications (Future)
+- [ ] **24.12** Design notification logic for pre-cleaning alerts (1 hour before)
+
+- [ ] **24.13** Add "street cleaning today" to daily parking summary notification
+
+**Story 24 Complete When:**
+- [ ] Street cleaning data integrated into pipeline and bundled with app
+- [ ] Street cleaning schedules display correctly on zone/blockface cards
+- [ ] "Park Until" accounts for upcoming street cleaning times
+- [ ] Map overlay shows streets with cleaning schedules (optional toggle)
+- [ ] Data updates automatically with pipeline runs
+
+---
+
+## Story 25 (S25): Metered Parking Layer
+
+**Goal:** Add metered parking data with cost information and toggleable map layer
+
+### Data Source
+- **DataSF:** Parking Meters dataset (locations, rates, time limits, cap color)
+
+### Tasks
+
+#### Data Pipeline
+- [ ] **25.1** Create DataSF parking meters data fetcher
+
+- [ ] **25.2** Transform meter data to app schema (location, rate, time limit, payment methods)
+
+- [ ] **25.3** Spatially join meters with blockfaces (associate meters with nearby blockface segments)
+
+- [ ] **25.4** Tag blockfaces with meter data:
+  - `hasMeters`: Boolean
+  - `meterRate`: String (e.g., "$3.50/hr")
+  - `meterTimeLimit`: Minutes
+  - `meterOperatingHours`: Time range
+  - `meterCapColor`: String (for cap color coding)
+
+- [ ] **25.5** Validate meter data (rate format, operating hours, cap color)
+
+- [ ] **25.6** Update pipeline to include meter data in daily runs
+
+#### Data Model
+- [ ] **25.7** Extend blockface data model with meter fields (see 25.4)
+
+- [ ] **25.8** Update GeoJSON parser to handle metered parking fields
+
+- [ ] **25.9** Create `MeterInfo` model with rate, limit, hours, payment methods
+
+#### Map Layer
+- [ ] **25.10** Create toggleable "Metered Parking" map layer (on/off in settings or map controls)
+
+- [ ] **25.11** Add meter pin icons at meter locations (color-coded by cap color)
+
+- [ ] **25.12** Color-code metered blockfaces differently from permit zones
+
+- [ ] **25.13** Add meter cluster markers at higher zoom levels (performance optimization)
+
+#### UI Display
+- [ ] **25.14** Update zone/blockface cards to show meter information:
+  - "💰 Metered: $3.50/hr, 2hr limit"
+  - Operating hours (e.g., "Mon-Sat 9AM-6PM")
+  - Payment methods (PayByPhone, ParkMobile, coins, card)
+
+- [ ] **25.15** Add "Pay Meter" button with deep links to payment apps
+
+- [ ] **25.16** Show meter cost calculation in "Park Until" section (e.g., "2 hours = $7.00")
+
+- [ ] **25.17** Display meter time limit in "Park Until" calculation
+
+#### Enhanced Lookup Logic
+- [ ] **25.18** Update parking rules logic to handle metered blockfaces:
+  - If permit valid + metered → show both permit and meter info
+  - If no permit + metered → show meter as primary parking option
+  - If meter expired/broken → fall back to base blockface rules
+
+- [ ] **25.19** Add "nearest available parking" feature:
+  - Find closest non-metered or permit-valid blockface if tapped spot is metered/invalid
+
+**Story 25 Complete When:**
+- [ ] Meter data integrated into pipeline and bundled with app
+- [ ] Metered parking layer toggleable on map with meter pins
+- [ ] Metered blockfaces display rate, time limit, and operating hours
+- [ ] "Pay Meter" deep links work for supported payment apps
+- [ ] "Park Until" calculation includes meter time limits
+- [ ] Lookup logic correctly handles permit + metered combinations
+- [ ] Performance acceptable with full meter dataset (28K+ meters)
 
 ---
 
