@@ -250,19 +250,22 @@ final class MainResultViewModel: ObservableObject {
             time: Date()
         )
 
-        // TEST: Call adapter in parallel if blockface mode enabled
+        // Use blockface data if feature flag enabled, otherwise use zone data
         if DeveloperSettings.shared.useBlockfaceForFeatures {
             let adapterResult = await ParkingDataAdapter.shared.lookupParking(at: location.coordinate)
 
-            // Log comparison (less verbose for continuous updates)
             if let adapter = adapterResult {
                 let zoneName = result.lookupResult.primaryZone?.displayName ?? "nil"
-                logger.info("🔄 GPS Update - Zone: \(zoneName), Blockface: \(adapter.locationName)")
+                logger.info("🎯 Using Blockface Data - Zone: \(zoneName), Blockface: \(adapter.locationName)")
+                updateStateFromBlockface(from: adapter)
+            } else {
+                logger.warning("⚠️ Blockface lookup failed, falling back to zone data")
+                updateState(from: result)
             }
+        } else {
+            // Use legacy zone-based data
+            updateState(from: result)
         }
-
-        // Continue using zone result for UI (no breaking changes)
-        updateState(from: result)
 
         // Get address (don't fail if this fails)
         await updateAddress(for: location)
@@ -380,19 +383,22 @@ final class MainResultViewModel: ObservableObject {
                 time: Date()
             )
 
-            // TEST: Call adapter in parallel if blockface mode enabled
+            // Use blockface data if feature flag enabled, otherwise use zone data
             if DeveloperSettings.shared.useBlockfaceForFeatures {
                 let adapterResult = await ParkingDataAdapter.shared.lookupParking(at: location.coordinate)
 
-                // Log comparison
                 if let adapter = adapterResult {
                     let zoneName = result.lookupResult.primaryZone?.displayName ?? "nil"
-                    logger.info("🔄 Manual Refresh - Zone: \(zoneName), Blockface: \(adapter.locationName)")
+                    logger.info("🎯 Using Blockface Data (Manual Refresh) - Zone: \(zoneName), Blockface: \(adapter.locationName)")
+                    updateStateFromBlockface(from: adapter)
+                } else {
+                    logger.warning("⚠️ Blockface lookup failed, falling back to zone data")
+                    updateState(from: result)
                 }
+            } else {
+                // Use legacy zone-based data
+                updateState(from: result)
             }
-
-            // Continue using zone result for UI (no breaking changes)
-            updateState(from: result)
 
             // Get address (don't fail if this fails)
             await updateAddress(for: location)
@@ -432,40 +438,25 @@ final class MainResultViewModel: ObservableObject {
             logger.warning("⚠️ Outside coverage area")
         }
 
-        // TEST: Call adapter in parallel if blockface mode enabled
+        // Use blockface data if feature flag enabled, otherwise use zone data
         if DeveloperSettings.shared.useBlockfaceForFeatures {
             let adapterResult = await ParkingDataAdapter.shared.lookupParking(at: coordinate)
 
-            // Log comparison between zone and blockface results
-            let zoneName = result.lookupResult.primaryZone?.displayName ?? "nil"
-            let blockfaceName = adapterResult?.locationName ?? "nil"
-            logger.info("🔄 COMPARISON - Zone: \(zoneName), Blockface: \(blockfaceName)")
-
             if let adapter = adapterResult {
-                // Convert enum to string for logging
+                let zoneName = result.lookupResult.primaryZone?.displayName ?? "nil"
                 let typeString = String(describing: adapter.primaryRegulationType)
-                logger.info("📍 Adapter found: \(adapter.locationName) (type: \(typeString))")
+                logger.info("🎯 Using Blockface Data (Searched) - Zone: \(zoneName), Blockface: \(adapter.locationName) (type: \(typeString))")
                 logger.info("📍 Regulations: \(adapter.allRegulations.count) total")
 
-                // Log can park status comparison
-                let zoneCanPark = result.primaryInterpretation?.validityStatus != .invalid
-                let blockfaceCanPark = ParkingDataAdapter.shared.canPark(
-                    at: adapter,
-                    userPermits: Set(permitService.permits.map { $0.area }),
-                    at: Date()
-                )
-                if zoneCanPark != blockfaceCanPark {
-                    logger.warning("⚠️ MISMATCH - Zone canPark: \(zoneCanPark), Blockface canPark: \(blockfaceCanPark)")
-                } else {
-                    logger.info("✅ MATCH - Both agree canPark: \(zoneCanPark)")
-                }
+                updateStateFromBlockface(from: adapter)
             } else {
-                logger.warning("⚠️ Adapter returned nil - no blockface found")
+                logger.warning("⚠️ Blockface lookup failed, falling back to zone data")
+                updateState(from: result)
             }
+        } else {
+            // Use legacy zone-based data
+            updateState(from: result)
         }
-
-        // Continue using zone result for UI (no breaking changes)
-        updateState(from: result)
 
         // Get address for the searched location
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -557,6 +548,140 @@ final class MainResultViewModel: ObservableObject {
         } else if result.lookupResult.isUnknownArea {
             error = .unknownArea
         }
+    }
+
+    /// Update view model state from blockface adapter result
+    private func updateStateFromBlockface(from result: ParkingLookupResult) {
+        // Basic location info
+        zoneName = result.locationName
+        currentZoneId = nil  // Blockfaces don't have zone IDs
+
+        // Map regulation type to zone type
+        switch result.primaryRegulationType {
+        case .metered:
+            zoneType = .metered
+            meteredSubtitle = "$2/hr • 2hr max"  // TODO: Get from blockface data
+        case .residentialPermit:
+            zoneType = .residentialPermit
+            meteredSubtitle = nil
+        case .timeLimited:
+            zoneType = .residentialPermit  // Time limited uses RPP styling
+            meteredSubtitle = nil
+        case .free:
+            zoneType = .residentialPermit
+            meteredSubtitle = nil
+        case .noParking, .streetCleaning:
+            zoneType = .residentialPermit
+            meteredSubtitle = nil
+        }
+
+        // Time limit
+        timeLimitMinutes = result.timeLimitMinutes
+
+        // Extract enforcement hours from first regulation that has them
+        if let firstEnforcement = result.allRegulations.first(where: { $0.enforcementStart != nil }) {
+            // Parse enforcement times
+            if let startStr = firstEnforcement.enforcementStart,
+               let endStr = firstEnforcement.enforcementEnd {
+                enforcementStartTime = parseTimeOfDay(startStr)
+                enforcementEndTime = parseTimeOfDay(endStr)
+                enforcementDays = firstEnforcement.enforcementDays
+            } else {
+                enforcementStartTime = nil
+                enforcementEndTime = nil
+                enforcementDays = nil
+            }
+        } else {
+            enforcementStartTime = nil
+            enforcementEndTime = nil
+            enforcementDays = nil
+        }
+
+        // Determine validity status based on user permits
+        let userPermitSet = Set(userPermits.map { $0.area.uppercased() })
+        if let permitAreas = result.permitAreas {
+            let permitAreaSet = Set(permitAreas.map { $0.uppercased() })
+            let hasMatchingPermit = !permitAreaSet.isDisjoint(with: userPermitSet)
+
+            if hasMatchingPermit {
+                validityStatus = permitAreaSet.count > 1 ? .multipleApply : .valid
+                applicablePermits = userPermits.filter { permit in
+                    permitAreaSet.contains(permit.area.uppercased())
+                }
+            } else if result.primaryRegulationType == .metered {
+                validityStatus = .noPermitRequired  // Can pay at meter
+                applicablePermits = []
+            } else {
+                validityStatus = .invalid
+                applicablePermits = []
+            }
+        } else if result.primaryRegulationType == .metered {
+            validityStatus = .noPermitRequired
+            applicablePermits = []
+        } else if result.primaryRegulationType == .free {
+            validityStatus = .noPermitRequired
+            applicablePermits = []
+        } else {
+            validityStatus = .noPermitSet
+            applicablePermits = []
+        }
+
+        // Build rule summary from regulations
+        ruleSummaryLines = result.allRegulations.map { reg in
+            var line = reg.description
+            if let days = reg.enforcementDays, !days.isEmpty {
+                let dayNames = days.map { $0.abbreviation }.joined(separator: ", ")
+                line += " (\(dayNames)"
+                if let start = reg.enforcementStart, let end = reg.enforcementEnd {
+                    line += " \(start)-\(end)"
+                }
+                line += ")"
+            }
+            return line
+        }
+        ruleSummary = ruleSummaryLines.joined(separator: "\n")
+
+        // Warnings and flags
+        warnings = []
+        conditionalFlags = []
+
+        // Add warning for active street cleaning
+        if result.primaryRegulationType == .streetCleaning {
+            warnings.append(ParkingWarning(
+                type: .streetCleaning,
+                message: "Street cleaning in effect",
+                severity: .high
+            ))
+        }
+
+        // Add warning for no parking
+        if result.primaryRegulationType == .noParking {
+            warnings.append(ParkingWarning(
+                type: .noParking,
+                message: "No parking allowed at this time",
+                severity: .high
+            ))
+        }
+
+        // Overlapping zones (not applicable for blockfaces)
+        overlappingZones = []
+        hasOverlappingZones = false
+
+        // Permit areas
+        allValidPermitAreas = result.permitAreas ?? []
+
+        // Confidence - blockface data is always high confidence
+        lookupConfidence = .high
+
+        // No coverage errors for blockface data
+        error = nil
+    }
+
+    /// Parse time string (HH:MM) into TimeOfDay
+    private func parseTimeOfDay(_ timeStr: String) -> TimeOfDay? {
+        let components = timeStr.split(separator: ":").compactMap { Int($0) }
+        guard components.count == 2 else { return nil }
+        return TimeOfDay(hour: components[0], minute: components[1])
     }
 
     /// Convert zone data error to user-facing app error
