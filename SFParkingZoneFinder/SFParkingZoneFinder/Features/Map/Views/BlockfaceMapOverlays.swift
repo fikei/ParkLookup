@@ -313,10 +313,72 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
     }
 
     private func configureStyle() {
-        // Simple black centerline for debugging
-        strokeColor = UIColor.black.withAlphaComponent(0.7)
-        lineWidth = 2
-        lineDashPattern = [2, 2]  // Dashed to distinguish from polygon borders
+        let devSettings = DeveloperSettings.shared
+
+        // Apply same color logic as polygons to centerlines
+        let baseColor: UIColor
+
+        if let bf = blockface {
+            if bf.regulations.isEmpty {
+                // No restrictions = free parking → Green
+                baseColor = UIColor.systemGreen
+            } else {
+                // Check regulation types to determine color (priority order)
+                var hasStreetCleaning = false
+                var hasMetered = false
+                var hasRPP = false
+                var hasTimeLimit = false
+                var hasNoParking = false
+
+                for reg in bf.regulations {
+                    if reg.type == "streetCleaning" {
+                        hasStreetCleaning = true
+                    }
+                    if reg.type == "metered" {
+                        hasMetered = true
+                    }
+                    if let permitZone = reg.permitZone, !permitZone.isEmpty {
+                        hasRPP = true
+                    }
+                    if reg.type == "timeLimit" {
+                        hasTimeLimit = true
+                    }
+                    if reg.type == "noParking" {
+                        hasNoParking = true
+                    }
+                }
+
+                // Priority: No Parking > Street Cleaning > Metered > RPP > Time Limited
+                if hasNoParking {
+                    baseColor = UIColor.systemRed
+                } else if hasStreetCleaning {
+                    baseColor = UIColor.systemRed
+                } else if hasMetered {
+                    baseColor = ZoneColorProvider.meteredZoneColor
+                } else if hasRPP {
+                    baseColor = UIColor.systemOrange
+                } else if hasTimeLimit {
+                    baseColor = UIColor.systemGray
+                } else {
+                    // Fallback for unknown regulation types
+                    baseColor = UIColor.systemBlue
+                }
+            }
+        } else {
+            // No blockface info - fallback
+            baseColor = UIColor.systemBlue
+        }
+
+        // Updated styling per user requirements:
+        // - 75% opacity
+        // - 2px stroke width
+        // - Rounded line caps
+        // - Solid line (no dash pattern for cleaner look)
+        strokeColor = baseColor.withAlphaComponent(0.75)
+        lineWidth = 2.0
+        lineCap = .round  // Rounded end caps
+        lineJoin = .round  // Rounded corners for smoother appearance
+        lineDashPattern = nil  // Solid line
     }
 }
 
