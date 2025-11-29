@@ -72,6 +72,9 @@ struct ExpandedMapView: View {
                     onZoneTapped: { zone, _, _ in
                         selectedZone = zone
                     },
+                    onMapTapped: { _ in
+                        // No action needed in expanded view
+                    },
                     userPermitAreas: userPermitAreaCodes,
                     devSettingsHash: devSettings.settingsHash,
                     reloadTrigger: devSettings.reloadTrigger,

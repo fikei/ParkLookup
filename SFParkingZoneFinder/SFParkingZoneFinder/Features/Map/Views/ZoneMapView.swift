@@ -1923,6 +1923,9 @@ class ParkingMeterAnnotation: NSObject, MKAnnotation {
         userCoordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
         onZoneTapped: { zone, permitAreas, coordinate in
             print("Tapped zone: \(zone.displayName), permits: \(permitAreas?.description ?? "nil"), at: \(coordinate.latitude),\(coordinate.longitude)")
+        },
+        onMapTapped: { coordinate in
+            print("Tapped map at: \(coordinate.latitude),\(coordinate.longitude)")
         }
     )
 }
