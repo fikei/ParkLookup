@@ -25,8 +25,37 @@ BOUNDS = {
     "max_lon": -122.407  # East: Potrero Ave
 }
 
-# Buffer distance for spatial matching (meters converted to degrees, ~10m)
-BUFFER_DISTANCE = 0.0001  # ~11 meters at SF latitude
+# Buffer distance for spatial matching (meters converted to degrees, ~15m)
+BUFFER_DISTANCE = 0.000135  # ~15 meters at SF latitude
+
+# Priority order for regulations (lower number = higher priority / more restrictive)
+REGULATION_PRIORITY = {
+    "noParking": 1,        # Highest - can't park at all
+    "towAway": 2,          # Very high - serious consequence
+    "streetCleaning": 3,   # High - temporary tow-away
+    "metered": 4,          # Medium-high - requires payment
+    "timeLimit": 5,        # Medium - limited duration
+    "residentialPermit": 6,# Medium-low - permit requirement
+    "loadingZone": 7,      # Low - special use
+    "other": 8             # Lowest - misc restrictions
+}
+
+
+def get_regulation_priority(regulation: Dict) -> int:
+    """
+    Get priority value for a regulation. Lower number = higher priority.
+    Used to sort regulations by restrictiveness.
+    """
+    reg_type = regulation.get('type', 'other')
+    return REGULATION_PRIORITY.get(reg_type, 99)
+
+
+def sort_regulations_by_priority(regulations: List[Dict]) -> List[Dict]:
+    """
+    Sort regulations by priority (most restrictive first).
+    Secondary sort by type name for consistency.
+    """
+    return sorted(regulations, key=lambda r: (get_regulation_priority(r), r.get('type', '')))
 
 
 def parse_side_from_popupinfo(popupinfo: str) -> str:
@@ -376,6 +405,12 @@ def convert_with_regulations(blockfaces_path: str,
                              bounds_filter: bool = True):
     """
     Convert GeoJSON blockfaces to app format with regulations populated.
+
+    Algorithm:
+    1. Load all blockfaces and regulations
+    2. For each regulation, find the CLOSEST blockface it intersects with
+    3. Assign each regulation to only ONE blockface (prevents duplication)
+    4. Build output with blockfaces containing their assigned regulations
     """
 
     # Load regulations first
@@ -392,11 +427,10 @@ def convert_with_regulations(blockfaces_path: str,
 
     print(f"Total blockface features: {len(blockfaces_data['features'])}")
 
-    blockfaces = []
+    # First pass: Build blockface objects with geometries
+    blockface_objects = []
     skipped_out_of_bounds = 0
     skipped_invalid = 0
-    blockfaces_with_regulations = 0
-    total_regulations_added = 0
 
     for idx, feature in enumerate(blockfaces_data['features']):
         if (idx + 1) % 1000 == 0:
@@ -432,16 +466,66 @@ def convert_with_regulations(blockfaces_path: str,
             skipped_invalid += 1
             continue
 
-        # Find matching regulations
-        matched_regulations = find_matching_regulations(blockface_geom, regulations)
+        blockface_objects.append({
+            'id': globalid,
+            'geometry': blockface_geom,
+            'coords': coords,
+            'street_info': street_info,
+            'side': side,
+            'regulations': []  # Will be populated in second pass
+        })
 
-        # Deduplicate regulations (same regulation may match multiple times)
-        # Create unique key based on all fields except None values
+    print(f"\n  ✓ Loaded {len(blockface_objects)} blockfaces")
+    print(f"    Skipped (out of bounds): {skipped_out_of_bounds}")
+    print(f"    Skipped (invalid): {skipped_invalid}")
+
+    # Second pass: For each regulation, find the CLOSEST blockface
+    print(f"\n  Matching {len(regulations)} regulations to blockfaces...")
+
+    regulations_matched = 0
+    regulations_unmatched = 0
+
+    for reg_idx, (reg_geom, reg_props) in enumerate(regulations):
+        if (reg_idx + 1) % 1000 == 0:
+            print(f"    Processing regulation {reg_idx + 1}/{len(regulations)}...")
+
+        # Find all blockfaces that intersect with this regulation
+        buffered_reg = reg_geom.buffer(BUFFER_DISTANCE)
+
+        closest_blockface = None
+        min_distance = float('inf')
+
+        for bf in blockface_objects:
+            if buffered_reg.intersects(bf['geometry']):
+                # Calculate distance from regulation to blockface centerline
+                distance = reg_geom.distance(bf['geometry'])
+
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_blockface = bf
+
+        # Assign regulation to the closest blockface only
+        if closest_blockface:
+            extracted_regs = extract_regulation(reg_props)
+            closest_blockface['regulations'].extend(extracted_regs)
+            regulations_matched += 1
+        else:
+            regulations_unmatched += 1
+
+    print(f"  ✓ Matched {regulations_matched} regulations ({100*regulations_matched/len(regulations):.1f}%)")
+    print(f"    Unmatched: {regulations_unmatched} ({100*regulations_unmatched/len(regulations):.1f}%)")
+
+    # Third pass: Deduplicate regulations within each blockface and build output
+    blockfaces = []
+    blockfaces_with_regulations = 0
+    total_regulations_added = 0
+
+    for bf_obj in blockface_objects:
+        # Deduplicate regulations
         seen = set()
         unique_regulations = []
-        for reg in matched_regulations:
+        for reg in bf_obj['regulations']:
             # Create tuple of all non-None values for comparison
-            # Convert lists to tuples for hashing
             key_parts = []
             for k, v in sorted(reg.items()):
                 if v is not None and k != 'meterRate':
@@ -454,24 +538,25 @@ def convert_with_regulations(blockfaces_path: str,
                 seen.add(key)
                 unique_regulations.append(reg)
 
-        matched_regulations = unique_regulations
+        # Sort regulations by priority (most restrictive first)
+        unique_regulations = sort_regulations_by_priority(unique_regulations)
 
-        if matched_regulations:
+        if unique_regulations:
             blockfaces_with_regulations += 1
-            total_regulations_added += len(matched_regulations)
+            total_regulations_added += len(unique_regulations)
 
         # Create blockface in app format
         blockface = {
-            "id": globalid,
-            "street": street_info['street'],
-            "fromStreet": street_info['from'],
-            "toStreet": street_info['to'],
-            "side": side,
+            "id": bf_obj['id'],
+            "street": bf_obj['street_info']['street'],
+            "fromStreet": bf_obj['street_info']['from'],
+            "toStreet": bf_obj['street_info']['to'],
+            "side": bf_obj['side'],
             "geometry": {
                 "type": "LineString",
-                "coordinates": coords
+                "coordinates": bf_obj['coords']
             },
-            "regulations": matched_regulations
+            "regulations": unique_regulations
         }
 
         blockfaces.append(blockface)
