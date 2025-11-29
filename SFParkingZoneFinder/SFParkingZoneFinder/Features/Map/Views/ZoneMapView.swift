@@ -958,7 +958,11 @@ struct ZoneMapView: UIViewRepresentable {
     }
 
     /// PoC: Load and render blockface data for street cleaning visualization (OPTIMIZED)
-    private func loadBlockfaceOverlays(mapView: MKMapView, isInitialLoad: Bool = false) {
+    /// - Parameters:
+    ///   - mapView: The map view to add overlays to
+    ///   - isInitialLoad: Whether this is the first load
+    ///   - centerCoordinate: Optional center coordinate (uses map center if nil)
+    private func loadBlockfaceOverlays(mapView: MKMapView, isInitialLoad: Bool = false, centerCoordinate: CLLocationCoordinate2D? = nil) {
         // Check feature flag - only load if enabled in developer settings
         let devSettings = DeveloperSettings.shared
         guard devSettings.showBlockfaceOverlays else {
@@ -966,29 +970,35 @@ struct ZoneMapView: UIViewRepresentable {
             return
         }
 
-        // Use user coordinate or SF default
-        let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        let centerCoordinate = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
+        // Determine center coordinate
+        let loadCenter: CLLocationCoordinate2D
+        if let center = centerCoordinate {
+            loadCenter = center
+        } else if isValidCoordinate(userCoordinate) {
+            loadCenter = userCoordinate!
+        } else {
+            loadCenter = mapView.region.center
+        }
 
         // Zoom to user location on initial load (or test area if no location)
         if isInitialLoad {
             logger.info("🚧 PoC: Initial load with blockface overlays enabled - centering on user location")
             DispatchQueue.main.async {
-                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m
-                let blockfaceRegion = MKCoordinateRegion(center: centerCoordinate, span: blockfaceSpan)
+                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.015, longitudeDelta: 0.008) // Larger initial view
+                let blockfaceRegion = MKCoordinateRegion(center: loadCenter, span: blockfaceSpan)
                 mapView.setRegion(blockfaceRegion, animated: true)
             }
         }
 
-        // Load blockfaces asynchronously near user location
+        // Load blockfaces asynchronously near the center coordinate
         Task {
             do {
                 let startTime = Date()
-                // Load only nearby blockfaces (500m radius, max 150 blockfaces)
+                // Increased radius and count for better coverage
                 let blockfaces = try await BlockfaceLoader.shared.loadBlockfacesNear(
-                    coordinate: centerCoordinate,
-                    radiusMeters: 500,  // ~5-6 blocks
-                    maxCount: 150       // Limit for performance
+                    coordinate: loadCenter,
+                    radiusMeters: 1500,  // Increased from 500m to 1500m (~15 blocks)
+                    maxCount: 300       // Increased from 150 to 300
                 )
                 let elapsed = Date().timeIntervalSince(startTime)
                 logger.info("🚧 PoC: Loaded \(blockfaces.count) nearby blockfaces in \(String(format: "%.3f", elapsed))s")
@@ -997,6 +1007,11 @@ struct ZoneMapView: UIViewRepresentable {
                 await MainActor.run {
                     mapView.addBlockfaceOverlays(blockfaces)
                     logger.info("✅ PoC: Added \(blockfaces.count) blockface overlays to map")
+
+                    // Update coordinator's last load center to prevent immediate reload
+                    if let coordinator = mapView.delegate as? Coordinator {
+                        coordinator.lastBlockfaceLoadCenter = loadCenter
+                    }
                 }
             } catch {
                 logger.error("❌ PoC: Failed to load blockfaces: \(error.localizedDescription)")
@@ -1096,6 +1111,10 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Track blockface overlay state to zoom to sample location when enabled
         var lastBlockfaceOverlaysEnabled: Bool = false
+
+        // Track blockface loading for dynamic region updates
+        var lastBlockfaceLoadCenter: CLLocationCoordinate2D?
+        var isLoadingBlockfaces: Bool = false
 
         init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?) {
             self.currentZoneId = currentZoneId
@@ -1617,6 +1636,73 @@ struct ZoneMapView: UIViewRepresentable {
 
                     return
                 }
+            }
+        }
+
+        // MARK: - Region Change Handling
+
+        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            // Check if blockface overlays are enabled
+            guard DeveloperSettings.shared.showBlockfaceOverlays else { return }
+
+            // Don't reload if already loading
+            guard !isLoadingBlockfaces else { return }
+
+            let currentCenter = mapView.region.center
+
+            // Check if we should reload blockfaces (user has moved significantly)
+            var shouldReload = false
+
+            if let lastCenter = lastBlockfaceLoadCenter {
+                // Calculate distance from last load center
+                let lastLocation = CLLocation(latitude: lastCenter.latitude, longitude: lastCenter.longitude)
+                let currentLocation = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
+                let distance = lastLocation.distance(from: currentLocation)
+
+                // Reload if moved more than 300m from last load
+                if distance > 300 {
+                    shouldReload = true
+                }
+            } else {
+                // No previous load, should load
+                shouldReload = true
+            }
+
+            guard shouldReload else { return }
+
+            // Mark as loading and update last center
+            isLoadingBlockfaces = true
+            lastBlockfaceLoadCenter = currentCenter
+
+            // Load blockfaces for new region (async)
+            Task { @MainActor in
+                // Find the parent ZoneMapView to call loadBlockfaceOverlays
+                // This is a bit tricky since Coordinator doesn't have direct reference to parent
+                // Instead, we'll directly load and add overlays here
+
+                do {
+                    let blockfaces = try await BlockfaceLoader.shared.loadBlockfacesNear(
+                        coordinate: currentCenter,
+                        radiusMeters: 1500,
+                        maxCount: 300
+                    )
+
+                    // Remove existing blockface overlays
+                    let existingBlockfaces = mapView.overlays.compactMap { $0 as? BlockfacePolygon }
+                    let existingPolylines = mapView.overlays.compactMap { $0 as? BlockfacePolyline }
+                    mapView.removeOverlays(existingBlockfaces)
+                    mapView.removeOverlays(existingPolylines)
+
+                    // Add new blockfaces
+                    mapView.addBlockfaceOverlays(blockfaces)
+
+                    print("🔄 Dynamically loaded \(blockfaces.count) blockfaces for new region")
+                } catch {
+                    print("❌ Failed to load blockfaces for new region: \(error)")
+                }
+
+                // Mark as done loading
+                isLoadingBlockfaces = false
             }
         }
     }
