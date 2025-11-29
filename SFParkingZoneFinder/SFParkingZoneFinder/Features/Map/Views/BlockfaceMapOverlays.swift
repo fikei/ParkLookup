@@ -246,23 +246,30 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 let parkUntilWindow = calendar.date(byAdding: .hour, value: 2, to: now) ?? now
 
                 for reg in bf.regulations {
-                    if reg.type == "noParking" {
+                    let regType = reg.type.lowercased()
+
+                    if regType == "noparking" || regType == "no parking" {
                         hasNoParking = true
                     }
-                    if reg.type == "streetCleaning" {
+                    if regType == "streetcleaning" || regType == "street cleaning" {
                         // Only consider street cleaning if active NOW or within park-until window
                         if isStreetCleaningActive(regulation: reg, at: now, untilDate: parkUntilWindow) {
                             hasActiveStreetCleaning = true
                         }
                     }
-                    if reg.type == "metered" {
+                    if regType == "metered" || regType == "meter" {
                         hasMetered = true
                     }
                     if let permitZone = reg.permitZone, !permitZone.isEmpty {
                         hasRPP = true
                     }
-                    if reg.type == "timeLimit" {
+                    if regType == "timelimit" || regType == "time limit" {
                         hasTimeLimit = true
+                    }
+
+                    // Debug: Log first regulation type for this blockface
+                    if bf.regulations.first === reg {
+                        print("📍 DEBUG: First regulation type for \(bf.street): '\(reg.type)'")
                     }
                 }
 
@@ -282,8 +289,9 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                     baseColor = UIColor.systemOrange
                     opacity = devSettings.blockfaceOpacity
                 } else {
-                    // Fallback for unknown regulation types
-                    baseColor = UIColor.systemBlue
+                    // Default to green for unknown types (free parking)
+                    print("⚠️ DEBUG: Unknown regulation types for \(bf.street), defaulting to green")
+                    baseColor = UIColor.systemGreen
                     opacity = devSettings.blockfaceOpacity
                 }
             }
