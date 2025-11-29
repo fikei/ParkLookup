@@ -62,6 +62,62 @@ struct ParkingMeterGeoJSON: Codable {
     let features: [ParkingMeterFeature]
 }
 
+/// GeoJSON Feature wrapper for parking meter
+struct ParkingMeterFeature: Codable {
+    let type: String
+    let geometry: PointGeometry
+    let properties: ParkingMeterProperties
+
+    /// Convert to ParkingMeter model
+    func toParkingMeter() -> ParkingMeter? {
+        guard let id = properties.id else { return nil }
+
+        return ParkingMeter(
+            id: id,
+            postId: properties.postId ?? "",
+            streetName: properties.streetName,
+            streetNum: properties.streetNum,
+            geometry: geometry,
+            activeMeterFlag: properties.activeMeterFlag,
+            meterType: properties.meterType,
+            meterVendor: properties.meterVendor,
+            meterModel: properties.meterModel,
+            capColor: properties.capColor,
+            blockfaceId: properties.blockfaceId,
+            pmDistrictId: properties.pmDistrictId
+        )
+    }
+}
+
+/// Properties from GeoJSON
+struct ParkingMeterProperties: Codable {
+    let id: String?
+    let postId: String?
+    let streetName: String?
+    let streetNum: String?
+    let activeMeterFlag: String?
+    let meterType: String?
+    let meterVendor: String?
+    let meterModel: String?
+    let capColor: String?
+    let blockfaceId: String?
+    let pmDistrictId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id = ":id"
+        case postId = "post_id"
+        case streetName = "street_name"
+        case streetNum = "street_num"
+        case activeMeterFlag = "active_meter_flag"
+        case meterType = "meter_type"
+        case meterVendor = "meter_vendor"
+        case meterModel = "meter_model"
+        case capColor = "cap_color"
+        case blockfaceId = "blockface_id"
+        case pmDistrictId = "pm_district_id"
+    }
+}
+
 enum ParkingMeterLoaderError: Error {
     case fileNotFound
     case invalidData
