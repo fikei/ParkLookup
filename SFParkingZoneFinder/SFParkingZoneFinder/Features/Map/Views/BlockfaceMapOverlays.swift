@@ -171,33 +171,72 @@ extension MKMapView {
         return (bearing + 360).truncatingRemainder(dividingBy: 360)
     }
 
+    /// Calculate the angle difference between two bearings
+    /// Returns the smallest angle difference in degrees (0-180)
+    private func angleDifference(_ bearing1: Double, _ bearing2: Double) -> Double {
+        var diff = abs(bearing1 - bearing2)
+        if diff > 180 {
+            diff = 360 - diff
+        }
+        return diff
+    }
+
     /// Determine smart offset direction based on street bearing and side label
     /// Returns true to offset right, false to offset left (when traveling in line direction)
-    /// Smart selection uses side labels when available to determine correct offset direction:
-    /// - WEST/EVEN → offset right (east toward street center)
-    /// - EAST/ODD → offset left (west toward street center)
-    /// - NORTH → offset right (south toward street center)
-    /// - SOUTH → offset left (north toward street center)
-    /// - UNKNOWN → offset right (default for consistent rendering)
+    ///
+    /// Algorithm:
+    /// 1. Determine the desired offset compass direction based on side label
+    ///    - WEST/EVEN → offset EAST (90°) toward street center
+    ///    - EAST/ODD → offset WEST (270°) toward street center
+    ///    - NORTH → offset SOUTH (180°) toward street center
+    ///    - SOUTH → offset NORTH (0°) toward street center
+    /// 2. Calculate what direction the right perpendicular points based on centerline bearing
+    ///    - Right perpendicular is 90° clockwise from forward direction
+    /// 3. Choose right if it aligns better with desired direction, otherwise choose left
     private func shouldOffsetRight(side: String, bearing: Double) -> Bool {
         let sideUpper = side.uppercased()
 
-        // Map side labels to offset direction
+        // Determine the desired offset direction (compass bearing) based on side label
+        let preferredDirection: Double
         switch sideUpper {
-        case "WEST", "EVEN", "NORTH":
-            return true  // Offset right toward street center
-        case "EAST", "ODD", "SOUTH":
-            return false  // Offset left toward street center
-        default:
+        case "WEST", "EVEN":
+            preferredDirection = 90   // offset EAST toward street center
+        case "EAST", "ODD":
+            preferredDirection = 270  // offset WEST toward street center
+        case "NORTH":
+            preferredDirection = 180  // offset SOUTH toward street center
+        case "SOUTH":
+            preferredDirection = 0    // offset NORTH toward street center
+        case "UNKNOWN":
             // UNKNOWN: default to right for consistent rendering
             // Future enhancement: could analyze bearing and nearby blockfaces
             // to infer correct direction for unknown sides
             return true
+        default:
+            return true
         }
+
+        // Calculate what direction the right perpendicular points
+        // Right perpendicular is 90° clockwise from the forward direction
+        let rightPerpBearing = (bearing + 90).truncatingRemainder(dividingBy: 360)
+        let leftPerpBearing = (bearing - 90 + 360).truncatingRemainder(dividingBy: 360)
+
+        // Choose the perpendicular that best aligns with the preferred direction
+        let rightAlignment = angleDifference(rightPerpBearing, preferredDirection)
+        let leftAlignment = angleDifference(leftPerpBearing, preferredDirection)
+
+        return rightAlignment < leftAlignment
     }
 
     /// Create a polygon representing a parking lane by offsetting a centerline
-    /// Uses smart perpendicular offset based on side labels and street bearing
+    /// Uses bearing-aware perpendicular offset to always offset toward street center
+    ///
+    /// Algorithm:
+    /// 1. Determines desired offset direction based on side label (e.g., WEST → offset EAST)
+    /// 2. Calculates centerline bearing to determine which perpendicular (left/right) points in desired direction
+    /// 3. Offsets each point perpendicular to the local forward direction
+    /// 4. Correctly handles all centerline directions and diagonal streets
+    ///
     /// - For known sides (NORTH/SOUTH/EAST/WEST/EVEN/ODD): offsets toward street center
     /// - For UNKNOWN sides: defaults to right offset for consistent rendering
     private func createParkingLanePolygon(
@@ -283,8 +322,29 @@ extension MKMapView {
                 }
 
                 if shouldDebug {
-                    print("🔧 DEBUG: Smart perpendicular offset")
-                    print("  Side: \(side), Bearing: \(String(format: "%.1f°", bearing)), offsetToRight: \(offsetToRight)")
+                    print("🔧 DEBUG: Bearing-based perpendicular offset")
+                    print("  Side: \(side), Bearing: \(String(format: "%.1f°", bearing))")
+
+                    // Show the bearing-based decision
+                    let sideUpper = side.uppercased()
+                    switch sideUpper {
+                    case "WEST", "EVEN":
+                        print("  Preferred direction: EAST (90°)")
+                    case "EAST", "ODD":
+                        print("  Preferred direction: WEST (270°)")
+                    case "NORTH":
+                        print("  Preferred direction: SOUTH (180°)")
+                    case "SOUTH":
+                        print("  Preferred direction: NORTH (0°)")
+                    default:
+                        print("  Preferred direction: DEFAULT (right)")
+                    }
+
+                    let rightPerpBearing = (bearing + 90).truncatingRemainder(dividingBy: 360)
+                    let leftPerpBearing = (bearing - 90 + 360).truncatingRemainder(dividingBy: 360)
+                    print("  Right perp bearing: \(String(format: "%.1f°", rightPerpBearing))")
+                    print("  Left perp bearing: \(String(format: "%.1f°", leftPerpBearing))")
+                    print("  Selected: \(offsetToRight ? "RIGHT" : "LEFT") perpendicular")
                     print("  Latitude: \(point.latitude)°, lonScaleFactor: \(lonScaleFactor)")
                     print("  Forward vector: dlat=\(forward.lat), dlon=\(forward.lon)")
 
