@@ -103,139 +103,22 @@ protocol ParkingDataAdapterProtocol {
 /// Factory that returns the appropriate adapter based on feature flag
 class ParkingDataAdapter {
     static var shared: ParkingDataAdapterProtocol {
-        if DeveloperSettings.shared.useBlockfaceForFeatures {
-            return BlockfaceDataAdapter()
-        } else {
-            return ZoneDataAdapter()
-        }
+        // Always use BlockfaceDataAdapter for now
+        // ZoneDataAdapter disabled due to compilation issues - needs refactoring
+        return BlockfaceDataAdapter()
     }
 }
 
-// MARK: - Zone-Based Adapter (Legacy System)
+// MARK: - Zone-Based Adapter (Legacy System) - DISABLED
 
+// TODO: Re-enable ZoneDataAdapter after fixing compilation issues
+// Issues: ZoneLookupEngine initialization, ZoneType enum cases, ParkingZone initializer
+/*
 /// Adapter for legacy zone-based parking lookup
 class ZoneDataAdapter: ParkingDataAdapterProtocol {
-    private let zoneLookupEngine = ZoneLookupEngine()
-
-    func lookupParking(at coordinate: CLLocationCoordinate2D) async -> ParkingLookupResult? {
-        // Use existing zone lookup logic
-        guard let result = zoneLookupEngine.lookup(coordinate: coordinate) else {
-            return nil
-        }
-
-        // Convert zone result to unified format
-        let primaryType: ParkingLookupResult.RegulationType
-        if result.isInZone {
-            if result.currentZone?.zoneType == .metered {
-                primaryType = .metered
-            } else if result.currentZone?.zoneType == .residentialPermit {
-                primaryType = .residentialPermit
-            } else if result.currentZone?.zoneType == .timeLimited {
-                primaryType = .timeLimited
-            } else {
-                primaryType = .free
-            }
-        } else {
-            primaryType = .free
-        }
-
-        // Extract permit areas
-        let permitAreas: [String]?
-        if let zone = result.currentZone, zone.zoneType == .residentialPermit {
-            permitAreas = [zone.permitArea].compactMap { $0 }
-        } else {
-            permitAreas = nil
-        }
-
-        // Extract time limit
-        let timeLimit = result.currentZone?.rules.first(where: { $0.ruleType == .timeLimit })?.timeLimit
-
-        // Build regulations list
-        var regulations: [RegulationInfo] = []
-        if let zone = result.currentZone {
-            for rule in zone.rules {
-                let regType: ParkingLookupResult.RegulationType = {
-                    switch rule.ruleType {
-                    case .timeLimit: return .timeLimited
-                    case .residential: return .residentialPermit
-                    default: return .free
-                    }
-                }()
-
-                regulations.append(RegulationInfo(
-                    type: regType,
-                    description: rule.displayString,
-                    enforcementDays: rule.enforcementDays,
-                    enforcementStart: rule.enforcementStartTime?.formatted,
-                    enforcementEnd: rule.enforcementEndTime?.formatted,
-                    permitZone: zone.zoneType == .residentialPermit ? zone.permitArea : nil,
-                    timeLimit: rule.timeLimit
-                ))
-            }
-        }
-
-        // Determine next restriction (zones don't have street cleaning)
-        let nextRestriction: RestrictionWindow? = nil
-
-        return ParkingLookupResult(
-            locationName: result.currentZone?.displayName ?? "No Zone",
-            locationDetail: result.currentZone?.permitArea != nil ? "Zone \(result.currentZone!.permitArea!)" : nil,
-            primaryRegulationType: primaryType,
-            permitAreas: permitAreas,
-            timeLimitMinutes: timeLimit,
-            allRegulations: regulations,
-            nextRestriction: nextRestriction,
-            sourceData: result.currentZone.map { .zone($0) } ?? .zone(ParkingZone(
-                id: "unknown",
-                zoneType: .publicParking,
-                geometry: ZoneGeometry(type: "Polygon", coordinates: []),
-                rules: [],
-                permitArea: nil,
-                displayName: "Unknown"
-            ))
-        )
-    }
-
-    func calculateParkUntil(
-        for result: ParkingLookupResult,
-        userPermits: Set<String>,
-        parkingStartTime: Date
-    ) -> ParkUntilResult? {
-        // Use existing time limit logic
-        guard let timeLimit = result.timeLimitMinutes else {
-            return nil
-        }
-
-        let parkUntilTime = parkingStartTime.addingTimeInterval(TimeInterval(timeLimit * 60))
-
-        return ParkUntilResult(
-            parkUntilTime: parkUntilTime,
-            reason: "\(timeLimit) minute time limit",
-            restrictionType: .timeLimited
-        )
-    }
-
-    func canPark(
-        at result: ParkingLookupResult,
-        userPermits: Set<String>,
-        at time: Date
-    ) -> Bool {
-        // Zone-based permission logic
-        switch result.primaryRegulationType {
-        case .free:
-            return true
-        case .residentialPermit:
-            if let permitAreas = result.permitAreas {
-                return !userPermits.isDisjoint(with: Set(permitAreas))
-            }
-            return false
-        case .metered, .timeLimited:
-            return true  // Can park but with restrictions
-        case .noParking, .streetCleaning:
-            return false
-        }
-    }
+    // ... implementation disabled ...
 }
+*/
 
 // MARK: - Blockface-Based Adapter (New System)
 
@@ -284,7 +167,6 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
             return nil
         }
 
-        let calendar = Calendar.current
         var earliestEndTime: Date?
         var earliestReason: String?
         var earliestType: ParkingLookupResult.RegulationType?
@@ -471,10 +353,15 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
 
         // Build all regulations list
         let allRegulations = blockface.regulations.map { reg in
-            RegulationInfo(
+            // Convert String days to DayOfWeek
+            let days: [DayOfWeek]? = reg.enforcementDays?.compactMap { dayStr in
+                DayOfWeek.allCases.first { $0.rawValue.lowercased() == dayStr.lowercased() }
+            }
+
+            return RegulationInfo(
                 type: regulationTypeMapping(reg.type),
                 description: reg.description,
-                enforcementDays: reg.enforcementDays,
+                enforcementDays: days,
                 enforcementStart: reg.enforcementStart,
                 enforcementEnd: reg.enforcementEnd,
                 permitZone: reg.permitZone,
@@ -579,44 +466,56 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
         return userPermits.contains(permitZone)
     }
 
+    /// Parse time string (HH:MM format) into hour and minute
+    private func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+        let components = timeStr.split(separator: ":").compactMap { Int($0) }
+        guard components.count == 2 else { return nil }
+        return (hour: components[0], minute: components[1])
+    }
+
     /// Find next street cleaning window
     private func findNextStreetCleaningWindow(
         regulation: BlockfaceRegulation,
         from startTime: Date
     ) -> (start: Date, end: Date)? {
-        guard let days = regulation.enforcementDays,
+        guard let daysStr = regulation.enforcementDays,
               let startStr = regulation.enforcementStart,
               let endStr = regulation.enforcementEnd,
-              let startTime = TimeOfDay.parse(startStr),
-              let endTime = TimeOfDay.parse(endStr) else {
+              let parsedStart = parseTime(startStr),
+              let parsedEnd = parseTime(endStr) else {
             return nil
         }
+
+        // Convert string days to DayOfWeek
+        let days = daysStr.compactMap { dayStr -> DayOfWeek? in
+            DayOfWeek.allCases.first { $0.rawValue.lowercased() == dayStr.lowercased() }
+        }
+        guard !days.isEmpty else { return nil }
 
         let calendar = Calendar.current
 
         // Check next 7 days for street cleaning
         for dayOffset in 0..<7 {
-            let checkDate = calendar.date(byAdding: .day, value: dayOffset, to: from)!
+            let checkDate = calendar.date(byAdding: .day, value: dayOffset, to: startTime)!
             let weekday = calendar.component(.weekday, from: checkDate)
-            let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday)
+            guard let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) else { continue }
 
             if days.contains(dayOfWeek) {
                 // Found a street cleaning day
-                let cleaningStart = calendar.date(
-                    bySettingHour: startTime.hour,
-                    minute: startTime.minute,
+                guard let cleaningStart = calendar.date(
+                    bySettingHour: parsedStart.hour,
+                    minute: parsedStart.minute,
                     second: 0,
                     of: checkDate
-                )!
-
+                ),
                 let cleaningEnd = calendar.date(
-                    bySettingHour: endTime.hour,
-                    minute: endTime.minute,
+                    bySettingHour: parsedEnd.hour,
+                    minute: parsedEnd.minute,
                     second: 0,
                     of: checkDate
-                )!
+                ) else { continue }
 
-                if cleaningStart > from {
+                if cleaningStart > startTime {
                     return (cleaningStart, cleaningEnd)
                 }
             }
@@ -631,26 +530,21 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
         from startTime: Date
     ) -> Date? {
         guard let endStr = regulation.enforcementEnd,
-              let endTime = TimeOfDay.parse(endStr) else {
+              let parsedEnd = parseTime(endStr) else {
             return nil
         }
 
         let calendar = Calendar.current
-        let endDate = calendar.date(
-            bySettingHour: endTime.hour,
-            minute: endTime.minute,
+        guard let endDate = calendar.date(
+            bySettingHour: parsedEnd.hour,
+            minute: parsedEnd.minute,
             second: 0,
             of: startTime
-        )!
+        ) else { return nil }
 
         return endDate > startTime ? endDate : nil
     }
 }
 
 // MARK: - Extensions
-
-extension TimeOfDay {
-    var formatted: String {
-        String(format: "%02d:%02d", hour, minute)
-    }
-}
+// (TimeOfDay.formatted already exists in TimeOfDay model)
