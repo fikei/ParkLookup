@@ -3,3 +3,4 @@ SFParkingZoneFinder/SFParkingZoneFinder.xcodeproj/project.pbxproj
 __pycache__/
 *.pyc
 sample_blockfaces*.json
+spot_check_samples.json
