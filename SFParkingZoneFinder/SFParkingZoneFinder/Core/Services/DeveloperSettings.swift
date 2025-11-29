@@ -241,13 +241,19 @@ final class DeveloperSettings: ObservableObject {
     /// When false, only blockface centerlines are shown (cleaner map)
     /// When true, shows both zone polygons and blockface lines
     @Published var showZonePolygons: Bool {
-        didSet { UserDefaults.standard.set(showZonePolygons, forKey: Keys.showZonePolygons) }
+        didSet {
+            UserDefaults.standard.set(showZonePolygons, forKey: Keys.showZonePolygons)
+            forceReloadOverlays()
+        }
     }
 
     /// Show blockface overlays on the map
     /// Renders street segments with parking regulations
     @Published var showBlockfaceOverlays: Bool {
-        didSet { UserDefaults.standard.set(showBlockfaceOverlays, forKey: Keys.showBlockfaceOverlays) }
+        didSet {
+            UserDefaults.standard.set(showBlockfaceOverlays, forKey: Keys.showBlockfaceOverlays)
+            forceReloadOverlays()
+        }
     }
 
     /// Show blockface centerline polylines alongside blockface polygons
