@@ -38,6 +38,14 @@ final class DependencyContainer: ObservableObject {
     private(set) lazy var ruleInterpreter: RuleInterpreterProtocol = RuleInterpreter()
     private(set) lazy var permitService: PermitServiceProtocol = PermitService()
 
+    // Notification Services
+    private(set) lazy var notificationService: NotificationServiceProtocol = NotificationService()
+
+    // Session Management
+    private(set) lazy var parkingSessionManager: ParkingSessionManagerProtocol = ParkingSessionManager(
+        notificationService: notificationService
+    )
+
     // Map Services
     private(set) lazy var mapProvider: MapProviderProtocol = GoogleMapsAdapter()
 

@@ -600,8 +600,8 @@ final class DeveloperSettings: ObservableObject {
         static let useBlockfaceForFeatures = false  // DEFAULT OFF - safe rollback (use zones)
         static let showZonePolygons = false  // Zone polygons OFF by default (cleaner map with blockfaces)
         static let showBlockfaceOverlays = true  // Enable with new GeoJSON data
-        static let showBlockfaceCenterlines = true  // Show centerlines by default (main UI)
-        static let showBlockfacePolygons = false  // Polygons OFF by default (available in dev overlay)
+        static let showBlockfaceCenterlines = false  // Centerlines OFF by default (debug visualization)
+        static let showBlockfacePolygons = true  // Polygons ON by default (shows proper color coding)
         static let showParkingMeters = false  // Parking meters OFF by default (user-facing setting)
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
@@ -693,6 +693,17 @@ final class DeveloperSettings: ObservableObject {
             blockfaceGlobalLatShift = 0.0
             blockfaceGlobalLonShift = 0.0
             print("🔧 Reset blockface global shifts to 0.0 (new GeoJSON data is correctly positioned)")
+        }
+
+        // Migration: Fix blockface display settings for existing users
+        // Switch from centerlines (blue debug lines) to polygons (proper color-coded overlays)
+        let migrationKey = "dev.blockfaceMigrationV1"
+        let hasMigrated = defaults.bool(forKey: migrationKey)
+        if !hasMigrated {
+            showBlockfacePolygons = true
+            showBlockfaceCenterlines = false
+            defaults.set(true, forKey: migrationKey)
+            print("🔧 Migration: Enabled blockface polygons, disabled centerlines for proper color coding")
         }
     }
 

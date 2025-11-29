@@ -11,6 +11,7 @@ struct ZoneMapView: UIViewRepresentable {
     let currentZoneId: String?
     let userCoordinate: CLLocationCoordinate2D?
     let onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?  // Pass zone, permit areas, and tap coordinate
+    let onMapTapped: ((CLLocationCoordinate2D) -> Void)?  // Generic tap callback (fires for any tap on map)
 
     /// User's valid permit areas (uppercase codes like "Q", "AA")
     /// Zones matching these will be colored green, others orange
@@ -100,6 +101,7 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.currentZoneId = currentZoneId
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
+        context.coordinator.onMapTapped = onMapTapped
         context.coordinator.showOverlays = showOverlays
 
         // Debug logging to track permit changes
@@ -316,7 +318,7 @@ struct ZoneMapView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(currentZoneId: currentZoneId, zones: zones, onZoneTapped: onZoneTapped)
+        Coordinator(currentZoneId: currentZoneId, zones: zones, onZoneTapped: onZoneTapped, onMapTapped: onMapTapped)
     }
 
     // MARK: - Overlap Clipping
@@ -1076,6 +1078,7 @@ struct ZoneMapView: UIViewRepresentable {
         var currentZoneId: String?
         var zones: [ParkingZone]
         var onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?
+        var onMapTapped: ((CLLocationCoordinate2D) -> Void)?
         var userPermitAreas: Set<String> = []
         var lastUserPermitAreas: Set<String> = []  // Track previous permits to detect changes
 
@@ -1119,10 +1122,11 @@ struct ZoneMapView: UIViewRepresentable {
         var lastBlockfaceLoadCenter: CLLocationCoordinate2D?
         var isLoadingBlockfaces: Bool = false
 
-        init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?) {
+        init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?, onMapTapped: ((CLLocationCoordinate2D) -> Void)?) {
             self.currentZoneId = currentZoneId
             self.zones = zones
             self.onZoneTapped = onZoneTapped
+            self.onMapTapped = onMapTapped
             self.lastSettingsHash = DeveloperSettings.shared.settingsHash
             self.lastReloadTrigger = DeveloperSettings.shared.reloadTrigger
             self.lastBlockfaceOverlaysEnabled = DeveloperSettings.shared.showBlockfaceOverlays
@@ -1269,12 +1273,9 @@ struct ZoneMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            // Hide user location pin/callout (keep blue dot only)
+            // Use default MKUserLocation view (blue pulsing dot)
             if annotation is MKUserLocation {
-                let view = MKAnnotationView(annotation: annotation, reuseIdentifier: "UserLocation")
-                view.canShowCallout = false
-                view.isEnabled = false  // Disable interaction
-                return view
+                return nil
             }
 
             // Handle searched location annotation (blue pin, no label)
@@ -1320,15 +1321,19 @@ struct ZoneMapView: UIViewRepresentable {
                 let identifier = "ParkingMeter"
                 var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
 
+                // Only show callout in developer mode
+                let showCallout = DeveloperSettings.shared.developerModeUnlocked
+
                 if annotationView == nil {
                     annotationView = MKMarkerAnnotationView(annotation: meterAnnotation, reuseIdentifier: identifier)
-                    annotationView?.canShowCallout = true
+                    annotationView?.canShowCallout = showCallout
                     annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
                     annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
                     annotationView?.displayPriority = .defaultLow
                     annotationView?.glyphTintColor = .white
                 } else {
                     annotationView?.annotation = meterAnnotation
+                    annotationView?.canShowCallout = showCallout
                     annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
                 }
 
@@ -1340,22 +1345,32 @@ struct ZoneMapView: UIViewRepresentable {
                 let identifier = "BlockfaceLabel"
                 var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
 
+                // Only show callout in developer mode
+                let showCallout = DeveloperSettings.shared.developerModeUnlocked
+
                 if annotationView == nil {
                     annotationView = MKMarkerAnnotationView(annotation: blockfaceAnnotation, reuseIdentifier: identifier)
-                    annotationView?.canShowCallout = true
+                    annotationView?.canShowCallout = showCallout
                     annotationView?.markerTintColor = .systemOrange
                     annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
                     annotationView?.displayPriority = .required
 
-                    // Create custom callout with detailed content view
-                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
-                    annotationView?.detailCalloutAccessoryView = calloutView
+                    // Create custom callout with detailed content view (only if developer mode)
+                    if showCallout {
+                        let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                        annotationView?.detailCalloutAccessoryView = calloutView
+                    }
                 } else {
                     annotationView?.annotation = blockfaceAnnotation
+                    annotationView?.canShowCallout = showCallout
 
-                    // Update callout content
-                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
-                    annotationView?.detailCalloutAccessoryView = calloutView
+                    // Update callout content (only if developer mode)
+                    if showCallout {
+                        let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                        annotationView?.detailCalloutAccessoryView = calloutView
+                    } else {
+                        annotationView?.detailCalloutAccessoryView = nil
+                    }
                 }
 
                 return annotationView
@@ -1590,19 +1605,25 @@ struct ZoneMapView: UIViewRepresentable {
                         let label = labelLines.joined(separator: "\n")
                         logger.info("📍 Tapped blockface: \(blockface.street) \(sideName)")
 
-                        // Add temporary annotation to show blockface info
-                        let annotation = BlockfaceLabelAnnotation(
-                            coordinate: coordinate,
-                            label: label,
-                            blockface: blockface
-                        )
+                        // Only show annotation in developer mode
+                        if DeveloperSettings.shared.developerModeUnlocked {
+                            // Add temporary annotation to show blockface info
+                            let annotation = BlockfaceLabelAnnotation(
+                                coordinate: coordinate,
+                                label: label,
+                                blockface: blockface
+                            )
 
-                        // Remove any existing blockface label annotations
-                        let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
-                        mapView.removeAnnotations(existingLabels)
+                            // Remove any existing blockface label annotations
+                            let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
+                            mapView.removeAnnotations(existingLabels)
 
-                        // Add new annotation
-                        mapView.addAnnotation(annotation)
+                            // Add new annotation
+                            mapView.addAnnotation(annotation)
+                        }
+
+                        // Trigger generic map tap callback (updates spot card)
+                        onMapTapped?(coordinate)
 
                         return
                     }
@@ -1624,6 +1645,9 @@ struct ZoneMapView: UIViewRepresentable {
                     if let zone = zones.first(where: { $0.id == polygon.zoneId }) {
                         // Pass the zone, permit areas, and tap coordinate
                         onZoneTapped?(zone, polygon.allValidPermitAreas, coordinate)
+
+                        // Trigger generic map tap callback (updates spot card)
+                        onMapTapped?(coordinate)
                     }
 
                     // Store overlay debug info if developer mode is active
@@ -1640,6 +1664,108 @@ struct ZoneMapView: UIViewRepresentable {
                     return
                 }
             }
+
+            // If blockface mode is enabled and no direct hit, find nearest blockface
+            if DeveloperSettings.shared.showBlockfaceOverlays {
+                var nearestBlockface: (blockface: Blockface, distance: Double)?
+                let tappedLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+
+                for overlay in mapView.overlays {
+                    if let blockfacePolygon = overlay as? BlockfacePolygon,
+                       let blockface = blockfacePolygon.blockface {
+
+                        // Calculate distance to blockface centerline
+                        let coords = blockface.geometry.locationCoordinates
+                        guard !coords.isEmpty else { continue }
+
+                        // Find minimum distance to any point on the blockface
+                        var minDistance = Double.infinity
+                        for coord in coords {
+                            let blockfacePoint = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+                            let distance = tappedLocation.distance(from: blockfacePoint)
+                            if distance < minDistance {
+                                minDistance = distance
+                            }
+                        }
+
+                        // Track nearest blockface (within 100m radius)
+                        if minDistance <= 100 {
+                            if nearestBlockface == nil || minDistance < nearestBlockface!.distance {
+                                nearestBlockface = (blockface, minDistance)
+                            }
+                        }
+                    }
+                }
+
+                // If found a nearby blockface, highlight it
+                if let nearest = nearestBlockface {
+                    // Build label for nearest blockface
+                    var labelLines: [String] = []
+
+                    let streetLine = "\(nearest.blockface.street)"
+                    let segmentLine = "(\(nearest.blockface.fromStreet ?? "?") to \(nearest.blockface.toStreet ?? "?"))"
+                    labelLines.append(streetLine)
+                    labelLines.append(segmentLine)
+
+                    let sideName: String
+                    switch nearest.blockface.side {
+                    case "EVEN":
+                        sideName = "West side"
+                    case "ODD":
+                        sideName = "East side"
+                    case "NORTH":
+                        sideName = "North side"
+                    case "SOUTH":
+                        sideName = "South side"
+                    default:
+                        sideName = "\(nearest.blockface.side) side"
+                    }
+                    labelLines.append(sideName)
+                    labelLines.append("(\(Int(nearest.distance))m away)")
+
+                    if !nearest.blockface.regulations.isEmpty {
+                        labelLines.append("")
+                        for reg in nearest.blockface.regulations {
+                            labelLines.append("• \(reg.description)")
+                        }
+                    } else {
+                        labelLines.append("")
+                        labelLines.append("No parking regulations")
+                    }
+
+                    let label = labelLines.joined(separator: "\n")
+                    logger.info("📍 Tapped near blockface: \(nearest.blockface.street) \(sideName) (\(Int(nearest.distance))m)")
+
+                    // Only show annotation in developer mode
+                    if DeveloperSettings.shared.developerModeUnlocked {
+                        // Use the blockface's center point for the annotation (not tap point)
+                        let coords = nearest.blockface.geometry.locationCoordinates
+                        let centerIndex = coords.count / 2
+                        let blockfaceCenter = coords[centerIndex]
+
+                        let annotation = BlockfaceLabelAnnotation(
+                            coordinate: blockfaceCenter,
+                            label: label,
+                            blockface: nearest.blockface
+                        )
+
+                        // Remove existing blockface labels
+                        let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
+                        mapView.removeAnnotations(existingLabels)
+
+                        // Add annotation at blockface center
+                        mapView.addAnnotation(annotation)
+                    }
+
+                    // Trigger map tap callback (updates spot card)
+                    onMapTapped?(coordinate)
+
+                    return
+                }
+            }
+
+            // No zone or blockface found - still trigger callback to show tapped location
+            onMapTapped?(coordinate)
         }
 
         // MARK: - Region Change Handling
@@ -1803,6 +1929,9 @@ class ParkingMeterAnnotation: NSObject, MKAnnotation {
         userCoordinate: CLLocationCoordinate2D(latitude: 37.7585, longitude: -122.4233),
         onZoneTapped: { zone, permitAreas, coordinate in
             print("Tapped zone: \(zone.displayName), permits: \(permitAreas?.description ?? "nil"), at: \(coordinate.latitude),\(coordinate.longitude)")
+        },
+        onMapTapped: { coordinate in
+            print("Tapped map at: \(coordinate.latitude),\(coordinate.longitude)")
         }
     )
 }
