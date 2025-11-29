@@ -442,12 +442,18 @@ final class MainResultViewModel: ObservableObject {
             logger.info("🔄 COMPARISON - Zone: \(zoneName), Blockface: \(blockfaceName)")
 
             if let adapter = adapterResult {
-                logger.info("📍 Adapter found: \(adapter.locationName) (type: \(adapter.primaryRegulationType))")
+                // Convert enum to string for logging
+                let typeString = String(describing: adapter.primaryRegulationType)
+                logger.info("📍 Adapter found: \(adapter.locationName) (type: \(typeString))")
                 logger.info("📍 Regulations: \(adapter.allRegulations.count) total")
 
                 // Log can park status comparison
                 let zoneCanPark = result.primaryInterpretation?.validityStatus != .invalid
-                let blockfaceCanPark = adapter.canPark
+                let blockfaceCanPark = ParkingDataAdapter.shared.canPark(
+                    at: adapter,
+                    userPermits: Set(permitService.permits.map { $0.permitArea }),
+                    at: Date()
+                )
                 if zoneCanPark != blockfaceCanPark {
                     logger.warning("⚠️ MISMATCH - Zone canPark: \(zoneCanPark), Blockface canPark: \(blockfaceCanPark)")
                 } else {

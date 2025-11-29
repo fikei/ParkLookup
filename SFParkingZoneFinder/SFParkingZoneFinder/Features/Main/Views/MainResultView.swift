@@ -92,11 +92,15 @@ struct MainResultView: View {
                         currentZoneId: viewModel.currentZoneId,
                         userCoordinate: activeCoordinate,
                         onZoneTapped: { zone, permitAreas, coordinate in
-                            if isMapExpanded {
-                                selectedZone = zone
-                                tappedPermitAreas = permitAreas
-                                tappedCoordinate = coordinate
-                                // Don't call viewModel.lookupZone - it causes flash and we already have the zone info
+                            // Allow tapping in both collapsed and expanded mode
+                            selectedZone = zone
+                            tappedPermitAreas = permitAreas
+                            tappedCoordinate = coordinate
+                            // Expand map to show the tapped card
+                            if !isMapExpanded {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    isMapExpanded = true
+                                }
                             }
                         },
                         userPermitAreas: userPermitAreaCodes,
@@ -128,6 +132,34 @@ struct MainResultView: View {
                             isPanelExpanded: $developerPanelExpanded,
                             showToggleButton: false
                         )
+                    }
+
+                    // Floating location button (bottom-right corner)
+                    // Only show when not at current location
+                    if searchedCoordinate != nil || tappedCoordinate != nil {
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                Button {
+                                    searchedCoordinate = nil
+                                    tappedCoordinate = nil
+                                    selectedZone = nil
+                                    viewModel.returnToGPSLocation()
+                                    recenterTrigger.toggle()
+                                } label: {
+                                    Image(systemName: "location.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(.white)
+                                        .frame(width: 50, height: 50)
+                                        .background(Color.accentColor)
+                                        .clipShape(Circle())
+                                        .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                                }
+                                .padding(.trailing, 16)
+                                .padding(.bottom, 100) // Above bottom navigation
+                            }
+                        }
                     }
 
                     // Loading overlays
