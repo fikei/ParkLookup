@@ -344,6 +344,86 @@ def extract_regulation(reg_props: Dict) -> List[Dict]:
     return regulations
 
 
+def parse_week_pattern(props: Dict) -> str:
+    """Convert week1-week5 bits to human-readable string"""
+    weeks = [
+        props.get('week1', 0),
+        props.get('week2', 0),
+        props.get('week3', 0),
+        props.get('week4', 0),
+        props.get('week5', 0)
+    ]
+    week_names = ["1st", "2nd", "3rd", "4th", "5th"]
+
+    # Convert to int and check if active (handles both string "1" and int 1)
+    active_weeks = [week_names[i] for i, active in enumerate(weeks) if int(active) == 1]
+
+    if len(active_weeks) == 5:
+        return "Street cleaning every week"
+    elif len(active_weeks) == 0:
+        return "Street cleaning (schedule TBD)"
+    elif set(active_weeks) == {"1st", "3rd"} or set(active_weeks) == {"1st", "3rd", "5th"}:
+        return "Street cleaning on odd weeks"
+    elif set(active_weeks) == {"2nd", "4th"}:
+        return "Street cleaning on even weeks"
+    else:
+        if len(active_weeks) > 1:
+            weeks_str = ", ".join(active_weeks[:-1]) + " and " + active_weeks[-1]
+        else:
+            weeks_str = active_weeks[0]
+        return f"Street cleaning {weeks_str} week of month"
+
+
+def extract_street_sweeping(props: Dict) -> Dict:
+    """Extract street sweeping fields and map to app schema"""
+
+    # Parse weekday - handle abbreviations
+    weekday = props.get('weekday', '').strip().lower()
+    weekday_map = {
+        'mon': 'monday',
+        'tues': 'tuesday',
+        'tue': 'tuesday',
+        'wed': 'wednesday',
+        'thurs': 'thursday',
+        'thu': 'thursday',
+        'fri': 'friday',
+        'sat': 'saturday',
+        'sun': 'sunday',
+        'holiday': 'holiday'
+    }
+
+    # Map abbreviation to full name
+    for abbrev, full_name in weekday_map.items():
+        if weekday.startswith(abbrev):
+            weekday = full_name
+            break
+
+    # Format time
+    fromhour = props.get('fromhour', 0)
+    tohour = props.get('tohour', 0)
+
+    try:
+        enforcement_start = f"{int(fromhour):02d}:00"
+        enforcement_end = f"{int(tohour):02d}:00"
+    except (ValueError, TypeError):
+        enforcement_start = "00:00"
+        enforcement_end = "00:00"
+
+    # Parse week pattern
+    special_conditions = parse_week_pattern(props)
+
+    return {
+        "type": "streetCleaning",
+        "permitZone": None,
+        "timeLimit": None,
+        "meterRate": None,
+        "enforcementDays": [weekday] if weekday else None,
+        "enforcementStart": enforcement_start,
+        "enforcementEnd": enforcement_end,
+        "specialConditions": special_conditions
+    }
+
+
 def load_regulations(regulations_path: str) -> List[Tuple[MultiLineString, Dict]]:
     """
     Load regulations GeoJSON and extract geometries + properties.
@@ -377,6 +457,39 @@ def load_regulations(regulations_path: str) -> List[Tuple[MultiLineString, Dict]
     return regulations
 
 
+def load_street_sweeping(sweeping_path: str) -> List[Tuple[LineString, Dict]]:
+    """
+    Load street sweeping GeoJSON and extract geometries + properties.
+    Returns list of (geometry, properties) tuples.
+    """
+    print(f"Loading street sweeping from: {sweeping_path}")
+
+    with open(sweeping_path, 'r') as f:
+        data = json.load(f)
+
+    sweeping_regs = []
+    skipped = 0
+
+    for feature in data['features']:
+        geom = feature.get('geometry')
+        props = feature.get('properties', {})
+
+        if not geom or geom.get('type') != 'LineString':
+            skipped += 1
+            continue
+
+        try:
+            # Convert GeoJSON to Shapely geometry
+            shapely_geom = shape(geom)
+            sweeping_regs.append((shapely_geom, props))
+        except Exception as e:
+            skipped += 1
+            continue
+
+    print(f"  ✓ Loaded {len(sweeping_regs)} street sweeping schedules ({skipped} skipped)")
+    return sweeping_regs
+
+
 def find_matching_regulations(blockface_geom: LineString,
                              regulations: List[Tuple[MultiLineString, Dict]],
                              buffer_distance: float = BUFFER_DISTANCE) -> List[Dict]:
@@ -399,24 +512,51 @@ def find_matching_regulations(blockface_geom: LineString,
     return matching_regs
 
 
+def extract_regulation_from_props(props: Dict) -> List[Dict]:
+    """
+    Dispatch to appropriate extraction function based on source.
+
+    Heuristic: If props has 'weekday' and 'fromhour' fields, it's street sweeping.
+    Otherwise, it's a parking regulation.
+    """
+    if 'weekday' in props and 'fromhour' in props:
+        # Street sweeping record
+        return [extract_street_sweeping(props)]
+    else:
+        # Parking regulation record
+        return extract_regulation(props)
+
+
 def convert_with_regulations(blockfaces_path: str,
                              regulations_path: str,
                              output_path: str,
+                             sweeping_path: Optional[str] = None,
                              bounds_filter: bool = True):
     """
     Convert GeoJSON blockfaces to app format with regulations populated.
 
     Algorithm:
-    1. Load all blockfaces and regulations
+    1. Load all blockfaces and regulations (parking + sweeping)
     2. For each regulation, find the CLOSEST blockface it intersects with
     3. Assign each regulation to only ONE blockface (prevents duplication)
     4. Build output with blockfaces containing their assigned regulations
     """
 
-    # Load regulations first
+    # Load parking regulations first
     regulations = load_regulations(regulations_path)
+    print(f"  Parking regulations: {len(regulations)}")
 
-    if not regulations:
+    # Load street sweeping if provided
+    if sweeping_path:
+        sweeping_regs = load_street_sweeping(sweeping_path)
+        print(f"  Street sweeping: {len(sweeping_regs)}")
+        # Combine datasets
+        all_regulations = regulations + sweeping_regs
+        print(f"  Total regulations: {len(all_regulations)}")
+    else:
+        all_regulations = regulations
+
+    if not all_regulations:
         print("ERROR: No regulations loaded. Aborting.")
         return
 
@@ -480,14 +620,14 @@ def convert_with_regulations(blockfaces_path: str,
     print(f"    Skipped (invalid): {skipped_invalid}")
 
     # Second pass: For each regulation, find the CLOSEST blockface
-    print(f"\n  Matching {len(regulations)} regulations to blockfaces...")
+    print(f"\n  Matching {len(all_regulations)} regulations to blockfaces...")
 
     regulations_matched = 0
     regulations_unmatched = 0
 
-    for reg_idx, (reg_geom, reg_props) in enumerate(regulations):
+    for reg_idx, (reg_geom, reg_props) in enumerate(all_regulations):
         if (reg_idx + 1) % 1000 == 0:
-            print(f"    Processing regulation {reg_idx + 1}/{len(regulations)}...")
+            print(f"    Processing regulation {reg_idx + 1}/{len(all_regulations)}...")
 
         # Find all blockfaces that intersect with this regulation
         buffered_reg = reg_geom.buffer(BUFFER_DISTANCE)
@@ -506,14 +646,14 @@ def convert_with_regulations(blockfaces_path: str,
 
         # Assign regulation to the closest blockface only
         if closest_blockface:
-            extracted_regs = extract_regulation(reg_props)
+            extracted_regs = extract_regulation_from_props(reg_props)
             closest_blockface['regulations'].extend(extracted_regs)
             regulations_matched += 1
         else:
             regulations_unmatched += 1
 
-    print(f"  ✓ Matched {regulations_matched} regulations ({100*regulations_matched/len(regulations):.1f}%)")
-    print(f"    Unmatched: {regulations_unmatched} ({100*regulations_unmatched/len(regulations):.1f}%)")
+    print(f"  ✓ Matched {regulations_matched} regulations ({100*regulations_matched/len(all_regulations):.1f}%)")
+    print(f"    Unmatched: {regulations_unmatched} ({100*regulations_unmatched/len(all_regulations):.1f}%)")
 
     # Third pass: Deduplicate regulations within each blockface and build output
     blockfaces = []
@@ -638,21 +778,29 @@ def main():
     else:
         output_file = "sample_blockfaces_with_regulations.json"
 
+    # Check for sweeping dataset (4th argument)
+    sweeping_file = None
+    if len(sys.argv) > 4 and not sys.argv[4].startswith('--'):
+        sweeping_file = sys.argv[4]
+
     # Check for --no-bounds flag
     bounds_filter = "--no-bounds" not in sys.argv
 
     print("=" * 70)
     print("BLOCKFACE + REGULATIONS SPATIAL JOIN")
     print("=" * 70)
-    print(f"Blockfaces:  {blockfaces_file}")
-    print(f"Regulations: {regulations_file}")
-    print(f"Output:      {output_file}")
+    print(f"Blockfaces:      {blockfaces_file}")
+    print(f"Regulations:     {regulations_file}")
+    if sweeping_file:
+        print(f"Street Sweeping: {sweeping_file}")
+    print(f"Output:          {output_file}")
     print(f"Bounds filter: {'ON (Mission District only)' if bounds_filter else 'OFF (all SF)'}")
     print(f"Buffer distance: {BUFFER_DISTANCE} degrees (~{BUFFER_DISTANCE * 111000:.0f}m)")
     print("=" * 70)
     print()
 
-    convert_with_regulations(blockfaces_file, regulations_file, output_file, bounds_filter)
+    convert_with_regulations(blockfaces_file, regulations_file, output_file,
+                           sweeping_file, bounds_filter)
 
 
 if __name__ == "__main__":
