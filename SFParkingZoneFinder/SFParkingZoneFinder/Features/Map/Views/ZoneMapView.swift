@@ -1641,6 +1641,7 @@ struct ZoneMapView: UIViewRepresentable {
 
         // MARK: - Region Change Handling
 
+        /* TEMPORARILY DISABLED - clipping too many blocks
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             // Check if blockface overlays are enabled
             guard DeveloperSettings.shared.showBlockfaceOverlays else { return }
@@ -1705,6 +1706,7 @@ struct ZoneMapView: UIViewRepresentable {
                 isLoadingBlockfaces = false
             }
         }
+        */
     }
 }
 
