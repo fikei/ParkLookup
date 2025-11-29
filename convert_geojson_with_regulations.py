@@ -11,6 +11,7 @@ on each blockface with matched parking rules.
 """
 
 import json
+import re
 import sys
 from typing import List, Dict, Optional, Tuple
 from shapely.geometry import LineString, MultiLineString, shape
@@ -56,6 +57,48 @@ def sort_regulations_by_priority(regulations: List[Dict]) -> List[Dict]:
     Secondary sort by type name for consistency.
     """
     return sorted(regulations, key=lambda r: (get_regulation_priority(r), r.get('type', '')))
+
+
+def normalize_street_name(name: str) -> str:
+    """
+    Normalize street name from abbreviated format (corridor) to full format (blockface).
+
+    Examples:
+        "Market St" → "Market Street"
+        "08th Ave" → "8th Avenue"
+        "Lower Great Hwy" → "Lower Great Highway"
+        "Alemany Blvd" → "Alemany Boulevard"
+    """
+    if not name or not name.strip():
+        return "Unknown Street"
+
+    # Strip whitespace
+    name = name.strip()
+
+    # Remove leading zeros from numbered streets (e.g., "08th" → "8th", "03rd" → "3rd")
+    name = re.sub(r'\b0+(\d)', r'\1', name)
+
+    # Expand common abbreviations at end of street name
+    abbreviations = {
+        r'\bSt\b': 'Street',
+        r'\bAve\b': 'Avenue',
+        r'\bBlvd\b': 'Boulevard',
+        r'\bDr\b': 'Drive',
+        r'\bRd\b': 'Road',
+        r'\bLn\b': 'Lane',
+        r'\bCt\b': 'Court',
+        r'\bPl\b': 'Place',
+        r'\bTer\b': 'Terrace',
+        r'\bHwy\b': 'Highway',
+        r'\bPkwy\b': 'Parkway',
+        r'\bCir\b': 'Circle',
+        r'\bWay\b': 'Way',
+    }
+
+    for abbrev, full in abbreviations.items():
+        name = re.sub(abbrev + r'$', full, name)
+
+    return name
 
 
 def parse_side_from_popupinfo(popupinfo: str) -> str:
@@ -412,6 +455,9 @@ def extract_street_sweeping(props: Dict) -> Dict:
     # Parse week pattern
     special_conditions = parse_week_pattern(props)
 
+    # Preserve source street name for backfilling
+    corridor = props.get('corridor', '').strip()
+
     return {
         "type": "streetCleaning",
         "permitZone": None,
@@ -420,7 +466,8 @@ def extract_street_sweeping(props: Dict) -> Dict:
         "enforcementDays": [weekday] if weekday else None,
         "enforcementStart": enforcement_start,
         "enforcementEnd": enforcement_end,
-        "specialConditions": special_conditions
+        "specialConditions": special_conditions,
+        "_sourceStreet": corridor if corridor else None  # For backfilling blockface names
     }
 
 
@@ -864,10 +911,25 @@ def convert_with_regulations(blockfaces_path: str,
             blockfaces_with_regulations += 1
             total_regulations_added += len(unique_regulations)
 
+        # Backfill street name if missing (from regulation source data)
+        street_name = bf_obj['street_info']['street']
+        if street_name == "Unknown Street" and unique_regulations:
+            # Try to get street name from street cleaning regulations
+            for reg in unique_regulations:
+                source_street = reg.get('_sourceStreet')
+                if source_street and source_street.strip():
+                    # Normalize street name to match existing style
+                    street_name = normalize_street_name(source_street)
+                    break  # Use first available street name
+
+        # Clean up _sourceStreet from regulations before output
+        for reg in unique_regulations:
+            reg.pop('_sourceStreet', None)
+
         # Create blockface in app format
         blockface = {
             "id": bf_obj['id'],
-            "street": bf_obj['street_info']['street'],
+            "street": street_name,
             "fromStreet": bf_obj['street_info']['from'],
             "toStreet": bf_obj['street_info']['to'],
             "side": bf_obj['side'],
