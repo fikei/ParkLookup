@@ -568,8 +568,8 @@ final class DeveloperSettings: ObservableObject {
         static let showVertexCounts = false
         static let showZoneOverlays = true  // Show zone overlays by default
         static let showBlockfaceOverlays = true  // Enable with new GeoJSON data
-        static let showBlockfaceCenterlines = true  // Show centerlines for alignment
-        static let showBlockfacePolygons = true  // Show polygons with new GeoJSON data
+        static let showBlockfaceCenterlines = true  // Show colored centerlines by default
+        static let showBlockfacePolygons = false  // Hide polygons - use centerlines instead
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)

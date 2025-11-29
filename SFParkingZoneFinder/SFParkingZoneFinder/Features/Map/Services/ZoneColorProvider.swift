@@ -12,8 +12,8 @@ enum ZoneColorProvider {
     /// Color for all other RPP zones (orange)
     static let rppZoneColor = UIColor(red: 0.95, green: 0.6, blue: 0.2, alpha: 1.0)  // #F29933 Orange
 
-    /// Color for metered/paid parking zones (grey)
-    static let meteredZoneColor = UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)  // #808080 Grey
+    /// Color for metered/paid parking zones (dark grey)
+    static let meteredZoneColor = UIColor(red: 0.3, green: 0.3, blue: 0.3, alpha: 1.0)  // #4D4D4D Dark Grey
 
     // MARK: - Zone Colors
 
