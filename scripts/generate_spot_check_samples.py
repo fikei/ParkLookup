@@ -152,10 +152,13 @@ def generate_google_maps_link(lat: float, lon: float) -> str:
     return f"https://www.google.com/maps/@{lat},{lon},3a,75y,0h,90t/data=!3m6!1e1!3m4!1s0!2e0!7i16384!8i8192"
 
 def main():
-    blockfaces_path = "SFParkingZoneFinder/SFParkingZoneFinder/Resources/sample_blockfaces.json"
+    # Use Path for cross-platform compatibility
+    from pathlib import Path
+    project_root = Path(__file__).parent.parent
+    blockfaces_path = project_root / "SFParkingZoneFinder" / "SFParkingZoneFinder" / "Resources" / "sample_blockfaces.json"
 
     print("Loading blockface data...")
-    blockfaces = load_blockfaces(blockfaces_path)
+    blockfaces = load_blockfaces(str(blockfaces_path))
 
     print("Collecting samples...")
     samples = collect_samples_by_type(blockfaces, samples_per_type=5)
@@ -223,10 +226,14 @@ def main():
                 'street_view_link': generate_google_maps_link(lat, lon) if lat and lon else None
             })
 
-    with open('spot_check_samples.json', 'w') as f:
+    from pathlib import Path
+    project_root = Path(__file__).parent.parent
+    output_path = project_root / "data" / "validation" / "spot_check_samples.json"
+
+    with open(output_path, 'w') as f:
         json.dump(output_data, f, indent=2)
 
-    print("Samples saved to: spot_check_samples.json\n")
+    print(f"Samples saved to: {output_path}\n")
 
 if __name__ == '__main__':
     random.seed(42)  # For reproducible samples

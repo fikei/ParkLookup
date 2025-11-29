@@ -4,16 +4,22 @@ Simple wrapper to run full blockface + regulation conversion with side-aware mat
 """
 
 import sys
-sys.path.insert(0, '.')
+import os
+from pathlib import Path
+
+# Add project root to path to import converter
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 from convert_geojson_with_regulations import convert_with_regulations
 
-# File paths
-blockfaces = "Data Sets/Blockfaces_20251128.geojson"
-regulations = "Data Sets/Parking_regulations_(except_non-metered_color_curb)_20251128.geojson"
-sweeping = "Data Sets/Street_Sweeping_Schedule_20251128.geojson"
-metered = "Data Sets/Blockfaces_with_Meters_20251128.geojson"
-output = "sample_blockfaces_sideaware_full.json"
+# File paths (new organized structure)
+data_dir = project_root / "data"
+blockfaces = str(data_dir / "raw" / "Blockfaces_20251128.geojson")
+regulations = str(data_dir / "raw" / "Parking_regulations_(except_non-metered_color_curb)_20251128.geojson")
+sweeping = str(data_dir / "raw" / "Street_Sweeping_Schedule_20251128.geojson")
+metered = str(data_dir / "raw" / "Blockfaces_with_Meters_20251128.geojson")
+output = str(data_dir / "processed" / "mission_district" / "sample_blockfaces_sideaware_full.json")
 
 print("=" * 70)
 print("RUNNING FULL CONVERSION WITH SIDE-AWARE MATCHING")

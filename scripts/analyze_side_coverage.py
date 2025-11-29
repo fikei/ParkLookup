@@ -4,10 +4,17 @@ Analyze street cleaning coverage on both sides of streets.
 """
 
 import json
+import sys
+from pathlib import Path
 from collections import defaultdict
 
+# Add project root to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 # Load the side-aware data
-with open('sample_blockfaces_sideaware_full.json', 'r') as f:
+data_file = project_root / "data" / "processed" / "mission_district" / "sample_blockfaces_sideaware_full.json"
+with open(data_file, 'r') as f:
     data = json.load(f)
 
 blockfaces = data['blockfaces']
