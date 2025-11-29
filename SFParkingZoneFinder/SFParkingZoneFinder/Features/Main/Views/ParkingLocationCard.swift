@@ -238,8 +238,8 @@ struct ParkingLocationCard: View {
             VStack {
                 Spacer()
 
-                // "See regulations" button
-                if !data.detailedRegulations.isEmpty {
+                // "See regulations" button (show if we have any regulations or rule summaries)
+                if !data.detailedRegulations.isEmpty || !data.ruleSummaryLines.isEmpty {
                     Button {
                         showRegulationsDrawer = true
                     } label: {
@@ -426,8 +426,8 @@ struct ParkingLocationCard: View {
                 Spacer()
             }
 
-            // Regulations button
-            if !data.detailedRegulations.isEmpty {
+            // Regulations button (show if we have any regulations or rule summaries)
+            if !data.detailedRegulations.isEmpty || !data.ruleSummaryLines.isEmpty {
                 Button {
                     showRegulationsDrawer = true
                 } label: {
