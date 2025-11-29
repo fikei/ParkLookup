@@ -264,19 +264,17 @@ struct ParkingLocationCard: View {
             VStack {
                 Spacer()
 
-                // "See regulations" button (show if we have any regulations or rule summaries)
-                if !data.detailedRegulations.isEmpty || !data.ruleSummaryLines.isEmpty {
-                    Button {
-                        showRegulationsDrawer = true
-                    } label: {
-                        Text("See regulations")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
-                            .underline()
-                    }
-                    .padding(.bottom, 8)
+                // "See regulations" button - always show (drawer handles empty state)
+                Button {
+                    showRegulationsDrawer = true
+                } label: {
+                    Text("See regulations")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
+                        .underline()
                 }
+                .padding(.bottom, 8)
 
                 ValidityBadgeView(
                     status: data.validityStatus,
