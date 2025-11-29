@@ -1605,19 +1605,22 @@ struct ZoneMapView: UIViewRepresentable {
                         let label = labelLines.joined(separator: "\n")
                         logger.info("📍 Tapped blockface: \(blockface.street) \(sideName)")
 
-                        // Add temporary annotation to show blockface info
-                        let annotation = BlockfaceLabelAnnotation(
-                            coordinate: coordinate,
-                            label: label,
-                            blockface: blockface
-                        )
+                        // Only show annotation in developer mode
+                        if DeveloperSettings.shared.developerModeUnlocked {
+                            // Add temporary annotation to show blockface info
+                            let annotation = BlockfaceLabelAnnotation(
+                                coordinate: coordinate,
+                                label: label,
+                                blockface: blockface
+                            )
 
-                        // Remove any existing blockface label annotations
-                        let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
-                        mapView.removeAnnotations(existingLabels)
+                            // Remove any existing blockface label annotations
+                            let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
+                            mapView.removeAnnotations(existingLabels)
 
-                        // Add new annotation
-                        mapView.addAnnotation(annotation)
+                            // Add new annotation
+                            mapView.addAnnotation(annotation)
+                        }
 
                         // Trigger generic map tap callback (updates spot card)
                         onMapTapped?(coordinate)
@@ -1733,23 +1736,26 @@ struct ZoneMapView: UIViewRepresentable {
                     let label = labelLines.joined(separator: "\n")
                     logger.info("📍 Tapped near blockface: \(nearest.blockface.street) \(sideName) (\(Int(nearest.distance))m)")
 
-                    // Use the blockface's center point for the annotation (not tap point)
-                    let coords = nearest.blockface.geometry.locationCoordinates
-                    let centerIndex = coords.count / 2
-                    let blockfaceCenter = coords[centerIndex]
+                    // Only show annotation in developer mode
+                    if DeveloperSettings.shared.developerModeUnlocked {
+                        // Use the blockface's center point for the annotation (not tap point)
+                        let coords = nearest.blockface.geometry.locationCoordinates
+                        let centerIndex = coords.count / 2
+                        let blockfaceCenter = coords[centerIndex]
 
-                    let annotation = BlockfaceLabelAnnotation(
-                        coordinate: blockfaceCenter,
-                        label: label,
-                        blockface: nearest.blockface
-                    )
+                        let annotation = BlockfaceLabelAnnotation(
+                            coordinate: blockfaceCenter,
+                            label: label,
+                            blockface: nearest.blockface
+                        )
 
-                    // Remove existing blockface labels
-                    let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
-                    mapView.removeAnnotations(existingLabels)
+                        // Remove existing blockface labels
+                        let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
+                        mapView.removeAnnotations(existingLabels)
 
-                    // Add annotation at blockface center
-                    mapView.addAnnotation(annotation)
+                        // Add annotation at blockface center
+                        mapView.addAnnotation(annotation)
+                    }
 
                     // Trigger map tap callback (updates spot card)
                     onMapTapped?(coordinate)
