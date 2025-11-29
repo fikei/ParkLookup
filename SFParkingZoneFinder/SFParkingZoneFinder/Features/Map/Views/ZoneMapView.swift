@@ -957,7 +957,7 @@ struct ZoneMapView: UIViewRepresentable {
         }
     }
 
-    /// PoC: Load and render blockface data for street cleaning visualization
+    /// PoC: Load and render blockface data for street cleaning visualization (OPTIMIZED)
     private func loadBlockfaceOverlays(mapView: MKMapView, isInitialLoad: Bool = false) {
         // Check feature flag - only load if enabled in developer settings
         let devSettings = DeveloperSettings.shared
@@ -966,26 +966,41 @@ struct ZoneMapView: UIViewRepresentable {
             return
         }
 
-        // Zoom to blockface test area on initial load
+        // Use user coordinate or SF default
+        let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        let centerCoordinate = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
+
+        // Zoom to user location on initial load (or test area if no location)
         if isInitialLoad {
-            logger.info("🚧 PoC: Initial load with blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area")
+            logger.info("🚧 PoC: Initial load with blockface overlays enabled - centering on user location")
             DispatchQueue.main.async {
-                let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7541, longitude: -122.4193)
-                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m, shows multiple blocks
-                let blockfaceRegion = MKCoordinateRegion(center: blockfaceCenter, span: blockfaceSpan)
+                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m
+                let blockfaceRegion = MKCoordinateRegion(center: centerCoordinate, span: blockfaceSpan)
                 mapView.setRegion(blockfaceRegion, animated: true)
             }
         }
 
-        do {
-            let blockfaces = try BlockfaceLoader.shared.loadBlockfaces()
-            logger.info("🚧 PoC: Loaded \(blockfaces.count) blockfaces")
+        // Load blockfaces asynchronously near user location
+        Task {
+            do {
+                let startTime = Date()
+                // Load only nearby blockfaces (500m radius, max 150 blockfaces)
+                let blockfaces = try await BlockfaceLoader.shared.loadBlockfacesNear(
+                    coordinate: centerCoordinate,
+                    radiusMeters: 500,  // ~5-6 blocks
+                    maxCount: 150       // Limit for performance
+                )
+                let elapsed = Date().timeIntervalSince(startTime)
+                logger.info("🚧 PoC: Loaded \(blockfaces.count) nearby blockfaces in \(String(format: "%.3f", elapsed))s")
 
-            // Add blockface overlays to map
-            mapView.addBlockfaceOverlays(blockfaces)
-            logger.info("✅ PoC: Added blockface overlays to map")
-        } catch {
-            logger.error("❌ PoC: Failed to load blockfaces: \(error.localizedDescription)")
+                // Add blockface overlays to map on main thread
+                await MainActor.run {
+                    mapView.addBlockfaceOverlays(blockfaces)
+                    logger.info("✅ PoC: Added \(blockfaces.count) blockface overlays to map")
+                }
+            } catch {
+                logger.error("❌ PoC: Failed to load blockfaces: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -1011,11 +1026,6 @@ struct ZoneMapView: UIViewRepresentable {
             mapView.removeAnnotations(existingMeters)
         }
 
-        // TODO: Re-enable when ParkingMeterLoader is added to Xcode project
-        // For now, parking meters are disabled during BlockFace migration
-        logger.info("🅿️ Parking meters temporarily disabled during BlockFace migration")
-
-        /* Parking meter loading disabled - uncomment when ParkingMeter files are added to Xcode project
         do {
             let meters = try ParkingMeterLoader.shared.loadParkingMeters()
             logger.info("🅿️ Loaded \(meters.count) parking meters from dataset")
@@ -1040,7 +1050,6 @@ struct ZoneMapView: UIViewRepresentable {
         } catch {
             logger.error("❌ Failed to load parking meters: \(error.localizedDescription)")
         }
-        */
     }
 
     // MARK: - Coordinator
@@ -1284,7 +1293,6 @@ struct ZoneMapView: UIViewRepresentable {
                 return annotationView
             }
 
-            /* Parking meter annotations disabled - uncomment when ParkingMeter files are added to Xcode project
             // Handle parking meter annotation
             if let meterAnnotation = annotation as? ParkingMeterAnnotation {
                 let identifier = "ParkingMeter"
@@ -1304,7 +1312,6 @@ struct ZoneMapView: UIViewRepresentable {
 
                 return annotationView
             }
-            */
 
             // Handle blockface label annotation (shows callout with blockface info)
             if let blockfaceAnnotation = annotation as? BlockfaceLabelAnnotation {
@@ -1689,7 +1696,6 @@ class BlockfaceLabelAnnotation: NSObject, MKAnnotation {
     }
 }
 
-/* Parking meter annotation disabled - uncomment when ParkingMeter files are added to Xcode project
 /// Annotation for parking meters
 class ParkingMeterAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
@@ -1699,18 +1705,6 @@ class ParkingMeterAnnotation: NSObject, MKAnnotation {
     init(coordinate: CLLocationCoordinate2D, meter: ParkingMeter) {
         self.coordinate = coordinate
         self.meter = meter
-        super.init()
-    }
-}
-*/
-
-// Stub class to satisfy existing references
-class ParkingMeterAnnotation: NSObject, MKAnnotation {
-    let coordinate: CLLocationCoordinate2D
-    var title: String? { nil }
-
-    init(coordinate: CLLocationCoordinate2D) {
-        self.coordinate = coordinate
         super.init()
     }
 }
