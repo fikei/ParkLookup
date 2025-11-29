@@ -74,7 +74,8 @@ struct ExpandedMapView: View {
                     },
                     userPermitAreas: userPermitAreaCodes,
                     devSettingsHash: devSettings.settingsHash,
-                    showOverlays: devSettings.showZoneOverlays
+                    reloadTrigger: devSettings.reloadTrigger,
+                    showOverlays: true  // Always show in expanded view
                 )
                 .ignoresSafeArea()
 

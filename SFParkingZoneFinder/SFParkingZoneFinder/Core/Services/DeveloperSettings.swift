@@ -230,10 +230,30 @@ final class DeveloperSettings: ObservableObject {
 
     // MARK: - Experimental Features
 
-    /// Show blockface overlays with street cleaning visualization (PoC)
-    /// Renders street segments with active/inactive street cleaning status
+    /// Use blockface data for main app features (Cards, Park Until, etc.)
+    /// When false, uses legacy zone-based system. When true, uses blockface-based system.
+    /// This is the main migration flag with instant rollback capability.
+    @Published var useBlockfaceForFeatures: Bool {
+        didSet { UserDefaults.standard.set(useBlockfaceForFeatures, forKey: Keys.useBlockfaceForFeatures) }
+    }
+
+    /// Show zone area polygons on map (large colored zones)
+    /// When false, only blockface centerlines are shown (cleaner map)
+    /// When true, shows both zone polygons and blockface lines
+    @Published var showZonePolygons: Bool {
+        didSet {
+            UserDefaults.standard.set(showZonePolygons, forKey: Keys.showZonePolygons)
+            forceReloadOverlays()
+        }
+    }
+
+    /// Show blockface overlays on the map
+    /// Renders street segments with parking regulations
     @Published var showBlockfaceOverlays: Bool {
-        didSet { UserDefaults.standard.set(showBlockfaceOverlays, forKey: Keys.showBlockfaceOverlays) }
+        didSet {
+            UserDefaults.standard.set(showBlockfaceOverlays, forKey: Keys.showBlockfaceOverlays)
+            forceReloadOverlays()
+        }
     }
 
     /// Show blockface centerline polylines alongside blockface polygons
@@ -513,6 +533,8 @@ final class DeveloperSettings: ObservableObject {
         static let showOriginalOverlay = "dev.showOriginalOverlay"
         static let showVertexCounts = "dev.showVertexCounts"
         static let showZoneOverlays = "dev.showZoneOverlays"
+        static let useBlockfaceForFeatures = "dev.useBlockfaceForFeatures"
+        static let showZonePolygons = "dev.showZonePolygons"
         static let showBlockfaceOverlays = "dev.showBlockfaceOverlays"
         static let showBlockfaceCenterlines = "dev.showBlockfaceCenterlines"
         static let showBlockfacePolygons = "dev.showBlockfacePolygons"
@@ -575,9 +597,11 @@ final class DeveloperSettings: ObservableObject {
         static let showOriginalOverlay = false
         static let showVertexCounts = false
         static let showZoneOverlays = true  // Show zone overlays by default
+        static let useBlockfaceForFeatures = false  // DEFAULT OFF - safe rollback (use zones)
+        static let showZonePolygons = false  // Zone polygons OFF by default (cleaner map with blockfaces)
         static let showBlockfaceOverlays = true  // Enable with new GeoJSON data
-        static let showBlockfaceCenterlines = true  // Show centerlines for alignment
-        static let showBlockfacePolygons = true  // Show polygons with new GeoJSON data
+        static let showBlockfaceCenterlines = true  // Show centerlines by default (main UI)
+        static let showBlockfacePolygons = false  // Polygons OFF by default (available in dev overlay)
         static let showParkingMeters = false  // Parking meters OFF by default (user-facing setting)
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
@@ -640,6 +664,8 @@ final class DeveloperSettings: ObservableObject {
         showOriginalOverlay = defaults.object(forKey: Keys.showOriginalOverlay) as? Bool ?? Defaults.showOriginalOverlay
         showVertexCounts = defaults.object(forKey: Keys.showVertexCounts) as? Bool ?? Defaults.showVertexCounts
         showZoneOverlays = defaults.object(forKey: Keys.showZoneOverlays) as? Bool ?? Defaults.showZoneOverlays
+        useBlockfaceForFeatures = defaults.object(forKey: Keys.useBlockfaceForFeatures) as? Bool ?? Defaults.useBlockfaceForFeatures
+        showZonePolygons = defaults.object(forKey: Keys.showZonePolygons) as? Bool ?? Defaults.showZonePolygons
         showBlockfaceOverlays = defaults.object(forKey: Keys.showBlockfaceOverlays) as? Bool ?? Defaults.showBlockfaceOverlays
         showBlockfaceCenterlines = defaults.object(forKey: Keys.showBlockfaceCenterlines) as? Bool ?? Defaults.showBlockfaceCenterlines
         showBlockfacePolygons = defaults.object(forKey: Keys.showBlockfacePolygons) as? Bool ?? Defaults.showBlockfacePolygons
@@ -716,6 +742,8 @@ final class DeveloperSettings: ObservableObject {
         hasher.combine(showOriginalOverlay)
         hasher.combine(showVertexCounts)
         hasher.combine(showZoneOverlays)
+        hasher.combine(useBlockfaceForFeatures)
+        hasher.combine(showZonePolygons)
         hasher.combine(showBlockfaceOverlays)
         hasher.combine(showBlockfaceCenterlines)
         hasher.combine(showBlockfacePolygons)
@@ -824,6 +852,8 @@ final class DeveloperSettings: ObservableObject {
         showOriginalOverlay = Defaults.showOriginalOverlay
         showVertexCounts = Defaults.showVertexCounts
         showZoneOverlays = Defaults.showZoneOverlays
+        useBlockfaceForFeatures = Defaults.useBlockfaceForFeatures
+        showZonePolygons = Defaults.showZonePolygons
         showBlockfaceOverlays = Defaults.showBlockfaceOverlays
         showBlockfaceCenterlines = Defaults.showBlockfaceCenterlines
         showBlockfacePolygons = Defaults.showBlockfacePolygons
