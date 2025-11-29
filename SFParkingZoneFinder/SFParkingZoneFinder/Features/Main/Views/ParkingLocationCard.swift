@@ -436,8 +436,13 @@ struct ParkingLocationCard: View {
 
     @ViewBuilder
     private var compactMainText: some View {
+        // PRIORITY ORDER:
+        // 1. Street cleaning/restrictions (applies to everyone including valid permit holders)
+        // 2. Time limits (only for users without valid permits)
+        // 3. Valid permit status
         if let parkUntil = parkUntilResult {
-            // Show "Park Until" as main title when there's a time limit
+            // Show "Park Until" for ANY restriction (street cleaning, time limits, etc.)
+            // This ensures street cleaning is always displayed, even for valid permit holders
             HStack(spacing: 6) {
                 Image(systemName: "timer")
                     .font(.headline)
@@ -447,6 +452,7 @@ struct ParkingLocationCard: View {
             .foregroundColor(.primary)
         } else if isValidStyle {
             // Valid permit - show "Valid Permit" or "Park Until" based on enforcement
+            // Only shown when there are NO restrictions (no street cleaning, no time limits)
             if isOutsideEnforcement, let nextEnforcement = findNextEnforcementForValidPermit() {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
@@ -517,7 +523,8 @@ struct ParkingLocationCard: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     if let parkUntil = parkUntilResult {
-                        // Show "Park Until" as main title
+                        // Show "Park Until" for any restriction
+                        // Includes street cleaning (applies to everyone, even valid permit holders)
                         HStack(spacing: 6) {
                             Image(systemName: "timer")
                                 .font(.headline)
@@ -577,31 +584,41 @@ struct ParkingLocationCard: View {
 
     @ViewBuilder
     private func locationCircle(size: CGFloat) -> some View {
-        if isMultiPermitLocation && displayMode == .primary {
-            MultiPermitCircleView(
-                permitAreas: orderedPermitAreas,
-                animationIndex: animationIndex,
-                size: size
-            )
-            .onTapGesture {
+        ZStack {
+            Circle()
+                .fill(circleBackgroundForCurrentZone)
+                .frame(width: size, height: size)
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+
+            Text(currentDisplayCode)
+                .font(.system(size: size * 0.6, weight: .bold))
+                .foregroundColor(.white)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+        }
+        .onTapGesture {
+            if isMultiPermitLocation {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     animationIndex = (animationIndex + 1) % orderedPermitAreas.count
                 }
             }
-        } else {
-            ZStack {
-                Circle()
-                    .fill(circleBackground)
-                    .frame(width: size, height: size)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-
-                Text(singleLocationCode)
-                    .font(.system(size: size * 0.6, weight: .bold))
-                    .foregroundColor(letterColor)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-            }
         }
+    }
+
+    /// Get the zone code to display (cycles through multi-permit zones)
+    private var currentDisplayCode: String {
+        if isMultiPermitLocation {
+            return orderedPermitAreas[animationIndex]
+        }
+        return singleLocationCode
+    }
+
+    /// Get circle background color for current zone (handles animation)
+    private var circleBackgroundForCurrentZone: Color {
+        if isMultiPermitLocation {
+            return ZoneColorProvider.swiftUIColor(for: orderedPermitAreas[animationIndex])
+        }
+        return circleBackground
     }
 }
 

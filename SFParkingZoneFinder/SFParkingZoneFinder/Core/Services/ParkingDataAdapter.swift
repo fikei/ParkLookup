@@ -661,6 +661,8 @@ struct ParkUntilCalculator {
         let calendar = Calendar.current
 
         // 1. Check for upcoming street cleaning and no parking zones
+        // IMPORTANT: These restrictions apply to EVERYONE, including valid permit holders.
+        // Valid permits do NOT exempt users from street cleaning or no parking restrictions.
         for regulation in allRegulations {
             if regulation.type == .streetCleaning || regulation.type == .noParking {
                 if let nextOccurrence = findNextOccurrence(of: regulation, from: date) {
@@ -676,6 +678,7 @@ struct ParkUntilCalculator {
         }
 
         // 2. Check time limit (only for users without valid permits)
+        // Valid permit holders are exempt from time limits, but NOT from street cleaning (checked above)
         if validityStatus == .invalid || validityStatus == .noPermitSet {
             if let limit = timeLimitMinutes {
                 if let startTime = enforcementStartTime, let endTime = enforcementEndTime {
