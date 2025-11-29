@@ -99,23 +99,53 @@ struct SettingsView: View {
                 if devSettings.developerModeUnlocked {
                     Section(
                         header: Text("Map Overlays"),
-                        footer: Text("Control which parking data layers are displayed on the map. Zone overlays show parking zones, blockface overlays show street-level parking segments (experimental).")
+                        footer: Text("Control which parking data layers are displayed on the map. Zone polygons show large zone areas, blockfaces show individual street segments.")
                     ) {
-                        Toggle("Zone Overlays", isOn: $devSettings.showZoneOverlays)
-                            .onChange(of: devSettings.showZoneOverlays) { _, isEnabled in
+                        Toggle("Zone Polygons", isOn: $devSettings.showZonePolygons)
+                            .onChange(of: devSettings.showZonePolygons) { _, isEnabled in
                                 let generator = UIImpactFeedbackGenerator(style: .light)
                                 generator.impactOccurred()
                             }
 
-                        Toggle("Blockface Overlays", isOn: $devSettings.showBlockfaceOverlays)
+                        Toggle("BlockFaces", isOn: $devSettings.showBlockfaceOverlays)
                             .onChange(of: devSettings.showBlockfaceOverlays) { _, isEnabled in
                                 let generator = UIImpactFeedbackGenerator(style: .light)
                                 generator.impactOccurred()
                             }
+                    }
 
-                        Text("Use the developer overlay on the map to fine-tune overlay appearance and behavior.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    // MARK: - Calculations Section (Developer Mode Only)
+                    Section(
+                        header: Text("Calculations"),
+                        footer: Text("Choose which data source to use for parking calculations and card content. Changes take effect immediately.")
+                    ) {
+                        Button {
+                            devSettings.useBlockfaceForFeatures = false
+                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                            generator.impactOccurred()
+                        } label: {
+                            HStack {
+                                Image(systemName: devSettings.useBlockfaceForFeatures ? "circle" : "circle.inset.filled")
+                                    .foregroundColor(devSettings.useBlockfaceForFeatures ? .secondary : .accentColor)
+                                Text("Use Zone Polygons")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                        }
+
+                        Button {
+                            devSettings.useBlockfaceForFeatures = true
+                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                            generator.impactOccurred()
+                        } label: {
+                            HStack {
+                                Image(systemName: devSettings.useBlockfaceForFeatures ? "circle.inset.filled" : "circle")
+                                    .foregroundColor(devSettings.useBlockfaceForFeatures ? .accentColor : .secondary)
+                                Text("Use BlockFaces")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                        }
                     }
                 }
 

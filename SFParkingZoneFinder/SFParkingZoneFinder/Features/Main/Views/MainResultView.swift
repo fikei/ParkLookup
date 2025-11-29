@@ -104,8 +104,9 @@ struct MainResultView: View {
                         // When collapsed, shift user location below the card
                         // A bias of 0.5 places the user indicator well below the large card
                         verticalBias: isMapExpanded ? 0.0 : 0.5,
-                        // Show zone overlays when enabled AND (expanded OR developer panel is open)
-                        showOverlays: devSettings.showZoneOverlays && (isMapExpanded || developerPanelExpanded),
+                        // Show overlays when expanded OR developer panel is open
+                        // Individual overlay types (zones/blockfaces) controlled by their own toggles
+                        showOverlays: isMapExpanded || developerPanelExpanded,
                         // Collapsed: 0.65, Expanded: 0.5
                         zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
                         // Show pin for searched address
