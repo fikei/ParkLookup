@@ -11,6 +11,7 @@ struct ZoneMapView: UIViewRepresentable {
     let currentZoneId: String?
     let userCoordinate: CLLocationCoordinate2D?
     let onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?  // Pass zone, permit areas, and tap coordinate
+    let onMapTapped: ((CLLocationCoordinate2D) -> Void)?  // Generic tap callback (fires for any tap on map)
 
     /// User's valid permit areas (uppercase codes like "Q", "AA")
     /// Zones matching these will be colored green, others orange
@@ -100,6 +101,7 @@ struct ZoneMapView: UIViewRepresentable {
         context.coordinator.currentZoneId = currentZoneId
         context.coordinator.zones = zones
         context.coordinator.onZoneTapped = onZoneTapped
+        context.coordinator.onMapTapped = onMapTapped
         context.coordinator.showOverlays = showOverlays
 
         // Debug logging to track permit changes
@@ -316,7 +318,7 @@ struct ZoneMapView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(currentZoneId: currentZoneId, zones: zones, onZoneTapped: onZoneTapped)
+        Coordinator(currentZoneId: currentZoneId, zones: zones, onZoneTapped: onZoneTapped, onMapTapped: onMapTapped)
     }
 
     // MARK: - Overlap Clipping
@@ -1076,6 +1078,7 @@ struct ZoneMapView: UIViewRepresentable {
         var currentZoneId: String?
         var zones: [ParkingZone]
         var onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?
+        var onMapTapped: ((CLLocationCoordinate2D) -> Void)?
         var userPermitAreas: Set<String> = []
         var lastUserPermitAreas: Set<String> = []  // Track previous permits to detect changes
 
@@ -1119,10 +1122,11 @@ struct ZoneMapView: UIViewRepresentable {
         var lastBlockfaceLoadCenter: CLLocationCoordinate2D?
         var isLoadingBlockfaces: Bool = false
 
-        init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?) {
+        init(currentZoneId: String?, zones: [ParkingZone], onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?, onMapTapped: ((CLLocationCoordinate2D) -> Void)?) {
             self.currentZoneId = currentZoneId
             self.zones = zones
             self.onZoneTapped = onZoneTapped
+            self.onMapTapped = onMapTapped
             self.lastSettingsHash = DeveloperSettings.shared.settingsHash
             self.lastReloadTrigger = DeveloperSettings.shared.reloadTrigger
             self.lastBlockfaceOverlaysEnabled = DeveloperSettings.shared.showBlockfaceOverlays
@@ -1615,6 +1619,9 @@ struct ZoneMapView: UIViewRepresentable {
                         // Add new annotation
                         mapView.addAnnotation(annotation)
 
+                        // Trigger generic map tap callback (updates spot card)
+                        onMapTapped?(coordinate)
+
                         return
                     }
                 }
@@ -1635,6 +1642,9 @@ struct ZoneMapView: UIViewRepresentable {
                     if let zone = zones.first(where: { $0.id == polygon.zoneId }) {
                         // Pass the zone, permit areas, and tap coordinate
                         onZoneTapped?(zone, polygon.allValidPermitAreas, coordinate)
+
+                        // Trigger generic map tap callback (updates spot card)
+                        onMapTapped?(coordinate)
                     }
 
                     // Store overlay debug info if developer mode is active

@@ -96,7 +96,25 @@ struct MainResultView: View {
                             selectedZone = zone
                             tappedPermitAreas = permitAreas
                             tappedCoordinate = coordinate
+
+                            // Haptic feedback
+                            HapticFeedback.light()
+
                             // Expand map to show the tapped card
+                            if !isMapExpanded {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    isMapExpanded = true
+                                }
+                            }
+                        },
+                        onMapTapped: { coordinate in
+                            // Generic tap handler (works for zones, blockfaces, or empty map areas)
+                            tappedCoordinate = coordinate
+
+                            // Trigger lookup at tapped coordinate (updates spot card)
+                            viewModel.lookupZone(at: coordinate)
+
+                            // Expand map if collapsed
                             if !isMapExpanded {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                     isMapExpanded = true
