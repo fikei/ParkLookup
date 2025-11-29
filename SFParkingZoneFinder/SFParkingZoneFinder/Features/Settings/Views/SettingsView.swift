@@ -36,14 +36,6 @@ struct SettingsView: View {
 
                 // MARK: - Map Preferences Section
                 Section(header: Text("Map"), footer: Text("Parking meters show individual meter locations on the map. Paid parking zones are always visible.")) {
-                    Toggle("Show Floating Map", isOn: $viewModel.showFloatingMap)
-
-                    Picker("Map Position", selection: $viewModel.mapPosition) {
-                        ForEach(MapPosition.allCases, id: \.self) { position in
-                            Text(position.displayName).tag(position)
-                        }
-                    }
-
                     Toggle("Show Parking Meters", isOn: $viewModel.showParkingMeters)
                 }
 
