@@ -92,22 +92,28 @@ struct MainResultView: View {
                         currentZoneId: viewModel.currentZoneId,
                         userCoordinate: activeCoordinate,
                         onZoneTapped: { zone, permitAreas, coordinate in
-                            if isMapExpanded {
-                                selectedZone = zone
-                                tappedPermitAreas = permitAreas
-                                tappedCoordinate = coordinate
-                                // Don't call viewModel.lookupZone - it causes flash and we already have the zone info
+                            // Allow tapping in both collapsed and expanded mode
+                            selectedZone = zone
+                            tappedPermitAreas = permitAreas
+                            tappedCoordinate = coordinate
+                            // Expand map to show the tapped card
+                            if !isMapExpanded {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    isMapExpanded = true
+                                }
                             }
                         },
                         userPermitAreas: userPermitAreaCodes,
                         devSettingsHash: devSettings.settingsHash,
+                        reloadTrigger: devSettings.reloadTrigger,
                         // When collapsed, shift user location below the card
                         // A bias of 0.5 places the user indicator well below the large card
                         verticalBias: isMapExpanded ? 0.0 : 0.5,
-                        // Show zone overlays when enabled AND (expanded OR developer panel is open)
-                        showOverlays: devSettings.showZoneOverlays && (isMapExpanded || developerPanelExpanded),
-                        // Collapsed: 0.65, Expanded: 0.5
-                        zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
+                        // Show overlays when expanded OR developer panel is open
+                        // Individual overlay types (zones/blockfaces) controlled by their own toggles
+                        showOverlays: isMapExpanded || developerPanelExpanded,
+                        // Original zoom: 1.0 = ~670m (8-10 blocks)
+                        zoomMultiplier: 1.0,
                         // Show pin for searched address
                         searchedCoordinate: searchedCoordinate,
                         // Show blue dot for tapped location
@@ -162,34 +168,32 @@ struct MainResultView: View {
                     .ignoresSafeArea()
             }
 
-            // Layer 2: Card overlays (hidden when developer panel is open)
-            if !viewModel.isLoading && viewModel.error == nil && !developerPanelExpanded {
+            // Layer 2: Card overlays
+            if !viewModel.isLoading && viewModel.error == nil {
                 VStack {
-                    // Address search card (only in expanded mode)
-                    if isMapExpanded {
-                        AddressSearchCard(
-                            currentAddress: viewModel.currentAddress,
-                            isAtCurrentLocation: searchedCoordinate == nil && tappedCoordinate == nil,
-                            onAddressSelected: { coordinate in
-                                searchedCoordinate = coordinate
-                                // Trigger zone lookup for the new coordinate
-                                viewModel.lookupZone(at: coordinate)
-                            },
-                            onResetToCurrentLocation: {
-                                searchedCoordinate = nil
-                                tappedCoordinate = nil
-                                selectedZone = nil  // Close tapped spot card
-                                viewModel.returnToGPSLocation()
-                                recenterTrigger.toggle()  // Force map recenter
-                            },
-                            onOutsideCoverage: {
-                                showOutsideCoverageAlert = true
-                            }
-                        )
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                    }
+                    // Address search card (always visible for location button)
+                    AddressSearchCard(
+                        currentAddress: viewModel.currentAddress,
+                        isAtCurrentLocation: searchedCoordinate == nil && tappedCoordinate == nil,
+                        onAddressSelected: { coordinate in
+                            searchedCoordinate = coordinate
+                            // Trigger zone lookup for the new coordinate
+                            viewModel.lookupZone(at: coordinate)
+                        },
+                        onResetToCurrentLocation: {
+                            searchedCoordinate = nil
+                            tappedCoordinate = nil
+                            selectedZone = nil  // Close tapped spot card
+                            viewModel.returnToGPSLocation()
+                            recenterTrigger.toggle()  // Force map recenter
+                        },
+                        onOutsideCoverage: {
+                            showOutsideCoverageAlert = true
+                        }
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
 
                     // Animated zone card that morphs between large and mini states
                     // Hidden when TappedSpotInfoCard is showing

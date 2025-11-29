@@ -9,16 +9,6 @@ final class SettingsViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published private(set) var permits: [ParkingPermit] = []
-    @Published var showFloatingMap: Bool {
-        didSet {
-            UserDefaults.standard.set(showFloatingMap, forKey: "showFloatingMap")
-        }
-    }
-    @Published var mapPosition: MapPosition {
-        didSet {
-            UserDefaults.standard.set(mapPosition.rawValue, forKey: "mapPosition")
-        }
-    }
     @Published var showParkingMeters: Bool {
         didSet {
             UserDefaults.standard.set(showParkingMeters, forKey: "showParkingMeters")
@@ -84,9 +74,6 @@ final class SettingsViewModel: ObservableObject {
         self.notificationService = notificationService
 
         // Load map preferences
-        self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
-        let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
-        self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
         self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
 
         // Load notification preferences (all enabled by default)

@@ -66,8 +66,6 @@ final class MainResultViewModel: ObservableObject {
     private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
 
     // Map preferences (read from UserDefaults)
-    @Published var showFloatingMap: Bool
-    @Published var mapPosition: MapPosition
     @Published var showParkingMeters: Bool  // Individual meter pins (not zone polygons)
 
     /// All loaded zones for map display (metered zone polygons always shown)
@@ -101,9 +99,6 @@ final class MainResultViewModel: ObservableObject {
         self.parkingSessionManager = parkingSessionManager
 
         // Load map preferences from UserDefaults
-        self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
-        let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
-        self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
         // Show parking meters (individual pins) is OFF by default
         self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
 
@@ -249,13 +244,24 @@ final class MainResultViewModel: ObservableObject {
         lastKnownGPSCoordinate = location.coordinate  // Save GPS location
         error = nil
 
-        // Get parking result
+        // Get parking result from zone service (continues to power UI)
         let result = await zoneService.getParkingResult(
             at: location.coordinate,
             time: Date()
         )
 
-        // Update UI state
+        // TEST: Call adapter in parallel if blockface mode enabled
+        if DeveloperSettings.shared.useBlockfaceForFeatures {
+            let adapterResult = await ParkingDataAdapter.shared.lookupParking(at: location.coordinate)
+
+            // Log comparison (less verbose for continuous updates)
+            if let adapter = adapterResult {
+                let zoneName = result.lookupResult.primaryZone?.displayName ?? "nil"
+                logger.info("🔄 GPS Update - Zone: \(zoneName), Blockface: \(adapter.locationName)")
+            }
+        }
+
+        // Continue using zone result for UI (no breaking changes)
         updateState(from: result)
 
         // Get address (don't fail if this fails)
@@ -326,9 +332,6 @@ final class MainResultViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.showFloatingMap = UserDefaults.standard.object(forKey: "showFloatingMap") as? Bool ?? true
-                let positionRaw = UserDefaults.standard.string(forKey: "mapPosition") ?? MapPosition.topRight.rawValue
-                self.mapPosition = MapPosition(rawValue: positionRaw) ?? .topRight
                 self.showParkingMeters = UserDefaults.standard.object(forKey: "showParkingMeters") as? Bool ?? false
             }
             .store(in: &cancellables)
@@ -371,13 +374,24 @@ final class MainResultViewModel: ObservableObject {
             currentCoordinate = location.coordinate
             lastKnownGPSCoordinate = location.coordinate  // Save GPS location
 
-            // Get parking result
+            // Get parking result from zone service (continues to power UI)
             let result = await zoneService.getParkingResult(
                 at: location.coordinate,
                 time: Date()
             )
 
-            // Update UI state
+            // TEST: Call adapter in parallel if blockface mode enabled
+            if DeveloperSettings.shared.useBlockfaceForFeatures {
+                let adapterResult = await ParkingDataAdapter.shared.lookupParking(at: location.coordinate)
+
+                // Log comparison
+                if let adapter = adapterResult {
+                    let zoneName = result.lookupResult.primaryZone?.displayName ?? "nil"
+                    logger.info("🔄 Manual Refresh - Zone: \(zoneName), Blockface: \(adapter.locationName)")
+                }
+            }
+
+            // Continue using zone result for UI (no breaking changes)
             updateState(from: result)
 
             // Get address (don't fail if this fails)
@@ -403,13 +417,13 @@ final class MainResultViewModel: ObservableObject {
         // Update coordinate
         currentCoordinate = coordinate
 
-        // Get parking result
+        // Get parking result from zone service (continues to power UI)
         let result = await zoneService.getParkingResult(
             at: coordinate,
             time: Date()
         )
 
-        // Log the result
+        // Log the zone result
         if let zone = result.lookupResult.primaryZone {
             logger.info("✅ Zone found: \(zone.displayName) (type: \(zone.zoneType.rawValue))")
         } else if result.lookupResult.isUnknownArea {
@@ -418,7 +432,39 @@ final class MainResultViewModel: ObservableObject {
             logger.warning("⚠️ Outside coverage area")
         }
 
-        // Update UI state
+        // TEST: Call adapter in parallel if blockface mode enabled
+        if DeveloperSettings.shared.useBlockfaceForFeatures {
+            let adapterResult = await ParkingDataAdapter.shared.lookupParking(at: coordinate)
+
+            // Log comparison between zone and blockface results
+            let zoneName = result.lookupResult.primaryZone?.displayName ?? "nil"
+            let blockfaceName = adapterResult?.locationName ?? "nil"
+            logger.info("🔄 COMPARISON - Zone: \(zoneName), Blockface: \(blockfaceName)")
+
+            if let adapter = adapterResult {
+                // Convert enum to string for logging
+                let typeString = String(describing: adapter.primaryRegulationType)
+                logger.info("📍 Adapter found: \(adapter.locationName) (type: \(typeString))")
+                logger.info("📍 Regulations: \(adapter.allRegulations.count) total")
+
+                // Log can park status comparison
+                let zoneCanPark = result.primaryInterpretation?.validityStatus != .invalid
+                let blockfaceCanPark = ParkingDataAdapter.shared.canPark(
+                    at: adapter,
+                    userPermits: Set(permitService.permits.map { $0.area }),
+                    at: Date()
+                )
+                if zoneCanPark != blockfaceCanPark {
+                    logger.warning("⚠️ MISMATCH - Zone canPark: \(zoneCanPark), Blockface canPark: \(blockfaceCanPark)")
+                } else {
+                    logger.info("✅ MATCH - Both agree canPark: \(zoneCanPark)")
+                }
+            } else {
+                logger.warning("⚠️ Adapter returned nil - no blockface found")
+            }
+        }
+
+        // Continue using zone result for UI (no breaking changes)
         updateState(from: result)
 
         // Get address for the searched location
@@ -654,30 +700,6 @@ final class MainResultViewModel: ObservableObject {
 
         // Fallback: time limit from now
         return now.addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
-    }
-}
-
-// MARK: - Map Position
-
-enum MapPosition: String, CaseIterable, Codable, Hashable {
-    case topLeft
-    case topRight
-    case bottomRight
-
-    var alignment: Alignment {
-        switch self {
-        case .topLeft: return .topLeading
-        case .topRight: return .topTrailing
-        case .bottomRight: return .bottomTrailing
-        }
-    }
-
-    var displayName: String {
-        switch self {
-        case .topLeft: return "Top Left"
-        case .topRight: return "Top Right"
-        case .bottomRight: return "Bottom Right"
-        }
     }
 }
 
