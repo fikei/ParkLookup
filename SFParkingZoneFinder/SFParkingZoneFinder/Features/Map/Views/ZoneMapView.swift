@@ -1317,15 +1317,19 @@ struct ZoneMapView: UIViewRepresentable {
                 let identifier = "ParkingMeter"
                 var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
 
+                // Only show callout in developer mode
+                let showCallout = DeveloperSettings.shared.developerModeUnlocked
+
                 if annotationView == nil {
                     annotationView = MKMarkerAnnotationView(annotation: meterAnnotation, reuseIdentifier: identifier)
-                    annotationView?.canShowCallout = true
+                    annotationView?.canShowCallout = showCallout
                     annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
                     annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
                     annotationView?.displayPriority = .defaultLow
                     annotationView?.glyphTintColor = .white
                 } else {
                     annotationView?.annotation = meterAnnotation
+                    annotationView?.canShowCallout = showCallout
                     annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
                 }
 
@@ -1337,22 +1341,32 @@ struct ZoneMapView: UIViewRepresentable {
                 let identifier = "BlockfaceLabel"
                 var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
 
+                // Only show callout in developer mode
+                let showCallout = DeveloperSettings.shared.developerModeUnlocked
+
                 if annotationView == nil {
                     annotationView = MKMarkerAnnotationView(annotation: blockfaceAnnotation, reuseIdentifier: identifier)
-                    annotationView?.canShowCallout = true
+                    annotationView?.canShowCallout = showCallout
                     annotationView?.markerTintColor = .systemOrange
                     annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
                     annotationView?.displayPriority = .required
 
-                    // Create custom callout with detailed content view
-                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
-                    annotationView?.detailCalloutAccessoryView = calloutView
+                    // Create custom callout with detailed content view (only if developer mode)
+                    if showCallout {
+                        let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                        annotationView?.detailCalloutAccessoryView = calloutView
+                    }
                 } else {
                     annotationView?.annotation = blockfaceAnnotation
+                    annotationView?.canShowCallout = showCallout
 
-                    // Update callout content
-                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
-                    annotationView?.detailCalloutAccessoryView = calloutView
+                    // Update callout content (only if developer mode)
+                    if showCallout {
+                        let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                        annotationView?.detailCalloutAccessoryView = calloutView
+                    } else {
+                        annotationView?.detailCalloutAccessoryView = nil
+                    }
                 }
 
                 return annotationView
