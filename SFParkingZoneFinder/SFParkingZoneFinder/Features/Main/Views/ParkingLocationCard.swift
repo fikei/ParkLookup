@@ -86,6 +86,17 @@ struct ParkingLocationCard: View {
         return calculator.isOutsideEnforcement()
     }
 
+    /// Check if this is an "always no parking" zone (no parking anytime)
+    private var isAlwaysNoParking: Bool {
+        // Check if there's a no parking regulation with no specific enforcement days/times
+        data.detailedRegulations.contains { regulation in
+            regulation.type == .noParking &&
+            (regulation.enforcementDays == nil || regulation.enforcementDays?.isEmpty == true) &&
+            regulation.enforcementStart == nil &&
+            regulation.enforcementEnd == nil
+        }
+    }
+
     /// Find when enforcement starts for valid permit holders (outside enforcement hours)
     private func findNextEnforcementForValidPermit() -> ParkUntilDisplay? {
         guard let startTime = data.enforcementStartTime,
@@ -437,10 +448,20 @@ struct ParkingLocationCard: View {
     @ViewBuilder
     private var compactMainText: some View {
         // PRIORITY ORDER:
-        // 1. Street cleaning/restrictions (applies to everyone including valid permit holders)
-        // 2. Time limits (only for users without valid permits)
-        // 3. Valid permit status
-        if let parkUntil = parkUntilResult {
+        // 1. Always no parking zones → "No Parking"
+        // 2. Park Until (street cleaning, time limits, etc.) → "Until [time]"
+        // 3. Valid permit with no restrictions → "Unlimited parking"
+        // 4. Other cases → Location name or type
+        if isAlwaysNoParking {
+            // Always no parking - parking never allowed
+            HStack(spacing: 6) {
+                Image(systemName: "nosign")
+                    .font(.headline)
+                Text("No Parking")
+                    .font(.headline)
+            }
+            .foregroundColor(.red)
+        } else if let parkUntil = parkUntilResult {
             // Show "Park Until" for ANY restriction (street cleaning, time limits, etc.)
             // This ensures street cleaning is always displayed, even for valid permit holders
             HStack(spacing: 6) {
@@ -451,8 +472,7 @@ struct ParkingLocationCard: View {
             }
             .foregroundColor(.primary)
         } else if isValidStyle {
-            // Valid permit - show "Valid Permit" or "Park Until" based on enforcement
-            // Only shown when there are NO restrictions (no street cleaning, no time limits)
+            // Valid permit with no restrictions - show "Unlimited parking" or enforcement start time
             if isOutsideEnforcement, let nextEnforcement = findNextEnforcementForValidPermit() {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
@@ -465,7 +485,7 @@ struct ParkingLocationCard: View {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.headline)
-                    Text("Valid Permit")
+                    Text("Unlimited parking")
                         .font(.headline)
                 }
                 .foregroundColor(.white)
@@ -483,7 +503,12 @@ struct ParkingLocationCard: View {
 
     @ViewBuilder
     private var compactSubtext: some View {
-        if parkUntilResult != nil {
+        if isAlwaysNoParking {
+            // Always no parking - show "Anytime"
+            Text("Anytime")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        } else if parkUntilResult != nil {
             // Show location name when Park Until is the main title
             Text(data.locationName)
                 .font(.caption)
@@ -493,13 +518,13 @@ struct ParkingLocationCard: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
         } else if isValidStyle {
-            // For valid permits, show "No limit" or location name
+            // For valid permits with no restrictions, keep the location name visible
             if isOutsideEnforcement {
                 Text(isMultiPermitLocation ? formattedLocationsList : data.locationName)
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
             } else {
-                Text("No limit")
+                Text(isMultiPermitLocation ? formattedLocationsList : data.locationName)
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
             }
@@ -522,7 +547,20 @@ struct ParkingLocationCard: View {
                 locationCircle(size: 48)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    if let parkUntil = parkUntilResult {
+                    if isAlwaysNoParking {
+                        // Always no parking zone
+                        HStack(spacing: 6) {
+                            Image(systemName: "nosign")
+                                .font(.headline)
+                            Text("No Parking")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.red)
+
+                        Text("Anytime")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else if let parkUntil = parkUntilResult {
                         // Show "Park Until" for any restriction
                         // Includes street cleaning (applies to everyone, even valid permit holders)
                         HStack(spacing: 6) {
