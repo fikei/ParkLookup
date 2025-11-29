@@ -23,26 +23,15 @@ extension MKMapView {
     func addBlockfaceOverlays(_ blockfaces: [Blockface]) {
         let devSettings = DeveloperSettings.shared
 
-        print("🔧 DEBUG: Adding \(blockfaces.count) blockface overlays")
-
-        for (index, blockface) in blockfaces.enumerated() {
+        for blockface in blockfaces {
             let centerline = blockface.geometry.locationCoordinates
             guard centerline.count >= 2 else { continue }
 
-            if index < 3 {  // Log first 3 blockfaces for debugging
-                print("🔧 DEBUG: Blockface \(index) (\(blockface.street), \(blockface.side) side)")
-                print("  Centerline points: \(centerline.count)")
-                print("  First point: lat=\(centerline[0].latitude), lon=\(centerline[0].longitude)")
-                print("  Second point: lat=\(centerline[1].latitude), lon=\(centerline[1].longitude)")
-                let dlat = centerline[1].latitude - centerline[0].latitude
-                let dlon = centerline[1].longitude - centerline[0].longitude
-                print("  Direction: dlat=\(dlat), dlon=\(dlon)")
-            }
-
             // Add polygons if enabled
             if devSettings.showBlockfacePolygons {
-                // TESTING: Force large width to rule out thin polygon rendering artifacts
-                let laneWidthDegrees = 0.0003  // ~36m / 118 feet - should be very visible
+                // 6 meters width at SF latitude (37.75°N)
+                // 1 degree latitude ≈ 111km, so 6m ≈ 0.000054 degrees
+                let laneWidthDegrees = 0.000054
 
                 guard let polygonCoords = createParkingLanePolygon(
                     centerline: centerline,
@@ -50,54 +39,22 @@ extension MKMapView {
                     side: blockface.side
                 ) else { continue }
 
-                if index < 3 {
-                    print("  Created polygon with \(polygonCoords.count) points")
-                    print("  Width setting: \(laneWidthDegrees) degrees (TESTING: forced large)")
-                }
-
                 let polygon = BlockfacePolygon(
                     coordinates: polygonCoords,
                     count: polygonCoords.count
                 )
                 polygon.blockface = blockface
-
-                if index < 3 {
-                    print("  ✅ Adding polygon overlay to map")
-                }
                 addOverlay(polygon)
-            } else if index < 3 {
-                print("  ⚠️ SKIPPING polygon - showBlockfacePolygons is OFF")
             }
 
-            // Add centerline polylines if enabled
+            // Add centerline polylines if enabled (for debugging)
             if devSettings.showBlockfaceCenterlines {
                 let polyline = BlockfacePolyline(
                     coordinates: centerline,
                     count: centerline.count
                 )
                 polyline.blockface = blockface
-                if index < 3 {
-                    print("  ✅ Adding centerline polyline overlay to map")
-                }
                 addOverlay(polyline)
-            } else if index < 3 {
-                print("  ⚠️ SKIPPING centerline - showBlockfaceCenterlines is OFF")
-            }
-
-            // DIAGNOSTIC: Add direction arrow at start of each blockface
-            if devSettings.showBlockfaceCenterlines && centerline.count >= 2 {
-                let start = centerline[0]
-                let next = centerline[1]
-                let arrowLength = 0.00015  // Small arrow in degrees
-                let dx = next.longitude - start.longitude
-                let dy = next.latitude - start.latitude
-                let len = sqrt(dx*dx + dy*dy)
-                let endPoint = CLLocationCoordinate2D(
-                    latitude: start.latitude + (dy/len) * arrowLength,
-                    longitude: start.longitude + (dx/len) * arrowLength
-                )
-                let arrow = MKPolyline(coordinates: [start, endPoint], count: 2)
-                addOverlay(arrow)
             }
         }
     }
@@ -124,11 +81,6 @@ extension MKMapView {
         let offsetToRight = side.uppercased() == "EVEN"
 
         var offsetSide: [CLLocationCoordinate2D] = []
-
-        // Debug logging for first blockface
-        let shouldDebug = centerline.count >= 2 &&
-                         abs(centerline[0].latitude - 37.7564) < 0.001 &&
-                         abs(centerline[0].longitude - (-122.4193)) < 0.001
 
         for i in 0..<centerline.count {
             let point = centerline[i]
@@ -170,28 +122,6 @@ extension MKMapView {
                 // Convert back to geographic space by scaling longitude back DOWN
                 // Since we divided by cos(lat) to go TO metric, we multiply to go back
                 perpVector = (lat: normalizedMetric.lat, lon: normalizedMetric.lon * lonScaleFactor)
-
-                if shouldDebug {
-                    print("🔧 DEBUG: Perpendicular calculation for \(side) side (offsetToRight=\(offsetToRight))")
-                    print("  Latitude: \(point.latitude)°, lonScaleFactor: \(lonScaleFactor)")
-                    print("  Forward vector: dlat=\(forward.lat), dlon=\(forward.lon)")
-
-                    // Diagnose forward direction
-                    let fwdDir = describeDirection(dlat: forward.lat, dlon: forward.lon)
-                    print("  Forward points: \(fwdDir)")
-
-                    print("  Forward (metric): dlat=\(forwardMetric.lat), dlon=\(forwardMetric.lon)")
-                    print("  Perp (metric): dlat=\(perpMetric.lat), dlon=\(perpMetric.lon)")
-                    print("  Perp (geographic): dlat=\(perpVector.lat), dlon=\(perpVector.lon)")
-
-                    // Diagnose perpendicular direction
-                    let perpDir = describeDirection(dlat: perpVector.lat, dlon: perpVector.lon)
-                    print("  Perpendicular points: \(perpDir)")
-
-                    // Determine if this is a left or right turn
-                    let turn = determineTurn(forward: (forward.lat, forward.lon), perp: (perpVector.lat, perpVector.lon))
-                    print("  Turn direction: \(turn) (expected: \(offsetToRight ? "RIGHT" : "LEFT"))")
-                }
             } else if i == centerline.count - 1 {
                 // Last point - use direction from previous point
                 let prev = centerline[i - 1]
@@ -250,28 +180,12 @@ extension MKMapView {
                 longitude: point.longitude + perpVector.lon * widthDegrees
             )
             offsetSide.append(offsetPoint)
-
-            if shouldDebug && i < 2 {
-                let dlat = offsetPoint.latitude - point.latitude
-                let dlon = offsetPoint.longitude - point.longitude
-                print("  Point \(i): centerline=(\(point.latitude), \(point.longitude)), offset=(\(offsetPoint.latitude), \(offsetPoint.longitude))")
-                print("    Offset applied: dlat=\(dlat), dlon=\(dlon)")
-            }
         }
 
         // Build polygon: centerline forward + offset side reversed to close the shape
         // This creates a polygon between the curb (centerline) and the street edge (offset)
         var polygonCoords = centerline
         polygonCoords.append(contentsOf: offsetSide.reversed())
-
-        // Debug: Print all polygon vertices
-        if shouldDebug {
-            print("  🔷 COMPLETE POLYGON - Total vertices: " + String(polygonCoords.count))
-            for (idx, coord) in polygonCoords.enumerated() {
-                let label = idx < centerline.count ? "CENTER" : "OFFSET"
-                print("    [\(idx)] \(label): lat=\(coord.latitude), lon=\(coord.longitude)")
-            }
-        }
 
         return polygonCoords.count >= 3 ? polygonCoords : nil
     }
@@ -302,21 +216,80 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     private func configureStyle() {
         let devSettings = DeveloperSettings.shared
 
-        // TESTING: Force full opacity and bright color to rule out visibility issues
-        let baseColor = UIColor.systemOrange
-        let opacity = 1.0  // 100% opacity for testing
+        // Color coding based on regulation type:
+        // 1. Street cleaning → Red
+        // 2. Metered → Dark grey
+        // 3. RPP (residential permit) → Orange
+        // 4. Time Limited → Light grey
+        // 5. No parking → Red
+        // 6. No restrictions (free parking) → Green
+        let baseColor: UIColor
+        let opacity: Double
 
-        fillColor = baseColor.withAlphaComponent(opacity)
+        if let bf = blockface {
+            if bf.regulations.isEmpty {
+                // No restrictions = free parking → Green
+                baseColor = UIColor.systemGreen
+                opacity = devSettings.blockfaceOpacity
+            } else {
+                // Check regulation types to determine color (priority order)
+                var hasStreetCleaning = false
+                var hasMetered = false
+                var hasRPP = false
+                var hasTimeLimit = false
+                var hasNoParking = false
+
+                for reg in bf.regulations {
+                    if reg.type == "streetCleaning" {
+                        hasStreetCleaning = true
+                    }
+                    if reg.type == "metered" {
+                        hasMetered = true
+                    }
+                    if let permitZone = reg.permitZone, !permitZone.isEmpty {
+                        hasRPP = true
+                    }
+                    if reg.type == "timeLimit" {
+                        hasTimeLimit = true
+                    }
+                    if reg.type == "noParking" {
+                        hasNoParking = true
+                    }
+                }
+
+                // Priority: No Parking > Street Cleaning > Metered > RPP > Time Limited
+                if hasNoParking {
+                    baseColor = UIColor.systemRed
+                    opacity = devSettings.blockfaceOpacity
+                } else if hasStreetCleaning {
+                    baseColor = UIColor.systemRed
+                    opacity = devSettings.blockfaceOpacity
+                } else if hasMetered {
+                    baseColor = ZoneColorProvider.meteredZoneColor
+                    opacity = devSettings.blockfaceOpacity
+                } else if hasRPP {
+                    baseColor = UIColor.systemOrange
+                    opacity = devSettings.blockfaceOpacity
+                } else if hasTimeLimit {
+                    baseColor = UIColor.systemGray
+                    opacity = devSettings.blockfaceOpacity
+                } else {
+                    // Fallback for unknown regulation types
+                    baseColor = UIColor.systemBlue
+                    opacity = devSettings.blockfaceOpacity
+                }
+            }
+
+            fillColor = baseColor.withAlphaComponent(opacity)
+        } else {
+            // No blockface info - shouldn't happen
+            fillColor = UIColor.clear
+        }
 
         // Disable stroke for thin polygons - the stroke creates visible diagonal lines
         // between centerline and offset that look wrong on the map
         strokeColor = nil
         lineWidth = 0
-
-        // Debug: Log rendering configuration for first few polygons
-        if let bf = blockface {
-            print("  🎨 Renderer config for \(bf.street) \(bf.side): fillOpacity=\(opacity) (TESTING: forced), stroke=DISABLED, color=ORANGE (forced)")
-        }
     }
 }
 
@@ -345,43 +318,6 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         lineWidth = 2
         lineDashPattern = [2, 2]  // Dashed to distinguish from polygon borders
     }
-}
-
-// MARK: - Diagnostic Helpers
-
-/// Describe the compass direction of a vector
-private func describeDirection(dlat: Double, dlon: Double) -> String {
-    let threshold = 0.3  // Ratio threshold for "mostly" one direction
-    let latAbs = abs(dlat)
-    let lonAbs = abs(dlon)
-    let total = latAbs + lonAbs
-
-    if total == 0 { return "ZERO" }
-
-    let latRatio = latAbs / total
-    let lonRatio = lonAbs / total
-
-    var parts: [String] = []
-
-    if latRatio > threshold {
-        parts.append(dlat > 0 ? "NORTH" : "SOUTH")
-    }
-    if lonRatio > threshold {
-        parts.append(dlon > 0 ? "EAST" : "WEST")
-    }
-
-    return parts.isEmpty ? "UNCLEAR" : parts.joined(separator: "-")
-}
-
-/// Determine if perpendicular is a LEFT or RIGHT turn from forward
-/// Uses cross product: forward × perp > 0 → left turn, < 0 → right turn
-private func determineTurn(forward: (lat: Double, lon: Double), perp: (lat: Double, lon: Double)) -> String {
-    // In lat/lon space: lat=y, lon=x
-    // Cross product z-component: forward.x * perp.y - forward.y * perp.x
-    let cross = forward.lon * perp.lat - forward.lat * perp.lon
-
-    if abs(cross) < 1e-10 { return "PARALLEL/OPPOSITE" }
-    return cross > 0 ? "LEFT" : "RIGHT"
 }
 
 /// Renderer for perpendicular direction markers (debug visualization)
