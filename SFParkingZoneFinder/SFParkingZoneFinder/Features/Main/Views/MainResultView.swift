@@ -134,34 +134,6 @@ struct MainResultView: View {
                         )
                     }
 
-                    // Floating location button (bottom-right corner)
-                    // Only show when not at current location
-                    if searchedCoordinate != nil || tappedCoordinate != nil {
-                        VStack {
-                            Spacer()
-                            HStack {
-                                Spacer()
-                                Button {
-                                    searchedCoordinate = nil
-                                    tappedCoordinate = nil
-                                    selectedZone = nil
-                                    viewModel.returnToGPSLocation()
-                                    recenterTrigger.toggle()
-                                } label: {
-                                    Image(systemName: "location.fill")
-                                        .font(.system(size: 20))
-                                        .foregroundColor(.white)
-                                        .frame(width: 50, height: 50)
-                                        .background(Color.accentColor)
-                                        .clipShape(Circle())
-                                        .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-                                }
-                                .padding(.trailing, 16)
-                                .padding(.bottom, 100) // Above bottom navigation
-                            }
-                        }
-                    }
-
                     // Loading overlays
                     if devSettings.developerModeUnlocked {
                         // Detailed developer loading overlay
@@ -199,31 +171,29 @@ struct MainResultView: View {
             // Layer 2: Card overlays
             if !viewModel.isLoading && viewModel.error == nil {
                 VStack {
-                    // Address search card (only in expanded mode)
-                    if isMapExpanded {
-                        AddressSearchCard(
-                            currentAddress: viewModel.currentAddress,
-                            isAtCurrentLocation: searchedCoordinate == nil && tappedCoordinate == nil,
-                            onAddressSelected: { coordinate in
-                                searchedCoordinate = coordinate
-                                // Trigger zone lookup for the new coordinate
-                                viewModel.lookupZone(at: coordinate)
-                            },
-                            onResetToCurrentLocation: {
-                                searchedCoordinate = nil
-                                tappedCoordinate = nil
-                                selectedZone = nil  // Close tapped spot card
-                                viewModel.returnToGPSLocation()
-                                recenterTrigger.toggle()  // Force map recenter
-                            },
-                            onOutsideCoverage: {
-                                showOutsideCoverageAlert = true
-                            }
-                        )
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                    }
+                    // Address search card (always visible for location button)
+                    AddressSearchCard(
+                        currentAddress: viewModel.currentAddress,
+                        isAtCurrentLocation: searchedCoordinate == nil && tappedCoordinate == nil,
+                        onAddressSelected: { coordinate in
+                            searchedCoordinate = coordinate
+                            // Trigger zone lookup for the new coordinate
+                            viewModel.lookupZone(at: coordinate)
+                        },
+                        onResetToCurrentLocation: {
+                            searchedCoordinate = nil
+                            tappedCoordinate = nil
+                            selectedZone = nil  // Close tapped spot card
+                            viewModel.returnToGPSLocation()
+                            recenterTrigger.toggle()  // Force map recenter
+                        },
+                        onOutsideCoverage: {
+                            showOutsideCoverageAlert = true
+                        }
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
 
                     // Animated zone card that morphs between large and mini states
                     // Hidden when TappedSpotInfoCard is showing
