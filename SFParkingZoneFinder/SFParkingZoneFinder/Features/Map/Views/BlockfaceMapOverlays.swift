@@ -217,12 +217,12 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     private func configureStyle() {
         let devSettings = DeveloperSettings.shared
 
-        // Color coding based on regulation type:
-        // 1. Street cleaning → Red
-        // 2. Metered → Dark grey
-        // 3. RPP (residential permit) → Orange
-        // 4. Time Limited → Light grey
-        // 5. No parking → Red
+        // Updated color coding based on regulation type:
+        // 1. No parking → Red
+        // 2. Street cleaning (when ACTIVE or within park-until window) → Red
+        // 3. Metered/Paid → Grey
+        // 4. Time Limited → Orange
+        // 5. RPP (residential permit) → Orange
         // 6. No restrictions (free parking) → Green
         let baseColor: UIColor
         let opacity: Double
@@ -234,15 +234,26 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 opacity = devSettings.blockfaceOpacity
             } else {
                 // Check regulation types to determine color (priority order)
-                var hasStreetCleaning = false
+                var hasActiveStreetCleaning = false
                 var hasMetered = false
                 var hasRPP = false
                 var hasTimeLimit = false
                 var hasNoParking = false
 
+                let now = Date()
+                let calendar = Calendar.current
+                // Check within next 2 hours for "park until" window
+                let parkUntilWindow = calendar.date(byAdding: .hour, value: 2, to: now) ?? now
+
                 for reg in bf.regulations {
+                    if reg.type == "noParking" {
+                        hasNoParking = true
+                    }
                     if reg.type == "streetCleaning" {
-                        hasStreetCleaning = true
+                        // Only consider street cleaning if active NOW or within park-until window
+                        if isStreetCleaningActive(regulation: reg, at: now, untilDate: parkUntilWindow) {
+                            hasActiveStreetCleaning = true
+                        }
                     }
                     if reg.type == "metered" {
                         hasMetered = true
@@ -253,26 +264,22 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                     if reg.type == "timeLimit" {
                         hasTimeLimit = true
                     }
-                    if reg.type == "noParking" {
-                        hasNoParking = true
-                    }
                 }
 
-                // Priority: No Parking > Street Cleaning > Metered > RPP > Time Limited
+                // Priority: No Parking > Active Street Cleaning > Metered > Time Limited/RPP
                 if hasNoParking {
                     baseColor = UIColor.systemRed
                     opacity = devSettings.blockfaceOpacity
-                } else if hasStreetCleaning {
+                } else if hasActiveStreetCleaning {
                     baseColor = UIColor.systemRed
                     opacity = devSettings.blockfaceOpacity
                 } else if hasMetered {
-                    baseColor = ZoneColorProvider.meteredZoneColor
-                    opacity = devSettings.blockfaceOpacity
-                } else if hasRPP {
-                    baseColor = UIColor.systemOrange
-                    opacity = devSettings.blockfaceOpacity
-                } else if hasTimeLimit {
+                    // Metered/Paid parking → Grey
                     baseColor = UIColor.systemGray
+                    opacity = devSettings.blockfaceOpacity
+                } else if hasTimeLimit || hasRPP {
+                    // Timed zones and RPP → Orange
+                    baseColor = UIColor.systemOrange
                     opacity = devSettings.blockfaceOpacity
                 } else {
                     // Fallback for unknown regulation types
@@ -291,6 +298,80 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         // between centerline and offset that look wrong on the map
         strokeColor = nil
         lineWidth = 0
+    }
+
+    /// Check if street cleaning is active now or will be active within the park-until window
+    private func isStreetCleaningActive(regulation: BlockfaceRegulation, at date: Date, untilDate: Date) -> Bool {
+        guard let daysStr = regulation.enforcementDays,
+              let startStr = regulation.enforcementStart,
+              let endStr = regulation.enforcementEnd else {
+            return false
+        }
+
+        // Parse time strings (HH:MM format)
+        func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+            let components = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard components.count == 2 else { return nil }
+            return (hour: components[0], minute: components[1])
+        }
+
+        guard let startTime = parseTime(startStr),
+              let endTime = parseTime(endStr) else {
+            return false
+        }
+
+        // Convert string days to check
+        let cleaningDays = daysStr.compactMap { dayStr -> Int? in
+            // Map day strings to Calendar weekday values (1=Sunday, 2=Monday, etc.)
+            let dayLower = dayStr.lowercased()
+            switch dayLower {
+            case "sunday", "sun": return 1
+            case "monday", "mon": return 2
+            case "tuesday", "tue", "tues": return 3
+            case "wednesday", "wed": return 4
+            case "thursday", "thu", "thurs": return 5
+            case "friday", "fri": return 6
+            case "saturday", "sat": return 7
+            default: return nil
+            }
+        }
+
+        let calendar = Calendar.current
+
+        // Check if active within the window (now to untilDate)
+        var checkDate = date
+        while checkDate <= untilDate {
+            let weekday = calendar.component(.weekday, from: checkDate)
+
+            if cleaningDays.contains(weekday) {
+                // This day has street cleaning, check if the time window overlaps
+                guard let cleaningStart = calendar.date(
+                    bySettingHour: startTime.hour,
+                    minute: startTime.minute,
+                    second: 0,
+                    of: checkDate
+                ),
+                let cleaningEnd = calendar.date(
+                    bySettingHour: endTime.hour,
+                    minute: endTime.minute,
+                    second: 0,
+                    of: checkDate
+                ) else {
+                    checkDate = calendar.date(byAdding: .hour, value: 1, to: checkDate) ?? checkDate
+                    continue
+                }
+
+                // Check if this cleaning window overlaps with our date-untilDate window
+                if cleaningEnd > date && cleaningStart <= untilDate {
+                    return true
+                }
+            }
+
+            // Move to next hour
+            checkDate = calendar.date(byAdding: .hour, value: 1, to: checkDate) ?? checkDate
+        }
+
+        return false
     }
 }
 
