@@ -62,12 +62,13 @@ For a functional Alpha release with real data, complete these in order:
 | S23: Parking Rules & Location Lookups | Not Started | 0/13 |
 | S24: Street Cleaning Data | Not Started | 0/13 |
 | S25: Metered Parking Layer | Not Started | 0/19 |
+| S26: Blockface Migration | Not Started | 0/24 |
 
-**Beta Progress:** 66/191 tasks complete (35%)
+**Beta Progress:** 66/215 tasks complete (31%)
 
 ---
 
-**Overall Progress:** 167/296 tasks complete (56%)
+**Overall Progress:** 167/320 tasks complete (52%)
 
 *Note: Future Enhancement tasks (F-series) not included in progress counts*
 
@@ -934,6 +935,108 @@ Currently, the app uses RPP zone polygons for lookups. To transition to blockfac
 - [ ] "Park Until" calculation includes meter time limits
 - [ ] Lookup logic correctly handles permit + metered combinations
 - [ ] Performance acceptable with full meter dataset (28K+ meters)
+
+---
+
+## Story 26 (S26): Blockface Data Layer Migration
+
+**Goal:** Migrate from zone-based to blockface-based parking lookups using a hybrid approach with phased rollout
+
+### Context
+
+**Current:** Zone polygons (24 zones) with zone-wide rules
+**Proposed:** Blockface segments (18K+) with street-level granularity
+**Approach:** Hybrid system (blockfaces for detail, zones for context/fallback)
+**Risk:** Medium (mitigated through phasing, testing, and fallback logic)
+
+> **See:** `docs/BlockfaceMigrationStrategy.md` for comprehensive risk analysis and mitigation strategies
+
+### Tasks
+
+#### Phase 1: Database & Pipeline Infrastructure
+- [ ] **26.1** Set up PostgreSQL + PostGIS database for central parking data storage
+
+- [ ] **26.2** Implement database schema with spatial indexes (blockfaces, zones, meters, cleaning)
+
+- [ ] **26.3** Update pipeline to write to database instead of JSON files only
+
+- [ ] **26.4** Add data versioning and rollback capability to database
+
+- [ ] **26.5** Implement GeoJSON export from database for app bundling
+
+- [ ] **26.6** Set up pipeline health monitoring and alerting
+
+#### Phase 2: Feature Flag Architecture
+- [ ] **26.7** Implement feature flag system for toggling blockface vs zone lookup
+
+- [ ] **26.8** Add remote config support (can toggle flags without app update)
+
+- [ ] **26.9** Create kill switch for instant rollback to zone lookup
+
+- [ ] **26.10** Implement A/B testing framework for gradual rollout (5% → 25% → 50% → 100%)
+
+#### Phase 3: Hybrid Lookup Logic
+- [ ] **26.11** Implement dual lookup mode (run both blockface and zone lookup, compare results)
+
+- [ ] **26.12** Add confidence scoring (high/medium/low based on GPS accuracy and distance)
+
+- [ ] **26.13** Design fallback logic (use zone when blockface lookup uncertain)
+
+- [ ] **26.14** Create "smart default" algorithm (most restrictive when ambiguous)
+
+- [ ] **26.15** Implement logging for lookup discrepancies (blockface vs zone disagreement)
+
+#### Phase 4: Enhanced UI for Blockface Results
+- [ ] **26.16** Design result card for blockface-based lookups:
+  - Primary blockface (closest/most relevant)
+  - "Other side of street" indicator if different rules
+  - Confidence indicator (high/medium/low)
+  - Map visualization highlighting selected blockface
+
+- [ ] **26.17** Add manual override (user can tap map to select specific blockface)
+
+- [ ] **26.18** Create "Why this blockface?" explanation dialog
+
+- [ ] **26.19** Update onboarding tutorial for blockface-based lookups
+
+#### Phase 5: Testing & Validation
+- [ ] **26.20** Validate blockface data against ground truth (random sample of 100 blockfaces vs. street signs)
+
+- [ ] **26.21** A/B test UX with beta users (blockface vs zone, measure satisfaction)
+
+- [ ] **26.22** Performance testing with full dataset (ensure < 100ms lookup time)
+
+- [ ] **26.23** Test rollback procedure (verify can revert to zone lookup within 1 hour)
+
+#### Phase 6: Production Rollout & Monitoring
+- [ ] **26.24** Gradual rollout with monitoring:
+  - Week 1: 5% of users with blockface lookup enabled
+  - Week 2: 25% rollout if metrics healthy (crash rate < 0.1%, accuracy > 90%)
+  - Week 3: 50% rollout if no critical issues
+  - Week 4: 100% rollout with zone fallback always available
+
+**Story 26 Complete When:**
+- [ ] Database and pipeline infrastructure operational
+- [ ] Feature flag system with remote toggle and kill switch
+- [ ] Hybrid lookup logic implemented with confidence scoring
+- [ ] Enhanced UI tested and approved by beta users
+- [ ] Ground truth validation shows < 2% error rate
+- [ ] A/B test shows > 70% users prefer blockface lookup
+- [ ] Performance benchmarks met (< 100ms lookup, < 2s app startup)
+- [ ] 100% rollout complete with zone fallback operational
+- [ ] Zero critical bugs preventing rollback
+
+**Migration Decision Points:**
+1. **After S23:** Proceed with migration if lookup accuracy > 90% and performance < 100ms
+2. **After S24-25:** Proceed with beta if data quality acceptable (< 2% errors)
+3. **After 5% rollout:** Proceed to 25% if crash rate < 0.1% and no critical bugs
+4. **After 50% rollout:** Proceed to 100% if user satisfaction > 80%
+
+**Rollback Triggers:**
+- Crash rate > 1% related to blockface lookup
+- User-reported accuracy issues > 5%
+- Performance degradation > 200ms (p95)
+- Critical bug discovered with no immediate fix
 
 ---
 
