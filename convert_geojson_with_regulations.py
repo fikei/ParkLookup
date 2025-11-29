@@ -525,23 +525,130 @@ def load_metered_blockfaces(metered_path: str) -> List[Tuple[LineString, Dict]]:
     return metered_faces
 
 
+def determine_side_of_line(centerline: LineString, test_line: LineString) -> str:
+    """
+    Determine which side of a centerline a test line is on.
+
+    Uses the cross product to determine left vs right:
+    - Returns 'LEFT' if test_line is on the left side (when traveling along centerline)
+    - Returns 'RIGHT' if test_line is on the right side
+    - Returns 'UNKNOWN' if ambiguous (parallel, intersecting, or unclear)
+
+    Algorithm:
+    1. Get the midpoint of the test line
+    2. Find the closest point on the centerline
+    3. Get the direction vector of the centerline at that point
+    4. Use cross product to determine if midpoint is left or right of direction
+    """
+    try:
+        # Get midpoint of test line
+        test_midpoint = test_line.interpolate(0.5, normalized=True)
+
+        # Find closest point on centerline to test midpoint
+        closest_point = centerline.interpolate(centerline.project(test_midpoint))
+
+        # Get a small segment of centerline around the closest point for direction
+        distance_along = centerline.project(closest_point)
+        total_length = centerline.length
+
+        # Get two points to establish direction (5% of line length ahead and behind)
+        offset = min(total_length * 0.05, 0.00001)  # ~1-10 meters
+
+        if distance_along < offset:
+            # Near start - use forward direction
+            p1 = centerline.interpolate(0)
+            p2 = centerline.interpolate(offset * 2)
+        elif distance_along > total_length - offset:
+            # Near end - use forward direction
+            p1 = centerline.interpolate(total_length - offset * 2)
+            p2 = centerline.interpolate(total_length)
+        else:
+            # Middle - use local direction
+            p1 = centerline.interpolate(distance_along - offset)
+            p2 = centerline.interpolate(distance_along + offset)
+
+        # Direction vector of centerline
+        dx = p2.x - p1.x  # longitude direction
+        dy = p2.y - p1.y  # latitude direction
+
+        # Vector from closest point to test midpoint
+        tx = test_midpoint.x - closest_point.x
+        ty = test_midpoint.y - closest_point.y
+
+        # Cross product: direction × to_test
+        # In 2D: cross_product_z = dx * ty - dy * tx
+        # Positive = left side, Negative = right side
+        cross = dx * ty - dy * tx
+
+        # Threshold for "clearly on one side" (accounts for nearly parallel lines)
+        threshold = 1e-8
+
+        if cross > threshold:
+            return 'LEFT'
+        elif cross < -threshold:
+            return 'RIGHT'
+        else:
+            return 'UNKNOWN'
+
+    except Exception as e:
+        return 'UNKNOWN'
+
+
+def blockface_side_to_left_right(side: str) -> str:
+    """
+    Convert blockface side designation to LEFT/RIGHT.
+
+    SF convention:
+    - ODD = left side of street (when traveling in typical direction)
+    - EVEN = right side of street
+    - Directional sides vary by street orientation
+    """
+    side_upper = side.upper()
+
+    # Simple convention: ODD = LEFT, EVEN = RIGHT
+    # This matches SF addressing where odd numbers are typically on one side
+    if side_upper == 'ODD':
+        return 'LEFT'
+    elif side_upper == 'EVEN':
+        return 'RIGHT'
+    else:
+        # For directional sides (NORTH/SOUTH/EAST/WEST), we can't reliably
+        # determine left/right without knowing the street's bearing
+        # So we'll match to both sides (return UNKNOWN)
+        return 'UNKNOWN'
+
+
 def find_matching_regulations(blockface_geom: LineString,
+                             blockface_side: str,
                              regulations: List[Tuple[MultiLineString, Dict]],
                              buffer_distance: float = BUFFER_DISTANCE) -> List[Dict]:
     """
     Find all regulations that spatially intersect with the blockface.
-    Uses a buffer around the blockface to catch nearby regulations.
+    Uses side-aware matching to ensure regulations are assigned to the correct
+    side of the street (ODD vs EVEN).
     """
     # Create buffer around blockface centerline
     buffered_blockface = blockface_geom.buffer(buffer_distance)
+
+    # Determine which side (LEFT/RIGHT) this blockface is on
+    blockface_lr_side = blockface_side_to_left_right(blockface_side)
 
     matching_regs = []
 
     for reg_geom, reg_props in regulations:
         # Check if regulation geometry intersects with buffered blockface
         if buffered_blockface.intersects(reg_geom):
-            # Extract regulation data
-            extracted = extract_regulation(reg_props)
+            # For side-aware matching, check if regulation is on the same side
+            if blockface_lr_side != 'UNKNOWN':
+                # Blockface has a clear EVEN/ODD designation
+                reg_side = determine_side_of_line(blockface_geom, reg_geom)
+
+                # Skip if regulation is clearly on the wrong side
+                if reg_side != 'UNKNOWN' and reg_side != blockface_lr_side:
+                    continue  # Wrong side - skip this regulation
+
+            # Extract regulation data (uses dispatcher to handle different sources)
+            extracted = extract_regulation_from_props(reg_props)
             matching_regs.extend(extracted)
 
     return matching_regs
@@ -697,6 +804,18 @@ def convert_with_regulations(blockfaces_path: str,
 
         for bf in blockface_objects:
             if buffered_reg.intersects(bf['geometry']):
+                # Side-aware matching: check if regulation is on the same side as blockface
+                bf_side = bf['side']
+                bf_lr_side = blockface_side_to_left_right(bf_side)
+
+                # If blockface has a clear side designation (EVEN/ODD), check regulation side
+                if bf_lr_side != 'UNKNOWN':
+                    reg_side = determine_side_of_line(bf['geometry'], reg_geom)
+
+                    # Skip if regulation is clearly on the wrong side
+                    if reg_side != 'UNKNOWN' and reg_side != bf_lr_side:
+                        continue  # Wrong side - skip this blockface
+
                 # Calculate distance from regulation to blockface centerline
                 distance = reg_geom.distance(bf['geometry'])
 
@@ -704,7 +823,7 @@ def convert_with_regulations(blockfaces_path: str,
                     min_distance = distance
                     closest_blockface = bf
 
-        # Assign regulation to the closest blockface only
+        # Assign regulation to the closest blockface only (on the correct side)
         if closest_blockface:
             extracted_regs = extract_regulation_from_props(reg_props)
             closest_blockface['regulations'].extend(extracted_regs)
