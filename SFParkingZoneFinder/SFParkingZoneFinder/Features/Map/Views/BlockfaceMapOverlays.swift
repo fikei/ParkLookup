@@ -33,14 +33,14 @@ extension MKMapView {
                 // 1 degree latitude ≈ 111km, so 6m ≈ 0.000054 degrees
                 let laneWidthDegrees = 0.000054
 
-                guard let polygonCoords = createParkingLanePolygon(
+                guard var polygonCoords = createParkingLanePolygon(
                     centerline: centerline,
                     widthDegrees: laneWidthDegrees,
                     side: blockface.side
                 ) else { continue }
 
                 let polygon = BlockfacePolygon(
-                    coordinates: polygonCoords,
+                    coordinates: &polygonCoords,
                     count: polygonCoords.count
                 )
                 polygon.blockface = blockface
@@ -49,9 +49,10 @@ extension MKMapView {
 
             // Add centerline polylines if enabled (for debugging)
             if devSettings.showBlockfaceCenterlines {
+                var mutableCenterline = centerline
                 let polyline = BlockfacePolyline(
-                    coordinates: centerline,
-                    count: centerline.count
+                    coordinates: &mutableCenterline,
+                    count: mutableCenterline.count
                 )
                 polyline.blockface = blockface
                 addOverlay(polyline)
