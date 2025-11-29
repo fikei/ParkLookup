@@ -7,10 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3CBD00022EDBF000001BDE61 /* Blockface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00012EDBF000001BDE61 /* Blockface.swift */; };
-		3CBD00042EDBF000001BDE61 /* BlockfaceMapOverlays.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */; };
-		3CBD00062EDBF000001BDE61 /* BlockfaceLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */; };
-		3CBD00082EDBF000001BDE61 /* sample_blockfaces.json in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */; };
 		3C3898EC2ED3F696006C780C /* PolygonSimplifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */; };
 		3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */; };
 		3C3898F02ED405C4006C780C /* PolygonClipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3898EF2ED405C4006C780C /* PolygonClipper.swift */; };
@@ -60,7 +56,6 @@
 		3C41460F2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C41460B2ED14AC3001BDE61 /* SFParkingZoneFinderApp.swift */; };
 		3C4146192ED1559C001BDE61 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */; };
 		3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */; };
-		3C4146AB2ED1559C001BDE61 /* NotificationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146AA2ED1559C001BDE61 /* NotificationPermissionView.swift */; };
 		3C41461B2ED1559C001BDE61 /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */; };
 		3C41461C2ED1559C001BDE61 /* PermitSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146152ED1559C001BDE61 /* PermitSetupView.swift */; };
 		3C41461D2ED1559C001BDE61 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146162ED1559C001BDE61 /* WelcomeView.swift */; };
@@ -68,20 +63,11 @@
 		3C4146272ED16803001BDE61 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146212ED16803001BDE61 /* SettingsViewModel.swift */; };
 		3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146232ED16803001BDE61 /* AddPermitView.swift */; };
 		3C4146292ED16803001BDE61 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4146242ED16803001BDE61 /* SettingsView.swift */; };
-		3C70DDC72ED7927D00D53137 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C70DDC52ED7927D00D53137 /* NotificationService.swift */; };
-		3C70DDC82ED7927D00D53137 /* ParkingSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C70DDC62ED7927D00D53137 /* ParkingSessionManager.swift */; };
-		3C70DDCA2ED7940900D53137 /* ActiveParkingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C70DDC92ED7940900D53137 /* ActiveParkingView.swift */; };
-		3C70DDCC2ED7943200D53137 /* ParkingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C70DDCB2ED7943200D53137 /* ParkingSession.swift */; };
-		3C70DDCE2ED7961100D53137 /* NotificationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C70DDCD2ED7961100D53137 /* NotificationPermissionView.swift */; };
 		3C9E4FF42ED52D6400EE643B /* DeveloperMapOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FEC2ED52D6300EE643B /* DeveloperMapOverlay.swift */; };
 		3C9E4FF52ED52D6400EE643B /* MainResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E4FED2ED52D6300EE643B /* MainResultView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3CBD00012EDBF000001BDE61 /* Blockface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Blockface.swift; sourceTree = "<group>"; };
-		3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockfaceMapOverlays.swift; sourceTree = "<group>"; };
-		3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockfaceLoader.swift; sourceTree = "<group>"; };
-		3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sample_blockfaces.json; sourceTree = "<group>"; };
 		3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperMapOverlay.swift; sourceTree = "<group>"; };
 		3C3898EA2ED3F696006C780C /* PolygonSimplifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolygonSimplifier.swift; sourceTree = "<group>"; };
 		3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperSettings.swift; sourceTree = "<group>"; };
@@ -135,7 +121,6 @@
 		3C4146102ED15289001BDE61 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SFParkingZoneFinder/Info.plist; sourceTree = "<group>"; };
 		3C4146112ED1559C001BDE61 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationPermissionView.swift; sourceTree = "<group>"; };
-		3C4146AA2ED1559C001BDE61 /* NotificationPermissionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationPermissionView.swift; sourceTree = "<group>"; };
 		3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
 		3C4146152ED1559C001BDE61 /* PermitSetupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermitSetupView.swift; sourceTree = "<group>"; };
 		3C4146162ED1559C001BDE61 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
@@ -143,11 +128,6 @@
 		3C4146212ED16803001BDE61 /* SettingsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		3C4146232ED16803001BDE61 /* AddPermitView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPermitView.swift; sourceTree = "<group>"; };
 		3C4146242ED16803001BDE61 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		3C70DDC52ED7927D00D53137 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		3C70DDC62ED7927D00D53137 /* ParkingSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkingSessionManager.swift; sourceTree = "<group>"; };
-		3C70DDC92ED7940900D53137 /* ActiveParkingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveParkingView.swift; sourceTree = "<group>"; };
-		3C70DDCB2ED7943200D53137 /* ParkingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkingSession.swift; sourceTree = "<group>"; };
-		3C70DDCD2ED7961100D53137 /* NotificationPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionView.swift; sourceTree = "<group>"; };
 		3C9E4FEA2ED52D6300EE643B /* AdditionalInfoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdditionalInfoView.swift; sourceTree = "<group>"; };
 		3C9E4FEB2ED52D6300EE643B /* AddressSearchCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressSearchCard.swift; sourceTree = "<group>"; };
 		3C9E4FEC2ED52D6300EE643B /* DeveloperMapOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeveloperMapOverlay.swift; sourceTree = "<group>"; };
@@ -245,7 +225,6 @@
 		3C4145BB2ED14A6F001BDE61 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */,
 				3C4145B82ED14A6F001BDE61 /* Assets.xcassets */,
 				3C4145B92ED14A6F001BDE61 /* Config.plist.template */,
 				3C4145BA2ED14A6F001BDE61 /* sf_parking_zones.json */,
@@ -265,8 +244,6 @@
 		3C4145C62ED14A6F001BDE61 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				3CBD00012EDBF000001BDE61 /* Blockface.swift */,
-				3C70DDCB2ED7943200D53137 /* ParkingSession.swift */,
 				3C4145BE2ED14A6F001BDE61 /* Address.swift */,
 				3C4145BF2ED14A6F001BDE61 /* CityIdentifier.swift */,
 				3C4145C02ED14A6F001BDE61 /* Coordinate.swift */,
@@ -297,9 +274,6 @@
 		3C4145D62ED14A6F001BDE61 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */,
-				3C70DDC52ED7927D00D53137 /* NotificationService.swift */,
-				3C70DDC62ED7927D00D53137 /* ParkingSessionManager.swift */,
 				3C3898ED2ED3F69F006C780C /* DeveloperSettings.swift */,
 				3C4145D02ED14A6F001BDE61 /* LocationService.swift */,
 				3C4145D12ED14A6F001BDE61 /* PermitService.swift */,
@@ -335,7 +309,6 @@
 		3C4145DF2ED14A6F001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				3C70DDC92ED7940900D53137 /* ActiveParkingView.swift */,
 				3C9E4FF12ED52D6300EE643B /* Views */,
 				3C3898E82ED3F68D006C780C /* DeveloperMapOverlay.swift */,
 				3C3D51042ED2EBE5002208EF /* AddressSearchCard.swift */,
@@ -409,9 +382,7 @@
 		3C4146172ED1559C001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				3C70DDCD2ED7961100D53137 /* NotificationPermissionView.swift */,
 				3C4146132ED1559C001BDE61 /* LocationPermissionView.swift */,
-				3C4146AA2ED1559C001BDE61 /* NotificationPermissionView.swift */,
 				3C4146142ED1559C001BDE61 /* OnboardingContainerView.swift */,
 				3C4146152ED1559C001BDE61 /* PermitSetupView.swift */,
 				3C4146162ED1559C001BDE61 /* WelcomeView.swift */,
@@ -431,7 +402,6 @@
 		3C41461F2ED15702001BDE61 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */,
 				3C3D51022ED26D3C002208EF /* MapCardView.swift */,
 				3C3D50FC2ED26CCA002208EF /* ZoneMapView.swift */,
 				3C41461E2ED15702001BDE61 /* ExpandedMapView.swift */,
@@ -538,7 +508,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3CBD00082EDBF000001BDE61 /* sample_blockfaces.json in Resources */,
 				3C4145E82ED14A6F001BDE61 /* Assets.xcassets in Resources */,
 				3C4145EA2ED14A6F001BDE61 /* sf_parking_zones.json in Resources */,
 				3C4145E92ED14A6F001BDE61 /* Config.plist.template in Resources */,
@@ -552,9 +521,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3CBD00022EDBF000001BDE61 /* Blockface.swift in Sources */,
-				3CBD00042EDBF000001BDE61 /* BlockfaceMapOverlays.swift in Sources */,
-				3CBD00062EDBF000001BDE61 /* BlockfaceLoader.swift in Sources */,
 				3C4145FA2ED14A70001BDE61 /* ZoneLookupEngineProtocol.swift in Sources */,
 				3C3D51012ED26CFC002208EF /* PrivacyPolicyView.swift in Sources */,
 				3C4145EE2ED14A6F001BDE61 /* Coordinate.swift in Sources */,
@@ -575,10 +541,7 @@
 				3C3898EE2ED3F69F006C780C /* DeveloperSettings.swift in Sources */,
 				3C4146282ED16803001BDE61 /* AddPermitView.swift in Sources */,
 				3C9E4FF42ED52D6400EE643B /* DeveloperMapOverlay.swift in Sources */,
-				3C70DDCE2ED7961100D53137 /* NotificationPermissionView.swift in Sources */,
 				3C4145EF2ED14A6F001BDE61 /* ParkingPermit.swift in Sources */,
-				3C70DDC72ED7927D00D53137 /* NotificationService.swift in Sources */,
-				3C70DDC82ED7927D00D53137 /* ParkingSessionManager.swift in Sources */,
 				3C4145FC2ED14A70001BDE61 /* LocationService.swift in Sources */,
 				3C4145F82ED14A70001BDE61 /* RuleInterpreterProtocol.swift in Sources */,
 				3C4146052ED14A70001BDE61 /* RulesSummaryView.swift in Sources */,
@@ -586,7 +549,6 @@
 				3C4146012ED14A70001BDE61 /* ZoneService.swift in Sources */,
 				3C4145F32ED14A70001BDE61 /* ZoneLookupResult.swift in Sources */,
 				3C4146202ED15702001BDE61 /* ExpandedMapView.swift in Sources */,
-				3C70DDCC2ED7943200D53137 /* ParkingSession.swift in Sources */,
 				3C4145F62ED14A70001BDE61 /* PermitServiceProtocol.swift in Sources */,
 				3C4146002ED14A70001BDE61 /* ZoneLookupEngine.swift in Sources */,
 				3C4146032ED14A70001BDE61 /* AdditionalInfoView.swift in Sources */,
@@ -610,11 +572,9 @@
 				3C4145FF2ED14A70001BDE61 /* RuleInterpreter.swift in Sources */,
 				3C4145F22ED14A70001BDE61 /* RuleInterpretationResult.swift in Sources */,
 				3C4145F72ED14A70001BDE61 /* ReverseGeocodingServiceProtocol.swift in Sources */,
-				3C70DDCA2ED7940900D53137 /* ActiveParkingView.swift in Sources */,
 				3C4145EC2ED14A6F001BDE61 /* Address.swift in Sources */,
 				3C41460D2ED14AC3001BDE61 /* AppDelegate.swift in Sources */,
 				3C41461A2ED1559C001BDE61 /* LocationPermissionView.swift in Sources */,
-				3C4146AB2ED1559C001BDE61 /* NotificationPermissionView.swift in Sources */,
 				3C4146082ED14A70001BDE61 /* GoogleMapsAdapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -675,7 +635,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -734,7 +694,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

@@ -1,19 +1,1 @@
 SFParkingZoneFinder/SFParkingZoneFinder.xcodeproj/project.pbxproj
-.DS_Store
-__pycache__/
-*.pyc
-sample_blockfaces*.json
-spot_check_samples.json
-
-# Temporary conversion logs
-conversion*.log
-full_sf_*.log
-*.flag
-
-# Generated data files (too large for git)
-data/processed/
-data/archive/
-data/raw/
-
-# Root-level data files (use Data Sets/ folder instead)
-/*.geojson
