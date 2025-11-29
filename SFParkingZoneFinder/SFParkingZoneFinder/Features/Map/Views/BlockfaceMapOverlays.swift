@@ -245,7 +245,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 // Check within next 2 hours for "park until" window
                 let parkUntilWindow = calendar.date(byAdding: .hour, value: 2, to: now) ?? now
 
-                for reg in bf.regulations {
+                for (index, reg) in bf.regulations.enumerated() {
                     let regType = reg.type.lowercased()
 
                     if regType == "noparking" || regType == "no parking" {
@@ -268,7 +268,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                     }
 
                     // Debug: Log first regulation type for this blockface
-                    if bf.regulations.first === reg {
+                    if index == 0 {
                         print("📍 DEBUG: First regulation type for \(bf.street): '\(reg.type)'")
                     }
                 }
