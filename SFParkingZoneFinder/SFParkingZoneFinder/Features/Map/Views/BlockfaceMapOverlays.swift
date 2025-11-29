@@ -336,11 +336,16 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
             }
         }
 
+        guard !cleaningDays.isEmpty else { return false }
+
         let calendar = Calendar.current
 
-        // Check if active within the window (now to untilDate)
-        var checkDate = date
-        while checkDate <= untilDate {
+        // Check only next 3 days (enough for 2-hour park-until window)
+        for dayOffset in 0..<3 {
+            guard let checkDate = calendar.date(byAdding: .day, value: dayOffset, to: date) else {
+                continue
+            }
+
             let weekday = calendar.component(.weekday, from: checkDate)
 
             if cleaningDays.contains(weekday) {
@@ -357,7 +362,6 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                     second: 0,
                     of: checkDate
                 ) else {
-                    checkDate = calendar.date(byAdding: .hour, value: 1, to: checkDate) ?? checkDate
                     continue
                 }
 
@@ -366,9 +370,6 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                     return true
                 }
             }
-
-            // Move to next hour
-            checkDate = calendar.date(byAdding: .hour, value: 1, to: checkDate) ?? checkDate
         }
 
         return false
