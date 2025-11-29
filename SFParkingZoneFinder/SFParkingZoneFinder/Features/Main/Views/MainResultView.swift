@@ -104,6 +104,9 @@ struct MainResultView: View {
             permitAreas.contains(where: { $0.uppercased() == permit.area.uppercased() })
         }
 
+        // Extract detailed regulations from zone rules
+        let detailedRegulations = extractRegulations(from: zone.rules, permitAreas: permitAreas)
+
         return LocationCardData(
             locationName: zone.displayName,
             locationCode: zone.permitArea,
@@ -112,7 +115,7 @@ struct MainResultView: View {
             applicablePermits: applicablePermits,
             allValidPermitAreas: permitAreas,
             timeLimitMinutes: zone.nonPermitTimeLimit,
-            detailedRegulations: [],  // TODO: Extract from zone.rules if needed
+            detailedRegulations: detailedRegulations,
             ruleSummaryLines: zone.primaryRuleDescription.map { [$0] } ?? [],
             enforcementStartTime: zone.rules.first?.enforcementStartTime,
             enforcementEndTime: zone.rules.first?.enforcementEndTime,
@@ -120,6 +123,45 @@ struct MainResultView: View {
             meteredSubtitle: zone.zoneType == .metered ? zone.enforcementHours : nil,
             isCurrentLocation: false
         )
+    }
+
+    /// Convert ParkingRule array to RegulationInfo array for unified card display
+    private func extractRegulations(from rules: [ParkingRule], permitAreas: [String]) -> [RegulationInfo] {
+        rules.map { rule in
+            // Map RuleType to RegulationType
+            let type: ParkingLookupResult.RegulationType
+            switch rule.ruleType {
+            case .permitRequired:
+                type = .residentialPermit
+            case .timeLimit:
+                type = .timeLimited
+            case .metered:
+                type = .metered
+            case .streetCleaning:
+                type = .streetCleaning
+            case .noParking, .towAway:
+                type = .noParking
+            case .loadingZone:
+                type = .timeLimited  // Loading zones are time-limited
+            }
+
+            // Format time strings
+            let enforcementStart = rule.enforcementStartTime.map { String(format: "%02d:%02d", $0.hour, $0.minute) }
+            let enforcementEnd = rule.enforcementEndTime.map { String(format: "%02d:%02d", $0.hour, $0.minute) }
+
+            // Use first permit area as the permit zone (for RPP rules)
+            let permitZone: String? = (type == .residentialPermit) ? permitAreas.first : nil
+
+            return RegulationInfo(
+                type: type,
+                description: rule.description,
+                enforcementDays: rule.enforcementDays,
+                enforcementStart: enforcementStart,
+                enforcementEnd: enforcementEnd,
+                permitZone: permitZone,
+                timeLimit: rule.timeLimit
+            )
+        }
     }
 
     var body: some View {
