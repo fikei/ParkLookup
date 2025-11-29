@@ -1661,6 +1661,105 @@ struct ZoneMapView: UIViewRepresentable {
                     return
                 }
             }
+
+            // If blockface mode is enabled and no direct hit, find nearest blockface
+            if DeveloperSettings.shared.showBlockfaceOverlays {
+                var nearestBlockface: (blockface: Blockface, distance: Double)?
+                let tappedLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+
+                for overlay in mapView.overlays {
+                    if let blockfacePolygon = overlay as? BlockfacePolygon,
+                       let blockface = blockfacePolygon.blockface {
+
+                        // Calculate distance to blockface centerline
+                        let coords = blockface.geometry.locationCoordinates
+                        guard !coords.isEmpty else { continue }
+
+                        // Find minimum distance to any point on the blockface
+                        var minDistance = Double.infinity
+                        for coord in coords {
+                            let blockfacePoint = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+                            let distance = tappedLocation.distance(from: blockfacePoint)
+                            if distance < minDistance {
+                                minDistance = distance
+                            }
+                        }
+
+                        // Track nearest blockface (within 100m radius)
+                        if minDistance <= 100 {
+                            if nearestBlockface == nil || minDistance < nearestBlockface!.distance {
+                                nearestBlockface = (blockface, minDistance)
+                            }
+                        }
+                    }
+                }
+
+                // If found a nearby blockface, highlight it
+                if let nearest = nearestBlockface {
+                    // Build label for nearest blockface
+                    var labelLines: [String] = []
+
+                    let streetLine = "\(nearest.blockface.street)"
+                    let segmentLine = "(\(nearest.blockface.fromStreet ?? "?") to \(nearest.blockface.toStreet ?? "?"))"
+                    labelLines.append(streetLine)
+                    labelLines.append(segmentLine)
+
+                    let sideName: String
+                    switch nearest.blockface.side {
+                    case "EVEN":
+                        sideName = "West side"
+                    case "ODD":
+                        sideName = "East side"
+                    case "NORTH":
+                        sideName = "North side"
+                    case "SOUTH":
+                        sideName = "South side"
+                    default:
+                        sideName = "\(nearest.blockface.side) side"
+                    }
+                    labelLines.append(sideName)
+                    labelLines.append("(\(Int(nearest.distance))m away)")
+
+                    if !nearest.blockface.regulations.isEmpty {
+                        labelLines.append("")
+                        for reg in nearest.blockface.regulations {
+                            labelLines.append("• \(reg.description)")
+                        }
+                    } else {
+                        labelLines.append("")
+                        labelLines.append("No parking regulations")
+                    }
+
+                    let label = labelLines.joined(separator: "\n")
+                    logger.info("📍 Tapped near blockface: \(nearest.blockface.street) \(sideName) (\(Int(nearest.distance))m)")
+
+                    // Use the blockface's center point for the annotation (not tap point)
+                    let coords = nearest.blockface.geometry.locationCoordinates
+                    let centerIndex = coords.count / 2
+                    let blockfaceCenter = coords[centerIndex]
+
+                    let annotation = BlockfaceLabelAnnotation(
+                        coordinate: blockfaceCenter,
+                        label: label,
+                        blockface: nearest.blockface
+                    )
+
+                    // Remove existing blockface labels
+                    let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
+                    mapView.removeAnnotations(existingLabels)
+
+                    // Add annotation at blockface center
+                    mapView.addAnnotation(annotation)
+
+                    // Trigger map tap callback (updates spot card)
+                    onMapTapped?(coordinate)
+
+                    return
+                }
+            }
+
+            // No zone or blockface found - still trigger callback to show tapped location
+            onMapTapped?(coordinate)
         }
 
         // MARK: - Region Change Handling
