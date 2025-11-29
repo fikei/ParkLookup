@@ -248,6 +248,13 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(showBlockfacePolygons, forKey: Keys.showBlockfacePolygons) }
     }
 
+    /// Show parking meters on the map
+    /// Displays all parking meter locations from the Parking_Meters dataset
+    /// Note: This setting is synced with the user-facing setting in SettingsViewModel
+    @Published var showParkingMeters: Bool {
+        didSet { UserDefaults.standard.set(showParkingMeters, forKey: "showParkingMeters") }
+    }
+
     /// Blockface polygon stroke width
     @Published var blockfaceStrokeWidth: Double {
         didSet { UserDefaults.standard.set(blockfaceStrokeWidth, forKey: Keys.blockfaceStrokeWidth) }
@@ -509,6 +516,7 @@ final class DeveloperSettings: ObservableObject {
         static let showBlockfaceOverlays = "dev.showBlockfaceOverlays"
         static let showBlockfaceCenterlines = "dev.showBlockfaceCenterlines"
         static let showBlockfacePolygons = "dev.showBlockfacePolygons"
+        // Note: showParkingMeters uses "showParkingMeters" key (user-facing setting, not developer setting)
         static let blockfaceStrokeWidth = "dev.blockfaceStrokeWidth"
         static let blockfacePolygonWidth = "dev.blockfacePolygonWidth"
         static let blockfaceColorHex = "dev.blockfaceColorHex"
@@ -568,8 +576,9 @@ final class DeveloperSettings: ObservableObject {
         static let showVertexCounts = false
         static let showZoneOverlays = true  // Show zone overlays by default
         static let showBlockfaceOverlays = true  // Enable with new GeoJSON data
-        static let showBlockfaceCenterlines = true  // Show colored centerlines by default
-        static let showBlockfacePolygons = false  // Hide polygons - use centerlines instead
+        static let showBlockfaceCenterlines = true  // Show centerlines for alignment
+        static let showBlockfacePolygons = true  // Show polygons with new GeoJSON data
+        static let showParkingMeters = false  // Parking meters OFF by default (user-facing setting)
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)
@@ -634,6 +643,7 @@ final class DeveloperSettings: ObservableObject {
         showBlockfaceOverlays = defaults.object(forKey: Keys.showBlockfaceOverlays) as? Bool ?? Defaults.showBlockfaceOverlays
         showBlockfaceCenterlines = defaults.object(forKey: Keys.showBlockfaceCenterlines) as? Bool ?? Defaults.showBlockfaceCenterlines
         showBlockfacePolygons = defaults.object(forKey: Keys.showBlockfacePolygons) as? Bool ?? Defaults.showBlockfacePolygons
+        showParkingMeters = defaults.object(forKey: "showParkingMeters") as? Bool ?? Defaults.showParkingMeters
         blockfaceStrokeWidth = defaults.object(forKey: Keys.blockfaceStrokeWidth) as? Double ?? Defaults.blockfaceStrokeWidth
         blockfacePolygonWidth = defaults.object(forKey: Keys.blockfacePolygonWidth) as? Double ?? Defaults.blockfacePolygonWidth
         blockfaceColorHex = defaults.object(forKey: Keys.blockfaceColorHex) as? String ?? Defaults.blockfaceColorHex
