@@ -1,0 +1,634 @@
+{
+  "blockfaces": [
+    {
+      "id": "mission_st_22nd St_23rd St_even",
+      "street": "Mission St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.41823046121091,
+            37.7548280954945
+          ],
+          [
+            -122.41839903417795,
+            37.75524532822906
+          ],
+          [
+            -122.41856760714498,
+            37.755662560963614
+          ],
+          [
+            -122.41873618011202,
+            37.75607979369817
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "mission_st_22nd St_23rd St_odd",
+      "street": "Mission St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.4183695387891,
+            37.75477190450549
+          ],
+          [
+            -122.41853811175613,
+            37.755189137240045
+          ],
+          [
+            -122.41870668472316,
+            37.7556063699746
+          ],
+          [
+            -122.4188752576902,
+            37.756023602709156
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "mission_st_23rd St_24th St_even",
+      "street": "Mission St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.41823046121091,
+            37.75347809549451
+          ],
+          [
+            -122.41839903417795,
+            37.75389532822906
+          ],
+          [
+            -122.41856760714498,
+            37.75431256096362
+          ],
+          [
+            -122.41873618011202,
+            37.754729793698175
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "mission_st_23rd St_24th St_odd",
+      "street": "Mission St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.4183695387891,
+            37.753421904505494
+          ],
+          [
+            -122.41853811175613,
+            37.75383913724005
+          ],
+          [
+            -122.41870668472316,
+            37.754256369974605
+          ],
+          [
+            -122.4188752576902,
+            37.75467360270916
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "mission_st_24th St_25th St_even",
+      "street": "Mission St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.41823046121091,
+            37.752128095494506
+          ],
+          [
+            -122.41839903417795,
+            37.75254532822906
+          ],
+          [
+            -122.41856760714498,
+            37.75296256096362
+          ],
+          [
+            -122.41873618011202,
+            37.75337979369817
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "mission_st_24th St_25th St_odd",
+      "street": "Mission St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.4183695387891,
+            37.75207190450549
+          ],
+          [
+            -122.41853811175613,
+            37.75248913724005
+          ],
+          [
+            -122.41870668472316,
+            37.7529063699746
+          ],
+          [
+            -122.4188752576902,
+            37.75332360270916
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "valencia_st_22nd St_23rd St_even",
+      "street": "Valencia St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.42068749842551,
+            37.75383538802195
+          ],
+          [
+            -122.42085607139255,
+            37.7542526207565
+          ],
+          [
+            -122.42102464435958,
+            37.75466985349106
+          ],
+          [
+            -122.42119321732662,
+            37.755087086225615
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "valencia_st_22nd St_23rd St_odd",
+      "street": "Valencia St",
+      "fromStreet": "22nd St",
+      "toStreet": "23rd St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.42082657600369,
+            37.753779197032934
+          ],
+          [
+            -122.42099514897073,
+            37.75419642976749
+          ],
+          [
+            -122.42116372193776,
+            37.754613662502045
+          ],
+          [
+            -122.4213322949048,
+            37.7550308952366
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "valencia_st_23rd St_24th St_even",
+      "street": "Valencia St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.42068749842551,
+            37.75248538802195
+          ],
+          [
+            -122.42085607139255,
+            37.75290262075651
+          ],
+          [
+            -122.42102464435958,
+            37.753319853491064
+          ],
+          [
+            -122.42119321732662,
+            37.75373708622562
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "valencia_st_23rd St_24th St_odd",
+      "street": "Valencia St",
+      "fromStreet": "23rd St",
+      "toStreet": "24th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.42082657600369,
+            37.75242919703294
+          ],
+          [
+            -122.42099514897073,
+            37.752846429767494
+          ],
+          [
+            -122.42116372193776,
+            37.75326366250205
+          ],
+          [
+            -122.4213322949048,
+            37.753680895236606
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "valencia_st_24th St_25th St_even",
+      "street": "Valencia St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "EVEN",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.42068749842551,
+            37.75113538802195
+          ],
+          [
+            -122.42085607139255,
+            37.751552620756506
+          ],
+          [
+            -122.42102464435958,
+            37.75196985349106
+          ],
+          [
+            -122.42119321732662,
+            37.75238708622562
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "valencia_st_24th St_25th St_odd",
+      "street": "Valencia St",
+      "fromStreet": "24th St",
+      "toStreet": "25th St",
+      "side": "ODD",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.42082657600369,
+            37.75107919703294
+          ],
+          [
+            -122.42099514897073,
+            37.75149642976749
+          ],
+          [
+            -122.42116372193776,
+            37.75191366250205
+          ],
+          [
+            -122.4213322949048,
+            37.752330895236604
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "24th_st_Mission St_Valencia St_north",
+      "street": "24th St",
+      "fromStreet": "Mission St",
+      "toStreet": "Valencia St",
+      "side": "NORTH",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.4183280954945,
+            37.75216953878909
+          ],
+          [
+            -122.41914710789936,
+            37.75183863629824
+          ],
+          [
+            -122.41996612030424,
+            37.75150773380739
+          ],
+          [
+            -122.4207851327091,
+            37.751176831316535
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    },
+    {
+      "id": "24th_st_Mission St_Valencia St_south",
+      "street": "24th St",
+      "fromStreet": "Mission St",
+      "toStreet": "Valencia St",
+      "side": "SOUTH",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.4182719045055,
+            37.75203046121091
+          ],
+          [
+            -122.41909091691036,
+            37.751699558720055
+          ],
+          [
+            -122.41990992931524,
+            37.751368656229204
+          ],
+          [
+            -122.4207289417201,
+            37.75103775373835
+          ]
+        ]
+      },
+      "regulations": [
+        {
+          "type": "metered",
+          "meterRate": 4.0,
+          "enforcementDays": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ],
+          "enforcementStart": "09:00",
+          "enforcementEnd": "18:00",
+          "timeLimit": 120
+        }
+      ]
+    }
+  ]
+}

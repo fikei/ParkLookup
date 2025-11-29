@@ -81,15 +81,15 @@ struct DeveloperMapOverlay: View {
 
                     Spacer()
 
-                    // Refresh button
+                    // Apply button - applies pending settings changes
                     Button {
                         refreshLayers()
                     } label: {
-                        Image(systemName: "arrow.clockwise")
+                        Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: 28, height: 28)
-                            .background(Color.blue)
+                            .background(Color.green)
                             .clipShape(Circle())
                     }
                 }
@@ -103,32 +103,69 @@ struct DeveloperMapOverlay: View {
 
             // Stats display (fixed, above scroll)
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 12) {
-                    // Total zones and polygons
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Zones")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text("\(devSettings.totalZonesLoaded)")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .monospacedDigit()
+                // Conditional stats based on mode
+                if devSettings.showBlockfaceOverlays {
+                    // Blockface mode stats - show total
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Total")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(devSettings.totalBlockfacesLoaded)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .monospacedDigit()
+                        }
+
+                        Spacer()
                     }
 
-                    Divider()
-                        .frame(height: 32)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Polygons")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text("\(devSettings.totalPolygonsRendered)")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .monospacedDigit()
+                    // Color-coded categories
+                    HStack(spacing: 8) {
+                        if devSettings.blockfacesWithoutRegulations > 0 {
+                            statsChip(label: "Free", count: devSettings.blockfacesWithoutRegulations, color: .green)
+                        }
+                        if devSettings.blockfacesNoParking > 0 {
+                            statsChip(label: "No Park", count: devSettings.blockfacesNoParking, color: .red)
+                        }
+                        if devSettings.blockfacesRPP > 0 {
+                            statsChip(label: "RPP", count: devSettings.blockfacesRPP, color: .orange)
+                        }
+                        if devSettings.blockfacesTimeLimit > 0 {
+                            statsChip(label: "Time", count: devSettings.blockfacesTimeLimit, color: .gray)
+                        }
+                        Spacer()
                     }
+                    .padding(.top, 4)
+                } else {
+                    // Zone mode stats
+                    HStack(spacing: 12) {
+                        // Total zones and polygons
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Zones")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(devSettings.totalZonesLoaded)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .monospacedDigit()
+                        }
 
-                    Spacer()
+                        Divider()
+                            .frame(height: 32)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Polygons")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(devSettings.totalPolygonsRendered)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .monospacedDigit()
+                        }
+
+                        Spacer()
+                    }
                 }
 
                 // Processing stats (only show if any are non-zero)
@@ -479,12 +516,100 @@ struct DeveloperMapOverlay: View {
 
             Divider()
 
-            // Styling controls
+            // Global transformations (affects entire plotted area)
+            Text("Global Transformations")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            compactToggle("Flip Horizontal", isOn: $devSettings.blockfaceFlipHorizontal, icon: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+
+            editableSliderControl(
+                label: "Rotation",
+                value: $devSettings.blockfaceGlobalRotation,
+                range: -25.0...25.0,
+                step: 0.1,
+                formatter: { String(format: "%.1f°", $0) }
+            )
+
+            editableSliderControl(
+                label: "Scale",
+                value: $devSettings.blockfaceGlobalScale,
+                range: 0.5...1.5,
+                step: 0.01,
+                formatter: { String(format: "%.2fx", $0) }
+            )
+
+            editableSliderControl(
+                label: "Shift (Lat)",
+                value: $devSettings.blockfaceGlobalLatShift,
+                range: -0.002...0.002,
+                step: 0.00001,
+                formatter: { String(format: "%.5f° (~%.0fm)", $0, $0 * 111000) }
+            )
+
+            editableSliderControl(
+                label: "Shift (Lon)",
+                value: $devSettings.blockfaceGlobalLonShift,
+                range: -0.002...0.002,
+                step: 0.00001,
+                formatter: { String(format: "%.5f° (~%.0fm)", $0, abs($0) * 85000) }
+            )
+
+            Divider()
+
+            // Per-block angle correction (affects perpendicular offset)
+            Text("Per-Block Angle Correction")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+
+            editableSliderControl(
+                label: "Perpendicular Rotation",
+                value: $devSettings.blockfacePerpendicularRotation,
+                range: -25.0...25.0,
+                step: 0.1,
+                formatter: { String(format: "%.1f°", $0) }
+            )
+
+            compactToggle("Enable Direct Offset", isOn: $devSettings.blockfaceUseDirectOffset, icon: "slider.horizontal.2.square")
+
+            if devSettings.blockfaceUseDirectOffset {
+                sliderControl(
+                    label: "Latitude Multiplier",
+                    value: $devSettings.blockfaceDirectLatAdjust,
+                    range: -2.0...2.0,
+                    step: 0.05,
+                    formatter: { String(format: "%.2fx", $0) }
+                )
+
+                sliderControl(
+                    label: "Longitude Multiplier",
+                    value: $devSettings.blockfaceDirectLonAdjust,
+                    range: -2.0...2.0,
+                    step: 0.05,
+                    formatter: { String(format: "%.2fx", $0) }
+                )
+            }
+
+            Divider()
+
+            // Polygon Style
             Text("Polygon Style")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
+
+            sliderControl(
+                label: "Polygon Width",
+                value: $devSettings.blockfacePolygonWidth,
+                range: 0.00001...0.0003,
+                step: 0.000005,
+                formatter: { String(format: "%.5f° (~%.1fm)", $0, $0 * 111000) }
+            )
 
             sliderControl(
                 label: "Stroke Width",
@@ -493,23 +618,6 @@ struct DeveloperMapOverlay: View {
                 step: 0.25,
                 formatter: { String(format: "%.2f", $0) }
             )
-
-            sliderControl(
-                label: "Polygon Width",
-                value: $devSettings.blockfacePolygonWidth,
-                range: 0.00001...0.0001,
-                step: 0.000005,
-                formatter: { String(format: "%.5f° (~%.1fm)", $0, $0 * 111000) }
-            )
-
-            Divider()
-
-            // Color and opacity
-            Text("Color & Opacity")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
 
             hexColorField(
                 label: "Color",
@@ -524,6 +632,25 @@ struct DeveloperMapOverlay: View {
                 step: 0.05,
                 formatter: { String(format: "%.0f%%", $0 * 100) }
             )
+
+            Divider()
+
+            // Capture button
+            Button {
+                devSettings.captureBlockfaceCalibration()
+            } label: {
+                HStack {
+                    Image(systemName: "camera.fill")
+                    Text("Capture Values")
+                        .fontWeight(.semibold)
+                }
+                .font(.subheadline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color.green)
+                .cornerRadius(8)
+            }
         }
     }
 
@@ -651,6 +778,50 @@ struct DeveloperMapOverlay: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .monospacedDigit()
+            }
+
+            Slider(value: value, in: range, step: step)
+                .tint(.accentColor)
+        }
+    }
+
+    private func editableSliderControl(
+        label: String,
+        value: Binding<Double>,
+        range: ClosedRange<Double>,
+        step: Double,
+        formatter: @escaping (Double) -> String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(.primary)
+                Spacer()
+
+                // Editable text field
+                TextField("", text: Binding(
+                    get: {
+                        // Format current value for display
+                        String(format: "%.5f", value.wrappedValue).trimmingCharacters(in: CharacterSet(charactersIn: "0")).trimmingCharacters(in: CharacterSet(charactersIn: "."))
+                    },
+                    set: { newValue in
+                        // Parse input and clamp to range
+                        if let parsed = Double(newValue) {
+                            value.wrappedValue = min(max(parsed, range.lowerBound), range.upperBound)
+                        }
+                    }
+                ))
+                .font(.caption.monospaced())
+                .multilineTextAlignment(.trailing)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 70)
+                .keyboardType(.decimalPad)
+
+                Text(formatter(value.wrappedValue).components(separatedBy: " ").dropFirst().joined(separator: " "))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .frame(width: 45, alignment: .leading)
             }
 
             Slider(value: value, in: range, step: step)

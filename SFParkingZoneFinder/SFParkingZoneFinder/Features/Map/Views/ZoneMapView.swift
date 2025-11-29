@@ -198,41 +198,9 @@ struct ZoneMapView: UIViewRepresentable {
             return
         }
 
-        // Check if developer settings changed - reload overlays if so
-        let currentSettingsHash = DeveloperSettings.shared.settingsHash
-        let devSettings = DeveloperSettings.shared
-        let blockfaceOverlaysJustEnabled = !context.coordinator.lastBlockfaceOverlaysEnabled && devSettings.showBlockfaceOverlays
-
-        if context.coordinator.overlaysLoaded && currentSettingsHash != context.coordinator.lastSettingsHash {
-            logger.info("🔄 Developer settings changed - reloading overlays")
-            context.coordinator.lastSettingsHash = currentSettingsHash
-
-            // Check if blockface overlays were just enabled - zoom to sample location
-            if blockfaceOverlaysJustEnabled {
-                logger.info("🚧 PoC: Blockface overlays enabled - zooming to Mission/Valencia 22nd-25th sample area")
-                // Center between Mission & Valencia, 22nd-25th Streets (covers full test area)
-                let blockfaceCenter = CLLocationCoordinate2D(latitude: 37.7541, longitude: -122.4193)
-                let blockfaceSpan = MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.003) // ~880m x 330m, shows multiple blocks
-                let blockfaceRegion = MKCoordinateRegion(center: blockfaceCenter, span: blockfaceSpan)
-                mapView.setRegion(blockfaceRegion, animated: true)
-            }
-
-            // Update tracking state
-            context.coordinator.lastBlockfaceOverlaysEnabled = devSettings.showBlockfaceOverlays
-
-            // Clear existing overlays and annotations (except user location and searched pin)
-            let overlaysToRemove = mapView.overlays
-            let annotationsToRemove = mapView.annotations.filter { annotation in
-                !(annotation is MKUserLocation) && !(annotation is SearchedLocationAnnotation)
-            }
-            mapView.removeOverlays(overlaysToRemove)
-            mapView.removeAnnotations(annotationsToRemove)
-
-            // Reload overlays (keep overlaysLoaded=true to prevent race condition)
-            context.coordinator.overlaysCurrentlyVisible = false
-            loadOverlays(mapView: mapView, context: context)
-            return
-        }
+        // NOTE: Developer settings changes NO LONGER trigger automatic reload
+        // User must click "Apply" button to apply changes (which increments reloadTrigger)
+        // This prevents unwanted refreshes while user is adjusting multiple settings
 
         // Load overlays if they haven't been loaded yet but zones are now available
         if !context.coordinator.overlaysLoaded && !zones.isEmpty {
@@ -1249,6 +1217,32 @@ struct ZoneMapView: UIViewRepresentable {
                 return annotationView
             }
 
+            // Handle blockface label annotation (shows callout with blockface info)
+            if let blockfaceAnnotation = annotation as? BlockfaceLabelAnnotation {
+                let identifier = "BlockfaceLabel"
+                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+
+                if annotationView == nil {
+                    annotationView = MKMarkerAnnotationView(annotation: blockfaceAnnotation, reuseIdentifier: identifier)
+                    annotationView?.canShowCallout = true
+                    annotationView?.markerTintColor = .systemOrange
+                    annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
+                    annotationView?.displayPriority = .required
+
+                    // Create custom callout with detailed content view
+                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                    annotationView?.detailCalloutAccessoryView = calloutView
+                } else {
+                    annotationView?.annotation = blockfaceAnnotation
+
+                    // Update callout content
+                    let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
+                    annotationView?.detailCalloutAccessoryView = calloutView
+                }
+
+                return annotationView
+            }
+
             // Handle zone label annotation
             guard let zoneAnnotation = annotation as? ZoneLabelAnnotation else {
                 return nil
@@ -1310,6 +1304,116 @@ struct ZoneMapView: UIViewRepresentable {
             return containerView
         }
 
+        private func createBlockfaceCalloutView(for blockface: Blockface) -> UIView {
+            let containerView = UIView()
+            containerView.translatesAutoresizingMaskIntoConstraints = false
+
+            // Street name (bold)
+            let streetLabel = UILabel()
+            streetLabel.text = blockface.street
+            streetLabel.font = .systemFont(ofSize: 16, weight: .bold)
+            streetLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            // Segment info (from → to)
+            let segmentLabel = UILabel()
+            if let from = blockface.fromStreet, let to = blockface.toStreet {
+                segmentLabel.text = "\(from) → \(to)"
+            } else {
+                segmentLabel.text = "Unknown segment"
+            }
+            segmentLabel.font = .systemFont(ofSize: 14)
+            segmentLabel.textColor = .secondaryLabel
+            segmentLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            // Side info
+            let sideLabel = UILabel()
+            let sideName: String
+            switch blockface.side {
+            case "EVEN":
+                sideName = "West side"
+            case "ODD":
+                sideName = "East side"
+            case "NORTH":
+                sideName = "North side"
+            case "SOUTH":
+                sideName = "South side"
+            default:
+                sideName = "\(blockface.side) side"
+            }
+            sideLabel.text = sideName
+            sideLabel.font = .systemFont(ofSize: 14)
+            sideLabel.textColor = .secondaryLabel
+            sideLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            // Regulations (if any)
+            let regulationsStack = UIStackView()
+            regulationsStack.axis = .vertical
+            regulationsStack.spacing = 4
+            regulationsStack.translatesAutoresizingMaskIntoConstraints = false
+
+            if !blockface.regulations.isEmpty {
+                // Regulations header
+                let regHeader = UILabel()
+                regHeader.text = "Regulations:"
+                regHeader.font = .systemFont(ofSize: 14, weight: .semibold)
+                regHeader.translatesAutoresizingMaskIntoConstraints = false
+                regulationsStack.addArrangedSubview(regHeader)
+
+                // Add each regulation
+                for reg in blockface.regulations {
+                    let regLabel = UILabel()
+                    regLabel.text = "• \(reg.description)"
+                    regLabel.font = .systemFont(ofSize: 13)
+                    regLabel.numberOfLines = 0  // Allow wrapping
+                    regLabel.translatesAutoresizingMaskIntoConstraints = false
+                    regulationsStack.addArrangedSubview(regLabel)
+                }
+            } else {
+                let noRegLabel = UILabel()
+                noRegLabel.text = "No parking regulations"
+                noRegLabel.font = .systemFont(ofSize: 13)
+                noRegLabel.textColor = .tertiaryLabel
+                noRegLabel.translatesAutoresizingMaskIntoConstraints = false
+                regulationsStack.addArrangedSubview(noRegLabel)
+            }
+
+            // Add all subviews
+            containerView.addSubview(streetLabel)
+            containerView.addSubview(segmentLabel)
+            containerView.addSubview(sideLabel)
+            containerView.addSubview(regulationsStack)
+
+            // Layout constraints
+            NSLayoutConstraint.activate([
+                // Street label
+                streetLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
+                streetLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                streetLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+
+                // Segment label
+                segmentLabel.topAnchor.constraint(equalTo: streetLabel.bottomAnchor, constant: 2),
+                segmentLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                segmentLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+
+                // Side label
+                sideLabel.topAnchor.constraint(equalTo: segmentLabel.bottomAnchor, constant: 2),
+                sideLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                sideLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+
+                // Regulations stack
+                regulationsStack.topAnchor.constraint(equalTo: sideLabel.bottomAnchor, constant: 8),
+                regulationsStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+                regulationsStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+                regulationsStack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
+
+                // Container width
+                containerView.widthAnchor.constraint(greaterThanOrEqualToConstant: 250),
+                containerView.widthAnchor.constraint(lessThanOrEqualToConstant: 300)
+            ])
+
+            return containerView
+        }
+
         // MARK: - Tap Handling
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -1317,6 +1421,75 @@ struct ZoneMapView: UIViewRepresentable {
 
             let point = gesture.location(in: mapView)
             let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
+
+            // Check blockface polygons first (higher priority when blockface mode is active)
+            for overlay in mapView.overlays {
+                if let blockfacePolygon = overlay as? BlockfacePolygon,
+                   let blockface = blockfacePolygon.blockface,
+                   let renderer = mapView.renderer(for: blockfacePolygon) as? MKPolygonRenderer {
+
+                    let mapPoint = MKMapPoint(coordinate)
+                    let polygonPoint = renderer.point(for: mapPoint)
+
+                    if renderer.path?.contains(polygonPoint) == true {
+                        // Found tapped blockface
+                        // Build detailed label with street, side, and regulations
+                        var labelLines: [String] = []
+
+                        // Line 1: Street name and segment
+                        let streetLine = "\(blockface.street)"
+                        let segmentLine = "(\(blockface.fromStreet ?? "?") to \(blockface.toStreet ?? "?"))"
+                        labelLines.append(streetLine)
+                        labelLines.append(segmentLine)
+
+                        // Line 2: Side
+                        let sideName: String
+                        switch blockface.side {
+                        case "EVEN":
+                            sideName = "West side"
+                        case "ODD":
+                            sideName = "East side"
+                        case "NORTH":
+                            sideName = "North side"
+                        case "SOUTH":
+                            sideName = "South side"
+                        default:
+                            sideName = "\(blockface.side) side"
+                        }
+                        labelLines.append(sideName)
+
+                        // Lines 3+: Regulations
+                        if !blockface.regulations.isEmpty {
+                            labelLines.append("") // Blank line separator
+                            for reg in blockface.regulations {
+                                labelLines.append("• \(reg.description)")
+                            }
+                        } else {
+                            labelLines.append("")
+                            labelLines.append("No parking regulations")
+                        }
+
+                        let label = labelLines.joined(separator: "\n")
+                        logger.info("📍 Tapped blockface: \(blockface.street) \(sideName)")
+
+                        // Add temporary annotation to show blockface info
+                        let annotation = BlockfaceLabelAnnotation(
+                            coordinate: coordinate,
+                            label: label,
+                            blockface: blockface
+                        )
+
+                        // Remove any existing blockface label annotations
+                        let existingLabels = mapView.annotations.compactMap { $0 as? BlockfaceLabelAnnotation }
+                        mapView.removeAnnotations(existingLabels)
+
+                        // Add new annotation
+                        mapView.addAnnotation(annotation)
+
+                        return
+                    }
+                }
+            }
 
             // Find which zone polygon contains this point
             for overlay in mapView.overlays {
@@ -1408,6 +1581,21 @@ class TappedLocationAnnotation: NSObject, MKAnnotation {
 
     init(coordinate: CLLocationCoordinate2D) {
         self.coordinate = coordinate
+        super.init()
+    }
+}
+
+/// Annotation for tapped blockface (shows a label)
+class BlockfaceLabelAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    let label: String
+    let blockface: Blockface
+    var title: String? { label }
+
+    init(coordinate: CLLocationCoordinate2D, label: String, blockface: Blockface) {
+        self.coordinate = coordinate
+        self.label = label
+        self.blockface = blockface
         super.init()
     }
 }
