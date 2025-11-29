@@ -112,8 +112,8 @@ struct MainResultView: View {
                         // Show overlays when expanded OR developer panel is open
                         // Individual overlay types (zones/blockfaces) controlled by their own toggles
                         showOverlays: isMapExpanded || developerPanelExpanded,
-                        // Collapsed: 0.65, Expanded: 0.5
-                        zoomMultiplier: isMapExpanded ? 0.5 : 0.65,
+                        // Original zoom: 1.0 = ~670m (8-10 blocks)
+                        zoomMultiplier: 1.0,
                         // Show pin for searched address
                         searchedCoordinate: searchedCoordinate,
                         // Show blue dot for tapped location
