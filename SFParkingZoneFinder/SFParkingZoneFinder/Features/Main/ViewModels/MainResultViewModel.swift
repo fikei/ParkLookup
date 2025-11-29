@@ -630,7 +630,7 @@ final class MainResultViewModel: ObservableObject {
         ruleSummaryLines = result.allRegulations.map { reg in
             var line = reg.description
             if let days = reg.enforcementDays, !days.isEmpty {
-                let dayNames = days.map { $0.abbreviation }.joined(separator: ", ")
+                let dayNames = days.map { $0.shortName }.joined(separator: ", ")
                 line += " (\(dayNames)"
                 if let start = reg.enforcementStart, let end = reg.enforcementEnd {
                     line += " \(start)-\(end)"
@@ -657,7 +657,7 @@ final class MainResultViewModel: ObservableObject {
         // Add warning for no parking
         if result.primaryRegulationType == .noParking {
             warnings.append(ParkingWarning(
-                type: .noParking,
+                type: .towAway,
                 message: "No parking allowed at this time",
                 severity: .high
             ))

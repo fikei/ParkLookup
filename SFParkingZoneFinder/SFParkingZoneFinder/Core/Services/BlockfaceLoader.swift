@@ -5,7 +5,7 @@ import os.log
 private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "BlockfaceLoader")
 
 /// Loads blockface data from embedded JSON file with optimizations
-class BlockfaceLoader {
+final class BlockfaceLoader: @unchecked Sendable {
     static let shared = BlockfaceLoader()
 
     private var allBlockfacesCache: [Blockface]?

@@ -61,8 +61,8 @@ struct AddressSearchCard: View {
                         .textFieldStyle(.plain)
                         .focused($isSearchFocused)
                         .autocorrectionDisabled()
-                        .onChange(of: searchText) { newValue in
-                            searchCompleter.search(query: newValue)
+                        .onChange(of: searchText) {
+                            searchCompleter.search(query: searchText)
                         }
                 } else {
                     // Show current address when not searching
