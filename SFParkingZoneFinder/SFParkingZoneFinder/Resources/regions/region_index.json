@@ -1,0 +1,103 @@
+{
+  "regions": {
+    "downtown": {
+      "name": "Downtown/Financial District",
+      "bounds": {
+        "min_lat": 37.775,
+        "max_lat": 37.805,
+        "min_lon": -122.42,
+        "max_lon": -122.39
+      },
+      "file": "blockfaces_downtown.json",
+      "blockface_count": 1566
+    },
+    "mission": {
+      "name": "Mission District",
+      "bounds": {
+        "min_lat": 37.744,
+        "max_lat": 37.775,
+        "min_lon": -122.426,
+        "max_lon": -122.407
+      },
+      "file": "blockfaces_mission.json",
+      "blockface_count": 1283
+    },
+    "richmond": {
+      "name": "Richmond District",
+      "bounds": {
+        "min_lat": 37.77,
+        "max_lat": 37.79,
+        "min_lon": -122.51,
+        "max_lon": -122.45
+      },
+      "file": "blockfaces_richmond.json",
+      "blockface_count": 1720
+    },
+    "sunset": {
+      "name": "Sunset District",
+      "bounds": {
+        "min_lat": 37.744,
+        "max_lat": 37.77,
+        "min_lon": -122.51,
+        "max_lon": -122.47
+      },
+      "file": "blockfaces_sunset.json",
+      "blockface_count": 1554
+    },
+    "haight": {
+      "name": "Haight/Western Addition",
+      "bounds": {
+        "min_lat": 37.765,
+        "max_lat": 37.785,
+        "min_lon": -122.45,
+        "max_lon": -122.42
+      },
+      "file": "blockfaces_haight.json",
+      "blockface_count": 1187
+    },
+    "nob_hill": {
+      "name": "Nob Hill/Russian Hill",
+      "bounds": {
+        "min_lat": 37.785,
+        "max_lat": 37.808,
+        "min_lon": -122.43,
+        "max_lon": -122.4
+      },
+      "file": "blockfaces_nob_hill.json",
+      "blockface_count": 583
+    },
+    "north_beach": {
+      "name": "North Beach/Marina",
+      "bounds": {
+        "min_lat": 37.795,
+        "max_lat": 37.812,
+        "min_lon": -122.45,
+        "max_lon": -122.4
+      },
+      "file": "blockfaces_north_beach.json",
+      "blockface_count": 508
+    },
+    "soma": {
+      "name": "SOMA/Potrero",
+      "bounds": {
+        "min_lat": 37.76,
+        "max_lat": 37.785,
+        "min_lon": -122.42,
+        "max_lon": -122.385
+      },
+      "file": "blockfaces_soma.json",
+      "blockface_count": 483
+    },
+    "bayview": {
+      "name": "Bayview/Dogpatch",
+      "bounds": {
+        "min_lat": 37.715,
+        "max_lat": 37.76,
+        "min_lon": -122.407,
+        "max_lon": -122.38
+      },
+      "file": "blockfaces_bayview.json",
+      "blockface_count": 1801
+    }
+  }
+}
