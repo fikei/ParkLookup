@@ -80,6 +80,48 @@ struct MainResultView: View {
         Set(viewModel.userPermits.map { $0.area.uppercased() })
     }
 
+    /// Create LocationCardData from a tapped ParkingZone
+    private func createLocationCardData(for zone: ParkingZone) -> LocationCardData {
+        // Determine permit areas for this zone
+        let permitAreas = tappedPermitAreas ?? (zone.permitArea.map { [$0] } ?? [])
+
+        // Check if user has valid permit
+        let userPermitAreas = Set(viewModel.userPermits.map { $0.area.uppercased() })
+        let hasValidPermit = permitAreas.contains { userPermitAreas.contains($0.uppercased()) }
+
+        // Determine validity status
+        let validityStatus: PermitValidityStatus
+        if zone.zoneType == .metered {
+            validityStatus = .noPermitRequired
+        } else if hasValidPermit {
+            validityStatus = .valid
+        } else {
+            validityStatus = .invalid
+        }
+
+        // Get applicable permits
+        let applicablePermits = viewModel.userPermits.filter { permit in
+            permitAreas.contains(where: { $0.uppercased() == permit.area.uppercased() })
+        }
+
+        return LocationCardData(
+            locationName: zone.displayName,
+            locationCode: zone.permitArea,
+            locationType: zone.zoneType,
+            validityStatus: validityStatus,
+            applicablePermits: applicablePermits,
+            allValidPermitAreas: permitAreas,
+            timeLimitMinutes: zone.nonPermitTimeLimit,
+            detailedRegulations: [],  // TODO: Extract from zone.rules if needed
+            ruleSummaryLines: zone.primaryRuleDescription.map { [$0] } ?? [],
+            enforcementStartTime: zone.rules.first?.enforcementStartTime,
+            enforcementEndTime: zone.rules.first?.enforcementEndTime,
+            enforcementDays: zone.rules.first?.enforcementDays,
+            meteredSubtitle: zone.zoneType == .metered ? zone.enforcementHours : nil,
+            isCurrentLocation: false
+        )
+    }
+
     var body: some View {
         GeometryReader { geometry in
             let _ = print("🔧 DEBUG: MainResultView body - devMode: \(devSettings.developerModeUnlocked), expanded: \(isMapExpanded), panel: \(developerPanelExpanded)")
@@ -213,26 +255,29 @@ struct MainResultView: View {
                     .padding(.top, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
 
-                    // Animated zone card that morphs between large and mini states
-                    // Hidden when TappedSpotInfoCard is showing
+                    // Unified parking location card
                     if selectedZone == nil {
-                        AnimatedZoneCard(
-                            isExpanded: isMapExpanded,
-                            namespace: cardAnimation,
-                            zoneName: viewModel.zoneName,
-                            zoneCode: currentPermitArea,
-                            zoneType: viewModel.zoneType,
-                            validityStatus: viewModel.validityStatus,
-                            applicablePermits: viewModel.applicablePermits,
-                            allValidPermitAreas: viewModel.allValidPermitAreas,
-                            meteredSubtitle: viewModel.meteredSubtitle,
-                            timeLimitMinutes: viewModel.timeLimitMinutes,
-                            ruleSummaryLines: viewModel.ruleSummaryLines,
-                            detailedRegulations: viewModel.detailedRegulations,
-                            enforcementStartTime: viewModel.enforcementStartTime,
-                            enforcementEndTime: viewModel.enforcementEndTime,
-                            enforcementDays: viewModel.enforcementDays,
-                            screenHeight: geometry.size.height
+                        // Current location card (primary or compact mode)
+                        ParkingLocationCard(
+                            data: LocationCardData(
+                                locationName: viewModel.zoneName,
+                                locationCode: currentPermitArea,
+                                locationType: viewModel.zoneType,
+                                validityStatus: viewModel.validityStatus,
+                                applicablePermits: viewModel.applicablePermits,
+                                allValidPermitAreas: viewModel.allValidPermitAreas,
+                                timeLimitMinutes: viewModel.timeLimitMinutes,
+                                detailedRegulations: viewModel.detailedRegulations,
+                                ruleSummaryLines: viewModel.ruleSummaryLines,
+                                enforcementStartTime: viewModel.enforcementStartTime,
+                                enforcementEndTime: viewModel.enforcementEndTime,
+                                enforcementDays: viewModel.enforcementDays,
+                                meteredSubtitle: viewModel.meteredSubtitle,
+                                isCurrentLocation: true
+                            ),
+                            displayMode: isMapExpanded ? .compact : .primary,
+                            screenHeight: geometry.size.height,
+                            namespace: cardAnimation
                         )
                         .padding(.horizontal)
                         .padding(.top, 8)
@@ -242,19 +287,35 @@ struct MainResultView: View {
 
                     Spacer()
 
-                    // Bottom section - Tapped zone info (only in expanded mode)
+                    // Bottom section - Tapped location card (only in expanded mode)
                     if isMapExpanded, let selected = selectedZone {
-                        TappedSpotInfoCard(
-                            zone: selected,
-                            tappedPermitAreas: tappedPermitAreas,
-                            userPermits: viewModel.userPermits
-                        ) {
-                            selectedZone = nil
-                            tappedPermitAreas = nil
-                            tappedCoordinate = nil
+                        VStack(alignment: .leading, spacing: 8) {
+                            ParkingLocationCard(
+                                data: createLocationCardData(for: selected),
+                                displayMode: .spotDetail,
+                                screenHeight: geometry.size.height
+                            )
+
+                            // Close button
+                            Button {
+                                selectedZone = nil
+                                tappedPermitAreas = nil
+                                tappedCoordinate = nil
+                            } label: {
+                                HStack {
+                                    Spacer()
+                                    Text("Close")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 12)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(12)
+                            }
                         }
                         .padding(.horizontal)
-                        .padding(.bottom, 80) // Padding to avoid overlap with bottom navigation
+                        .padding(.bottom, 80)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -375,8 +436,13 @@ struct MainResultView: View {
     }
 }
 
-// MARK: - Animated Zone Card (morphs between large and mini states)
+// MARK: - DEPRECATED COMPONENTS REMOVED
+// AnimatedZoneCard has been replaced by ParkingLocationCard
+// TappedSpotInfoCard has been replaced by ParkingLocationCard
 
+// MARK: - Deprecated - Animated Zone Card (REMOVED - use ParkingLocationCard)
+
+/*
 private struct AnimatedZoneCard: View {
     let isExpanded: Bool
     var namespace: Namespace.ID
@@ -1768,6 +1834,8 @@ private struct TappedSpotInfoCard: View {
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 }
+*/
+// END DEPRECATED COMPONENTS
 
 // MARK: - Overlapping Zones Button (kept for compatibility)
 
