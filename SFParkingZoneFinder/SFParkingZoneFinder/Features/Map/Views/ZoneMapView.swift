@@ -878,15 +878,15 @@ struct ZoneMapView: UIViewRepresentable {
 
             DispatchQueue.main.async {
 
-                // Check if we should hide zone overlays when blockface mode is active
-                let shouldHideZoneOverlays = devSettings.showBlockfaceOverlays
+                // Check if zone polygons should be shown (user setting)
+                let showZonePolygons = devSettings.showZonePolygons
 
                 // Set initial alpha based on coordinator's CURRENT showOverlays value
                 // Coordinator is updated in updateUIView, so this reflects real-time state
                 let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
 
-                // Conditionally add annotations based on zone overlay visibility
-                if !shouldHideZoneOverlays {
+                // Conditionally add annotations based on zone polygon visibility
+                if showZonePolygons {
                     mapView.addAnnotations(annotations)
 
                     for annotation in annotations {
@@ -898,12 +898,12 @@ struct ZoneMapView: UIViewRepresentable {
 
                 let batchSize = 500
                 // Ordered polygons: metered first, then non-permitted, then permitted (later additions render on top)
-                // Skip zone polygons when blockface mode is active
-                let orderedPolygons = shouldHideZoneOverlays ? [] : (meteredPolygons + nonPermittedPolygons + permittedPolygons)
+                // Only add zone polygons if user has enabled them in settings
+                let orderedPolygons = showZonePolygons ? (meteredPolygons + nonPermittedPolygons + permittedPolygons) : []
                 let totalPolygons = orderedPolygons.count
 
-                if shouldHideZoneOverlays {
-                    logger.info("🚧 PoC: Hiding zone overlays (blockface mode active)")
+                if !showZonePolygons {
+                    logger.info("📍 Zone polygons hidden (user setting)")
                 }
 
                 func addBatch(startIndex: Int) {

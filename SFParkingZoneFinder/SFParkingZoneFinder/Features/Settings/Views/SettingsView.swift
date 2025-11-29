@@ -35,7 +35,8 @@ struct SettingsView: View {
                 }
 
                 // MARK: - Map Preferences Section
-                Section(header: Text("Map"), footer: Text("Parking meters show individual meter locations on the map. Paid parking zones are always visible.")) {
+                Section(header: Text("Map"), footer: Text("Zone Areas display large parking zone polygons. Parking meters show individual meter locations on the map.")) {
+                    Toggle("Show Zone Areas", isOn: $devSettings.showZonePolygons)
                     Toggle("Show Parking Meters", isOn: $viewModel.showParkingMeters)
                 }
 
