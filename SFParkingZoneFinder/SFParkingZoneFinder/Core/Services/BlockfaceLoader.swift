@@ -47,11 +47,6 @@ class BlockfaceLoader {
             if distance <= radiusMeters {
                 nearby.append((blockface, distance))
             }
-
-            // Early exit if we have enough blockfaces
-            if nearby.count >= maxCount * 2 { // Get 2x to allow sorting
-                break
-            }
         }
 
         // Sort by distance and limit to maxCount
