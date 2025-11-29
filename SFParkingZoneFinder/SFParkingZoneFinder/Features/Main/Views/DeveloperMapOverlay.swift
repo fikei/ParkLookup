@@ -513,6 +513,7 @@ struct DeveloperMapOverlay: View {
 
             compactToggle("Blockface Polygons", isOn: $devSettings.showBlockfacePolygons, icon: "rectangle.fill")
             compactToggle("Blockface Centerlines", isOn: $devSettings.showBlockfaceCenterlines, icon: "line.diagonal")
+            compactToggle("Show Parking Meters", isOn: $devSettings.showParkingMeters, icon: "parkingsign.circle.fill")
 
             Divider()
 

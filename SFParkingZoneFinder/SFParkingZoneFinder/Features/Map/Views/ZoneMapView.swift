@@ -108,10 +108,12 @@ struct ZoneMapView: UIViewRepresentable {
             context.coordinator.userPermitAreas = userPermitAreas
             context.coordinator.lastUserPermitAreas = userPermitAreas
 
-            // Clear existing overlays and annotations (except user location and searched pin)
+            // Clear existing overlays and annotations (except user location, searched pin, and parking meters)
             let overlaysToRemove = mapView.overlays
             let annotationsToRemove = mapView.annotations.filter { annotation in
-                !(annotation is MKUserLocation) && !(annotation is SearchedLocationAnnotation)
+                !(annotation is MKUserLocation) &&
+                !(annotation is SearchedLocationAnnotation) &&
+                !(annotation is ParkingMeterAnnotation)
             }
             mapView.removeOverlays(overlaysToRemove)
             mapView.removeAnnotations(annotationsToRemove)
@@ -119,6 +121,9 @@ struct ZoneMapView: UIViewRepresentable {
             // Reload overlays (keep overlaysLoaded=true to prevent race condition)
             context.coordinator.overlaysCurrentlyVisible = false
             loadOverlays(mapView: mapView, context: context)
+
+            // Reload parking meters (respects toggle state)
+            loadParkingMeterAnnotations(mapView: mapView)
             return
         } else {
             // Update coordinator's permit areas (no reload needed)
@@ -184,10 +189,12 @@ struct ZoneMapView: UIViewRepresentable {
             logger.info("🔄 Manual refresh triggered - reloading overlays")
             context.coordinator.lastReloadTrigger = currentReloadTrigger
 
-            // Clear existing overlays and annotations (except user location and searched pin)
+            // Clear existing overlays and annotations (except user location, searched pin, and parking meters)
             let overlaysToRemove = mapView.overlays
             let annotationsToRemove = mapView.annotations.filter { annotation in
-                !(annotation is MKUserLocation) && !(annotation is SearchedLocationAnnotation)
+                !(annotation is MKUserLocation) &&
+                !(annotation is SearchedLocationAnnotation) &&
+                !(annotation is ParkingMeterAnnotation)
             }
             mapView.removeOverlays(overlaysToRemove)
             mapView.removeAnnotations(annotationsToRemove)
@@ -195,6 +202,9 @@ struct ZoneMapView: UIViewRepresentable {
             // Reload overlays (keep overlaysLoaded=true to prevent race condition)
             context.coordinator.overlaysCurrentlyVisible = false
             loadOverlays(mapView: mapView, context: context)
+
+            // Reload parking meters (respects toggle state)
+            loadParkingMeterAnnotations(mapView: mapView)
             return
         }
 
@@ -940,6 +950,9 @@ struct ZoneMapView: UIViewRepresentable {
 
                 // PoC: Load blockface data and add street cleaning overlays
                 loadBlockfaceOverlays(mapView: mapView, isInitialLoad: true)
+
+                // Load parking meter annotations
+                loadParkingMeterAnnotations(mapView: mapView)
             }
         }
     }
@@ -973,6 +986,54 @@ struct ZoneMapView: UIViewRepresentable {
             logger.info("✅ PoC: Added blockface overlays to map")
         } catch {
             logger.error("❌ PoC: Failed to load blockfaces: \(error.localizedDescription)")
+        }
+    }
+
+    /// Load and render parking meter annotations
+    private func loadParkingMeterAnnotations(mapView: MKMapView) {
+        // Check feature flag - only load if enabled in developer settings
+        let devSettings = DeveloperSettings.shared
+        guard devSettings.showParkingMeters else {
+            logger.debug("🅿️ Parking meters disabled (feature flag off)")
+
+            // Remove any existing parking meter annotations
+            let existingMeters = mapView.annotations.compactMap { $0 as? ParkingMeterAnnotation }
+            if !existingMeters.isEmpty {
+                mapView.removeAnnotations(existingMeters)
+                logger.info("🅿️ Removed \(existingMeters.count) parking meter annotations")
+            }
+            return
+        }
+
+        // Remove existing parking meter annotations first
+        let existingMeters = mapView.annotations.compactMap { $0 as? ParkingMeterAnnotation }
+        if !existingMeters.isEmpty {
+            mapView.removeAnnotations(existingMeters)
+        }
+
+        do {
+            let meters = try ParkingMeterLoader.shared.loadParkingMeters()
+            logger.info("🅿️ Loaded \(meters.count) parking meters from dataset")
+
+            // Filter meters within the current visible region to avoid overwhelming the map
+            let visibleRegion = mapView.region
+            let visibleMeters = meters.filter { meter in
+                let coord = meter.coordinate
+                let latDelta = abs(coord.latitude - visibleRegion.center.latitude)
+                let lonDelta = abs(coord.longitude - visibleRegion.center.longitude)
+                return latDelta <= visibleRegion.span.latitudeDelta / 2 &&
+                       lonDelta <= visibleRegion.span.longitudeDelta / 2
+            }
+
+            // Create annotations for visible meters
+            let annotations = visibleMeters.map { meter in
+                ParkingMeterAnnotation(coordinate: meter.coordinate, meter: meter)
+            }
+
+            mapView.addAnnotations(annotations)
+            logger.info("✅ Added \(annotations.count) parking meter annotations (filtered from \(meters.count) total)")
+        } catch {
+            logger.error("❌ Failed to load parking meters: \(error.localizedDescription)")
         }
     }
 
@@ -1213,6 +1274,29 @@ struct ZoneMapView: UIViewRepresentable {
                 } else {
                     annotationView?.annotation = tappedAnnotation
                 }
+
+                return annotationView
+            }
+
+            // Handle parking meter annotation
+            if let meterAnnotation = annotation as? ParkingMeterAnnotation {
+                let identifier = "ParkingMeter"
+                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+
+                if annotationView == nil {
+                    annotationView = MKMarkerAnnotationView(annotation: meterAnnotation, reuseIdentifier: identifier)
+                    annotationView?.canShowCallout = true
+                    annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
+                    annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
+                    annotationView?.displayPriority = .defaultLow
+                    annotationView?.glyphTintColor = .white
+                } else {
+                    annotationView?.annotation = meterAnnotation
+                    annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
+                }
+
+                // Set subtitle with meter status
+                annotationView?.subtitle = meterAnnotation.meter.statusDescription
 
                 return annotationView
             }
@@ -1596,6 +1680,19 @@ class BlockfaceLabelAnnotation: NSObject, MKAnnotation {
         self.coordinate = coordinate
         self.label = label
         self.blockface = blockface
+        super.init()
+    }
+}
+
+/// Annotation for parking meters
+class ParkingMeterAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    let meter: ParkingMeter
+    var title: String? { meter.displayName }
+
+    init(coordinate: CLLocationCoordinate2D, meter: ParkingMeter) {
+        self.coordinate = coordinate
+        self.meter = meter
         super.init()
     }
 }
