@@ -53,7 +53,7 @@ For a functional Alpha release with real data, complete these in order:
 | S14: Error Handling | **COMPLETE** | 6/6 |
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | **COMPLETE** | 8/10 |
-| S17: Map Zone Boundaries & Blockface Viz | In Progress | 21/34 |
+| S17: Map Zone Boundaries & Blockface Viz | In Progress | 21/38 |
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | In Progress | 5/14 |
@@ -64,11 +64,11 @@ For a functional Alpha release with real data, complete these in order:
 | S25: Metered Parking Layer | Not Started | 0/19 |
 | S26: Blockface Migration | Not Started | 0/24 |
 
-**Beta Progress:** 66/215 tasks complete (31%)
+**Beta Progress:** 66/219 tasks complete (30%)
 
 ---
 
-**Overall Progress:** 167/320 tasks complete (52%)
+**Overall Progress:** 167/324 tasks complete (52%)
 
 *Note: Future Enhancement tasks (F-series) not included in progress counts*
 
@@ -711,6 +711,33 @@ For a functional Alpha release with real data, complete these in order:
 - [x] **17.32** Add developer settings for blockface width, offset adjustments, and visualization toggles
 - [ ] **17.33** Evaluate blockface rendering performance with full dataset (18K+ blockfaces)
 - [ ] **17.34** Implement blockface simplification/clustering for better performance at city-wide zoom levels
+- [ ] **17.35** Improve bearing-aware offset algorithm to handle curved streets and complex geometries:
+  - Add local bearing calculation per vertex (not just overall bearing)
+  - Smooth offsets at sharp turns to avoid polygon self-intersection
+  - Handle multi-segment blockfaces with varying bearings
+  - Test with diagonal streets (Market St, Geary Blvd) and curved roads (Twin Peaks)
+
+#### Blockface Data Integration (Pipeline - Nov 2025)
+- [ ] **17.36** Implement spatial join between blockface geometries and parking regulations CSV:
+  - Load regulations CSV with geometry from "shape" column (7,784 records)
+  - Spatially match regulations to blockface centerlines (buffer, intersects, or nearest)
+  - Handle one-to-many matches (multiple regulations per blockface)
+  - Populate `regulations: []` field in blockface JSON with matched data
+- [ ] **17.37** Extract regulation fields from matched CSV records:
+  - Map REGULATION, DAYS, HOURS, HRS_BEGIN, HRS_END to app schema
+  - Extract RPP areas (RPPAREA1/2/3) and time limits (HRLIMIT)
+  - Parse EXCEPTIONS field for special conditions
+  - Convert FROM_TIME/TO_TIME to enforcement hours
+- [ ] **17.38** Validate spatial join quality:
+  - Check match rate (% of blockfaces with regulations)
+  - Identify blockfaces with multiple conflicting regulations
+  - Test sample blockfaces against ground truth (street signs)
+  - Handle edge cases (no match, ambiguous match)
+- [ ] **17.39** Update conversion script to output blockfaces with regulations:
+  - Modify convert_geojson_to_app_format.py to include spatial join
+  - Add regulation validation (required fields, data types)
+  - Export enhanced blockface JSON with regulations populated
+  - Document regulation schema in app data model
 
 #### Map Provider Abstraction
 - [ ] **17.14** Create MapProviderProtocol abstraction layer for switching between map providers
