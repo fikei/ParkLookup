@@ -590,11 +590,11 @@ enum ParkUntilDisplay {
 
         case .restriction(let type, let date):
             formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
-            return "Park until \(formatter.string(from: date)) (\(type.lowercased()))"
+            return "Park until \(formatter.string(from: date))"
 
         case .meteredEnd(let date):
             formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
-            return "Park until \(formatter.string(from: date)) (meter free)"
+            return "Park until \(formatter.string(from: date))"
 
         case .enforcementStart(let time, let targetDate):
             let now = Date()

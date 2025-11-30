@@ -358,10 +358,18 @@ struct ParkingLocationCard: View {
                         }
                         .foregroundColor(.primary)
 
+                        // Location name as secondary copy
+                        if !data.locationName.lowercased().contains("unknown") {
+                            Text(data.locationName)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
                             Text(details)
-                                .font(.subheadline)
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                         }
@@ -604,16 +612,23 @@ struct ParkingLocationCard: View {
             Text("Anytime")
                 .font(.caption)
                 .foregroundColor(.secondary)
+        } else if parkUntilResult != nil {
+            // Show location name when Park Until is displayed
+            if !data.locationName.lowercased().contains("unknown") {
+                Text(data.locationName)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         } else if let details = abbreviatedDetailLine {
             // Show abbreviated details: "2hr • $3/hr • Zone Q"
             Text(details)
                 .font(.caption)
-                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                .foregroundColor(.secondary)
         } else {
             // Fallback
             Text(data.locationName.lowercased().contains("unknown") ? "" : data.locationName)
                 .font(.caption)
-                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                .foregroundColor(.secondary)
         }
     }
 
@@ -650,9 +665,9 @@ struct ParkingLocationCard: View {
                         }
                         .foregroundColor(.primary)
 
-                        // Abbreviated details on second line
-                        if let details = abbreviatedDetailLine {
-                            Text(details)
+                        // Location name as secondary copy
+                        if !data.locationName.lowercased().contains("unknown") {
+                            Text(data.locationName)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
