@@ -595,21 +595,19 @@ struct ParkingLocationCard: View {
                 Spacer()
             }
 
-            // Regulations button (show if we have any regulations or rule summaries)
-            if !data.detailedRegulations.isEmpty || !data.ruleSummaryLines.isEmpty {
-                Button {
-                    showRegulationsDrawer = true
-                } label: {
-                    HStack {
-                        Text("See regulations")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.blue)
+            // Regulations button - always show (drawer handles empty state)
+            Button {
+                showRegulationsDrawer = true
+            } label: {
+                HStack {
+                    Text("See regulations")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
                 }
+                .foregroundColor(.blue)
             }
         }
         .padding(16)
