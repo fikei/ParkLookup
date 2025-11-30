@@ -70,41 +70,57 @@ struct RegulationsDrawerView: View {
     }
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Header - Original card content (compact)
-                headerCard
-                    .padding(.horizontal)
-                    .padding(.top, 16)
+        VStack(spacing: 0) {
+            // Park Until header
+            if let parkUntil = parkUntilResult {
+                HStack {
+                    Text(parkUntil.shortFormatted())
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
 
-                Divider()
-                    .padding(.vertical, 16)
+                    Spacer()
 
-                // Explanation banner (if Park Until applies)
-                if let parkUntil = parkUntilResult {
-                    explanationBanner(for: parkUntil)
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
-                }
-
-                // Regulations list
-                if regulations.isEmpty {
-                    emptyStateView
-                } else {
-                    regulationsList
-                }
-            }
-            .navigationTitle("Parking Regulations")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                    // Dismiss button
                     Button {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
                             .foregroundColor(.secondary)
                     }
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 16)
+            } else {
+                // No Park Until - just show close button
+                HStack {
+                    Text("Parking Regulations")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 16)
+            }
+
+            Divider()
+
+            // Regulations list
+            if regulations.isEmpty {
+                emptyStateView
+            } else {
+                regulationsList
             }
         }
     }
