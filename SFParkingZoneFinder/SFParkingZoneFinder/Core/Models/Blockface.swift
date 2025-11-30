@@ -27,9 +27,14 @@ struct Blockface: Codable, Identifiable, Hashable {
         }
     }
 
-    /// Get permit zone if this is a residential permit area
+    /// Get permit zone if this is a residential permit area (single zone, for backward compatibility)
     var permitZone: String? {
-        regulations.first(where: { $0.type == "residentialPermit" })?.permitZone
+        regulations.first(where: { $0.type == "residentialPermit" })?.allPermitZones.first
+    }
+
+    /// Get all permit zones for multi-RPP support
+    var permitZones: [String] {
+        regulations.first(where: { $0.type == "residentialPermit" })?.allPermitZones ?? []
     }
 }
 
@@ -54,7 +59,8 @@ struct LineStringGeometry: Codable, Hashable {
 struct BlockfaceRegulation: Codable, Hashable, Identifiable {
     let id = UUID()
     let type: String  // "streetCleaning", "timeLimit", "residentialPermit", "metered", "towAway", "noParking", "loadingZone"
-    let permitZone: String?
+    let permitZone: String?          // DEPRECATED: Single zone (backward compatibility)
+    let permitZones: [String]?       // Multi-RPP support: Multiple zones
     let timeLimit: Int?  // Minutes
     let meterRate: Decimal?  // Dollars per hour
     let enforcementDays: [String]?  // ["monday", "thursday"]
@@ -63,8 +69,18 @@ struct BlockfaceRegulation: Codable, Hashable, Identifiable {
     let specialConditions: String?
 
     enum CodingKeys: String, CodingKey {
-        case type, permitZone, timeLimit, meterRate
+        case type, permitZone, permitZones, timeLimit, meterRate
         case enforcementDays, enforcementStart, enforcementEnd, specialConditions
+    }
+
+    /// Get all permit zones (handles both old and new format)
+    var allPermitZones: [String] {
+        if let zones = permitZones, !zones.isEmpty {
+            return zones  // Multi-RPP: use array
+        } else if let zone = permitZone {
+            return [zone]  // Backward compatibility: convert to array
+        }
+        return []
     }
 
     /// Human-readable description
@@ -121,7 +137,11 @@ struct BlockfaceRegulation: Codable, Hashable, Identifiable {
     private var permitDescription: String {
         var parts: [String] = []
 
-        if let zone = permitZone {
+        let zones = allPermitZones
+        if zones.count > 1 {
+            let zoneList = zones.joined(separator: ", ")
+            parts.append("Zones \(zoneList) permit")
+        } else if let zone = zones.first {
             parts.append("Zone \(zone) permit")
         } else {
             parts.append("Permit required")
