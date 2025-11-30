@@ -242,10 +242,8 @@ struct ParkingLocationCard: View {
     }
 
     private var cardBackground: Color {
-        if data.locationType == .metered {
-            return Color(.systemBackground)
-        }
-        return isValidStyle ? Color.accessibleValidGreen : Color(.systemBackground)
+        // Always use white background regardless of validity status
+        return Color(.systemBackground)
     }
 
     private var circleBackground: Color {
@@ -330,7 +328,8 @@ struct ParkingLocationCard: View {
         ZStack {
             // Center content
             VStack(spacing: 12) {
-                locationCircle(size: 160)
+                // Zone circle hidden per user request
+                // locationCircle(size: 160)
 
                 // Park Until display
                 if isAlwaysNoParking {
@@ -357,13 +356,13 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(isValidStyle ? .white : .primary)
+                        .foregroundColor(.primary)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
                             Text(details)
                                 .font(.subheadline)
-                                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                                .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                         }
                     }
@@ -377,13 +376,13 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
                             Text(details)
                                 .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                         }
                     }
@@ -517,7 +516,8 @@ struct ParkingLocationCard: View {
                 .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
 
             HStack(spacing: 12) {
-                locationCircle(size: 44)
+                // Zone circle hidden per user request
+                // locationCircle(size: 44)
 
                 VStack(alignment: .leading, spacing: 4) {
                     compactMainText
@@ -532,7 +532,7 @@ struct ParkingLocationCard: View {
                 } label: {
                     Image(systemName: "list.bullet.circle")
                         .font(.title3)
-                        .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
+                        .foregroundColor(.blue)
                 }
                 .padding(.trailing, 4)
             }
@@ -576,7 +576,7 @@ struct ParkingLocationCard: View {
                     Text(nextEnforcement.shortFormatted())
                         .font(.headline)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
             } else {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
@@ -584,7 +584,7 @@ struct ParkingLocationCard: View {
                     Text("Unlimited parking")
                         .font(.headline)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
             }
         } else if data.locationType == .metered {
             Text("Paid Parking")
@@ -622,7 +622,8 @@ struct ParkingLocationCard: View {
     private var spotDetailCard: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                locationCircle(size: 48)
+                // Zone circle hidden per user request
+                // locationCircle(size: 48)
 
                 VStack(alignment: .leading, spacing: 4) {
                     if isAlwaysNoParking {
