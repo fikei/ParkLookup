@@ -70,10 +70,10 @@ struct ZoneMapView: UIViewRepresentable {
         let desiredSpan: MKCoordinateSpan
 
         if showSFOverview {
-            // Show overview of all of San Francisco
+            // Show overview of all of San Francisco (zoomed in 35% from full city view)
             // SF bounds: ~37.7 to 37.8 latitude, ~-122.52 to -122.35 longitude
             center = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-            desiredSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
+            desiredSpan = MKCoordinateSpan(latitudeDelta: 0.0975, longitudeDelta: 0.0975)
         } else {
             // Normal view: centered on user (zoomed to ~10-15 blocks)
             // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
