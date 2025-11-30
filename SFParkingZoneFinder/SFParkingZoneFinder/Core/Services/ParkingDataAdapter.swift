@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import os.log
 
 // MARK: - Data Structures
 
@@ -653,11 +654,13 @@ struct ParkUntilCalculator {
     let validityStatus: PermitValidityStatus
     let allRegulations: [RegulationInfo]
 
+    private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "ParkUntilCalculator")
+
     /// Calculate when parking expires, considering ALL regulations
     func calculateParkUntil(at date: Date = Date()) -> ParkUntilDisplay? {
-        print("🔍 ParkUntilCalculator.calculateParkUntil: validityStatus=\(validityStatus), regulationCount=\(allRegulations.count)")
+        logger.info("🔍 ParkUntilCalculator.calculateParkUntil: validityStatus=\(String(describing: self.validityStatus)), regulationCount=\(self.allRegulations.count)")
         for (index, reg) in allRegulations.enumerated() {
-            print("  [\(index)] type=\(String(describing: reg.type)), desc=\(reg.description), enforcementDays=\(reg.enforcementDays?.map { $0.rawValue }.joined(separator: ",") ?? "nil")")
+            logger.info("  [\(index)] type=\(String(describing: reg.type)), desc=\(reg.description), enforcementDays=\(reg.enforcementDays?.map { $0.rawValue }.joined(separator: ",") ?? "nil")")
         }
 
         var earliestRestriction: ParkUntilDisplay?
@@ -668,12 +671,12 @@ struct ParkUntilCalculator {
         // 1. Check for upcoming street cleaning and no parking zones
         // IMPORTANT: These restrictions apply to EVERYONE, including valid permit holders.
         // Valid permits do NOT exempt users from street cleaning or no parking restrictions.
-        print("🔍 Step 1: Checking street cleaning and no parking regulations...")
+        logger.info("🔍 Step 1: Checking street cleaning and no parking regulations...")
         for regulation in allRegulations {
             if regulation.type == .streetCleaning || regulation.type == .noParking {
-                print("  Found \(String(describing: regulation.type)) regulation: \(regulation.description)")
+                logger.info("  Found \(String(describing: regulation.type)) regulation: \(regulation.description)")
                 if let nextOccurrence = findNextOccurrence(of: regulation, from: date) {
-                    print("  Next occurrence: \(nextOccurrence)")
+                    logger.info("  Next occurrence: \(nextOccurrence, privacy: .public)")
                     if earliestDate == nil || nextOccurrence < earliestDate! {
                         earliestDate = nextOccurrence
                         earliestRestriction = .restriction(
@@ -766,9 +769,9 @@ struct ParkUntilCalculator {
         }
 
         if let result = earliestRestriction {
-            print("✅ ParkUntilCalculator result: \(String(describing: result))")
+            logger.info("✅ ParkUntilCalculator result: \(String(describing: result))")
         } else {
-            print("✅ ParkUntilCalculator result: nil")
+            logger.info("✅ ParkUntilCalculator result: nil")
         }
         return earliestRestriction
     }
