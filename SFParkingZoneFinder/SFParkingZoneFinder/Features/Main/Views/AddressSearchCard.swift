@@ -24,6 +24,7 @@ private func isWithinSF(_ coordinate: CLLocationCoordinate2D) -> Bool {
 struct AddressSearchCard: View {
     let currentAddress: String?
     let isAtCurrentLocation: Bool
+    let isOutsideCoverage: Bool
     let onAddressSelected: (CLLocationCoordinate2D) -> Void
     let onResetToCurrentLocation: () -> Void
     let onOutsideCoverage: (() -> Void)?
@@ -31,12 +32,14 @@ struct AddressSearchCard: View {
     init(
         currentAddress: String?,
         isAtCurrentLocation: Bool = true,
+        isOutsideCoverage: Bool = false,
         onAddressSelected: @escaping (CLLocationCoordinate2D) -> Void,
         onResetToCurrentLocation: @escaping () -> Void,
         onOutsideCoverage: (() -> Void)? = nil
     ) {
         self.currentAddress = currentAddress
         self.isAtCurrentLocation = isAtCurrentLocation
+        self.isOutsideCoverage = isOutsideCoverage
         self.onAddressSelected = onAddressSelected
         self.onResetToCurrentLocation = onResetToCurrentLocation
         self.onOutsideCoverage = onOutsideCoverage
@@ -91,10 +94,16 @@ struct AddressSearchCard: View {
                     }
                 } else {
                     Button {
-                        onResetToCurrentLocation()
+                        if isOutsideCoverage {
+                            // Show banner when tapped while outside coverage
+                            onOutsideCoverage?()
+                        } else {
+                            // Normal behavior: return to GPS location
+                            onResetToCurrentLocation()
+                        }
                     } label: {
-                        Image(systemName: "location.fill")
-                            .foregroundColor(isAtCurrentLocation ? .blue : .gray)
+                        Image(systemName: isOutsideCoverage ? "location.slash.fill" : "location.fill")
+                            .foregroundColor(isOutsideCoverage ? .orange : (isAtCurrentLocation ? .blue : .gray))
                             .font(.system(size: 16))
                     }
                 }

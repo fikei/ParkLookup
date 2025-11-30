@@ -200,6 +200,11 @@ struct MainResultView: View {
                             // Generic tap handler (works for zones, blockfaces, or empty map areas)
                             tappedCoordinate = coordinate
 
+                            // Hide out-of-coverage banner when map is tapped
+                            if showOutsideCoverageBanner {
+                                showOutsideCoverageBanner = false
+                            }
+
                             // Trigger lookup at tapped coordinate (updates spot card)
                             viewModel.lookupZone(at: coordinate)
 
@@ -284,6 +289,7 @@ struct MainResultView: View {
                     AddressSearchCard(
                         currentAddress: viewModel.currentAddress,
                         isAtCurrentLocation: searchedCoordinate == nil && tappedCoordinate == nil,
+                        isOutsideCoverage: isOutsideCoverage,
                         onAddressSelected: { coordinate in
                             searchedCoordinate = coordinate
                             // Trigger zone lookup for the new coordinate
@@ -323,8 +329,8 @@ struct MainResultView: View {
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
 
-                    // Unified parking location card
-                    if selectedZone == nil {
+                    // Unified parking location card (hidden when out-of-coverage banner is shown)
+                    if selectedZone == nil && !showOutsideCoverageBanner && !isOutsideCoverage {
                         // Current location card (primary or compact mode)
                         ParkingLocationCard(
                             data: LocationCardData(
