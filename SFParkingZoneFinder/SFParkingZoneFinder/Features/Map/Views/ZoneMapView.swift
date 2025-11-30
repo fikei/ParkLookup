@@ -893,7 +893,7 @@ struct ZoneMapView: UIViewRepresentable {
                 // Deduplicate annotations by zoneId to prevent duplicate pins
                 var seenZoneIds = Set<String>()
                 let uniqueAnnotations = annotations.filter { annotation in
-                    guard let zoneId = annotation.zoneId else { return true }
+                    let zoneId = annotation.zoneId
                     if seenZoneIds.contains(zoneId) {
                         return false
                     }
