@@ -351,9 +351,34 @@ struct ParkingLocationCard: View {
                 // Zone circle hidden per user request
                 // locationCircle(size: 160)
 
+                // Valid Permit Token (top of card, when applicable)
+                if isValidStyle && data.validityStatus != .noPermitRequired {
+                    HStack {
+                        Spacer()
+
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption)
+                            Text("Valid Permit")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(Color.green)
+                        )
+
+                        Spacer()
+                    }
+                    .padding(.bottom, 8)
+                }
+
                 // Park Until display
                 if isAlwaysNoParking {
-                    VStack(spacing: 4) {
+                    VStack(spacing: 8) {
                         HStack(spacing: 6) {
                             Image(systemName: "nosign")
                                 .font(.title2)
@@ -368,15 +393,16 @@ struct ParkingLocationCard: View {
                             .foregroundColor(.secondary)
                     }
                 } else if let parkUntil = parkUntilResult {
-                    VStack(spacing: 4) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "timer")
-                                .font(.title2)
-                            Text(parkUntil.shortFormatted())
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                        }
-                        .foregroundColor(.primary)
+                    VStack(spacing: 8) {
+                        // "Move by" label
+                        Text("Move by")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        // Large Day & Time (removed "Until")
+                        Text(parkUntil.shortFormatted())
+                            .font(.system(size: 42, weight: .bold))
+                            .foregroundColor(.primary)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
@@ -387,7 +413,7 @@ struct ParkingLocationCard: View {
                         }
                     }
                 } else if isValidStyle {
-                    VStack(spacing: 4) {
+                    VStack(spacing: 8) {
                         HStack(spacing: 6) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.title2)
@@ -407,7 +433,7 @@ struct ParkingLocationCard: View {
                         }
                     }
                 } else {
-                    VStack(spacing: 4) {
+                    VStack(spacing: 8) {
                         Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
                             .font(.title2)
                             .fontWeight(.semibold)
@@ -435,27 +461,27 @@ struct ParkingLocationCard: View {
                     } label: {
                         Image(systemName: "info.circle")
                             .font(.title2)
-                            .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                            .foregroundColor(.secondary)
                     }
                 }
                 .padding(16)
                 Spacer()
             }
 
-            // Bottom section - just regulations button
+            // Bottom section - "See regulations" tertiary button
             VStack {
                 Spacer()
 
-                // "See regulations" button - always show (drawer handles empty state)
+                // Tertiary button style
                 Button {
                     showRegulationsDrawer = true
                 } label: {
                     Text("See regulations")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
-                        .underline()
+                        .foregroundColor(.secondary)
                 }
+                .buttonStyle(.borderless)
                 .padding(.bottom, 24)
             }
         }
