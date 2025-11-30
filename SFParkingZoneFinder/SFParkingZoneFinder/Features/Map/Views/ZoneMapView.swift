@@ -66,12 +66,14 @@ struct ZoneMapView: UIViewRepresentable {
         // Set initial region
         let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
 
-        let (center, desiredSpan) = if showSFOverview {
+        let center: CLLocationCoordinate2D
+        let desiredSpan: MKCoordinateSpan
+
+        if showSFOverview {
             // Show overview of all of San Francisco
             // SF bounds: ~37.7 to 37.8 latitude, ~-122.52 to -122.35 longitude
-            let sfCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-            let sfSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
-            (sfCenter, sfSpan)
+            center = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+            desiredSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
         } else {
             // Normal view: centered on user (zoomed to ~10-15 blocks)
             // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
@@ -85,11 +87,11 @@ struct ZoneMapView: UIViewRepresentable {
             // Apply vertical bias: offset center northward to push user location down on screen
             // verticalBias of 0.25 means user appears at 75% from top (halfway between center and bottom)
             let latOffset = span.latitudeDelta * verticalBias
-            let adjustedCenter = CLLocationCoordinate2D(
+            center = CLLocationCoordinate2D(
                 latitude: userCenter.latitude + latOffset,
                 longitude: userCenter.longitude
             )
-            (adjustedCenter, span)
+            desiredSpan = span
         }
 
         let region = MKCoordinateRegion(center: center, span: desiredSpan)
