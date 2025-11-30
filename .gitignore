@@ -1,1 +1,8 @@
 SFParkingZoneFinder/SFParkingZoneFinder.xcodeproj/project.pbxproj
+
+# Data files
+data/raw/*.geojson
+
+# Pipeline logs
+backend/pipeline_run.log
+backend/*.log

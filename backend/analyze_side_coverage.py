@@ -4,10 +4,23 @@ Analyze street cleaning coverage on both sides of streets.
 """
 
 import json
+import sys
 from collections import defaultdict
+from pathlib import Path
+
+# Get filename from command line or use default
+if len(sys.argv) > 1:
+    json_path = sys.argv[1]
+else:
+    json_path = 'sample_blockfaces_sideaware_full.json'
+
+if not Path(json_path).exists():
+    print(f"Error: File not found: {json_path}")
+    print("Usage: python analyze_side_coverage.py <blockface_json_file>")
+    sys.exit(1)
 
 # Load the side-aware data
-with open('sample_blockfaces_sideaware_full.json', 'r') as f:
+with open(json_path, 'r') as f:
     data = json.load(f)
 
 blockfaces = data['blockfaces']
