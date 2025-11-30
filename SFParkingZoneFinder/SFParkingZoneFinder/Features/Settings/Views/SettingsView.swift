@@ -147,6 +147,35 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    // MARK: - Data Source Section (Developer Mode Only)
+                    Section(
+                        header: Text("Blockface Data Source"),
+                        footer: Text("Select which blockface dataset to load. The multi-RPP version includes improved residential permit zone handling. App will reload data when changed.")
+                    ) {
+                        ForEach(BlockfaceDataSource.allCases, id: \.self) { dataSource in
+                            Button {
+                                devSettings.blockfaceDataSource = dataSource
+                                let generator = UIImpactFeedbackGenerator(style: .medium)
+                                generator.impactOccurred()
+                            } label: {
+                                HStack {
+                                    Image(systemName: devSettings.blockfaceDataSource == dataSource ? "circle.inset.filled" : "circle")
+                                        .foregroundColor(devSettings.blockfaceDataSource == dataSource ? .accentColor : .secondary)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(dataSource.displayName)
+                                            .foregroundColor(.primary)
+                                        if dataSource == .multiRPP20251128 {
+                                            Text("New: Multi-zone permits, 670 consolidated")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // MARK: - About Section

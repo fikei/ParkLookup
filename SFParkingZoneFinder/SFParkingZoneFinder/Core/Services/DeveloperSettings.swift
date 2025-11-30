@@ -2,6 +2,29 @@ import Foundation
 import Combine
 import UIKit
 
+extension Notification.Name {
+    static let blockfaceDataSourceChanged = Notification.Name("blockfaceDataSourceChanged")
+}
+
+/// Available blockface data sources
+enum BlockfaceDataSource: String, CaseIterable, Codable, Hashable {
+    case production = "sample_blockfaces"
+    case multiRPP20251128 = "sample_blockfaces_multiRPP_20251128"
+
+    var displayName: String {
+        switch self {
+        case .production:
+            return "Production (43,364 regulations)"
+        case .multiRPP20251128:
+            return "Multi-RPP 2025-11-28 (42,675 regulations)"
+        }
+    }
+
+    var filename: String {
+        return rawValue
+    }
+}
+
 /// Singleton managing developer/debug settings for polygon display
 /// Access via hidden gesture in Settings (5-tap on version)
 final class DeveloperSettings: ObservableObject {
@@ -275,6 +298,16 @@ final class DeveloperSettings: ObservableObject {
         didSet { UserDefaults.standard.set(showParkingMeters, forKey: "showParkingMeters") }
     }
 
+    /// Selected blockface data source file
+    /// Allows switching between different blockface datasets (production, multi-RPP, etc.)
+    @Published var blockfaceDataSource: BlockfaceDataSource {
+        didSet {
+            UserDefaults.standard.set(blockfaceDataSource.rawValue, forKey: Keys.blockfaceDataSource)
+            // Clear cache when data source changes
+            NotificationCenter.default.post(name: .blockfaceDataSourceChanged, object: nil)
+        }
+    }
+
     /// Blockface polygon stroke width
     @Published var blockfaceStrokeWidth: Double {
         didSet { UserDefaults.standard.set(blockfaceStrokeWidth, forKey: Keys.blockfaceStrokeWidth) }
@@ -539,6 +572,7 @@ final class DeveloperSettings: ObservableObject {
         static let showBlockfaceCenterlines = "dev.showBlockfaceCenterlines"
         static let showBlockfacePolygons = "dev.showBlockfacePolygons"
         // Note: showParkingMeters uses "showParkingMeters" key (user-facing setting, not developer setting)
+        static let blockfaceDataSource = "dev.blockfaceDataSource"
         static let blockfaceStrokeWidth = "dev.blockfaceStrokeWidth"
         static let blockfacePolygonWidth = "dev.blockfacePolygonWidth"
         static let blockfaceColorHex = "dev.blockfaceColorHex"
@@ -603,6 +637,7 @@ final class DeveloperSettings: ObservableObject {
         static let showBlockfaceCenterlines = false  // Centerlines OFF by default (debug visualization)
         static let showBlockfacePolygons = true  // Polygons ON by default (shows proper color coding)
         static let showParkingMeters = false  // Parking meters OFF by default (user-facing setting)
+        static let blockfaceDataSource = BlockfaceDataSource.production  // Production data by default
         static let blockfaceStrokeWidth = 1.5  // Default stroke width
         static let blockfacePolygonWidth = 0.00008  // ~9.6m / 31.5 feet - increased for visibility
         static let blockfaceColorHex = "FF9500"  // Orange (SF orange)
@@ -670,6 +705,15 @@ final class DeveloperSettings: ObservableObject {
         showBlockfaceCenterlines = defaults.object(forKey: Keys.showBlockfaceCenterlines) as? Bool ?? Defaults.showBlockfaceCenterlines
         showBlockfacePolygons = defaults.object(forKey: Keys.showBlockfacePolygons) as? Bool ?? Defaults.showBlockfacePolygons
         showParkingMeters = defaults.object(forKey: "showParkingMeters") as? Bool ?? Defaults.showParkingMeters
+
+        // Load blockface data source
+        if let sourceRawValue = defaults.string(forKey: Keys.blockfaceDataSource),
+           let source = BlockfaceDataSource(rawValue: sourceRawValue) {
+            blockfaceDataSource = source
+        } else {
+            blockfaceDataSource = Defaults.blockfaceDataSource
+        }
+
         blockfaceStrokeWidth = defaults.object(forKey: Keys.blockfaceStrokeWidth) as? Double ?? Defaults.blockfaceStrokeWidth
         blockfacePolygonWidth = defaults.object(forKey: Keys.blockfacePolygonWidth) as? Double ?? Defaults.blockfacePolygonWidth
         blockfaceColorHex = defaults.object(forKey: Keys.blockfaceColorHex) as? String ?? Defaults.blockfaceColorHex

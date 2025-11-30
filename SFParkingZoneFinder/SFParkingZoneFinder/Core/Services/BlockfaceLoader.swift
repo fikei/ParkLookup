@@ -11,7 +11,24 @@ final class BlockfaceLoader: @unchecked Sendable {
     private var allBlockfacesCache: [Blockface]?
     private let queue = DispatchQueue(label: "com.sfparkingzonefinder.blockface-loader", qos: .userInitiated)
 
-    private init() {}
+    private init() {
+        // Listen for data source changes to clear cache
+        NotificationCenter.default.addObserver(
+            forName: .blockfaceDataSourceChanged,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            self?.clearCache()
+        }
+    }
+
+    /// Clear the blockface cache (called when data source changes)
+    func clearCache() {
+        queue.async {
+            self.allBlockfacesCache = nil
+            logger.info("🗑️ Blockface cache cleared")
+        }
+    }
 
     /// Load blockfaces near a specific location (OPTIMIZED for performance)
     /// - Parameters:
@@ -69,11 +86,15 @@ final class BlockfaceLoader: @unchecked Sendable {
         return try await withCheckedThrowingContinuation { continuation in
             queue.async {
                 do {
-                    logger.info("📥 Loading full blockface dataset (32MB)...")
+                    // Get selected data source from developer settings
+                    let dataSource = DeveloperSettings.shared.blockfaceDataSource
+                    let filename = dataSource.filename
+
+                    logger.info("📥 Loading blockface dataset from \(filename).json (32MB)...")
                     let startTime = Date()
 
-                    guard let url = Bundle.main.url(forResource: "sample_blockfaces", withExtension: "json") else {
-                        logger.error("sample_blockfaces.json not found in bundle")
+                    guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
+                        logger.error("\(filename).json not found in bundle")
                         throw BlockfaceLoaderError.fileNotFound
                     }
 
@@ -83,7 +104,7 @@ final class BlockfaceLoader: @unchecked Sendable {
                     self.allBlockfacesCache = response.blockfaces
 
                     let elapsed = Date().timeIntervalSince(startTime)
-                    logger.info("✅ Loaded \(response.blockfaces.count) blockfaces in \(String(format: "%.2f", elapsed))s")
+                    logger.info("✅ Loaded \(response.blockfaces.count) blockfaces from \(dataSource.displayName) in \(String(format: "%.2f", elapsed))s")
 
                     continuation.resume(returning: response.blockfaces)
                 } catch {
@@ -102,10 +123,14 @@ final class BlockfaceLoader: @unchecked Sendable {
             return cached
         }
 
-        logger.info("⚠️ Loading ALL blockfaces synchronously (SLOW) - consider using loadBlockfacesNear instead")
+        // Get selected data source from developer settings
+        let dataSource = DeveloperSettings.shared.blockfaceDataSource
+        let filename = dataSource.filename
 
-        guard let url = Bundle.main.url(forResource: "sample_blockfaces", withExtension: "json") else {
-            logger.error("sample_blockfaces.json not found in bundle")
+        logger.info("⚠️ Loading ALL blockfaces from \(filename).json synchronously (SLOW) - consider using loadBlockfacesNear instead")
+
+        guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
+            logger.error("\(filename).json not found in bundle")
             throw BlockfaceLoaderError.fileNotFound
         }
 
@@ -114,7 +139,7 @@ final class BlockfaceLoader: @unchecked Sendable {
 
         allBlockfacesCache = response.blockfaces
 
-        logger.info("Loaded \(response.blockfaces.count) blockfaces")
+        logger.info("Loaded \(response.blockfaces.count) blockfaces from \(dataSource.displayName)")
 
         return response.blockfaces
     }
