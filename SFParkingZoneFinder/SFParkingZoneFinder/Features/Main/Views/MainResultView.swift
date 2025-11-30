@@ -174,7 +174,8 @@ struct MainResultView: View {
             let _ = print("🔧 DEBUG: MainResultView body - devMode: \(devSettings.developerModeUnlocked), expanded: \(isMapExpanded), panel: \(developerPanelExpanded)")
             ZStack {
             // Layer 1: Fullscreen Map (always visible as background)
-            if viewModel.error == nil && !viewModel.isLoading {
+            // Show map for normal state AND outside coverage (exclude other errors)
+            if (viewModel.error == nil || viewModel.error == .outsideCoverage) && !viewModel.isLoading {
                 ZStack {
                     ZoneMapView(
                         zones: viewModel.allLoadedZones,
@@ -283,7 +284,8 @@ struct MainResultView: View {
             }
 
             // Layer 2: Card overlays
-            if !viewModel.isLoading && viewModel.error == nil {
+            // Show cards for normal state AND outside coverage
+            if !viewModel.isLoading && (viewModel.error == nil || viewModel.error == .outsideCoverage) {
                 VStack {
                     // Address search card (always visible for location button)
                     AddressSearchCard(
@@ -396,7 +398,8 @@ struct MainResultView: View {
             }
 
             // Layer 3: Bottom Navigation Bar (always visible when not loading/error)
-            if !viewModel.isLoading && viewModel.error == nil {
+            // Show navigation for normal state AND outside coverage
+            if !viewModel.isLoading && (viewModel.error == nil || viewModel.error == .outsideCoverage) {
                 VStack {
                     Spacer()
                     BottomNavigationBar(
