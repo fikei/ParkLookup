@@ -201,27 +201,39 @@ struct RegulationsDrawerView: View {
 
     private func iconForParkUntil(_ parkUntil: ParkUntilDisplay) -> String {
         switch parkUntil {
-        case .streetCleaning:
-            return "wind"
+        case .restriction(let type, _):
+            if type.lowercased().contains("street cleaning") {
+                return "wind"
+            } else {
+                return "nosign"
+            }
         case .timeLimit:
             return "clock"
-        case .meteredEnforcement:
+        case .meteredEnd:
             return "dollarsign.circle"
         case .enforcementStart:
             return "bell"
+        case .unknown:
+            return "questionmark.circle"
         }
     }
 
     private func colorForParkUntil(_ parkUntil: ParkUntilDisplay) -> Color {
         switch parkUntil {
-        case .streetCleaning:
-            return .red
+        case .restriction(let type, _):
+            if type.lowercased().contains("street cleaning") {
+                return .red
+            } else {
+                return .red
+            }
         case .timeLimit:
             return .orange
-        case .meteredEnforcement:
+        case .meteredEnd:
             return .blue
         case .enforcementStart:
             return .green
+        case .unknown:
+            return .gray
         }
     }
 
@@ -231,28 +243,48 @@ struct RegulationsDrawerView: View {
 
     private func titleForParkUntil(_ parkUntil: ParkUntilDisplay) -> String {
         switch parkUntil {
-        case .streetCleaning(let time, _):
-            return "Move by \(formatTime(time)) for street cleaning"
-        case .timeLimit(let time, _):
-            return "Move by \(formatTime(time)) - time limit"
-        case .meteredEnforcement(let time, _):
-            return "Meter enforcement starts at \(formatTime(time))"
+        case .restriction(let type, let date):
+            let timeStr = formatDate(date)
+            if type.lowercased().contains("street cleaning") {
+                return "Move by \(timeStr) for street cleaning"
+            } else {
+                return "Move by \(timeStr) - \(type)"
+            }
+        case .timeLimit(let date):
+            return "Move by \(formatDate(date)) - time limit"
+        case .meteredEnd(let date):
+            return "Free parking starts at \(formatDate(date))"
         case .enforcementStart(let time, _):
             return "Enforcement starts at \(formatTime(time))"
+        case .unknown:
+            return "Unable to calculate park until time"
         }
     }
 
     private func explanationForParkUntil(_ parkUntil: ParkUntilDisplay) -> String {
         switch parkUntil {
-        case .streetCleaning:
-            return "Street cleaning applies to all vehicles, including those with valid permits."
+        case .restriction(let type, _):
+            if type.lowercased().contains("street cleaning") {
+                return "Street cleaning applies to all vehicles, including those with valid permits."
+            } else {
+                return "This restriction applies to all vehicles at this location."
+            }
         case .timeLimit:
             return "Your parking time limit will expire. Move your vehicle before then."
-        case .meteredEnforcement:
-            return "You'll need to pay for parking or move your vehicle."
+        case .meteredEnd:
+            return "Meter enforcement ends and parking becomes free."
         case .enforcementStart:
             return "Parking restrictions will begin at this time."
+        case .unknown:
+            return "Check the regulations below for details."
         }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: date)
     }
 
     private func formatTime(_ time: TimeOfDay) -> String {
