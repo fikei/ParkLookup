@@ -657,7 +657,7 @@ struct ParkUntilCalculator {
     func calculateParkUntil(at date: Date = Date()) -> ParkUntilDisplay? {
         print("🔍 ParkUntilCalculator.calculateParkUntil: validityStatus=\(validityStatus), regulationCount=\(allRegulations.count)")
         for (index, reg) in allRegulations.enumerated() {
-            print("  [\(index)] type=\(reg.type), desc=\(reg.description), enforcementDays=\(reg.enforcementDays?.map { $0.rawValue }.joined(separator: ",") ?? "nil")")
+            print("  [\(index)] type=\(String(describing: reg.type)), desc=\(reg.description), enforcementDays=\(reg.enforcementDays?.map { $0.rawValue }.joined(separator: ",") ?? "nil")")
         }
 
         var earliestRestriction: ParkUntilDisplay?
@@ -671,7 +671,7 @@ struct ParkUntilCalculator {
         print("🔍 Step 1: Checking street cleaning and no parking regulations...")
         for regulation in allRegulations {
             if regulation.type == .streetCleaning || regulation.type == .noParking {
-                print("  Found \(regulation.type) regulation: \(regulation.description)")
+                print("  Found \(String(describing: regulation.type)) regulation: \(regulation.description)")
                 if let nextOccurrence = findNextOccurrence(of: regulation, from: date) {
                     print("  Next occurrence: \(nextOccurrence)")
                     if earliestDate == nil || nextOccurrence < earliestDate! {

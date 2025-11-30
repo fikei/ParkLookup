@@ -771,7 +771,7 @@ final class MainResultViewModel: ObservableObject {
 
         logger.info("✅ extractRegulationsFromZone: extracted \(regulations.count) regulations")
         for (index, reg) in regulations.enumerated() {
-            logger.info("  [\(index)] type=\(reg.type), desc=\(reg.description)")
+            logger.info("  [\(index)] type=\(String(describing: reg.type)), desc=\(reg.description)")
         }
         return regulations
     }
