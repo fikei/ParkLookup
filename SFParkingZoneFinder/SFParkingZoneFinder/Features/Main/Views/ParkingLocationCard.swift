@@ -297,9 +297,6 @@ struct ParkingLocationCard: View {
                 timeLimitMinutes: data.timeLimitMinutes,
                 regulations: data.detailedRegulations
             )
-            .presentationDetents([.fraction(0.85), .large])
-            .presentationDragIndicator(.visible)
-            .presentationBackgroundInteraction(.enabled)
         }
     }
 

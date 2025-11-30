@@ -70,57 +70,26 @@ struct RegulationsDrawerView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Park Until header
-            if let parkUntil = parkUntilResult {
-                HStack {
-                    Text(parkUntil.shortFormatted())
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-
-                    Spacer()
-
-                    // Dismiss button
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
-                    }
+        NavigationView {
+            VStack(spacing: 0) {
+                // Regulations list
+                if regulations.isEmpty {
+                    emptyStateView
+                } else {
+                    regulationsList
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 16)
-            } else {
-                // No Park Until - just show close button
-                HStack {
-                    Text("Parking Regulations")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-
-                    Spacer()
-
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 16)
             }
-
-            Divider()
-
-            // Regulations list
-            if regulations.isEmpty {
-                emptyStateView
-            } else {
-                regulationsList
+            .navigationTitle("Parking Regulations")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
         }
     }
