@@ -15,6 +15,9 @@ from validators import DataValidator
 # iOS Resources path (relative to backend directory)
 IOS_RESOURCES_DIR = Path(__file__).parent.parent / "SFParkingZoneFinder" / "SFParkingZoneFinder" / "Resources"
 
+# Local data path
+DATA_RAW_DIR = Path(__file__).parent.parent / "data" / "raw"
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -158,9 +161,14 @@ class ParkingDataPipeline:
             logger.exception(f"Pipeline failed with error: {e}")
             return False
 
-    async def _fetch_all_data(self, skip_meters: bool) -> dict:
+    async def _fetch_all_data(self, skip_meters: bool, use_local: bool = True) -> dict:
         """Fetch data from all sources concurrently"""
         raw_data = {}
+
+        # Use local geojson files if available
+        if use_local:
+            raw_data = await self._load_local_geojson()
+            return raw_data
 
         # Fetch blockface (primary source) and RPP areas in parallel
         async with RPPAreasFetcher() as rpp_fetcher, \
@@ -200,6 +208,51 @@ class ParkingDataPipeline:
 
         # Save raw data for debugging
         self._save_raw_data(raw_data)
+
+        return raw_data
+
+    async def _load_local_geojson(self) -> dict:
+        """Load data from local geojson files instead of fetching"""
+        logger.info("Loading data from local geojson files...")
+
+        raw_data = {
+            "blockface": [],
+            "rpp_areas": [],
+            "meters": []
+        }
+
+        # Load blockfaces (contains multi-RPP data in rpparea1/2/3 fields)
+        blockface_path = DATA_RAW_DIR / "Parking_regulations_(except_non-metered_color_curb)_20251128.geojson"
+        if blockface_path.exists():
+            logger.info(f"Loading blockface data from {blockface_path.name}...")
+            with open(blockface_path) as f:
+                geojson = json.load(f)
+                for feature in geojson.get('features', []):
+                    record = feature.get('properties', {})
+                    if 'geometry' in feature:
+                        record['shape'] = feature['geometry']
+                    raw_data["blockface"].append(record)
+            logger.info(f"Loaded {len(raw_data['blockface'])} blockface records with multi-RPP support")
+
+        # Load meters
+        meters_path = DATA_RAW_DIR / "Parking_Meters_20251128.geojson"
+        if meters_path.exists():
+            logger.info(f"Loading meter data from {meters_path.name}...")
+            with open(meters_path) as f:
+                geojson = json.load(f)
+                for feature in geojson.get('features', []):
+                    record = feature.get('properties', {})
+                    if 'geometry' in feature:
+                        # Extract lat/lon from geometry for meters
+                        coords = feature['geometry'].get('coordinates', [])
+                        if coords:
+                            record['longitude'] = coords[0]
+                            record['latitude'] = coords[1]
+                    raw_data["meters"].append(record)
+            logger.info(f"Loaded {len(raw_data['meters'])} meter records")
+
+        # Note: RPP areas can stay empty - we derive from blockface now
+        logger.info("RPP areas will be derived from blockface data")
 
         return raw_data
 

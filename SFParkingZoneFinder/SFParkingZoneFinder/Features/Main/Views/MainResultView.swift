@@ -57,6 +57,20 @@ struct MainResultView: View {
         viewModel.error == .outsideCoverage
     }
 
+    /// Check if a coordinate is within SF bounds
+    private func isWithinSFBounds(_ coordinate: CLLocationCoordinate2D) -> Bool {
+        // SF bounds: approximately 37.7 to 37.8 latitude, -122.52 to -122.35 longitude
+        let latMin = 37.6398
+        let latMax = 37.8324
+        let lonMin = -122.5274
+        let lonMax = -122.3281
+
+        return coordinate.latitude >= latMin &&
+               coordinate.latitude <= latMax &&
+               coordinate.longitude >= lonMin &&
+               coordinate.longitude <= lonMax
+    }
+
     /// The coordinate to use for map centering (searched or current)
     /// Validates coordinates to prevent NaN errors in CoreGraphics
     private var activeCoordinate: CLLocationCoordinate2D? {
@@ -198,6 +212,11 @@ struct MainResultView: View {
                             }
                         },
                         onMapTapped: { coordinate in
+                            // Ignore taps outside SF coverage area
+                            guard isWithinSFBounds(coordinate) else {
+                                return
+                            }
+
                             // Generic tap handler (works for zones, blockfaces, or empty map areas)
                             tappedCoordinate = coordinate
 
@@ -2452,11 +2471,11 @@ private struct OutOfCoverageBanner: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.orange.opacity(colorScheme == .dark ? 0.2 : 0.1))
+                .fill(Color.orange.opacity(colorScheme == .dark ? 0.3 : 0.2))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(Color.orange.opacity(0.5), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }

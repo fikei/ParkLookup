@@ -26,6 +26,9 @@ from config import OUTPUT_DIR
 # iOS Resources path
 IOS_RESOURCES_DIR = Path(__file__).parent.parent / "SFParkingZoneFinder" / "SFParkingZoneFinder" / "Resources"
 
+# Local data path
+DATA_RAW_DIR = Path(__file__).parent.parent / "data" / "raw"
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -202,6 +205,38 @@ def extract_regulations(record: Dict[str, Any]) -> List[Dict[str, Any]]:
     return regulations
 
 
+def load_local_geojson(limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    """Load blockface data from local geojson file"""
+    # Use Parking_regulations file - it has RPP data including rpparea1/2/3 for multi-RPP
+    geojson_path = DATA_RAW_DIR / "Parking_regulations_(except_non-metered_color_curb)_20251128.geojson"
+
+    if not geojson_path.exists():
+        logger.error(f"Local geojson file not found: {geojson_path}")
+        logger.info("Please restore from git: git checkout 1e8bdc5 -- data/raw/*.geojson")
+        raise FileNotFoundError(f"Data source not found: {geojson_path}")
+
+    logger.info(f"Reading from: {geojson_path}")
+    logger.info(f"File size: {geojson_path.stat().st_size / (1024*1024):.1f} MB")
+
+    with open(geojson_path, 'r') as f:
+        geojson_data = json.load(f)
+
+    # Extract features from GeoJSON
+    features = geojson_data.get('features', [])
+    logger.info(f"Found {len(features)} features in geojson")
+
+    # Convert GeoJSON features to dict format expected by converter
+    records = []
+    for feature in features[:limit] if limit else features:
+        # Combine geometry and properties into single dict
+        record = feature.get('properties', {})
+        if 'geometry' in feature:
+            record['shape'] = feature['geometry']
+        records.append(record)
+
+    return records
+
+
 def convert_blockface_to_ios(record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Convert a raw DataSF blockface record to iOS Blockface format"""
     try:
@@ -253,7 +288,7 @@ def convert_blockface_to_ios(record: Dict[str, Any]) -> Optional[Dict[str, Any]]
         return None
 
 
-async def fetch_and_export(limit: Optional[int] = None, output_path: Optional[Path] = None):
+async def fetch_and_export(limit: Optional[int] = None, output_path: Optional[Path] = None, use_local: bool = True):
     """Fetch blockface data and export to iOS format"""
     logger.info("=" * 60)
     logger.info("Blockface Export to iOS")
@@ -264,21 +299,25 @@ async def fetch_and_export(limit: Optional[int] = None, output_path: Optional[Pa
         output_path = IOS_RESOURCES_DIR / "sample_blockfaces.json"
 
     logger.info(f"Output path: {output_path}")
-    if limit:
-        logger.info(f"Limit: {limit} blockfaces")
-    else:
-        logger.info("Fetching ALL blockfaces (this may take several minutes)")
 
     # Fetch blockface data
-    logger.info("\n[Step 1/3] Fetching blockface data from DataSF...")
-    async with BlockfaceFetcher() as fetcher:
+    if use_local:
+        logger.info("\n[Step 1/3] Loading blockface data from local geojson...")
+        raw_blockfaces = load_local_geojson(limit=limit)
+    else:
         if limit:
-            raw_blockfaces = await fetcher.fetch_sample(limit=limit)
+            logger.info(f"Limit: {limit} blockfaces")
         else:
-            # Fetch only RPP blockfaces (faster and more relevant)
-            raw_blockfaces = await fetcher.fetch_rpp_only()
+            logger.info("Fetching ALL blockfaces (this may take several minutes)")
+        logger.info("\n[Step 1/3] Fetching blockface data from DataSF...")
+        async with BlockfaceFetcher() as fetcher:
+            if limit:
+                raw_blockfaces = await fetcher.fetch_sample(limit=limit)
+            else:
+                # Fetch only RPP blockfaces (faster and more relevant)
+                raw_blockfaces = await fetcher.fetch_rpp_only()
 
-    logger.info(f"Fetched {len(raw_blockfaces)} blockface records")
+    logger.info(f"Loaded {len(raw_blockfaces)} blockface records")
 
     # Convert to iOS format
     logger.info("\n[Step 2/3] Converting to iOS format...")
