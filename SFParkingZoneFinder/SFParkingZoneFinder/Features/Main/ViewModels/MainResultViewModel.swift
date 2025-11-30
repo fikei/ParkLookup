@@ -728,7 +728,8 @@ final class MainResultViewModel: ObservableObject {
 
     /// Convert zone rules to RegulationInfo array for Park Until calculation and regulations drawer
     private func extractRegulationsFromZone(_ zone: ParkingZone) -> [RegulationInfo] {
-        zone.rules.map { rule in
+        logger.info("🔍 extractRegulationsFromZone: zone=\(zone.displayName), ruleCount=\(zone.rules.count)")
+        let regulations = zone.rules.map { rule in
             // Map RuleType to RegulationType
             let type: ParkingLookupResult.RegulationType
             switch rule.ruleType {
@@ -767,6 +768,12 @@ final class MainResultViewModel: ObservableObject {
                 timeLimit: rule.timeLimit
             )
         }
+
+        logger.info("✅ extractRegulationsFromZone: extracted \(regulations.count) regulations")
+        for (index, reg) in regulations.enumerated() {
+            logger.info("  [\(index)] type=\(reg.type), desc=\(reg.description)")
+        }
+        return regulations
     }
 
     /// Convert zone data error to user-facing app error

@@ -655,6 +655,11 @@ struct ParkUntilCalculator {
 
     /// Calculate when parking expires, considering ALL regulations
     func calculateParkUntil(at date: Date = Date()) -> ParkUntilDisplay? {
+        print("🔍 ParkUntilCalculator.calculateParkUntil: validityStatus=\(validityStatus), regulationCount=\(allRegulations.count)")
+        for (index, reg) in allRegulations.enumerated() {
+            print("  [\(index)] type=\(reg.type), desc=\(reg.description), enforcementDays=\(reg.enforcementDays?.map { $0.rawValue }.joined(separator: ",") ?? "nil")")
+        }
+
         var earliestRestriction: ParkUntilDisplay?
         var earliestDate: Date?
 
@@ -663,9 +668,12 @@ struct ParkUntilCalculator {
         // 1. Check for upcoming street cleaning and no parking zones
         // IMPORTANT: These restrictions apply to EVERYONE, including valid permit holders.
         // Valid permits do NOT exempt users from street cleaning or no parking restrictions.
+        print("🔍 Step 1: Checking street cleaning and no parking regulations...")
         for regulation in allRegulations {
             if regulation.type == .streetCleaning || regulation.type == .noParking {
+                print("  Found \(regulation.type) regulation: \(regulation.description)")
                 if let nextOccurrence = findNextOccurrence(of: regulation, from: date) {
+                    print("  Next occurrence: \(nextOccurrence)")
                     if earliestDate == nil || nextOccurrence < earliestDate! {
                         earliestDate = nextOccurrence
                         earliestRestriction = .restriction(
@@ -757,6 +765,7 @@ struct ParkUntilCalculator {
             }
         }
 
+        print("✅ ParkUntilCalculator result: \(earliestRestriction?.description ?? "nil")")
         return earliestRestriction
     }
 

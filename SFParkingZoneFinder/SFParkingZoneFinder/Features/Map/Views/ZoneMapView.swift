@@ -891,15 +891,18 @@ struct ZoneMapView: UIViewRepresentable {
                 let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
 
                 // Deduplicate annotations by zoneId to prevent duplicate pins
+                logger.info("🔍 Deduplication: Total annotations before: \(annotations.count)")
                 var seenZoneIds = Set<String>()
                 let uniqueAnnotations = annotations.filter { annotation in
                     let zoneId = annotation.zoneId
                     if seenZoneIds.contains(zoneId) {
+                        logger.info("  ❌ Duplicate zoneId=\(zoneId), skipping")
                         return false
                     }
                     seenZoneIds.insert(zoneId)
                     return true
                 }
+                logger.info("✅ Deduplication: Unique annotations after: \(uniqueAnnotations.count), removed \(annotations.count - uniqueAnnotations.count) duplicates")
 
                 // Conditionally add annotations based on zone polygon visibility
                 if showZonePolygons {

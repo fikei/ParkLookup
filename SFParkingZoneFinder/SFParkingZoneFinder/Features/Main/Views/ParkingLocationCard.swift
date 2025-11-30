@@ -439,6 +439,16 @@ struct ParkingLocationCard: View {
                 }
 
                 Spacer()
+
+                // "See regulations" button - compact icon version
+                Button {
+                    showRegulationsDrawer = true
+                } label: {
+                    Image(systemName: "list.bullet.circle")
+                        .font(.title3)
+                        .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
+                }
+                .padding(.trailing, 4)
             }
             .padding(.horizontal, 12)
         }
