@@ -500,6 +500,9 @@ final class MainResultViewModel: ObservableObject {
                 enforcementEndTime = nil
                 enforcementDays = nil
             }
+
+            // Extract detailed regulations from zone rules for Park Until calculation and regulations drawer
+            detailedRegulations = extractRegulationsFromZone(zone)
         } else {
             zoneName = "Unknown Zone"
             zoneType = .residentialPermit
@@ -509,6 +512,7 @@ final class MainResultViewModel: ObservableObject {
             enforcementStartTime = nil
             enforcementEndTime = nil
             enforcementDays = nil
+            detailedRegulations = []
         }
 
         // Validity & rules
@@ -720,6 +724,49 @@ final class MainResultViewModel: ObservableObject {
         }
 
         return "\(rateStr) • \(timeLimitStr)"
+    }
+
+    /// Convert zone rules to RegulationInfo array for Park Until calculation and regulations drawer
+    private func extractRegulationsFromZone(_ zone: ParkingZone) -> [RegulationInfo] {
+        zone.rules.map { rule in
+            // Map RuleType to RegulationType
+            let type: ParkingLookupResult.RegulationType
+            switch rule.ruleType {
+            case .permitRequired:
+                type = .residentialPermit
+            case .timeLimit:
+                type = .timeLimited
+            case .metered:
+                type = .metered
+            case .streetCleaning:
+                type = .streetCleaning
+            case .noParking, .towAway:
+                type = .noParking
+            case .loadingZone:
+                type = .timeLimited  // Loading zones are time-limited
+            }
+
+            // Format time strings to "HH:MM" format
+            let enforcementStart = rule.enforcementStartTime.map {
+                String(format: "%02d:%02d", $0.hour, $0.minute)
+            }
+            let enforcementEnd = rule.enforcementEndTime.map {
+                String(format: "%02d:%02d", $0.hour, $0.minute)
+            }
+
+            // Use first valid permit area as the permit zone (for RPP rules)
+            let permitZone: String? = (type == .residentialPermit) ? zone.validPermitAreas.first : nil
+
+            return RegulationInfo(
+                type: type,
+                description: rule.description,
+                enforcementDays: rule.enforcementDays,
+                enforcementStart: enforcementStart,
+                enforcementEnd: enforcementEnd,
+                permitZone: permitZone,
+                timeLimit: rule.timeLimit
+            )
+        }
     }
 
     /// Convert zone data error to user-facing app error
