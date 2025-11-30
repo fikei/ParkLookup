@@ -890,11 +890,22 @@ struct ZoneMapView: UIViewRepresentable {
                 // Coordinator is updated in updateUIView, so this reflects real-time state
                 let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
 
+                // Deduplicate annotations by zoneId to prevent duplicate pins
+                var seenZoneIds = Set<String>()
+                let uniqueAnnotations = annotations.filter { annotation in
+                    guard let zoneId = annotation.zoneId else { return true }
+                    if seenZoneIds.contains(zoneId) {
+                        return false
+                    }
+                    seenZoneIds.insert(zoneId)
+                    return true
+                }
+
                 // Conditionally add annotations based on zone polygon visibility
                 if showZonePolygons {
-                    mapView.addAnnotations(annotations)
+                    mapView.addAnnotations(uniqueAnnotations)
 
-                    for annotation in annotations {
+                    for annotation in uniqueAnnotations {
                         if let view = mapView.view(for: annotation) {
                             view.alpha = initialAlpha
                         }
