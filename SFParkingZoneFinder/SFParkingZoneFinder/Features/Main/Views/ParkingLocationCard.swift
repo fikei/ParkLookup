@@ -205,6 +205,7 @@ struct ParkingLocationCard: View {
     }
 
     /// Generates abbreviated detail line: "2hr • $3/hr • Zone Q" or "Zone Q"
+    /// For non-permit holders, shows time limit instead of zone
     private var abbreviatedDetailLine: String? {
         var components: [String] = []
 
@@ -215,23 +216,42 @@ struct ParkingLocationCard: View {
             } else {
                 components.append("$2/hr • 2hr max")
             }
-        }
-
-        // Add zone(s) - but NOT if it says "Unknown street"
-        let locationToShow: String
-        if data.locationName.lowercased().contains("unknown") {
-            // Don't show "Unknown street"
-            locationToShow = ""
-        } else if data.locationType == .metered {
-            locationToShow = "Metered"
-        } else if isMultiPermitLocation {
-            locationToShow = formattedLocationsList
+            // For metered zones, also add "Metered" label
+            if !data.locationName.lowercased().contains("unknown") {
+                components.append("Metered")
+            }
         } else {
-            locationToShow = data.locationName
-        }
+            // For non-metered zones (residential, etc.)
+            // Non-permit holders: show time limit instead of zone
+            // Permit holders: show zone
+            if !isValidStyle {
+                // Non-permit holder → show time limit
+                if let timeLimit = data.timeLimitMinutes {
+                    let hours = timeLimit / 60
+                    let minutes = timeLimit % 60
+                    if hours > 0 && minutes > 0 {
+                        components.append("\(hours)h \(minutes)m")
+                    } else if hours > 0 {
+                        components.append("\(hours)hr")
+                    } else if minutes > 0 {
+                        components.append("\(minutes)m")
+                    }
+                }
+            } else {
+                // Permit holder → show zone
+                let locationToShow: String
+                if data.locationName.lowercased().contains("unknown") {
+                    locationToShow = ""
+                } else if isMultiPermitLocation {
+                    locationToShow = formattedLocationsList
+                } else {
+                    locationToShow = data.locationName
+                }
 
-        if !locationToShow.isEmpty {
-            components.append(locationToShow)
+                if !locationToShow.isEmpty {
+                    components.append(locationToShow)
+                }
+            }
         }
 
         return components.isEmpty ? nil : components.joined(separator: " • ")
@@ -357,14 +377,6 @@ struct ParkingLocationCard: View {
                                 .fontWeight(.semibold)
                         }
                         .foregroundColor(.primary)
-
-                        // Location name as secondary copy
-                        if !data.locationName.lowercased().contains("unknown") {
-                            Text(data.locationName)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                        }
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
@@ -612,21 +624,19 @@ struct ParkingLocationCard: View {
             Text("Anytime")
                 .font(.caption)
                 .foregroundColor(.secondary)
-        } else if parkUntilResult != nil {
-            // Show location name when Park Until is displayed
-            if !data.locationName.lowercased().contains("unknown") {
-                Text(data.locationName)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
         } else if let details = abbreviatedDetailLine {
-            // Show abbreviated details: "2hr • $3/hr • Zone Q"
+            // Show abbreviated details: "2hr • Zone Q" or "2hr" for non-permit holders
             Text(details)
                 .font(.caption)
                 .foregroundColor(.secondary)
+        } else if parkUntilResult == nil && data.locationName.lowercased().contains("unknown") {
+            // Empty for unknown locations with no park until
+            Text("")
+                .font(.caption)
+                .foregroundColor(.secondary)
         } else {
-            // Fallback
-            Text(data.locationName.lowercased().contains("unknown") ? "" : data.locationName)
+            // Fallback - show location name
+            Text(data.locationName)
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -665,9 +675,9 @@ struct ParkingLocationCard: View {
                         }
                         .foregroundColor(.primary)
 
-                        // Location name as secondary copy
-                        if !data.locationName.lowercased().contains("unknown") {
-                            Text(data.locationName)
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
