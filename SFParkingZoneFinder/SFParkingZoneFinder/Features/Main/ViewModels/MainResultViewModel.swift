@@ -35,6 +35,7 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var validityStatus: PermitValidityStatus = .noPermitRequired
     @Published private(set) var ruleSummary: String = ""
     @Published private(set) var ruleSummaryLines: [String] = []
+    @Published private(set) var detailedRegulations: [RegulationInfo] = []  // Detailed regulations for bottom sheet
     @Published private(set) var warnings: [ParkingWarning] = []
     @Published private(set) var conditionalFlags: [ConditionalFlag] = []
 
@@ -499,6 +500,9 @@ final class MainResultViewModel: ObservableObject {
                 enforcementEndTime = nil
                 enforcementDays = nil
             }
+
+            // Extract detailed regulations from zone rules for Park Until calculation and regulations drawer
+            detailedRegulations = extractRegulationsFromZone(zone)
         } else {
             zoneName = "Unknown Zone"
             zoneType = .residentialPermit
@@ -508,6 +512,7 @@ final class MainResultViewModel: ObservableObject {
             enforcementStartTime = nil
             enforcementEndTime = nil
             enforcementDays = nil
+            detailedRegulations = []
         }
 
         // Validity & rules
@@ -560,7 +565,8 @@ final class MainResultViewModel: ObservableObject {
         switch result.primaryRegulationType {
         case .metered:
             zoneType = .metered
-            meteredSubtitle = "$2/hr • 2hr max"  // TODO: Get from blockface data
+            // Extract meter rate and time limit from regulations
+            meteredSubtitle = extractMeteredSubtitle(from: result.allRegulations)
         case .residentialPermit:
             zoneType = .residentialPermit
             meteredSubtitle = nil
@@ -626,6 +632,9 @@ final class MainResultViewModel: ObservableObject {
             applicablePermits = []
         }
 
+        // Store detailed regulations for bottom sheet
+        detailedRegulations = result.allRegulations
+
         // Build rule summary from regulations
         ruleSummaryLines = result.allRegulations.map { reg in
             var line = reg.description
@@ -682,6 +691,89 @@ final class MainResultViewModel: ObservableObject {
         let components = timeStr.split(separator: ":").compactMap { Int($0) }
         guard components.count == 2 else { return nil }
         return TimeOfDay(hour: components[0], minute: components[1])
+    }
+
+    /// Extract metered parking subtitle from regulations (e.g., "$3/hr • 2hr max")
+    /// Falls back to default if data is missing
+    private func extractMeteredSubtitle(from regulations: [RegulationInfo]) -> String {
+        // Find metered regulation
+        guard let meteredReg = regulations.first(where: { $0.type == .metered }) else {
+            return "$2/hr • 2hr max"  // Fallback if no metered regulation found
+        }
+
+        // Extract rate (will be in the description like "Metered $3/hr, 09:00-18:00")
+        // Try to parse from description first
+        let description = meteredReg.description
+        var rateStr = "$2/hr"  // Default
+        var timeLimitStr = "2hr max"  // Default
+
+        // Parse rate from description (format: "Metered $X/hr" or "Metered parking $X/hr")
+        if let rateMatch = description.range(of: #"\$[\d.]+/hr"#, options: .regularExpression) {
+            rateStr = String(description[rateMatch])
+        }
+
+        // Use time limit if available
+        if let timeLimit = meteredReg.timeLimit {
+            let hours = timeLimit / 60
+            let minutes = timeLimit % 60
+            if minutes == 0 {
+                timeLimitStr = "\(hours)hr max"
+            } else {
+                timeLimitStr = "\(hours)h\(minutes)m max"
+            }
+        }
+
+        return "\(rateStr) • \(timeLimitStr)"
+    }
+
+    /// Convert zone rules to RegulationInfo array for Park Until calculation and regulations drawer
+    private func extractRegulationsFromZone(_ zone: ParkingZone) -> [RegulationInfo] {
+        logger.info("🔍 extractRegulationsFromZone: zone=\(zone.displayName), ruleCount=\(zone.rules.count)")
+        let regulations = zone.rules.map { rule in
+            // Map RuleType to RegulationType
+            let type: ParkingLookupResult.RegulationType
+            switch rule.ruleType {
+            case .permitRequired:
+                type = .residentialPermit
+            case .timeLimit:
+                type = .timeLimited
+            case .metered:
+                type = .metered
+            case .streetCleaning:
+                type = .streetCleaning
+            case .noParking, .towAway:
+                type = .noParking
+            case .loadingZone:
+                type = .timeLimited  // Loading zones are time-limited
+            }
+
+            // Format time strings to "HH:MM" format
+            let enforcementStart = rule.enforcementStartTime.map {
+                String(format: "%02d:%02d", $0.hour, $0.minute)
+            }
+            let enforcementEnd = rule.enforcementEndTime.map {
+                String(format: "%02d:%02d", $0.hour, $0.minute)
+            }
+
+            // Use first valid permit area as the permit zone (for RPP rules)
+            let permitZone: String? = (type == .residentialPermit) ? zone.validPermitAreas.first : nil
+
+            return RegulationInfo(
+                type: type,
+                description: rule.description,
+                enforcementDays: rule.enforcementDays,
+                enforcementStart: enforcementStart,
+                enforcementEnd: enforcementEnd,
+                permitZone: permitZone,
+                timeLimit: rule.timeLimit
+            )
+        }
+
+        logger.info("✅ extractRegulationsFromZone: extracted \(regulations.count) regulations")
+        for (index, reg) in regulations.enumerated() {
+            logger.info("  [\(index)] type=\(String(describing: reg.type)), desc=\(reg.description)")
+        }
+        return regulations
     }
 
     /// Convert zone data error to user-facing app error

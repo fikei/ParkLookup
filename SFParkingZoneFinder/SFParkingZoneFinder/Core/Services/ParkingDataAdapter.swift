@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import os.log
 
 // MARK: - Data Structures
 
@@ -124,6 +125,8 @@ class ZoneDataAdapter: ParkingDataAdapterProtocol {
 
 /// Adapter for blockface-based parking lookup
 class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
+    private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "BlockfaceDataAdapter")
+
     // Track last selected blockface for sticky preference
     private var lastSelectedBlockface: Blockface?
 
@@ -352,7 +355,10 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
             .timeLimit
 
         // Build all regulations list
+        logger.info("🔍 Building regulations from blockface: \(blockface.street), regulationCount=\(blockface.regulations.count)")
         let allRegulations = blockface.regulations.map { reg in
+            logger.info("  Blockface regulation: type=\(reg.type), desc=\(reg.description)")
+
             // Convert String days to DayOfWeek
             let days: [DayOfWeek]? = reg.enforcementDays?.compactMap { dayStr in
                 DayOfWeek.allCases.first { $0.rawValue.lowercased() == dayStr.lowercased() }
@@ -368,6 +374,7 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
                 timeLimit: reg.timeLimit
             )
         }
+        logger.info("✅ Built \(allRegulations.count) regulations for ParkingLookupResult")
 
         // Find next restriction
         let nextRestriction = findNextRestriction(blockface: blockface)
@@ -548,3 +555,369 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
 
 // MARK: - Extensions
 // (TimeOfDay.formatted already exists in TimeOfDay model)
+
+// MARK: - Park Until Calculator
+
+/// Display format for "Park Until" calculation
+enum ParkUntilDisplay {
+    case timeLimit(date: Date)                          // Expires at specific time due to time limit
+    case enforcementStart(time: TimeOfDay, date: Date)  // Can park until enforcement starts
+    case restriction(type: String, date: Date)          // Restriction starts (street cleaning, tow-away)
+    case meteredEnd(date: Date)                         // Metered enforcement ends
+    case unknown                                        // Unable to calculate
+
+    /// Get the underlying date for comparison
+    var date: Date? {
+        switch self {
+        case .timeLimit(let date), .restriction(_, let date), .meteredEnd(let date):
+            return date
+        case .enforcementStart(_, let targetDate):
+            return targetDate
+        case .unknown:
+            return nil
+        }
+    }
+
+    /// Format for display (e.g., "Park until 3:00 PM", "Park until Mon 8:00 AM (street cleaning)")
+    func formatted() -> String {
+        let calendar = Calendar.current
+        let formatter = DateFormatter()
+
+        switch self {
+        case .timeLimit(let date):
+            formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
+            return "Park until \(formatter.string(from: date))"
+
+        case .restriction(let type, let date):
+            formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
+            return "Park until \(formatter.string(from: date))"
+
+        case .meteredEnd(let date):
+            formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
+            return "Park until \(formatter.string(from: date))"
+
+        case .enforcementStart(let time, let targetDate):
+            let now = Date()
+            let currentHour = calendar.component(.hour, from: now)
+            let targetIsAM = time.hour < 12
+
+            if calendar.isDateInToday(targetDate) {
+                formatter.dateFormat = "h:mm a"
+                guard let dateAtTime = calendar.date(
+                    bySettingHour: time.hour,
+                    minute: time.minute,
+                    second: 0,
+                    of: targetDate
+                ) else {
+                    return "Park until \(time.hour):\(String(format: "%02d", time.minute))"
+                }
+                return "Park until \(formatter.string(from: dateAtTime))"
+            }
+
+            if calendar.isDateInTomorrow(targetDate) && currentHour >= 12 && targetIsAM {
+                formatter.dateFormat = "h:mm a"
+                guard let dateAtTime = calendar.date(
+                    bySettingHour: time.hour,
+                    minute: time.minute,
+                    second: 0,
+                    of: targetDate
+                ) else {
+                    return "Park until \(time.hour):\(String(format: "%02d", time.minute))"
+                }
+                return "Park until \(formatter.string(from: dateAtTime))"
+            }
+
+            formatter.dateFormat = "EEE h:mm a"
+            guard let dateAtTime = calendar.date(
+                bySettingHour: time.hour,
+                minute: time.minute,
+                second: 0,
+                of: targetDate
+            ) else {
+                return "Park until tomorrow"
+            }
+            return "Park until \(formatter.string(from: dateAtTime))"
+
+        case .unknown:
+            return "Check posted signs"
+        }
+    }
+
+    /// Short format for compact display (e.g., "Until 3:00 PM")
+    func shortFormatted() -> String {
+        formatted().replacingOccurrences(of: "Park until ", with: "Until ")
+    }
+}
+
+/// Helper for calculating "Park Until" times based on ALL regulations
+/// Considers time limits, street cleaning, metered enforcement, and permit enforcement
+/// Works with data from both zones and blockfaces
+struct ParkUntilCalculator {
+    let timeLimitMinutes: Int?
+    let enforcementStartTime: TimeOfDay?
+    let enforcementEndTime: TimeOfDay?
+    let enforcementDays: [DayOfWeek]?
+    let validityStatus: PermitValidityStatus
+    let allRegulations: [RegulationInfo]
+
+    private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "ParkUntilCalculator")
+
+    /// Calculate when parking expires, considering ALL regulations
+    func calculateParkUntil(at date: Date = Date()) -> ParkUntilDisplay? {
+        logger.info("🔍 ParkUntilCalculator.calculateParkUntil: validityStatus=\(String(describing: self.validityStatus)), regulationCount=\(self.allRegulations.count)")
+        for (index, reg) in allRegulations.enumerated() {
+            logger.info("  [\(index)] type=\(String(describing: reg.type)), desc=\(reg.description), enforcementDays=\(reg.enforcementDays?.map { $0.rawValue }.joined(separator: ",") ?? "nil")")
+        }
+
+        var earliestRestriction: ParkUntilDisplay?
+        var earliestDate: Date?
+
+        let calendar = Calendar.current
+
+        // 1. Check for upcoming street cleaning and no parking zones
+        // IMPORTANT: These restrictions apply to EVERYONE, including valid permit holders.
+        // Valid permits do NOT exempt users from street cleaning or no parking restrictions.
+        logger.info("🔍 Step 1: Checking street cleaning and no parking regulations...")
+        for regulation in allRegulations {
+            if regulation.type == .streetCleaning || regulation.type == .noParking {
+                logger.info("  Found \(String(describing: regulation.type)) regulation: \(regulation.description)")
+                if let nextOccurrence = findNextOccurrence(of: regulation, from: date) {
+                    logger.info("  Next occurrence: \(nextOccurrence, privacy: .public)")
+                    if earliestDate == nil || nextOccurrence < earliestDate! {
+                        earliestDate = nextOccurrence
+                        earliestRestriction = .restriction(
+                            type: regulation.type == .streetCleaning ? "Street cleaning" : "No parking",
+                            date: nextOccurrence
+                        )
+                    }
+                }
+            }
+        }
+
+        // 2. Check time limit (only for users without valid permits)
+        // Valid permit holders are exempt from time limits, but NOT from street cleaning (checked above)
+        if validityStatus == .invalid || validityStatus == .noPermitSet {
+            logger.info("🔍 Step 2: Checking time limits for non-permit holders...")
+
+            // Check time-limited regulations in allRegulations array
+            for regulation in allRegulations where regulation.type == .timeLimited {
+                logger.info("  Found time-limited regulation: \(regulation.description), timeLimit=\(regulation.timeLimit ?? 0) min")
+
+                if let limit = regulation.timeLimit,
+                   let startStr = regulation.enforcementStart,
+                   let endStr = regulation.enforcementEnd,
+                   let startTime = parseTimeString(startStr),
+                   let endTime = parseTimeString(endStr) {
+
+                    let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
+                    let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+                    let startMinutes = startTime.totalMinutes
+                    let endMinutes = endTime.totalMinutes
+
+                    var currentDayOfWeek: DayOfWeek?
+                    var isEnforcementDay = true
+                    if let days = regulation.enforcementDays, !days.isEmpty,
+                       let weekday = components.weekday,
+                       let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+                        currentDayOfWeek = dayOfWeek
+                        isEnforcementDay = days.contains(dayOfWeek)
+                    }
+
+                    if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
+                        let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
+                        logger.info("  Time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
+                        if earliestDate == nil || timeLimitEnd < earliestDate! {
+                            earliestDate = timeLimitEnd
+                            earliestRestriction = .timeLimit(date: timeLimitEnd)
+                        }
+                    }
+                }
+            }
+
+            // Also check the top-level timeLimitMinutes parameter
+            if let limit = timeLimitMinutes {
+                logger.info("  Found top-level time limit: \(limit) min")
+                if let startTime = enforcementStartTime, let endTime = enforcementEndTime {
+                    let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
+                    let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+                    let startMinutes = startTime.totalMinutes
+                    let endMinutes = endTime.totalMinutes
+
+                    var currentDayOfWeek: DayOfWeek?
+                    var isEnforcementDay = true
+                    if let days = enforcementDays, !days.isEmpty,
+                       let weekday = components.weekday,
+                       let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+                        currentDayOfWeek = dayOfWeek
+                        isEnforcementDay = days.contains(dayOfWeek)
+                    }
+
+                    if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
+                        let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
+                        logger.info("  Top-level time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
+                        if earliestDate == nil || timeLimitEnd < earliestDate! {
+                            earliestDate = timeLimitEnd
+                            earliestRestriction = .timeLimit(date: timeLimitEnd)
+                        }
+                    }
+                } else {
+                    let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
+                    logger.info("  Top-level time limit (no enforcement hours), expires at: \(timeLimitEnd, privacy: .public)")
+                    if earliestDate == nil || timeLimitEnd < earliestDate! {
+                        earliestDate = timeLimitEnd
+                        earliestRestriction = .timeLimit(date: timeLimitEnd)
+                    }
+                }
+            }
+        }
+
+        // 3. Check for metered enforcement ending
+        for regulation in allRegulations {
+            if regulation.type == .metered {
+                if let endTime = regulation.enforcementEnd,
+                   let days = regulation.enforcementDays,
+                   let endTimeOfDay = parseTimeString(endTime) {
+                    let components = calendar.dateComponents([.weekday], from: date)
+                    if let weekday = components.weekday,
+                       let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday),
+                       days.contains(dayOfWeek) {
+                        if let endDate = calendar.date(
+                            bySettingHour: endTimeOfDay.hour,
+                            minute: endTimeOfDay.minute,
+                            second: 0,
+                            of: date
+                        ), endDate > date {
+                            if earliestDate == nil || endDate < earliestDate! {
+                                earliestDate = endDate
+                                earliestRestriction = .meteredEnd(date: endDate)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if let result = earliestRestriction {
+            logger.info("✅ ParkUntilCalculator result: \(String(describing: result))")
+        } else {
+            logger.info("✅ ParkUntilCalculator result: nil")
+        }
+        return earliestRestriction
+    }
+
+    /// Check if currently outside enforcement hours
+    func isOutsideEnforcement(at date: Date = Date()) -> Bool {
+        guard let startTime = enforcementStartTime,
+              let endTime = enforcementEndTime else {
+            return false
+        }
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.totalMinutes
+        let endMinutes = endTime.totalMinutes
+
+        if let days = enforcementDays, !days.isEmpty,
+           let weekday = components.weekday,
+           let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+            if !days.contains(dayOfWeek) {
+                return true
+            }
+        }
+
+        return currentMinutes < startMinutes || currentMinutes >= endMinutes
+    }
+
+    // MARK: - Private Helpers
+
+    private func findNextOccurrence(of regulation: RegulationInfo, from date: Date) -> Date? {
+        guard let days = regulation.enforcementDays,
+              let startTime = regulation.enforcementStart,
+              let timeOfDay = parseTimeString(startTime) else {
+            return nil
+        }
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
+        guard let currentWeekday = components.weekday,
+              let currentDayOfWeek = DayOfWeek.from(calendarWeekday: currentWeekday) else {
+            return nil
+        }
+
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let targetMinutes = timeOfDay.hour * 60 + timeOfDay.minute
+
+        if days.contains(currentDayOfWeek) && currentMinutes < targetMinutes {
+            return calendar.date(
+                bySettingHour: timeOfDay.hour,
+                minute: timeOfDay.minute,
+                second: 0,
+                of: date
+            )
+        }
+
+        let allDays: [DayOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        guard let currentIndex = allDays.firstIndex(of: currentDayOfWeek) else {
+            return nil
+        }
+
+        for offset in 1...7 {
+            let nextIndex = (currentIndex + offset) % 7
+            let nextDay = allDays[nextIndex]
+            if days.contains(nextDay) {
+                if let targetDate = calendar.date(byAdding: .day, value: offset, to: date) {
+                    return calendar.date(
+                        bySettingHour: timeOfDay.hour,
+                        minute: timeOfDay.minute,
+                        second: 0,
+                        of: targetDate
+                    )
+                }
+                break
+            }
+        }
+
+        return nil
+    }
+
+    private func parseTimeString(_ timeStr: String) -> TimeOfDay? {
+        let parts = timeStr.split(separator: ":").compactMap { Int($0) }
+        guard parts.count == 2 else { return nil }
+        return TimeOfDay(hour: parts[0], minute: parts[1])
+    }
+
+    private func findNextEnforcementStart(
+        from date: Date,
+        startTime: TimeOfDay,
+        days: [DayOfWeek]?,
+        currentDay: DayOfWeek?
+    ) -> ParkUntilDisplay {
+        let calendar = Calendar.current
+
+        guard let enforcementDays = days, !enforcementDays.isEmpty, let current = currentDay else {
+            if let tomorrow = calendar.date(byAdding: .day, value: 1, to: date) {
+                return .enforcementStart(time: startTime, date: tomorrow)
+            }
+            return .unknown
+        }
+
+        let allDays: [DayOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        guard let currentIndex = allDays.firstIndex(of: current) else {
+            return .unknown
+        }
+
+        for offset in 1...7 {
+            let nextIndex = (currentIndex + offset) % 7
+            let nextDay = allDays[nextIndex]
+            if enforcementDays.contains(nextDay) {
+                if let targetDate = calendar.date(byAdding: .day, value: offset, to: date) {
+                    return .enforcementStart(time: startTime, date: targetDate)
+                }
+                break
+            }
+        }
+
+        return .unknown
+    }
+}

@@ -43,7 +43,7 @@ struct MainResultView: View {
     @State private var searchedCoordinate: CLLocationCoordinate2D?
     @State private var tappedCoordinate: CLLocationCoordinate2D?  // Coordinate where user tapped (for blue dot indicator)
     @State private var recenterTrigger = false  // Toggle to force map recenter
-    @State private var showOutsideCoverageAlert = false
+    @State private var showOutsideCoverageBanner = false
     @State private var developerPanelExpanded = false
     @State private var isLoadingOverlays = false
     @State private var overlayLoadingMessage = ""
@@ -51,6 +51,11 @@ struct MainResultView: View {
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// Computed property to check if user is outside SF coverage
+    private var isOutsideCoverage: Bool {
+        viewModel.error == .outsideCoverage
+    }
 
     /// The coordinate to use for map centering (searched or current)
     /// Validates coordinates to prevent NaN errors in CoreGraphics
@@ -78,6 +83,90 @@ struct MainResultView: View {
     /// Uses ALL user permits (not just applicable ones) so all matching zones are colored green
     private var userPermitAreaCodes: Set<String> {
         Set(viewModel.userPermits.map { $0.area.uppercased() })
+    }
+
+    /// Create LocationCardData from a tapped ParkingZone
+    private func createLocationCardData(for zone: ParkingZone) -> LocationCardData {
+        // Determine permit areas for this zone
+        let permitAreas = tappedPermitAreas ?? (zone.permitArea.map { [$0] } ?? [])
+
+        // Check if user has valid permit
+        let userPermitAreas = Set(viewModel.userPermits.map { $0.area.uppercased() })
+        let hasValidPermit = permitAreas.contains { userPermitAreas.contains($0.uppercased()) }
+
+        // Determine validity status
+        let validityStatus: PermitValidityStatus
+        if zone.zoneType == .metered {
+            validityStatus = .noPermitRequired
+        } else if hasValidPermit {
+            validityStatus = .valid
+        } else {
+            validityStatus = .invalid
+        }
+
+        // Get applicable permits
+        let applicablePermits = viewModel.userPermits.filter { permit in
+            permitAreas.contains(where: { $0.uppercased() == permit.area.uppercased() })
+        }
+
+        // Extract detailed regulations from zone rules
+        let detailedRegulations = extractRegulations(from: zone.rules, permitAreas: permitAreas)
+
+        return LocationCardData(
+            locationName: zone.displayName,
+            locationCode: zone.permitArea,
+            locationType: zone.zoneType,
+            validityStatus: validityStatus,
+            applicablePermits: applicablePermits,
+            allValidPermitAreas: permitAreas,
+            timeLimitMinutes: zone.nonPermitTimeLimit,
+            detailedRegulations: detailedRegulations,
+            ruleSummaryLines: zone.primaryRuleDescription.map { [$0] } ?? [],
+            enforcementStartTime: zone.rules.first?.enforcementStartTime,
+            enforcementEndTime: zone.rules.first?.enforcementEndTime,
+            enforcementDays: zone.rules.first?.enforcementDays,
+            meteredSubtitle: zone.zoneType == .metered ? zone.enforcementHours : nil,
+            isCurrentLocation: false
+        )
+    }
+
+    /// Convert ParkingRule array to RegulationInfo array for unified card display
+    private func extractRegulations(from rules: [ParkingRule], permitAreas: [String]) -> [RegulationInfo] {
+        rules.map { rule in
+            // Map RuleType to RegulationType
+            let type: ParkingLookupResult.RegulationType
+            switch rule.ruleType {
+            case .permitRequired:
+                type = .residentialPermit
+            case .timeLimit:
+                type = .timeLimited
+            case .metered:
+                type = .metered
+            case .streetCleaning:
+                type = .streetCleaning
+            case .noParking, .towAway:
+                type = .noParking
+            case .loadingZone:
+                type = .timeLimited  // Loading zones are time-limited
+            }
+
+            // Format time strings
+            let enforcementStart = rule.enforcementStartTime.map { String(format: "%02d:%02d", $0.hour, $0.minute) }
+            let enforcementEnd = rule.enforcementEndTime.map { String(format: "%02d:%02d", $0.hour, $0.minute) }
+
+            // Use first permit area as the permit zone (for RPP rules)
+            let permitZone: String? = (type == .residentialPermit) ? permitAreas.first : nil
+
+            return RegulationInfo(
+                type: type,
+                description: rule.description,
+                enforcementDays: rule.enforcementDays,
+                enforcementStart: enforcementStart,
+                enforcementEnd: enforcementEnd,
+                permitZone: permitZone,
+                timeLimit: rule.timeLimit
+            )
+        }
     }
 
     var body: some View {
@@ -111,6 +200,11 @@ struct MainResultView: View {
                             // Generic tap handler (works for zones, blockfaces, or empty map areas)
                             tappedCoordinate = coordinate
 
+                            // Hide out-of-coverage banner when map is tapped
+                            if showOutsideCoverageBanner {
+                                showOutsideCoverageBanner = false
+                            }
+
                             // Trigger lookup at tapped coordinate (updates spot card)
                             viewModel.lookupZone(at: coordinate)
 
@@ -137,7 +231,9 @@ struct MainResultView: View {
                         // Show blue dot for tapped location
                         tappedCoordinate: tappedCoordinate,
                         // Force recenter trigger
-                        recenterTrigger: recenterTrigger
+                        recenterTrigger: recenterTrigger,
+                        // Show SF overview when outside coverage
+                        showSFOverview: showOutsideCoverageBanner || isOutsideCoverage
                     )
                     // Use zone count in ID to allow updates when zones load, but prevent recreation on UI-only changes
                     .id("zoneMapView-\(viewModel.allLoadedZones.count)")
@@ -193,6 +289,7 @@ struct MainResultView: View {
                     AddressSearchCard(
                         currentAddress: viewModel.currentAddress,
                         isAtCurrentLocation: searchedCoordinate == nil && tappedCoordinate == nil,
+                        isOutsideCoverage: isOutsideCoverage,
                         onAddressSelected: { coordinate in
                             searchedCoordinate = coordinate
                             // Trigger zone lookup for the new coordinate
@@ -202,36 +299,59 @@ struct MainResultView: View {
                             searchedCoordinate = nil
                             tappedCoordinate = nil
                             selectedZone = nil  // Close tapped spot card
+                            showOutsideCoverageBanner = false  // Hide banner when returning to GPS
                             viewModel.returnToGPSLocation()
                             recenterTrigger.toggle()  // Force map recenter
                         },
                         onOutsideCoverage: {
-                            showOutsideCoverageAlert = true
+                            showOutsideCoverageBanner = true
                         }
                     )
                     .padding(.horizontal)
                     .padding(.top, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
 
-                    // Animated zone card that morphs between large and mini states
-                    // Hidden when TappedSpotInfoCard is showing
-                    if selectedZone == nil {
-                        AnimatedZoneCard(
-                            isExpanded: isMapExpanded,
-                            namespace: cardAnimation,
-                            zoneName: viewModel.zoneName,
-                            zoneCode: currentPermitArea,
-                            zoneType: viewModel.zoneType,
-                            validityStatus: viewModel.validityStatus,
-                            applicablePermits: viewModel.applicablePermits,
-                            allValidPermitAreas: viewModel.allValidPermitAreas,
-                            meteredSubtitle: viewModel.meteredSubtitle,
-                            timeLimitMinutes: viewModel.timeLimitMinutes,
-                            ruleSummaryLines: viewModel.ruleSummaryLines,
-                            enforcementStartTime: viewModel.enforcementStartTime,
-                            enforcementEndTime: viewModel.enforcementEndTime,
-                            enforcementDays: viewModel.enforcementDays,
-                            screenHeight: geometry.size.height
+                    // Out of coverage banner
+                    if showOutsideCoverageBanner || isOutsideCoverage {
+                        OutOfCoverageBanner(
+                            onDismiss: {
+                                showOutsideCoverageBanner = false
+                                // Return to current GPS location
+                                searchedCoordinate = nil
+                                tappedCoordinate = nil
+                                selectedZone = nil
+                                viewModel.returnToGPSLocation()
+                                recenterTrigger.toggle()
+                            }
+                        )
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+
+                    // Unified parking location card (hidden when out-of-coverage banner is shown)
+                    if selectedZone == nil && !showOutsideCoverageBanner && !isOutsideCoverage {
+                        // Current location card (primary or compact mode)
+                        ParkingLocationCard(
+                            data: LocationCardData(
+                                locationName: viewModel.zoneName,
+                                locationCode: currentPermitArea,
+                                locationType: viewModel.zoneType,
+                                validityStatus: viewModel.validityStatus,
+                                applicablePermits: viewModel.applicablePermits,
+                                allValidPermitAreas: viewModel.allValidPermitAreas,
+                                timeLimitMinutes: viewModel.timeLimitMinutes,
+                                detailedRegulations: viewModel.detailedRegulations,
+                                ruleSummaryLines: viewModel.ruleSummaryLines,
+                                enforcementStartTime: viewModel.enforcementStartTime,
+                                enforcementEndTime: viewModel.enforcementEndTime,
+                                enforcementDays: viewModel.enforcementDays,
+                                meteredSubtitle: viewModel.meteredSubtitle,
+                                isCurrentLocation: true
+                            ),
+                            displayMode: isMapExpanded ? .compact : .primary,
+                            screenHeight: geometry.size.height,
+                            namespace: cardAnimation
                         )
                         .padding(.horizontal)
                         .padding(.top, 8)
@@ -241,19 +361,35 @@ struct MainResultView: View {
 
                     Spacer()
 
-                    // Bottom section - Tapped zone info (only in expanded mode)
+                    // Bottom section - Tapped location card (only in expanded mode)
                     if isMapExpanded, let selected = selectedZone {
-                        TappedSpotInfoCard(
-                            zone: selected,
-                            tappedPermitAreas: tappedPermitAreas,
-                            userPermits: viewModel.userPermits
-                        ) {
-                            selectedZone = nil
-                            tappedPermitAreas = nil
-                            tappedCoordinate = nil
+                        VStack(alignment: .leading, spacing: 8) {
+                            ParkingLocationCard(
+                                data: createLocationCardData(for: selected),
+                                displayMode: .spotDetail,
+                                screenHeight: geometry.size.height
+                            )
+
+                            // Close button
+                            Button {
+                                selectedZone = nil
+                                tappedPermitAreas = nil
+                                tappedCoordinate = nil
+                            } label: {
+                                HStack {
+                                    Spacer()
+                                    Text("Close")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 12)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(12)
+                            }
                         }
                         .padding(.horizontal)
-                        .padding(.bottom, 80) // Padding to avoid overlap with bottom navigation
+                        .padding(.bottom, 80)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -307,8 +443,8 @@ struct MainResultView: View {
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 1.05)))
             }
 
-            // Error state
-            if let error = viewModel.error {
+            // Error state (but not for outside coverage - that's shown as a banner)
+            if let error = viewModel.error, error != .outsideCoverage {
                 ErrorView(
                     error: error,
                     onRetry: {
@@ -365,17 +501,17 @@ struct MainResultView: View {
                 )
             }
         }
-        .alert("Outside Coverage Area", isPresented: $showOutsideCoverageAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("That address is outside San Francisco. We currently only support SF parking zones.")
-        }
         }
     }
 }
 
-// MARK: - Animated Zone Card (morphs between large and mini states)
+// MARK: - DEPRECATED COMPONENTS REMOVED
+// AnimatedZoneCard has been replaced by ParkingLocationCard
+// TappedSpotInfoCard has been replaced by ParkingLocationCard
 
+// MARK: - Deprecated - Animated Zone Card (REMOVED - use ParkingLocationCard)
+
+/*
 private struct AnimatedZoneCard: View {
     let isExpanded: Bool
     var namespace: Namespace.ID
@@ -388,6 +524,7 @@ private struct AnimatedZoneCard: View {
     let meteredSubtitle: String?
     let timeLimitMinutes: Int?
     let ruleSummaryLines: [String]
+    let detailedRegulations: [RegulationInfo]  // Detailed regulations for drawer
 
     // Enforcement hours for "Park Until" calculation
     let enforcementStartTime: TimeOfDay?
@@ -398,6 +535,7 @@ private struct AnimatedZoneCard: View {
 
     @State private var animationIndex: Int = 0
     @State private var isFlipped: Bool = false
+    @State private var showRegulationsDrawer = false
 
     private var isMultiPermitLocation: Bool {
         allValidPermitAreas.count > 1
@@ -701,6 +839,16 @@ private struct AnimatedZoneCard: View {
         }
         .frame(height: isExpanded ? miniCardHeight : largeCardHeight)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isExpanded)
+        .sheet(isPresented: $showRegulationsDrawer) {
+            RegulationsDrawerView(
+                zoneName: zoneName,
+                zoneType: zoneType,
+                validityStatus: validityStatus,
+                applicablePermits: applicablePermits,
+                timeLimitMinutes: timeLimitMinutes,
+                regulations: detailedRegulations
+            )
+        }
     }
 
     /// Fixed height for mini card (reduced by 20%)
@@ -852,9 +1000,24 @@ private struct AnimatedZoneCard: View {
                     Spacer()
                 }
 
-                // Bottom badge
+                // Bottom section: See regulations link + validity badge
                 VStack {
                     Spacer()
+
+                    // "See regulations" button
+                    if !detailedRegulations.isEmpty {
+                        Button {
+                            showRegulationsDrawer = true
+                        } label: {
+                            Text("See regulations")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
+                                .underline()
+                        }
+                        .padding(.bottom, 8)
+                    }
+
                     ValidityBadgeView(
                         status: validityStatus,
                         permits: applicablePermits,
@@ -1740,6 +1903,8 @@ private struct TappedSpotInfoCard: View {
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 }
+*/
+// END DEPRECATED COMPONENTS
 
 // MARK: - Overlapping Zones Button (kept for compatibility)
 
@@ -1797,12 +1962,12 @@ struct LoadingOverlay: View {
                 }
 
                 VStack(spacing: 8) {
-                    Text("Finding your zone...")
+                    Text("Hunting for a spot...")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
 
-                    Text("Checking your location")
+                    Text("The eternal SF quest")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -2240,6 +2405,57 @@ private struct DeveloperLoadingOverlay: View {
                 dots += "."
             }
         }
+    }
+}
+
+// MARK: - Out of Coverage Banner
+
+/// Banner shown at the top of the map when user is outside SF coverage area
+private struct OutOfCoverageBanner: View {
+    let onDismiss: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Warning icon
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.title3)
+                .foregroundColor(.orange)
+
+            // Message
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Outside Coverage Area")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+
+                Text("This location is outside San Francisco")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            // Dismiss button
+            Button {
+                onDismiss()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.orange.opacity(colorScheme == .dark ? 0.2 : 0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 }
 

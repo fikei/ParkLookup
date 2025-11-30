@@ -43,6 +43,9 @@ struct ZoneMapView: UIViewRepresentable {
     /// Toggle to force map recenter (for when coordinate doesn't change but we want to recenter anyway)
     var recenterTrigger: Bool = false
 
+    /// When true, shows an overview of all of San Francisco (ignores user coordinate)
+    var showSFOverview: Bool = false
+
     /// Validates a coordinate to ensure it won't cause NaN errors
     private func isValidCoordinate(_ coord: CLLocationCoordinate2D?) -> Bool {
         guard let c = coord else { return false }
@@ -60,23 +63,36 @@ struct ZoneMapView: UIViewRepresentable {
         mapView.showsCompass = true
         mapView.showsScale = true
 
-        // Set initial region centered on user (zoomed to ~10-15 blocks)
-        // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
+        // Set initial region
         let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
-        let baseSpan = 0.006
-        let desiredSpan = MKCoordinateSpan(
-            latitudeDelta: baseSpan * zoomMultiplier,
-            longitudeDelta: baseSpan * zoomMultiplier
-        )
 
-        // Apply vertical bias: offset center northward to push user location down on screen
-        // verticalBias of 0.25 means user appears at 75% from top (halfway between center and bottom)
-        let latOffset = desiredSpan.latitudeDelta * verticalBias
-        let center = CLLocationCoordinate2D(
-            latitude: userCenter.latitude + latOffset,
-            longitude: userCenter.longitude
-        )
+        let center: CLLocationCoordinate2D
+        let desiredSpan: MKCoordinateSpan
+
+        if showSFOverview {
+            // Show overview of all of San Francisco
+            // SF bounds: ~37.7 to 37.8 latitude, ~-122.52 to -122.35 longitude
+            center = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+            desiredSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
+        } else {
+            // Normal view: centered on user (zoomed to ~10-15 blocks)
+            // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
+            let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
+            let baseSpan = 0.006
+            let span = MKCoordinateSpan(
+                latitudeDelta: baseSpan * zoomMultiplier,
+                longitudeDelta: baseSpan * zoomMultiplier
+            )
+
+            // Apply vertical bias: offset center northward to push user location down on screen
+            // verticalBias of 0.25 means user appears at 75% from top (halfway between center and bottom)
+            let latOffset = span.latitudeDelta * verticalBias
+            center = CLLocationCoordinate2D(
+                latitude: userCenter.latitude + latOffset,
+                longitude: userCenter.longitude
+            )
+            desiredSpan = span
+        }
 
         let region = MKCoordinateRegion(center: center, span: desiredSpan)
         mapView.setRegion(region, animated: false)
@@ -143,6 +159,19 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Handle tapped location annotation (blue dot)
         updateTappedAnnotation(mapView: mapView, context: context)
+
+        // Handle SF overview mode (zoom out to show all of San Francisco)
+        if showSFOverview != context.coordinator.lastShowSFOverview {
+            context.coordinator.lastShowSFOverview = showSFOverview
+            if showSFOverview {
+                logger.info("🗺️ Showing SF overview - zooming out to show all of San Francisco")
+                let sfCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+                let sfSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
+                let region = MKCoordinateRegion(center: sfCenter, span: sfSpan)
+                mapView.setRegion(region, animated: true)
+                return
+            }
+        }
 
         // Check if user coordinate changed - recenter map if user returned to GPS location
         let coordinateChanged: Bool
@@ -890,11 +919,25 @@ struct ZoneMapView: UIViewRepresentable {
                 // Coordinator is updated in updateUIView, so this reflects real-time state
                 let initialAlpha: CGFloat = coordinator.showOverlays ? 1.0 : 0.0
 
+                // Deduplicate annotations by zoneId to prevent duplicate pins
+                logger.info("🔍 Deduplication: Total annotations before: \(annotations.count)")
+                var seenZoneIds = Set<String>()
+                let uniqueAnnotations = annotations.filter { annotation in
+                    let zoneId = annotation.zoneId
+                    if seenZoneIds.contains(zoneId) {
+                        logger.info("  ❌ Duplicate zoneId=\(zoneId), skipping")
+                        return false
+                    }
+                    seenZoneIds.insert(zoneId)
+                    return true
+                }
+                logger.info("✅ Deduplication: Unique annotations after: \(uniqueAnnotations.count), removed \(annotations.count - uniqueAnnotations.count) duplicates")
+
                 // Conditionally add annotations based on zone polygon visibility
                 if showZonePolygons {
-                    mapView.addAnnotations(annotations)
+                    mapView.addAnnotations(uniqueAnnotations)
 
-                    for annotation in annotations {
+                    for annotation in uniqueAnnotations {
                         if let view = mapView.view(for: annotation) {
                             view.alpha = initialAlpha
                         }
@@ -1114,6 +1157,9 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Track recenter trigger to force recentering even when coordinate doesn't change
         var lastRecenterTrigger: Bool = false
+
+        // Track SF overview mode to detect changes
+        var lastShowSFOverview: Bool = false
 
         // Track blockface overlay state to zoom to sample location when enabled
         var lastBlockfaceOverlaysEnabled: Bool = false
@@ -1340,72 +1386,31 @@ struct ZoneMapView: UIViewRepresentable {
                 return annotationView
             }
 
-            // Handle blockface label annotation (shows callout with blockface info)
+            // Handle blockface label annotation (colored pin, no text)
             if let blockfaceAnnotation = annotation as? BlockfaceLabelAnnotation {
                 let identifier = "BlockfaceLabel"
                 var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
 
-                // Only show callout in developer mode
-                let showCallout = DeveloperSettings.shared.developerModeUnlocked
-
                 if annotationView == nil {
                     annotationView = MKMarkerAnnotationView(annotation: blockfaceAnnotation, reuseIdentifier: identifier)
-                    annotationView?.canShowCallout = showCallout
-                    annotationView?.markerTintColor = .systemOrange
-                    annotationView?.glyphImage = UIImage(systemName: "parkingsign.circle.fill")
+                    annotationView?.canShowCallout = false  // Never show callout
+                    annotationView?.markerTintColor = blockfaceAnnotation.pinColor
+                    annotationView?.glyphImage = nil  // No glyph, just colored pin
                     annotationView?.displayPriority = .required
-
-                    // Create custom callout with detailed content view (only if developer mode)
-                    if showCallout {
-                        let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
-                        annotationView?.detailCalloutAccessoryView = calloutView
-                    }
                 } else {
                     annotationView?.annotation = blockfaceAnnotation
-                    annotationView?.canShowCallout = showCallout
-
-                    // Update callout content (only if developer mode)
-                    if showCallout {
-                        let calloutView = createBlockfaceCalloutView(for: blockfaceAnnotation.blockface)
-                        annotationView?.detailCalloutAccessoryView = calloutView
-                    } else {
-                        annotationView?.detailCalloutAccessoryView = nil
-                    }
+                    annotationView?.markerTintColor = blockfaceAnnotation.pinColor
                 }
 
                 return annotationView
             }
 
-            // Handle zone label annotation
-            guard let zoneAnnotation = annotation as? ZoneLabelAnnotation else {
-                return nil
+            // Handle zone label annotation - HIDDEN for now
+            if annotation is ZoneLabelAnnotation {
+                return nil  // Don't display zone circles
             }
 
-            let identifier = "ZoneLabel"
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
-
-            if annotationView == nil {
-                annotationView = MKAnnotationView(annotation: zoneAnnotation, reuseIdentifier: identifier)
-                annotationView?.canShowCallout = false
-            } else {
-                annotationView?.annotation = zoneAnnotation
-            }
-
-            // Create label view
-            let isCurrentZone = zoneAnnotation.zoneId == currentZoneId
-            let labelView = createZoneLabelView(
-                code: zoneAnnotation.zoneCode,
-                zoneType: zoneAnnotation.zoneType,
-                isCurrentZone: isCurrentZone
-            )
-
-            // Remove old subviews and add new label
-            annotationView?.subviews.forEach { $0.removeFromSuperview() }
-            annotationView?.addSubview(labelView)
-            annotationView?.frame = labelView.frame
-            annotationView?.centerOffset = CGPoint(x: 0, y: 0)
-
-            return annotationView
+            return nil
         }
 
         private func createZoneLabelView(code: String, zoneType: ZoneType?, isCurrentZone: Bool) -> UIView {
@@ -1435,6 +1440,135 @@ struct ZoneMapView: UIViewRepresentable {
 
             containerView.addSubview(label)
             return containerView
+        }
+
+        /// Calculate blockface pin color based on regulations (matches BlockfacePolygonRenderer logic)
+        private func colorForBlockface(_ blockface: Blockface) -> UIColor {
+            if blockface.regulations.isEmpty {
+                // No restrictions = free parking → Green
+                return UIColor.systemGreen
+            }
+
+            // Check regulation types to determine color (priority order)
+            var hasActiveStreetCleaning = false
+            var hasMetered = false
+            var hasRPP = false
+            var hasTimeLimit = false
+            var hasNoParking = false
+
+            let now = Date()
+            let calendar = Calendar.current
+            // Check within next 2 hours for "park until" window
+            let parkUntilWindow = calendar.date(byAdding: .hour, value: 2, to: now) ?? now
+
+            for reg in blockface.regulations {
+                let regType = reg.type.lowercased()
+
+                if regType == "noparking" || regType == "no parking" {
+                    hasNoParking = true
+                }
+                if regType == "streetcleaning" || regType == "street cleaning" {
+                    // Only consider street cleaning if active NOW or within park-until window
+                    if isStreetCleaningActiveForColor(regulation: reg, at: now, untilDate: parkUntilWindow) {
+                        hasActiveStreetCleaning = true
+                    }
+                }
+                if regType == "metered" || regType == "meter" {
+                    hasMetered = true
+                }
+                if let permitZone = reg.permitZone, !permitZone.isEmpty {
+                    hasRPP = true
+                }
+                if regType == "timelimit" || regType == "time limit" {
+                    hasTimeLimit = true
+                }
+            }
+
+            // Priority: No Parking > Active Street Cleaning > Metered > Time Limited/RPP
+            if hasNoParking {
+                return UIColor.systemRed
+            } else if hasActiveStreetCleaning {
+                return UIColor.systemRed
+            } else if hasMetered {
+                return UIColor.systemGray
+            } else if hasTimeLimit || hasRPP {
+                return UIColor.systemOrange
+            } else {
+                return UIColor.systemGreen
+            }
+        }
+
+        /// Check if street cleaning is active now or will be active within the park-until window
+        private func isStreetCleaningActiveForColor(regulation: BlockfaceRegulation, at date: Date, untilDate: Date) -> Bool {
+            guard let daysStr = regulation.enforcementDays,
+                  let startStr = regulation.enforcementStart,
+                  let endStr = regulation.enforcementEnd else {
+                return false
+            }
+
+            // Parse time strings (HH:MM format)
+            func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+                let components = timeStr.split(separator: ":").compactMap { Int($0) }
+                guard components.count == 2 else { return nil }
+                return (hour: components[0], minute: components[1])
+            }
+
+            guard let startTime = parseTime(startStr),
+                  let endTime = parseTime(endStr) else {
+                return false
+            }
+
+            // Convert string days to check
+            let cleaningDays = daysStr.compactMap { dayStr -> Int? in
+                let dayLower = dayStr.lowercased()
+                switch dayLower {
+                case "sunday", "sun": return 1
+                case "monday", "mon": return 2
+                case "tuesday", "tue", "tues": return 3
+                case "wednesday", "wed": return 4
+                case "thursday", "thu", "thurs": return 5
+                case "friday", "fri": return 6
+                case "saturday", "sat": return 7
+                default: return nil
+                }
+            }
+
+            let calendar = Calendar.current
+
+            // Check if active on current date
+            let currentWeekday = calendar.component(.weekday, from: date)
+            if cleaningDays.contains(currentWeekday) {
+                // Check time range
+                guard let todayStart = calendar.date(bySettingHour: startTime.hour, minute: startTime.minute, second: 0, of: date),
+                      let todayEnd = calendar.date(bySettingHour: endTime.hour, minute: endTime.minute, second: 0, of: date) else {
+                    return false
+                }
+
+                if date >= todayStart && date <= todayEnd {
+                    return true  // Active right now
+                }
+
+                // Check if will be active before untilDate
+                if untilDate > todayStart && date < todayStart {
+                    return true  // Will be active soon
+                }
+            }
+
+            // Check next day if within untilDate window
+            if let nextDay = calendar.date(byAdding: .day, value: 1, to: date) {
+                let nextWeekday = calendar.component(.weekday, from: nextDay)
+                if cleaningDays.contains(nextWeekday) {
+                    guard let nextStart = calendar.date(bySettingHour: startTime.hour, minute: startTime.minute, second: 0, of: nextDay) else {
+                        return false
+                    }
+
+                    if nextStart <= untilDate {
+                        return true  // Will be active tomorrow within window
+                    }
+                }
+            }
+
+            return false
         }
 
         private func createBlockfaceCalloutView(for blockface: Blockface) -> UIView {
@@ -1607,11 +1741,15 @@ struct ZoneMapView: UIViewRepresentable {
 
                         // Only show annotation in developer mode
                         if DeveloperSettings.shared.developerModeUnlocked {
+                            // Calculate color for pin
+                            let pinColor = colorForBlockface(blockface)
+
                             // Add temporary annotation to show blockface info
                             let annotation = BlockfaceLabelAnnotation(
                                 coordinate: coordinate,
                                 label: label,
-                                blockface: blockface
+                                blockface: blockface,
+                                pinColor: pinColor
                             )
 
                             // Remove any existing blockface label annotations
@@ -1743,10 +1881,14 @@ struct ZoneMapView: UIViewRepresentable {
                         let centerIndex = coords.count / 2
                         let blockfaceCenter = coords[centerIndex]
 
+                        // Calculate color for pin
+                        let pinColor = colorForBlockface(nearest.blockface)
+
                         let annotation = BlockfaceLabelAnnotation(
                             coordinate: blockfaceCenter,
                             label: label,
-                            blockface: nearest.blockface
+                            blockface: nearest.blockface,
+                            pinColor: pinColor
                         )
 
                         // Remove existing blockface labels
@@ -1897,12 +2039,14 @@ class BlockfaceLabelAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     let label: String
     let blockface: Blockface
-    var title: String? { label }
+    let pinColor: UIColor
+    var title: String? { nil }  // Hide title to prevent text annotations
 
-    init(coordinate: CLLocationCoordinate2D, label: String, blockface: Blockface) {
+    init(coordinate: CLLocationCoordinate2D, label: String, blockface: Blockface, pinColor: UIColor) {
         self.coordinate = coordinate
         self.label = label
         self.blockface = blockface
+        self.pinColor = pinColor
         super.init()
     }
 }
