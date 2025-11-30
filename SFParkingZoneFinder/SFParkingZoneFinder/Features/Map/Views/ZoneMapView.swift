@@ -1373,36 +1373,12 @@ struct ZoneMapView: UIViewRepresentable {
                 return annotationView
             }
 
-            // Handle zone label annotation
-            guard let zoneAnnotation = annotation as? ZoneLabelAnnotation else {
-                return nil
+            // Handle zone label annotation - HIDDEN for now
+            if annotation is ZoneLabelAnnotation {
+                return nil  // Don't display zone circles
             }
 
-            let identifier = "ZoneLabel"
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
-
-            if annotationView == nil {
-                annotationView = MKAnnotationView(annotation: zoneAnnotation, reuseIdentifier: identifier)
-                annotationView?.canShowCallout = false
-            } else {
-                annotationView?.annotation = zoneAnnotation
-            }
-
-            // Create label view
-            let isCurrentZone = zoneAnnotation.zoneId == currentZoneId
-            let labelView = createZoneLabelView(
-                code: zoneAnnotation.zoneCode,
-                zoneType: zoneAnnotation.zoneType,
-                isCurrentZone: isCurrentZone
-            )
-
-            // Remove old subviews and add new label
-            annotationView?.subviews.forEach { $0.removeFromSuperview() }
-            annotationView?.addSubview(labelView)
-            annotationView?.frame = labelView.frame
-            annotationView?.centerOffset = CGPoint(x: 0, y: 0)
-
-            return annotationView
+            return nil
         }
 
         private func createZoneLabelView(code: String, zoneType: ZoneType?, isCurrentZone: Bool) -> UIView {

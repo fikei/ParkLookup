@@ -14,6 +14,34 @@ struct RegulationsDrawerView: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    /// Calculate "Park Until" time considering ALL regulations
+    private var parkUntilResult: ParkUntilDisplay? {
+        // Extract enforcement times from regulations (use first regulation with times)
+        let enforcementStartTime = regulations.first { $0.enforcementStart != nil }?.enforcementStart.flatMap { timeStr -> TimeOfDay? in
+            let parts = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard parts.count == 2 else { return nil }
+            return TimeOfDay(hour: parts[0], minute: parts[1])
+        }
+
+        let enforcementEndTime = regulations.first { $0.enforcementEnd != nil }?.enforcementEnd.flatMap { timeStr -> TimeOfDay? in
+            let parts = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard parts.count == 2 else { return nil }
+            return TimeOfDay(hour: parts[0], minute: parts[1])
+        }
+
+        let enforcementDays = regulations.first { $0.enforcementDays != nil }?.enforcementDays
+
+        let calculator = ParkUntilCalculator(
+            timeLimitMinutes: timeLimitMinutes,
+            enforcementStartTime: enforcementStartTime,
+            enforcementEndTime: enforcementEndTime,
+            enforcementDays: enforcementDays,
+            validityStatus: validityStatus,
+            allRegulations: regulations
+        )
+        return calculator.calculateParkUntil()
+    }
+
     /// Whether the card should use the "valid" green style
     private var isValidStyle: Bool {
         validityStatus == .valid || validityStatus == .multipleApply
@@ -51,6 +79,13 @@ struct RegulationsDrawerView: View {
 
                 Divider()
                     .padding(.vertical, 16)
+
+                // Explanation banner (if Park Until applies)
+                if let parkUntil = parkUntilResult {
+                    explanationBanner(for: parkUntil)
+                        .padding(.horizontal)
+                        .padding(.bottom, 16)
+                }
 
                 // Regulations list
                 if regulations.isEmpty {
@@ -133,6 +168,101 @@ struct RegulationsDrawerView: View {
             return Color.forZoneType(.metered)
         }
         return Color.forValidityStatus(validityStatus)
+    }
+
+    // MARK: - Explanation Banner
+
+    @ViewBuilder
+    private func explanationBanner(for parkUntil: ParkUntilDisplay) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: iconForParkUntil(parkUntil))
+                .font(.title3)
+                .foregroundColor(colorForParkUntil(parkUntil))
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(titleForParkUntil(parkUntil))
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+
+                Text(explanationForParkUntil(parkUntil))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+        }
+        .padding(12)
+        .background(backgroundColorForParkUntil(parkUntil))
+        .cornerRadius(10)
+    }
+
+    private func iconForParkUntil(_ parkUntil: ParkUntilDisplay) -> String {
+        switch parkUntil {
+        case .streetCleaning:
+            return "wind"
+        case .timeLimit:
+            return "clock"
+        case .meteredEnforcement:
+            return "dollarsign.circle"
+        case .enforcementStart:
+            return "bell"
+        }
+    }
+
+    private func colorForParkUntil(_ parkUntil: ParkUntilDisplay) -> Color {
+        switch parkUntil {
+        case .streetCleaning:
+            return .red
+        case .timeLimit:
+            return .orange
+        case .meteredEnforcement:
+            return .blue
+        case .enforcementStart:
+            return .green
+        }
+    }
+
+    private func backgroundColorForParkUntil(_ parkUntil: ParkUntilDisplay) -> Color {
+        colorForParkUntil(parkUntil).opacity(0.1)
+    }
+
+    private func titleForParkUntil(_ parkUntil: ParkUntilDisplay) -> String {
+        switch parkUntil {
+        case .streetCleaning(let time, _):
+            return "Move by \(formatTime(time)) for street cleaning"
+        case .timeLimit(let time, _):
+            return "Move by \(formatTime(time)) - time limit"
+        case .meteredEnforcement(let time, _):
+            return "Meter enforcement starts at \(formatTime(time))"
+        case .enforcementStart(let time, _):
+            return "Enforcement starts at \(formatTime(time))"
+        }
+    }
+
+    private func explanationForParkUntil(_ parkUntil: ParkUntilDisplay) -> String {
+        switch parkUntil {
+        case .streetCleaning:
+            return "Street cleaning applies to all vehicles, including those with valid permits."
+        case .timeLimit:
+            return "Your parking time limit will expire. Move your vehicle before then."
+        case .meteredEnforcement:
+            return "You'll need to pay for parking or move your vehicle."
+        case .enforcementStart:
+            return "Parking restrictions will begin at this time."
+        }
+    }
+
+    private func formatTime(_ time: TimeOfDay) -> String {
+        let hour12 = time.hour == 0 ? 12 : (time.hour > 12 ? time.hour - 12 : time.hour)
+        let period = time.hour >= 12 ? "PM" : "AM"
+        if time.minute == 0 {
+            return "\(hour12)\(period)"
+        } else {
+            return "\(hour12):\(String(format: "%02d", time.minute))\(period)"
+        }
     }
 
     // MARK: - Regulations List

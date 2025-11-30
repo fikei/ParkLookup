@@ -204,6 +204,39 @@ struct ParkingLocationCard: View {
         return nil
     }
 
+    /// Generates abbreviated detail line: "2hr • $3/hr • Zone Q" or "Zone Q"
+    private var abbreviatedDetailLine: String? {
+        var components: [String] = []
+
+        // Add paid parking details if applicable (metered zones)
+        if data.locationType == .metered {
+            if let meteredSubtitle = data.meteredSubtitle {
+                components.append(meteredSubtitle)
+            } else {
+                components.append("$2/hr • 2hr max")
+            }
+        }
+
+        // Add zone(s) - but NOT if it says "Unknown street"
+        let locationToShow: String
+        if data.locationName.lowercased().contains("unknown") {
+            // Don't show "Unknown street"
+            locationToShow = ""
+        } else if data.locationType == .metered {
+            locationToShow = "Metered"
+        } else if isMultiPermitLocation {
+            locationToShow = formattedLocationsList
+        } else {
+            locationToShow = data.locationName
+        }
+
+        if !locationToShow.isEmpty {
+            components.append(locationToShow)
+        }
+
+        return components.isEmpty ? nil : components.joined(separator: " • ")
+    }
+
     private var isValidStyle: Bool {
         data.validityStatus == .valid || data.validityStatus == .multipleApply
     }
@@ -296,15 +329,79 @@ struct ParkingLocationCard: View {
     private var primaryFrontContent: some View {
         ZStack {
             // Center content
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 locationCircle(size: 160)
 
-                if let subtitle = displaySubtitle {
-                    Text(subtitle)
-                        .font(.headline)
-                        .foregroundColor(isValidStyle ? .white.opacity(0.9) : .secondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
+                // Park Until display
+                if isAlwaysNoParking {
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "nosign")
+                                .font(.title2)
+                            Text("No Parking")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.red)
+
+                        Text("Anytime")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                } else if let parkUntil = parkUntilResult {
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "timer")
+                                .font(.title2)
+                            Text(parkUntil.shortFormatted())
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(isValidStyle ? .white : .primary)
+
+                        // Abbreviated details below
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.subheadline)
+                                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                } else if isValidStyle {
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title2)
+                            Text(isOutsideEnforcement && findNextEnforcementForValidPermit() != nil ?
+                                 findNextEnforcementForValidPermit()!.shortFormatted() : "Unlimited parking")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.white)
+
+                        // Abbreviated details below
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.8))
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                } else {
+                    VStack(spacing: 4) {
+                        Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+
+                        // Abbreviated details below
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
                 }
             }
 
@@ -326,7 +423,7 @@ struct ParkingLocationCard: View {
                 Spacer()
             }
 
-            // Bottom section
+            // Bottom section - just regulations button
             VStack {
                 Spacer()
 
@@ -340,17 +437,6 @@ struct ParkingLocationCard: View {
                         .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
                         .underline()
                 }
-                .padding(.bottom, 8)
-
-                ValidityBadgeView(
-                    status: data.validityStatus,
-                    permits: data.applicablePermits,
-                    onColoredBackground: isValidStyle,
-                    timeLimitMinutes: data.timeLimitMinutes,
-                    enforcementStartTime: data.enforcementStartTime,
-                    enforcementEndTime: data.enforcementEndTime,
-                    enforcementDays: data.enforcementDays
-                )
                 .padding(.bottom, 24)
             }
         }
@@ -518,34 +604,16 @@ struct ParkingLocationCard: View {
             Text("Anytime")
                 .font(.caption)
                 .foregroundColor(.secondary)
-        } else if parkUntilResult != nil {
-            // Show location name when Park Until is the main title
-            Text(data.locationName)
+        } else if let details = abbreviatedDetailLine {
+            // Show abbreviated details: "2hr • $3/hr • Zone Q"
+            Text(details)
                 .font(.caption)
-                .foregroundColor(.secondary)
-        } else if data.locationType == .metered {
-            Text(data.meteredSubtitle ?? "$2/hr • 2hr max")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        } else if isValidStyle {
-            // For valid permits with no restrictions, keep the location name visible
-            if isOutsideEnforcement {
-                Text(isMultiPermitLocation ? formattedLocationsList : data.locationName)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.8))
-            } else {
-                Text(isMultiPermitLocation ? formattedLocationsList : data.locationName)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.8))
-            }
-        } else if isMultiPermitLocation {
-            Text(formattedLocationsList)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
         } else {
-            Text(data.validityStatus.shortText)
+            // Fallback
+            Text(data.locationName.lowercased().contains("unknown") ? "" : data.locationName)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(isValidStyle ? .white.opacity(0.8) : .secondary)
         }
     }
 
@@ -581,24 +649,40 @@ struct ParkingLocationCard: View {
                         }
                         .foregroundColor(.primary)
 
-                        // Location name on second line
-                        Text(data.locationName)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } else if isValidStyle {
+                        // Valid permit - show unlimited parking
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.headline)
+                            Text("Unlimited parking")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.green)
+
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     } else {
-                        // Original layout
-                        Text(data.locationName)
+                        // Other cases - show location name
+                        Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
                             .font(.headline)
                             .foregroundColor(.primary)
 
-                        HStack(spacing: 6) {
-                            Image(systemName: data.validityStatus.iconName)
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
                                 .font(.caption)
-                            Text(data.validityStatus.shortText)
-                                .font(.caption)
-                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
                         }
-                        .foregroundColor(Color.forValidityStatus(data.validityStatus))
                     }
                 }
 
