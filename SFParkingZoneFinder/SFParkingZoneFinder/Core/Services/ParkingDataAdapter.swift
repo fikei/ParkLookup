@@ -765,7 +765,11 @@ struct ParkUntilCalculator {
             }
         }
 
-        print("✅ ParkUntilCalculator result: \(earliestRestriction?.description ?? "nil")")
+        if let result = earliestRestriction {
+            print("✅ ParkUntilCalculator result: \(String(describing: result))")
+        } else {
+            print("✅ ParkUntilCalculator result: nil")
+        }
         return earliestRestriction
     }
 
