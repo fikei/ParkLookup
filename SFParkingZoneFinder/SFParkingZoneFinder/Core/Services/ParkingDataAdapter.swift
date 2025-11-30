@@ -344,10 +344,8 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
         // Determine primary regulation type
         let primaryType = determinePrimaryType(blockface: blockface)
 
-        // Extract permit zones
-        let permitAreas = blockface.regulations
-            .filter { $0.type == "residentialPermit" }
-            .compactMap { $0.permitZone }
+        // Extract permit zones (supports multiple zones per blockface)
+        let permitAreas = blockface.allPermitZones
 
         // Extract time limit
         let timeLimit = blockface.regulations
@@ -355,7 +353,7 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
             .timeLimit
 
         // Build all regulations list
-        logger.info("🔍 Building regulations from blockface: \(blockface.street), regulationCount=\(blockface.regulations.count)")
+        logger.info("🔍 Building regulations from blockface: \(blockface.street), regulationCount=\(blockface.regulations.count), permitZones=\(permitAreas)")
         let allRegulations = blockface.regulations.map { reg in
             logger.info("  Blockface regulation: type=\(reg.type), desc=\(reg.description)")
 
@@ -364,13 +362,14 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
                 DayOfWeek.allCases.first { $0.rawValue.lowercased() == dayStr.lowercased() }
             }
 
+            // Use first permit zone for backward compatibility in RegulationInfo
             return RegulationInfo(
                 type: regulationTypeMapping(reg.type),
                 description: reg.description,
                 enforcementDays: days,
                 enforcementStart: reg.enforcementStart,
                 enforcementEnd: reg.enforcementEnd,
-                permitZone: reg.permitZone,
+                permitZone: reg.allPermitZones.first,
                 timeLimit: reg.timeLimit
             )
         }
@@ -381,7 +380,10 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
 
         // Location name: hide blockface details per PM requirements
         let locationName: String
-        if let permitZone = permitAreas.first {
+        if permitAreas.count > 1 {
+            // Multi-zone location
+            locationName = "Zones \(permitAreas.joined(separator: ", "))"
+        } else if let permitZone = permitAreas.first {
             locationName = "Zone \(permitZone)"
         } else if primaryType == .metered {
             locationName = "Metered Parking"
@@ -467,10 +469,12 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
 
     /// Check if user has matching permit
     private func hasMatchingPermit(regulation: BlockfaceRegulation, userPermits: Set<String>) -> Bool {
-        guard let permitZone = regulation.permitZone else {
+        // Check if user has any of the applicable permit zones
+        let zones = regulation.allPermitZones
+        if zones.isEmpty {
             return false
         }
-        return userPermits.contains(permitZone)
+        return zones.contains(where: { userPermits.contains($0) })
     }
 
     /// Parse time string (HH:MM format) into hour and minute
