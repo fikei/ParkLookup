@@ -72,6 +72,16 @@ struct RegulationsDrawerView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                // Location header below navigation bar
+                VStack(spacing: 4) {
+                    Text(zoneName)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color(.secondarySystemBackground))
+
                 // Regulations list
                 if regulations.isEmpty {
                     emptyStateView
