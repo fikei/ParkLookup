@@ -8,6 +8,7 @@ struct RegulationsDrawerView: View {
     let validityStatus: PermitValidityStatus
     let applicablePermits: [ParkingPermit]
     let timeLimitMinutes: Int?
+    let address: String?
 
     // Detailed regulations
     let regulations: [RegulationInfo]
@@ -74,13 +75,13 @@ struct RegulationsDrawerView: View {
             VStack(spacing: 0) {
                 // Location header below navigation bar
                 VStack(spacing: 4) {
-                    Text(zoneName)
+                    Text(address ?? "Address unavailable")
                         .font(.headline)
                         .foregroundColor(.primary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Color(.secondarySystemBackground))
+                .background(Color.white)
 
                 // Regulations list
                 if regulations.isEmpty {
@@ -553,6 +554,7 @@ private struct RegulationRow: View {
             ParkingPermit(type: .residential, area: "Q")
         ],
         timeLimitMinutes: 120,
+        address: "123 Main St",
         regulations: [
             RegulationInfo(
                 type: .residentialPermit,

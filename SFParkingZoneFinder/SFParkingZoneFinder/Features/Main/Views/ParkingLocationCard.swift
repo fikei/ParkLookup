@@ -17,6 +17,7 @@ struct LocationCardData {
     let locationName: String           // "Zone Q", "Mission St", "Metered Parking"
     let locationCode: String?          // "Q", "$", nil
     let locationType: ZoneType         // .residentialPermit, .metered, etc.
+    let address: String?               // Street address (e.g., "123 Main St")
 
     // Parking status
     let validityStatus: PermitValidityStatus
@@ -295,6 +296,7 @@ struct ParkingLocationCard: View {
                 validityStatus: data.validityStatus,
                 applicablePermits: data.applicablePermits,
                 timeLimitMinutes: data.timeLimitMinutes,
+                address: data.address,
                 regulations: data.detailedRegulations
             )
         }
@@ -841,6 +843,7 @@ private struct MultiPermitCircleView: View {
             locationName: "Zone Q",
             locationCode: "Q",
             locationType: .residentialPermit,
+            address: "123 Main St",
             validityStatus: .valid,
             applicablePermits: [ParkingPermit(type: .residential, area: "Q")],
             allValidPermitAreas: ["Q"],
@@ -865,6 +868,7 @@ private struct MultiPermitCircleView: View {
             locationName: "Zone Q",
             locationCode: "Q",
             locationType: .residentialPermit,
+            address: "456 Oak Ave",
             validityStatus: .valid,
             applicablePermits: [ParkingPermit(type: .residential, area: "Q")],
             allValidPermitAreas: ["Q"],
@@ -889,6 +893,7 @@ private struct MultiPermitCircleView: View {
             locationName: "Mission St",
             locationCode: nil,
             locationType: .residentialPermit,
+            address: "789 Mission St",
             validityStatus: .invalid,
             applicablePermits: [],
             allValidPermitAreas: ["R"],
