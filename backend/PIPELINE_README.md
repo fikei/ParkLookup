@@ -285,14 +285,121 @@ For very large datasets, try:
 
 ---
 
+## 🔬 Analysis Tools
+
+Three analysis scripts help validate pipeline output before deploying to production.
+
+### `analyze_coverage.py` - Comprehensive Coverage Analysis
+
+**Purpose:** Validates data quality and completeness
+
+**Usage:**
+```bash
+python analyze_coverage.py sample_blockfaces_with_regulations.json
+```
+
+**Output includes:**
+- Overall coverage metrics (blockfaces with/without regulations)
+- Regulation type breakdown (street cleaning, RPP, metered, etc.)
+- Regulations per blockface distribution
+- Street name quality
+- Side determination accuracy
+- Top streets by regulation count
+
+**Example:**
+```
+Total Blockfaces: 18,355
+Blockfaces with regulations: 15,240 (83.0%)
+Street Cleaning: 27,046 (62.4%)
+Residential Permit: 6,679 (15.4%)
+Side NORTH/SOUTH/EAST/WEST: 17,437 (95.0%)
+```
+
+### `analyze_side_coverage.py` - Side Determination Validation
+
+**Purpose:** Validates that blockfaces have correct side assignment
+
+**Usage:**
+```bash
+python analyze_side_coverage.py sample_blockfaces_with_regulations.json
+```
+
+**Validates:**
+- Percentage with explicit sides (goal: >90%)
+- UNKNOWN side detection (<10% is good)
+- Street-by-street breakdown
+
+### `analyze_blockface_coordinates.py` - Geometry Validation
+
+**Purpose:** Validates source GeoJSON coordinate accuracy
+
+**Usage:**
+```bash
+python analyze_blockface_coordinates.py "Data Sets/Blockfaces_20251128.geojson"
+```
+
+**Checks:**
+- Street bearings for major streets
+- Coordinate bounds
+- Systematic offsets or rotation issues
+
+---
+
+## 📝 Testing Workflow
+
+**IMPORTANT:** Always test before replacing production data!
+
+### 1. Run Pipeline on Test Data
+```bash
+# Mission District only (fast)
+python pipeline_blockface.py \
+    "Data Sets/Blockfaces_20251128.geojson" \
+    "Data Sets/Parking_regulations_20251128.geojson" \
+    "test_output.json"
+```
+
+### 2. Analyze Output
+```bash
+python analyze_coverage.py test_output.json
+python analyze_side_coverage.py test_output.json
+```
+
+### 3. Verify Metrics
+
+**Expected ranges:**
+- ✅ Coverage: 80-95%
+- ✅ Street cleaning: 60-70%
+- ✅ Side determination: 90-95% (not UNKNOWN)
+- ✅ Multi-RPP: `permitZones` array present
+- ✅ Avg regulations/blockface: 2-4
+
+**Red flags:**
+- ❌ Coverage <70% - Check spatial parameters
+- ❌ UNKNOWN sides >20% - Review popupinfo parsing
+- ❌ Missing regulation types - Verify data sources
+
+### 4. Test in iOS App
+```bash
+# Copy to test location
+cp test_output.json ../SFParkingZoneFinder/SFParkingZoneFinder/Resources/sample_blockfaces_TEST.json
+```
+
+### 5. Deploy to Production (Only After Validation!)
+```bash
+cp test_output.json ../SFParkingZoneFinder/SFParkingZoneFinder/Resources/sample_blockfaces.json
+```
+
+---
+
 ## 📄 Files in This Directory
 
 | File | Purpose | Status |
 |------|---------|--------|
 | `pipeline_blockface.py` | **Active blockface pipeline** | ✅ Use this |
+| `analyze_coverage.py` | Coverage analysis tool | 🔬 Run after pipeline |
+| `analyze_side_coverage.py` | Side determination validator | 🔬 Run after pipeline |
+| `analyze_blockface_coordinates.py` | Geometry validator | 🔬 Run before pipeline |
 | `pipeline_zone_DEPRECATED.py` | Deprecated zone pipeline | ⚠️ Do not use |
-| `convert_to_ios.py` | Zone-to-iOS converter | ⚠️ Deprecated |
-| `update_ios_data.sh` | Automation script for zone pipeline | ⚠️ Deprecated |
 | `PIPELINE_README.md` | This documentation | 📖 Read me |
 
 ---
