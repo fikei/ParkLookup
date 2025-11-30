@@ -139,13 +139,13 @@ struct RegulationsDrawerView: View {
 
     private var regulationsList: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: 16) {
                 ForEach(regulations) { regulation in
                     RegulationRow(regulation: regulation)
                 }
             }
             .padding(.horizontal)
-            .padding(.bottom, 16)
+            .padding(.bottom, 24)
         }
     }
 
@@ -210,73 +210,83 @@ private struct RegulationRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Icon
-            Image(systemName: regulationIcon)
-                .font(.title3)
-                .foregroundColor(regulationColor)
-                .frame(width: 32)
+        VStack(alignment: .leading, spacing: 12) {
+            // Heading with icon
+            HStack(spacing: 10) {
+                Image(systemName: regulationIcon)
+                    .font(.title3)
+                    .foregroundColor(regulationColor)
+                    .frame(width: 28)
 
-            VStack(alignment: .leading, spacing: 6) {
-                // Description
-                Text(regulation.description)
-                    .font(.body)
-                    .fontWeight(.medium)
+                Text(regulationTitle)
+                    .font(.headline)
+                    .fontWeight(.semibold)
                     .foregroundColor(.primary)
 
-                // Enforcement details
+                Spacer()
+            }
+
+            // Details
+            VStack(alignment: .leading, spacing: 8) {
+                // Enforcement time range
                 if let days = regulation.enforcementDays,
                    !days.isEmpty,
                    let start = regulation.enforcementStart,
                    let end = regulation.enforcementEnd {
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "calendar")
-                            .font(.caption)
-                        Text(formatDays(days))
-                            .font(.caption)
-
-                        Spacer().frame(width: 8)
-
-                        Image(systemName: "clock")
-                            .font(.caption)
-                        Text("\(start) - \(end)")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
+                    Text("\(formatDayRange(days)), \(formatTimeRange(start: start, end: end))")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
 
                 // Permit zone if applicable
                 if let permitZone = regulation.permitZone {
-                    HStack(spacing: 4) {
-                        Image(systemName: "p.circle")
-                            .font(.caption)
-                        Text("Zone \(permitZone) permit required")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
+                    Text("Zone \(permitZone) permit required")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
 
                 // Time limit if applicable
                 if let timeLimit = regulation.timeLimit {
-                    HStack(spacing: 4) {
-                        Image(systemName: "timer")
-                            .font(.caption)
-                        Text("\(timeLimit) minute limit")
-                            .font(.caption)
+                    let hours = timeLimit / 60
+                    let minutes = timeLimit % 60
+                    if minutes == 0 {
+                        Text("\(hours) hour time limit")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("\(hours)h \(minutes)m time limit")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                     }
-                    .foregroundColor(.secondary)
                 }
             }
-
-            Spacer()
+            .padding(.leading, 38)  // Align with text after icon
         }
-        .padding(12)
+        .padding(16)
         .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(8)
+        .cornerRadius(12)
     }
 
-    private func formatDays(_ days: [DayOfWeek]) -> String {
+    /// Regulation title based on type
+    private var regulationTitle: String {
+        switch regulation.type {
+        case .streetCleaning:
+            return "Street Cleaning"
+        case .timeLimited:
+            return "Time Limited Parking"
+        case .residentialPermit:
+            return "Residential Permit Parking"
+        case .metered:
+            return "Metered Parking"
+        case .noParking:
+            return "No Parking"
+        case .free:
+            return "Free Parking"
+        }
+    }
+
+    /// Format day range (e.g., "Mon-Sat", "Every day", "Weekdays")
+    private func formatDayRange(_ days: [DayOfWeek]) -> String {
         if days.count == 7 {
             return "Every day"
         }
@@ -284,17 +294,94 @@ private struct RegulationRow: View {
         // Check for weekdays
         let weekdays: Set<DayOfWeek> = [.monday, .tuesday, .wednesday, .thursday, .friday]
         if Set(days) == weekdays {
-            return "Weekdays"
+            return "Mon-Fri"
+        }
+
+        // Check for Mon-Sat
+        let monToSat: Set<DayOfWeek> = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        if Set(days) == monToSat {
+            return "Mon-Sat"
         }
 
         // Check for weekends
         let weekends: Set<DayOfWeek> = [.saturday, .sunday]
         if Set(days) == weekends {
-            return "Weekends"
+            return "Sat-Sun"
         }
 
-        // Otherwise list days
-        return days.map { $0.shortName }.joined(separator: ", ")
+        // Check for consecutive days and create range
+        let allDays: [DayOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        let sortedDays = days.sorted { day1, day2 in
+            guard let idx1 = allDays.firstIndex(of: day1),
+                  let idx2 = allDays.firstIndex(of: day2) else { return false }
+            return idx1 < idx2
+        }
+
+        // Check if consecutive
+        if sortedDays.count >= 2 {
+            var isConsecutive = true
+            for i in 0..<(sortedDays.count - 1) {
+                guard let idx1 = allDays.firstIndex(of: sortedDays[i]),
+                      let idx2 = allDays.firstIndex(of: sortedDays[i + 1]) else {
+                    isConsecutive = false
+                    break
+                }
+                if idx2 != idx1 + 1 {
+                    isConsecutive = false
+                    break
+                }
+            }
+
+            if isConsecutive {
+                return "\(sortedDays.first!.shortName)-\(sortedDays.last!.shortName)"
+            }
+        }
+
+        // Otherwise list days with commas
+        return sortedDays.map { $0.shortName }.joined(separator: ", ")
+    }
+
+    /// Format time range (e.g., "9am-6pm", "9-6pm")
+    private func formatTimeRange(start: String, end: String) -> String {
+        // Parse "HH:MM" format
+        func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+            let parts = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard parts.count == 2 else { return nil }
+            return (hour: parts[0], minute: parts[1])
+        }
+
+        func formatTime(hour: Int, minute: Int) -> String {
+            let hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour)
+            let period = hour >= 12 ? "pm" : "am"
+            if minute == 0 {
+                return "\(hour12)\(period)"
+            } else {
+                return "\(hour12):\(String(format: "%02d", minute))\(period)"
+            }
+        }
+
+        guard let startTime = parseTime(start),
+              let endTime = parseTime(end) else {
+            return "\(start)-\(end)"
+        }
+
+        let startPeriod = startTime.hour >= 12 ? "pm" : "am"
+        let endPeriod = endTime.hour >= 12 ? "pm" : "am"
+
+        let startFormatted = formatTime(hour: startTime.hour, minute: startTime.minute)
+        let endFormatted = formatTime(hour: endTime.hour, minute: endTime.minute)
+
+        // If same period, only show period on end time
+        if startPeriod == endPeriod {
+            let startHour = startTime.hour == 0 ? 12 : (startTime.hour > 12 ? startTime.hour - 12 : startTime.hour)
+            if startTime.minute == 0 {
+                return "\(startHour)-\(endFormatted)"
+            } else {
+                return "\(startHour):\(String(format: "%02d", startTime.minute))-\(endFormatted)"
+            }
+        } else {
+            return "\(startFormatted)-\(endFormatted)"
+        }
     }
 }
 
