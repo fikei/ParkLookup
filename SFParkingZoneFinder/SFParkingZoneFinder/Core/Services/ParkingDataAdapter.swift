@@ -697,7 +697,46 @@ struct ParkUntilCalculator {
         // 2. Check time limit (only for users without valid permits)
         // Valid permit holders are exempt from time limits, but NOT from street cleaning (checked above)
         if validityStatus == .invalid || validityStatus == .noPermitSet {
+            logger.info("🔍 Step 2: Checking time limits for non-permit holders...")
+
+            // Check time-limited regulations in allRegulations array
+            for regulation in allRegulations where regulation.type == .timeLimited {
+                logger.info("  Found time-limited regulation: \(regulation.description), timeLimit=\(regulation.timeLimit ?? 0) min")
+
+                if let limit = regulation.timeLimit,
+                   let startStr = regulation.enforcementStart,
+                   let endStr = regulation.enforcementEnd,
+                   let startTime = parseTimeString(startStr),
+                   let endTime = parseTimeString(endStr) {
+
+                    let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
+                    let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+                    let startMinutes = startTime.totalMinutes
+                    let endMinutes = endTime.totalMinutes
+
+                    var currentDayOfWeek: DayOfWeek?
+                    var isEnforcementDay = true
+                    if let days = regulation.enforcementDays, !days.isEmpty,
+                       let weekday = components.weekday,
+                       let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+                        currentDayOfWeek = dayOfWeek
+                        isEnforcementDay = days.contains(dayOfWeek)
+                    }
+
+                    if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
+                        let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
+                        logger.info("  Time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
+                        if earliestDate == nil || timeLimitEnd < earliestDate! {
+                            earliestDate = timeLimitEnd
+                            earliestRestriction = .timeLimit(date: timeLimitEnd)
+                        }
+                    }
+                }
+            }
+
+            // Also check the top-level timeLimitMinutes parameter
             if let limit = timeLimitMinutes {
+                logger.info("  Found top-level time limit: \(limit) min")
                 if let startTime = enforcementStartTime, let endTime = enforcementEndTime {
                     let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
                     let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
@@ -715,31 +754,15 @@ struct ParkUntilCalculator {
 
                     if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
                         let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
+                        logger.info("  Top-level time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
                         if earliestDate == nil || timeLimitEnd < earliestDate! {
                             earliestDate = timeLimitEnd
                             earliestRestriction = .timeLimit(date: timeLimitEnd)
                         }
-                    } else {
-                        let enforcementStartResult: ParkUntilDisplay
-                        if isEnforcementDay && currentMinutes < startMinutes {
-                            enforcementStartResult = .enforcementStart(time: startTime, date: date)
-                        } else {
-                            enforcementStartResult = findNextEnforcementStart(
-                                from: date,
-                                startTime: startTime,
-                                days: enforcementDays,
-                                currentDay: currentDayOfWeek
-                            )
-                        }
-                        if let enforcementDate = enforcementStartResult.date {
-                            if earliestDate == nil || enforcementDate < earliestDate! {
-                                earliestDate = enforcementDate
-                                earliestRestriction = enforcementStartResult
-                            }
-                        }
                     }
                 } else {
                     let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
+                    logger.info("  Top-level time limit (no enforcement hours), expires at: \(timeLimitEnd, privacy: .public)")
                     if earliestDate == nil || timeLimitEnd < earliestDate! {
                         earliestDate = timeLimitEnd
                         earliestRestriction = .timeLimit(date: timeLimitEnd)
