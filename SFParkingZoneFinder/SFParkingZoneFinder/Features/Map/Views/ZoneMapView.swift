@@ -43,6 +43,9 @@ struct ZoneMapView: UIViewRepresentable {
     /// Toggle to force map recenter (for when coordinate doesn't change but we want to recenter anyway)
     var recenterTrigger: Bool = false
 
+    /// When true, shows an overview of all of San Francisco (ignores user coordinate)
+    var showSFOverview: Bool = false
+
     /// Validates a coordinate to ensure it won't cause NaN errors
     private func isValidCoordinate(_ coord: CLLocationCoordinate2D?) -> Bool {
         guard let c = coord else { return false }
@@ -60,23 +63,34 @@ struct ZoneMapView: UIViewRepresentable {
         mapView.showsCompass = true
         mapView.showsScale = true
 
-        // Set initial region centered on user (zoomed to ~10-15 blocks)
-        // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
+        // Set initial region
         let defaultCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-        let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
-        let baseSpan = 0.006
-        let desiredSpan = MKCoordinateSpan(
-            latitudeDelta: baseSpan * zoomMultiplier,
-            longitudeDelta: baseSpan * zoomMultiplier
-        )
 
-        // Apply vertical bias: offset center northward to push user location down on screen
-        // verticalBias of 0.25 means user appears at 75% from top (halfway between center and bottom)
-        let latOffset = desiredSpan.latitudeDelta * verticalBias
-        let center = CLLocationCoordinate2D(
-            latitude: userCenter.latitude + latOffset,
-            longitude: userCenter.longitude
-        )
+        let (center, desiredSpan) = if showSFOverview {
+            // Show overview of all of San Francisco
+            // SF bounds: ~37.7 to 37.8 latitude, ~-122.52 to -122.35 longitude
+            let sfCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+            let sfSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
+            (sfCenter, sfSpan)
+        } else {
+            // Normal view: centered on user (zoomed to ~10-15 blocks)
+            // 0.006 degrees ≈ 670m ≈ 8-10 SF blocks, adjusted by zoom multiplier
+            let userCenter = isValidCoordinate(userCoordinate) ? userCoordinate! : defaultCenter
+            let baseSpan = 0.006
+            let span = MKCoordinateSpan(
+                latitudeDelta: baseSpan * zoomMultiplier,
+                longitudeDelta: baseSpan * zoomMultiplier
+            )
+
+            // Apply vertical bias: offset center northward to push user location down on screen
+            // verticalBias of 0.25 means user appears at 75% from top (halfway between center and bottom)
+            let latOffset = span.latitudeDelta * verticalBias
+            let adjustedCenter = CLLocationCoordinate2D(
+                latitude: userCenter.latitude + latOffset,
+                longitude: userCenter.longitude
+            )
+            (adjustedCenter, span)
+        }
 
         let region = MKCoordinateRegion(center: center, span: desiredSpan)
         mapView.setRegion(region, animated: false)
@@ -143,6 +157,19 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Handle tapped location annotation (blue dot)
         updateTappedAnnotation(mapView: mapView, context: context)
+
+        // Handle SF overview mode (zoom out to show all of San Francisco)
+        if showSFOverview != context.coordinator.lastShowSFOverview {
+            context.coordinator.lastShowSFOverview = showSFOverview
+            if showSFOverview {
+                logger.info("🗺️ Showing SF overview - zooming out to show all of San Francisco")
+                let sfCenter = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+                let sfSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
+                let region = MKCoordinateRegion(center: sfCenter, span: sfSpan)
+                mapView.setRegion(region, animated: true)
+                return
+            }
+        }
 
         // Check if user coordinate changed - recenter map if user returned to GPS location
         let coordinateChanged: Bool
@@ -1128,6 +1155,9 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Track recenter trigger to force recentering even when coordinate doesn't change
         var lastRecenterTrigger: Bool = false
+
+        // Track SF overview mode to detect changes
+        var lastShowSFOverview: Bool = false
 
         // Track blockface overlay state to zoom to sample location when enabled
         var lastBlockfaceOverlaysEnabled: Bool = false

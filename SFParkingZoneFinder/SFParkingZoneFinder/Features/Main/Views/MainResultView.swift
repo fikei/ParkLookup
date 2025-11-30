@@ -43,7 +43,7 @@ struct MainResultView: View {
     @State private var searchedCoordinate: CLLocationCoordinate2D?
     @State private var tappedCoordinate: CLLocationCoordinate2D?  // Coordinate where user tapped (for blue dot indicator)
     @State private var recenterTrigger = false  // Toggle to force map recenter
-    @State private var showOutsideCoverageAlert = false
+    @State private var showOutsideCoverageBanner = false
     @State private var developerPanelExpanded = false
     @State private var isLoadingOverlays = false
     @State private var overlayLoadingMessage = ""
@@ -51,6 +51,11 @@ struct MainResultView: View {
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// Computed property to check if user is outside SF coverage
+    private var isOutsideCoverage: Bool {
+        viewModel.error == .outsideCoverage
+    }
 
     /// The coordinate to use for map centering (searched or current)
     /// Validates coordinates to prevent NaN errors in CoreGraphics
@@ -221,7 +226,9 @@ struct MainResultView: View {
                         // Show blue dot for tapped location
                         tappedCoordinate: tappedCoordinate,
                         // Force recenter trigger
-                        recenterTrigger: recenterTrigger
+                        recenterTrigger: recenterTrigger,
+                        // Show SF overview when outside coverage
+                        showSFOverview: showOutsideCoverageBanner || isOutsideCoverage
                     )
                     // Use zone count in ID to allow updates when zones load, but prevent recreation on UI-only changes
                     .id("zoneMapView-\(viewModel.allLoadedZones.count)")
@@ -286,16 +293,35 @@ struct MainResultView: View {
                             searchedCoordinate = nil
                             tappedCoordinate = nil
                             selectedZone = nil  // Close tapped spot card
+                            showOutsideCoverageBanner = false  // Hide banner when returning to GPS
                             viewModel.returnToGPSLocation()
                             recenterTrigger.toggle()  // Force map recenter
                         },
                         onOutsideCoverage: {
-                            showOutsideCoverageAlert = true
+                            showOutsideCoverageBanner = true
                         }
                     )
                     .padding(.horizontal)
                     .padding(.top, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
+
+                    // Out of coverage banner
+                    if showOutsideCoverageBanner || isOutsideCoverage {
+                        OutOfCoverageBanner(
+                            onDismiss: {
+                                showOutsideCoverageBanner = false
+                                // Return to current GPS location
+                                searchedCoordinate = nil
+                                tappedCoordinate = nil
+                                selectedZone = nil
+                                viewModel.returnToGPSLocation()
+                                recenterTrigger.toggle()
+                            }
+                        )
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
 
                     // Unified parking location card
                     if selectedZone == nil {
@@ -411,8 +437,8 @@ struct MainResultView: View {
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 1.05)))
             }
 
-            // Error state
-            if let error = viewModel.error {
+            // Error state (but not for outside coverage - that's shown as a banner)
+            if let error = viewModel.error, error != .outsideCoverage {
                 ErrorView(
                     error: error,
                     onRetry: {
@@ -468,11 +494,6 @@ struct MainResultView: View {
                     }
                 )
             }
-        }
-        .alert("Outside Coverage Area", isPresented: $showOutsideCoverageAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("That address is outside San Francisco. We currently only support SF parking zones.")
         }
         }
     }
@@ -1935,12 +1956,12 @@ struct LoadingOverlay: View {
                 }
 
                 VStack(spacing: 8) {
-                    Text("Finding your zone...")
+                    Text("Hunting for a spot...")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
 
-                    Text("Checking your location")
+                    Text("The eternal SF quest")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -2378,6 +2399,57 @@ private struct DeveloperLoadingOverlay: View {
                 dots += "."
             }
         }
+    }
+}
+
+// MARK: - Out of Coverage Banner
+
+/// Banner shown at the top of the map when user is outside SF coverage area
+private struct OutOfCoverageBanner: View {
+    let onDismiss: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Warning icon
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.title3)
+                .foregroundColor(.orange)
+
+            // Message
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Outside Coverage Area")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+
+                Text("This location is outside San Francisco")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            // Dismiss button
+            Button {
+                onDismiss()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.orange.opacity(colorScheme == .dark ? 0.2 : 0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 }
 
