@@ -125,6 +125,8 @@ class ZoneDataAdapter: ParkingDataAdapterProtocol {
 
 /// Adapter for blockface-based parking lookup
 class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
+    private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "BlockfaceDataAdapter")
+
     // Track last selected blockface for sticky preference
     private var lastSelectedBlockface: Blockface?
 
@@ -353,7 +355,10 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
             .timeLimit
 
         // Build all regulations list
+        logger.info("🔍 Building regulations from blockface: \(blockface.street), regulationCount=\(blockface.regulations.count)")
         let allRegulations = blockface.regulations.map { reg in
+            logger.info("  Blockface regulation: type=\(reg.type), desc=\(reg.description)")
+
             // Convert String days to DayOfWeek
             let days: [DayOfWeek]? = reg.enforcementDays?.compactMap { dayStr in
                 DayOfWeek.allCases.first { $0.rawValue.lowercased() == dayStr.lowercased() }
@@ -369,6 +374,7 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
                 timeLimit: reg.timeLimit
             )
         }
+        logger.info("✅ Built \(allRegulations.count) regulations for ParkingLookupResult")
 
         // Find next restriction
         let nextRestriction = findNextRestriction(blockface: blockface)
