@@ -618,19 +618,18 @@ final class MainResultViewModel: ObservableObject {
         // Time limit
         timeLimitMinutes = result.timeLimitMinutes
 
-        // Extract enforcement hours from first regulation that has them
-        if let firstEnforcement = result.allRegulations.first(where: { $0.enforcementStart != nil }) {
-            // Parse enforcement times
-            if let startStr = firstEnforcement.enforcementStart,
-               let endStr = firstEnforcement.enforcementEnd {
-                enforcementStartTime = parseTimeOfDay(startStr)
-                enforcementEndTime = parseTimeOfDay(endStr)
-                enforcementDays = firstEnforcement.enforcementDays
-            } else {
-                enforcementStartTime = nil
-                enforcementEndTime = nil
-                enforcementDays = nil
-            }
+        // Extract enforcement hours from the time limit or residential permit regulation (not street cleaning)
+        // Priority: time limit regulation, then residential permit regulation
+        let enforcementReg = result.allRegulations.first(where: { $0.type == .timeLimited && $0.enforcementStart != nil })
+            ?? result.allRegulations.first(where: { $0.type == .residentialPermit && $0.enforcementStart != nil })
+            ?? result.allRegulations.first(where: { $0.enforcementStart != nil })
+
+        if let reg = enforcementReg,
+           let startStr = reg.enforcementStart,
+           let endStr = reg.enforcementEnd {
+            enforcementStartTime = parseTimeOfDay(startStr)
+            enforcementEndTime = parseTimeOfDay(endStr)
+            enforcementDays = reg.enforcementDays
         } else {
             enforcementStartTime = nil
             enforcementEndTime = nil
