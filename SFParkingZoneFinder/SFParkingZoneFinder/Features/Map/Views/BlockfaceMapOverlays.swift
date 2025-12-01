@@ -311,33 +311,35 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 }
 
                 // Apply priority-based coloring
+                // IMPORTANT: Permit zones trump metered parking - permit holders get unlimited parking in their zone
                 if hasNoParking || hasActiveStreetCleaning {
-                    // Priority 1: Red for no parking or active street cleaning
+                    // Priority 1: Red for no parking or active street cleaning (affects everyone)
                     baseColor = UIColor.systemRed
                     opacity = devSettings.blockfaceOpacity
                     if isDebugStreet {
                         print("  → Color: RED (no parking or street cleaning)")
                     }
-                } else if isUserZone, let hours = parkUntilHours, hours > 24 {
-                    // Priority 2: Green for user's zone with >24 hours park time
+                } else if isUserZone {
+                    // Priority 2: Green for user's permit zone (unlimited parking for permit holders)
+                    // This takes precedence over metered enforcement - permit holders don't pay meters in their zone
                     baseColor = UIColor.systemGreen
                     opacity = devSettings.blockfaceOpacity
                     if isDebugStreet {
-                        print("  → Color: GREEN (user zone, >24h)")
+                        print("  → Color: GREEN (user zone - permit holder has unlimited parking)")
                     }
                 } else if hasMeteredEnforced {
-                    // Priority 3: Grey for metered parking currently enforced
+                    // Priority 3: Grey for metered parking currently enforced (non-permit holders)
                     baseColor = UIColor.systemGray
                     opacity = devSettings.blockfaceOpacity
                     if isDebugStreet {
-                        print("  → Color: GREY (metered enforced)")
+                        print("  → Color: GREY (metered enforced, no permit)")
                     }
                 } else if let hours = parkUntilHours, hours <= 24 {
-                    // Priority 4: Orange for time limited <24 hours or user's zone <24 hours
+                    // Priority 4: Orange for time limited <24 hours
                     baseColor = UIColor.systemOrange
                     opacity = devSettings.blockfaceOpacity
                     if isDebugStreet {
-                        print("  → Color: ORANGE (time limited ≤24h, isUserZone=\(isUserZone))")
+                        print("  → Color: ORANGE (time limited ≤24h)")
                     }
                 } else {
                     // Priority 5: Blue for no restrictions
@@ -726,29 +728,31 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
                 }
 
                 // Apply priority-based coloring
+                // IMPORTANT: Permit zones trump metered parking - permit holders get unlimited parking in their zone
                 if hasNoParking || hasActiveStreetCleaning {
-                    // Priority 1: Red for no parking or active street cleaning
+                    // Priority 1: Red for no parking or active street cleaning (affects everyone)
                     baseColor = UIColor.systemRed
                     if isDebugStreet {
                         print("  → Color: RED (no parking or street cleaning)")
                     }
-                } else if isUserZone, let hours = parkUntilHours, hours > 24 {
-                    // Priority 2: Green for user's zone with >24 hours park time
+                } else if isUserZone {
+                    // Priority 2: Green for user's permit zone (unlimited parking for permit holders)
+                    // This takes precedence over metered enforcement - permit holders don't pay meters in their zone
                     baseColor = UIColor.systemGreen
                     if isDebugStreet {
-                        print("  → Color: GREEN (user zone, >24h)")
+                        print("  → Color: GREEN (user zone - permit holder has unlimited parking)")
                     }
                 } else if hasMeteredEnforced {
-                    // Priority 3: Grey for metered parking currently enforced
+                    // Priority 3: Grey for metered parking currently enforced (non-permit holders)
                     baseColor = UIColor.systemGray
                     if isDebugStreet {
-                        print("  → Color: GREY (metered enforced)")
+                        print("  → Color: GREY (metered enforced, no permit)")
                     }
                 } else if let hours = parkUntilHours, hours <= 24 {
-                    // Priority 4: Orange for time limited <24 hours or user's zone <24 hours
+                    // Priority 4: Orange for time limited <24 hours
                     baseColor = UIColor.systemOrange
                     if isDebugStreet {
-                        print("  → Color: ORANGE (time limited ≤24h, isUserZone=\(isUserZone))")
+                        print("  → Color: ORANGE (time limited ≤24h)")
                     }
                 } else {
                     // Priority 5: Blue for no restrictions
