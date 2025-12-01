@@ -54,7 +54,7 @@ For a functional Alpha release with real data, complete these in order:
 | S15: UI Polish & Animations | **COMPLETE** | 7/8 |
 | S16: CarPlay Support | **COMPLETE** | 8/10 |
 | S17: Map Zone Boundaries & Blockface Viz | In Progress | 21/38 |
-| S18: Beta Release Prep | Not Started | 0/6 |
+| S18: Beta Release Prep | Not Started | 0/7 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | In Progress | 5/14 |
 | S21: Zone Card UI Refinements | In Progress | 29/32 |
@@ -64,11 +64,11 @@ For a functional Alpha release with real data, complete these in order:
 | S25: Metered Parking Layer | Not Started | 0/19 |
 | S26: Blockface Migration | Not Started | 0/24 |
 
-**Beta Progress:** 70/223 tasks complete (31%)
+**Beta Progress:** 70/224 tasks complete (31%)
 
 ---
 
-**Overall Progress:** 171/328 tasks complete (52%)
+**Overall Progress:** 171/329 tasks complete (52%)
 
 *Note: Future Enhancement tasks (F-series) not included in progress counts*
 
@@ -1084,6 +1084,11 @@ Currently, the app uses RPP zone polygons for lookups. To transition to blockfac
 - [ ] **18.5** Archive build and upload to TestFlight
 
 - [ ] **18.6** Distribute to beta testers (target: 50+ SF residents)
+
+- [ ] **18.7** Wrap debug tap logging in #if DEBUG or migrate to os.Logger for production
+  - Current tap logging includes user coordinates (privacy concern for App Store)
+  - TestFlight: can keep as-is for debugging
+  - Production: wrap logUserTapResult() in DEBUG flag or use privacy-safe logging
 
 **Story 18 Complete When:**
 - [ ] App available on TestFlight
