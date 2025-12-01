@@ -132,6 +132,8 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
 
     func lookupParking(at coordinate: CLLocationCoordinate2D) async -> ParkingLookupResult? {
         do {
+            logger.info("🔍 ParkingDataAdapter.lookupParking at (\(coordinate.latitude), \(coordinate.longitude))")
+
             // Find nearby blockfaces (50m radius for precision)
             let nearbyBlockfaces = try await BlockfaceLoader.shared.loadBlockfacesNear(
                 coordinate: coordinate,
@@ -139,8 +141,33 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
                 maxCount: 20  // Only need closest few
             )
 
+            logger.info("  Found \(nearbyBlockfaces.count) blockfaces within 50m")
+
             guard !nearbyBlockfaces.isEmpty else {
-                return nil
+                logger.warning("  ⚠️ No blockfaces found within 50m, trying larger radius...")
+
+                // Try larger radius as fallback
+                let nearbyFallback = try await BlockfaceLoader.shared.loadBlockfacesNear(
+                    coordinate: coordinate,
+                    radiusMeters: 150,
+                    maxCount: 20
+                )
+
+                logger.info("  Found \(nearbyFallback.count) blockfaces within 150m")
+
+                guard !nearbyFallback.isEmpty else {
+                    logger.error("  ❌ No blockfaces found even within 150m - returning nil")
+                    return nil
+                }
+
+                // Use fallback blockfaces
+                let selectedBlockface = selectBestBlockface(
+                    from: nearbyFallback,
+                    userCoordinate: coordinate
+                )
+                lastSelectedBlockface = selectedBlockface
+                logger.info("  ✅ Selected blockface: \(selectedBlockface.street) (\(selectedBlockface.side))")
+                return convertBlockfaceToResult(selectedBlockface)
             }
 
             // Find closest blockface with smart selection
@@ -152,11 +179,13 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
             // Store for sticky preference
             lastSelectedBlockface = selectedBlockface
 
+            logger.info("  ✅ Selected blockface: \(selectedBlockface.street) (\(selectedBlockface.side)), regulations: \(selectedBlockface.regulations.count)")
+
             // Convert blockface to unified result
             return convertBlockfaceToResult(selectedBlockface)
 
         } catch {
-            print("❌ BlockfaceDataAdapter lookup failed: \(error)")
+            logger.error("❌ BlockfaceDataAdapter lookup failed: \(error.localizedDescription)")
             return nil
         }
     }
