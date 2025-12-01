@@ -238,19 +238,65 @@ struct ParkingLocationCard: View {
         return parkUntil.date
     }
 
-    /// Check if we should show "Check Restrictions" instead of "Unlimited Parking"
-    /// True when we have regulations but can't determine park until time (e.g., outside enforcement)
+    /// Always show "Check Restrictions" as the default fallback
+    /// This applies when we can't determine specific parking info
     private var shouldShowCheckRestrictions: Bool {
-        // Must have no park until result
-        guard parkUntilResult == nil else { return false }
+        // Show Check Restrictions when no park until result
+        return parkUntilResult == nil
+    }
 
-        // Must have regulations
-        guard !data.detailedRegulations.isEmpty else { return false }
+    /// Get a description of the current card header state for logging
+    private var cardHeaderState: String {
+        if data.validityStatus == .noPermitRequired {
+            return "No Parking Anytime"
+        } else if isStreetCleaningActive {
+            return "Street Cleaning Active"
+        } else if let _ = upcomingStreetCleaning {
+            return "Street Cleaning Upcoming"
+        } else if isMeteredEnforcementActive {
+            return "Paid Parking"
+        } else if isFreeWithPermit {
+            return "Free with Permit"
+        } else if let _ = freeUntilInMeteredZone {
+            return "Free Until (Metered)"
+        } else if let parkUntil = parkUntilResult {
+            switch parkUntil {
+            case .timeLimit: return "Park Until (Time Limit)"
+            case .enforcementStart: return "Park Until (Enforcement Start)"
+            case .restriction: return "Park Until (Restriction)"
+            case .meteredEnd: return "Park Until (Metered End)"
+            case .unknown: return "Park Until (Unknown)"
+            }
+        } else if shouldShowCheckRestrictions {
+            return "Check Restrictions"
+        } else {
+            return "Unknown State"
+        }
+    }
 
-        // Don't show for unknown locations
-        guard !data.locationName.lowercased().contains("unknown") else { return false }
+    /// Log user tap result for analytics
+    private func logUserTapResult(coordinate: CLLocationCoordinate2D) {
+        let state = cardHeaderState
+        let zone = data.locationName
+        let hasRegulations = !data.detailedRegulations.isEmpty
+        let regulationCount = data.detailedRegulations.count
+        let validityStatus = data.validityStatus
 
-        return true
+        print("📊 USER TAP RESULT:")
+        print("   Coordinate: (\(coordinate.latitude), \(coordinate.longitude))")
+        print("   Zone: \(zone)")
+        print("   Card State: \(state)")
+        print("   Validity: \(validityStatus)")
+        print("   Regulations: \(regulationCount)")
+        print("   Has ParkUntil: \(parkUntilResult != nil)")
+
+        // Detailed regulation logging
+        if hasRegulations {
+            print("   Regulation Details:")
+            for (index, reg) in data.detailedRegulations.enumerated() {
+                print("     [\(index)] \(reg.type): \(reg.description)")
+            }
+        }
     }
 
     /// Helper to check if a regulation is currently in effect
@@ -561,6 +607,12 @@ struct ParkingLocationCard: View {
                 regulations: data.detailedRegulations
             )
         }
+        .onChange(of: data.coordinate) { newCoordinate in
+            // Log whenever user taps a new location
+            if let coord = newCoordinate {
+                logUserTapResult(coordinate: coord)
+            }
+        }
     }
 
     // MARK: - Primary Card (Large, for current location)
@@ -740,32 +792,13 @@ struct ParkingLocationCard: View {
                                 .multilineTextAlignment(.center)
                         }
                     }
-                } else if shouldShowCheckRestrictions {
-                    // 8. Check Restrictions (have regulations but can't determine park until)
+                } else {
+                    // 8. Check Restrictions (default when can't determine park until)
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
                             Image(systemName: "questionmark.circle")
                                 .font(.title2)
                             Text("Check Restrictions")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                        }
-
-                        // Abbreviated details below
-                        if let details = abbreviatedDetailLine {
-                            Text(details)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                        }
-                    }
-                } else {
-                    // 9. Unlimited Parking (default when no restrictions)
-                    VStack(spacing: 4) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "infinity")
-                                .font(.title2)
-                            Text("Unlimited Parking")
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
@@ -977,20 +1010,12 @@ struct ParkingLocationCard: View {
                 Text(parkUntil.shortFormatted())
                     .font(.headline)
             }
-        } else if shouldShowCheckRestrictions {
-            // 8. Check Restrictions (have regulations but can't determine park until)
+        } else {
+            // 8. Check Restrictions (default when can't determine park until)
             HStack(spacing: 6) {
                 Image(systemName: "questionmark.circle")
                     .font(.headline)
                 Text("Check Restrictions")
-                    .font(.headline)
-            }
-        } else {
-            // 9. Unlimited Parking (default when no restrictions)
-            HStack(spacing: 6) {
-                Image(systemName: "infinity")
-                    .font(.headline)
-                Text("Unlimited Parking")
                     .font(.headline)
             }
         }
@@ -1135,27 +1160,12 @@ struct ParkingLocationCard: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-                    } else if shouldShowCheckRestrictions {
-                        // 8. Check Restrictions (have regulations but can't determine park until)
+                    } else {
+                        // 8. Check Restrictions (default when can't determine park until)
                         HStack(spacing: 6) {
                             Image(systemName: "questionmark.circle")
                                 .font(.headline)
                             Text("Check Restrictions")
-                                .font(.headline)
-                        }
-
-                        // Abbreviated details on second line
-                        if let details = abbreviatedDetailLine {
-                            Text(details)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
-                        // 9. Unlimited Parking (default when no restrictions)
-                        HStack(spacing: 6) {
-                            Image(systemName: "infinity")
-                                .font(.headline)
-                            Text("Unlimited Parking")
                                 .font(.headline)
                         }
 
