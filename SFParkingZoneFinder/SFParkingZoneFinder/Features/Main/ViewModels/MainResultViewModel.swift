@@ -340,6 +340,19 @@ final class MainResultViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        // Listen for blockface data source changes and refresh location
+        NotificationCenter.default.publisher(for: .blockfaceDataSourceChanged)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.logger.info("📊 Blockface data source changed - refreshing location data")
+                // Re-evaluate current location with new data source
+                if self.lastUpdated != nil {
+                    self.refreshLocation()
+                }
+            }
+            .store(in: &cancellables)
+
         // Listen for location authorization changes
         locationService.authorizationPublisher
             .receive(on: DispatchQueue.main)
