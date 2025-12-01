@@ -57,12 +57,15 @@ final class BlockfaceLoader: @unchecked Sendable {
             let coords = blockface.geometry.locationCoordinates
             guard !coords.isEmpty else { continue }
 
-            // Use first point as approximate center for distance calculation
-            let blockfaceLocation = CLLocation(latitude: coords[0].latitude, longitude: coords[0].longitude)
-            let distance = userLocation.distance(from: blockfaceLocation)
+            // Calculate minimum distance to ANY point in the linestring (not just first point)
+            // This ensures we find blockfaces even when user taps near middle/end of street
+            let minDistance = coords.map { coord in
+                CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+                    .distance(from: userLocation)
+            }.min() ?? Double.infinity
 
-            if distance <= radiusMeters {
-                nearby.append((blockface, distance))
+            if minDistance <= radiusMeters {
+                nearby.append((blockface, minDistance))
             }
         }
 
