@@ -563,6 +563,40 @@ final class MainResultViewModel: ObservableObject {
 
         // Map regulation type to zone type
         switch result.primaryRegulationType {
+        case .outsideCoverage:
+            // Set error state for outside coverage
+            error = .outsideCoverage
+            zoneType = .residentialPermit
+            meteredSubtitle = nil
+            validityStatus = .noPermitRequired
+            ruleSummary = "Outside covered area"
+            ruleSummaryLines = [ruleSummary]
+            warnings = []
+            conditionalFlags = []
+            applicablePermits = []
+            detailedRegulations = []
+            overlappingZones = []
+            hasOverlappingZones = false
+            allValidPermitAreas = []
+            lookupConfidence = .outsideCoverage
+            return  // Early return, skip rest of processing
+        case .unknownArea:
+            // Set error state for unknown area
+            error = .unknownArea
+            zoneType = .residentialPermit
+            meteredSubtitle = nil
+            validityStatus = .noPermitRequired
+            ruleSummary = "No parking data available"
+            ruleSummaryLines = [ruleSummary]
+            warnings = []
+            conditionalFlags = []
+            applicablePermits = []
+            detailedRegulations = []
+            overlappingZones = []
+            hasOverlappingZones = false
+            allValidPermitAreas = []
+            lookupConfidence = .unknownArea
+            return  // Early return, skip rest of processing
         case .metered:
             zoneType = .metered
             // Extract meter rate and time limit from regulations

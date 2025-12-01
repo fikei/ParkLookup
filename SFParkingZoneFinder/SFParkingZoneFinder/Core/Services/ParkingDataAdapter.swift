@@ -37,6 +37,8 @@ struct ParkingLookupResult {
         case metered           // Paid parking
         case noParking         // No parking allowed
         case streetCleaning    // Street cleaning active
+        case outsideCoverage   // Outside supported city bounds
+        case unknownArea       // Inside city but no data available
     }
 
     enum SourceData {
@@ -131,9 +133,15 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
     private var lastSelectedBlockface: Blockface?
 
     func lookupParking(at coordinate: CLLocationCoordinate2D) async -> ParkingLookupResult? {
-        do {
-            logger.info("🔍 ParkingDataAdapter.lookupParking at (\(coordinate.latitude), \(coordinate.longitude))")
+        logger.info("🔍 ParkingDataAdapter.lookupParking at (\(coordinate.latitude), \(coordinate.longitude))")
 
+        // Check if coordinate is within supported city bounds
+        guard CityIdentifier.sanFrancisco.contains(coordinate) else {
+            logger.warning("  ⚠️ Coordinate outside San Francisco bounds - returning outsideCoverage")
+            return createOutsideCoverageResult(coordinate: coordinate)
+        }
+
+        do {
             // Find nearby blockfaces (50m radius for precision)
             let nearbyBlockfaces = try await BlockfaceLoader.shared.loadBlockfacesNear(
                 coordinate: coordinate,
@@ -156,8 +164,8 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
                 logger.info("  Found \(nearbyFallback.count) blockfaces within 150m")
 
                 guard !nearbyFallback.isEmpty else {
-                    logger.error("  ❌ No blockfaces found even within 150m - returning nil")
-                    return nil
+                    logger.warning("  ⚠️ No blockfaces found even within 150m - returning unknownArea")
+                    return createUnknownAreaResult(coordinate: coordinate)
                 }
 
                 // Use fallback blockfaces
@@ -325,6 +333,46 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
 
     // MARK: - Private Helpers
 
+    /// Create result for location outside coverage area
+    private func createOutsideCoverageResult(coordinate: CLLocationCoordinate2D) -> ParkingLookupResult {
+        return ParkingLookupResult(
+            locationName: "Outside Coverage",
+            locationDetail: "San Francisco only",
+            primaryRegulationType: .outsideCoverage,
+            permitAreas: nil,
+            timeLimitMinutes: nil,
+            allRegulations: [],
+            nextRestriction: nil,
+            sourceData: .blockface(Blockface(
+                id: "outside-coverage",
+                street: "Outside Coverage",
+                side: "UNKNOWN",
+                geometry: LineString(coordinates: []),
+                regulations: []
+            ))
+        )
+    }
+
+    /// Create result for location inside city but no blockface data
+    private func createUnknownAreaResult(coordinate: CLLocationCoordinate2D) -> ParkingLookupResult {
+        return ParkingLookupResult(
+            locationName: "Unknown Area",
+            locationDetail: "No parking data available",
+            primaryRegulationType: .unknownArea,
+            permitAreas: nil,
+            timeLimitMinutes: nil,
+            allRegulations: [],
+            nextRestriction: nil,
+            sourceData: .blockface(Blockface(
+                id: "unknown-area",
+                street: "Unknown Area",
+                side: "UNKNOWN",
+                geometry: LineString(coordinates: []),
+                regulations: []
+            ))
+        )
+    }
+
     /// Select best blockface using PM-specified logic
     private func selectBestBlockface(
         from blockfaces: [Blockface],
@@ -459,6 +507,8 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
         case "residentialPermit": return .residentialPermit
         case "metered": return .metered
         case "noParking": return .noParking
+        case "outsideCoverage": return .outsideCoverage
+        case "unknownArea": return .unknownArea
         default: return .free
         }
     }
