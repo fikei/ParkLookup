@@ -107,7 +107,7 @@ struct ParkingLocationCard: View {
         }
     }
 
-    /// Check if street cleaning is upcoming within 24 hours (but not currently active)
+    /// Check if street cleaning is the next restriction (but not currently active)
     private var upcomingStreetCleaning: Date? {
         // If street cleaning is active now, don't show as upcoming
         if isStreetCleaningActive {
@@ -116,7 +116,6 @@ struct ParkingLocationCard: View {
         }
 
         let now = Date()
-        let twentyFourHoursFromNow = now.addingTimeInterval(24 * 60 * 60)
 
         // Debug: log what parkUntilResult is
         if let result = parkUntilResult {
@@ -137,18 +136,13 @@ struct ParkingLocationCard: View {
             print("🧹 STREET CLEANING CHECK: parkUntilResult is nil")
         }
 
-        // Check if parkUntilResult is a street cleaning restriction within 24h
-        // Park Until would be equal to or after this time
+        // Check if parkUntilResult is a street cleaning restriction
+        // If street cleaning is the next restriction, show it in the header
         if case .restriction(let type, let date) = parkUntilResult {
             print("🧹 STREET CLEANING CHECK: Checking restriction type '\(type)' against 'Street cleaning'")
             if type == "Street cleaning" {
-                print("🧹 STREET CLEANING CHECK: Type matches! Checking date range...")
-                if date >= now && date <= twentyFourHoursFromNow {
-                    print("🧹 STREET CLEANING CHECK: ✅ Found upcoming cleaning at \(date)")
-                    return date
-                } else {
-                    print("🧹 STREET CLEANING CHECK: ❌ Date outside 24h window (date >= now: \(date >= now), date <= 24h: \(date <= twentyFourHoursFromNow))")
-                }
+                print("🧹 STREET CLEANING CHECK: ✅ Street cleaning is the next restriction at \(date)")
+                return date
             } else {
                 print("🧹 STREET CLEANING CHECK: ❌ Type doesn't match (got '\(type)')")
             }
