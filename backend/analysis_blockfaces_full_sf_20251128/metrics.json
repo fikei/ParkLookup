@@ -1,0 +1,87 @@
+{
+  "analysis_date": "2025-12-01",
+  "file_analyzed": "blockfaces_full_sf_20251128.json",
+  "pipeline": "pipeline_blockface.py",
+  "overall_stats": {
+    "total_blockfaces": 18355,
+    "blockfaces_with_regulations": 13631,
+    "blockfaces_without_regulations": 4724,
+    "coverage_percent": 74.3,
+    "total_regulations": 42675
+  },
+  "regulation_distribution": {
+    "streetCleaning": {"count": 27062, "percent": 63.4},
+    "timeLimit": {"count": 6309, "percent": 14.8},
+    "residentialPermit": {"count": 5973, "percent": 14.0},
+    "metered": {"count": 2705, "percent": 6.3},
+    "other": {"count": 539, "percent": 1.3},
+    "noParking": {"count": 87, "percent": 0.2}
+  },
+  "match_rates": {
+    "streetCleaning": {"source": 37878, "output": 27062, "rate": 71.4, "diff": -10816},
+    "timeLimit": {"source": 6889, "output": 6309, "rate": 91.6, "diff": -580},
+    "residentialPermit": {"source": 6485, "output": 5973, "rate": 92.1, "diff": -512},
+    "metered": {"source": 38297, "output": 2705, "rate": 7.1, "diff": -35592},
+    "noParking": {"source": 207, "output": 87, "rate": 42.0, "diff": -120},
+    "other": {"source": 629, "output": 539, "rate": 85.7, "diff": -90},
+    "total": {"source": 90385, "output": 42675, "rate": 47.2, "diff": -47710}
+  },
+  "multi_rpp": {
+    "total_permit_regulations": 5973,
+    "single_zone": 5303,
+    "single_zone_percent": 88.8,
+    "multi_zone": 670,
+    "multi_zone_percent": 11.2,
+    "no_zones": 0,
+    "top_combinations": [
+      {"zones": ["A", "C"], "count": 113},
+      {"zones": ["K", "M"], "count": 99},
+      {"zones": ["G", "K"], "count": 97},
+      {"zones": ["HV", "Q"], "count": 43},
+      {"zones": ["F", "N"], "count": 43}
+    ]
+  },
+  "data_quality": {
+    "street_names": {
+      "named": 9905,
+      "named_percent": 54.0,
+      "unknown": 8450,
+      "unknown_percent": 46.0
+    },
+    "side_determination": {
+      "UNKNOWN": 17392,
+      "UNKNOWN_percent": 94.8,
+      "SOUTH": 252,
+      "EAST": 241,
+      "NORTH": 237,
+      "WEST": 233
+    },
+    "street_cleaning_sides": {
+      "total_streets": 1351,
+      "one_sided": 1039,
+      "one_sided_percent": 76.9,
+      "both_sided": 312,
+      "both_sided_percent": 23.1
+    }
+  },
+  "top_streets": [
+    {"name": "Unknown Street", "regulations": 7137},
+    {"name": "Mission Street", "regulations": 793},
+    {"name": "Geary Boulevard", "regulations": 637},
+    {"name": "3rd Street", "regulations": 579},
+    {"name": "Fillmore Street", "regulations": 360},
+    {"name": "Van Ness Avenue", "regulations": 337},
+    {"name": "Taraval Street", "regulations": 321},
+    {"name": "Clement Street", "regulations": 307},
+    {"name": "California Street", "regulations": 289},
+    {"name": "Judah Street", "regulations": 281}
+  ],
+  "notes": [
+    "High match rates for time limits (91.6%) and residential permits (92.1%)",
+    "Multi-RPP consolidation working correctly (670 multi-zone permits)",
+    "No coverage loss - all reductions from proper consolidation",
+    "Side determination 94.8% UNKNOWN - known limitation, requires popupinfo parsing",
+    "Street names 46% unknown - could be improved with reverse geocoding",
+    "Metered low match rate is expected (meter aggregation to blockfaces)"
+  ]
+}

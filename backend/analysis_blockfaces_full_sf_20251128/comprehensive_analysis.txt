@@ -1,0 +1,125 @@
+================================================================================
+COMPREHENSIVE BLOCKFACE PIPELINE ANALYSIS
+================================================================================
+File: blockfaces_full_sf_20251128.json
+
+================================================================================
+OVERALL COVERAGE
+================================================================================
+Total blockfaces: 18,355
+Blockfaces with regulations: 13,631 (74.3%)
+Blockfaces without regulations: 4,724
+Total regulations: 42,675
+
+REGULATION TYPE BREAKDOWN:
+--------------------------------------------------------------------------------
+  streetCleaning         27,062 ( 63.4%)
+  timeLimit               6,309 ( 14.8%)
+  residentialPermit       5,973 ( 14.0%)
+  metered                 2,705 (  6.3%)
+  other                     539 (  1.3%)
+  noParking                  87 (  0.2%)
+
+STREET NAME QUALITY:
+--------------------------------------------------------------------------------
+  Named streets: 9,905 (54.0%)
+  Unknown streets: 8,450 (46.0%)
+
+SIDE DISTRIBUTION:
+--------------------------------------------------------------------------------
+  UNKNOWN           17,392 ( 94.8%)
+  SOUTH                252 (  1.4%)
+  EAST                 241 (  1.3%)
+  NORTH                237 (  1.3%)
+  WEST                 233 (  1.3%)
+
+TOP STREETS BY REGULATION COUNT:
+--------------------------------------------------------------------------------
+  Unknown Street                            7,137 regulations
+  Mission Street                              793 regulations
+  Geary Boulevard                             637 regulations
+  3rd Street                                  579 regulations
+  Fillmore Street                             360 regulations
+  Van Ness Avenue                             337 regulations
+  Taraval Street                              321 regulations
+  Clement Street                              307 regulations
+  California Street                           289 regulations
+  Judah Street                                281 regulations
+
+================================================================================
+STREET CLEANING SIDE COVERAGE
+================================================================================
+Streets with street cleaning: 1,351
+Streets with ONE side only: 1,039 (76.9%)
+Streets with BOTH sides: 312 (23.1%)
+
+Sample one-sided streets:
+  Lily Street - UNKNOWN side only (7 regulations)
+  16th Street - UNKNOWN side only (160 regulations)
+  Lower Great Highway - UNKNOWN side only (34 regulations)
+  Prado Street - UNKNOWN side only (4 regulations)
+  Collingwood Street - UNKNOWN side only (8 regulations)
+  Ramona Avenue - UNKNOWN side only (2 regulations)
+  Head Street - UNKNOWN side only (13 regulations)
+  25th Street - UNKNOWN side only (131 regulations)
+  Jersey Street - UNKNOWN side only (12 regulations)
+  Mason Street - UNKNOWN side only (57 regulations)
+
+Sample both-sided streets:
+  17th Street - SOUTH, UNKNOWN sides (131 regulations)
+  California Street - NORTH, SOUTH, UNKNOWN sides (186 regulations)
+  Geary Boulevard - NORTH, SOUTH, UNKNOWN sides (538 regulations)
+  Alemany Boulevard - EAST, NORTH, UNKNOWN sides (60 regulations)
+  20th Street - SOUTH, UNKNOWN sides (99 regulations)
+
+================================================================================
+MULTI-RPP PERMIT ANALYSIS
+================================================================================
+Total residential permit regulations: 5,973
+Single zone permits: 5,303 (88.8%)
+Multi-zone permits: 670 (11.2%)
+No zones: 0
+
+Top multi-zone combinations:
+  Zones A, C: 113 occurrences
+  Zones K, M: 99 occurrences
+  Zones G, K: 97 occurrences
+  Zones HV, Q: 43 occurrences
+  Zones F, N: 43 occurrences
+
+Sample multi-zone permits:
+  Unknown Street (UNKNOWN): Zones G, K
+  Broadway (UNKNOWN): Zones G, K
+  Unknown Street (UNKNOWN): Zones S, Z
+  Unknown Street (UNKNOWN): Zones C, G
+  Unknown Street (UNKNOWN): Zones G, K
+
+================================================================================
+MATCH RATE BY REGULATION TYPE
+================================================================================
+Source regulation counts:
+  regulations: 7,783
+  sweeping: 37,878
+  meters: 38,239
+  Total raw features: 83,900
+
+Type                       Source       Output   Match Rate   Difference
+--------------------------------------------------------------------------------
+metered                    38,297        2,705         7.1%      -35,592
+noParking                     207           87        42.0%         -120
+other                         629          539        85.7%          -90
+residentialPermit           6,485        5,973        92.1%         -512
+streetCleaning             37,878       27,062        71.4%      -10,816
+timeLimit                   6,889        6,309        91.6%         -580
+--------------------------------------------------------------------------------
+TOTAL                      90,385       42,675        47.2%      -47,710
+================================================================================
+
+NOTES:
+  - Match rate = (Output / Source) × 100%
+  - Negative differences indicate unmatched source regulations (spatial join miss)
+  - Positive differences for RPP indicate multi-source creation (time limit + RPP exemption)
+  - Multi-RPP consolidation reduced residentialPermit by ~706 (duplicate zones merged)
+  - 'Pay or Permit' regulations create both metered and residentialPermit
+  - Side determination is ~95% UNKNOWN (known limitation, requires popupinfo parsing)
+

@@ -1,0 +1,8 @@
+regulation_type,source_count,output_count,match_rate_percent,difference,status
+streetCleaning,37878,27062,71.4,-10816,acceptable
+timeLimit,6889,6309,91.6,-580,excellent
+residentialPermit,6485,5973,92.1,-512,excellent
+metered,38297,2705,7.1,-35592,expected_aggregation
+noParking,207,87,42.0,-120,medium
+other,629,539,85.7,-90,good
+TOTAL,90385,42675,47.2,-47710,overall
