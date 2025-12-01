@@ -308,7 +308,7 @@ struct ParkingLocationCard: View {
                     components.append(locationToShow)
                 }
             } else if !isValidStyle {
-                // Non-permit holder → show time limit and generic "Residential Parking Zone"
+                // Non-permit holder → show time limit and generic "Resident Parking Zone"
                 if let timeLimit = data.timeLimitMinutes {
                     let hours = timeLimit / 60
                     let minutes = timeLimit % 60
@@ -323,7 +323,7 @@ struct ParkingLocationCard: View {
 
                 // For non-permit holders with permit areas, show generic label
                 if !data.allValidPermitAreas.isEmpty && !data.locationName.lowercased().contains("unknown") {
-                    components.append("Residential Parking Zone")
+                    components.append("Resident Parking Zone")
                 }
             } else {
                 // Permit holder in their zone → show specific zone(s) only
