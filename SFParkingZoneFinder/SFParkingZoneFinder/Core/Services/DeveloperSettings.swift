@@ -30,6 +30,9 @@ enum BlockfaceDataSource: String, CaseIterable, Codable, Hashable {
 final class DeveloperSettings: ObservableObject {
     static let shared = DeveloperSettings()
 
+    // Flag to prevent notifications during initialization
+    private var isInitializing = true
+
     // MARK: - Display Simplification (affects map rendering only)
 
     /// Use convex hull (smoothed envelope) instead of actual boundaries
@@ -303,8 +306,10 @@ final class DeveloperSettings: ObservableObject {
     @Published var blockfaceDataSource: BlockfaceDataSource {
         didSet {
             UserDefaults.standard.set(blockfaceDataSource.rawValue, forKey: Keys.blockfaceDataSource)
-            // Clear cache when data source changes
-            NotificationCenter.default.post(name: .blockfaceDataSourceChanged, object: nil)
+            // Only post notification after initialization is complete (avoid deadlocks)
+            if !isInitializing {
+                NotificationCenter.default.post(name: .blockfaceDataSourceChanged, object: nil)
+            }
         }
     }
 
@@ -750,19 +755,20 @@ final class DeveloperSettings: ObservableObject {
             print("🔧 Migration V1: Enabled blockface polygons, disabled centerlines for proper color coding")
         }
 
-        // Migration V2: Enable blockface features for all users
+        // Migration V2: Enable blockface features for ALL users (including existing)
         // Fixes regression where Park Until, time limits, and metered parking weren't working
         let migrationV2Key = "dev.blockfaceMigrationV2"
         let hasMigratedV2 = defaults.bool(forKey: migrationV2Key)
         if !hasMigratedV2 {
-            // Force enable blockface features if not explicitly set by user
-            if defaults.object(forKey: Keys.useBlockfaceForFeatures) == nil {
-                useBlockfaceForFeatures = true
-                defaults.set(true, forKey: Keys.useBlockfaceForFeatures)
-                print("🔧 Migration V2: Enabled blockface features (Park Until, time limits, metered parking)")
-            }
+            // Force enable blockface features for everyone (override previous settings)
+            useBlockfaceForFeatures = true
+            defaults.set(true, forKey: Keys.useBlockfaceForFeatures)
+            print("🔧 Migration V2: Force-enabled blockface features for all users (Park Until, time limits, metered parking)")
             defaults.set(true, forKey: migrationV2Key)
         }
+
+        // Mark initialization complete
+        isInitializing = false
     }
 
     // MARK: - Computed Properties
