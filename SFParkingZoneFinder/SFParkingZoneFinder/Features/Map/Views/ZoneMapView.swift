@@ -1053,8 +1053,23 @@ struct ZoneMapView: UIViewRepresentable {
 
                 // Add blockface overlays to map on main thread
                 await MainActor.run {
+                    // Reset renderer counts before adding new overlays
+                    if let coordinator = mapView.delegate as? Coordinator {
+                        coordinator.blockfacePolygonCount = 0
+                        coordinator.blockfacePolylineCount = 0
+                    }
+
                     mapView.addBlockfaceOverlays(blockfaces)
                     logger.info("✅ Added \(blockfaces.count) blockface overlays to map")
+
+                    // Log renderer count summary after a brief delay (renderers are created lazily)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        if let coordinator = mapView.delegate as? Coordinator {
+                            if coordinator.blockfacePolygonCount > 0 || coordinator.blockfacePolylineCount > 0 {
+                                logger.info("📍 Created \(coordinator.blockfacePolygonCount) polygon renderers + \(coordinator.blockfacePolylineCount) polyline renderers")
+                            }
+                        }
+                    }
 
                     // Update coordinator's last load center to prevent immediate reload
                     if let coordinator = mapView.delegate as? Coordinator {
@@ -1137,6 +1152,10 @@ struct ZoneMapView: UIViewRepresentable {
         var overlaysCurrentlyVisible: Bool = false  // Start hidden, will be set true after initial load if showOverlays is true
         var overlaysLoaded: Bool = false  // Track whether overlays have been loaded
         var isLoadingOverlays: Bool = false  // Track whether overlays are currently being loaded/rendered
+
+        // Blockface renderer counters for logging summary
+        var blockfacePolygonCount: Int = 0
+        var blockfacePolylineCount: Int = 0
         var overlayLoadingMessage: String = ""  // Detailed message for developer view
         var lastVerticalBias: Double = 0.0
 
@@ -1190,14 +1209,14 @@ struct ZoneMapView: UIViewRepresentable {
 
             // Handle blockface centerline polylines (debug visualization)
             if let blockfacePolyline = overlay as? BlockfacePolyline {
-                print("📍 Creating BlockfacePolylineRenderer for \(blockfacePolyline.blockface?.street ?? "unknown")")
+                blockfacePolylineCount += 1
                 return BlockfacePolylineRenderer(polyline: blockfacePolyline, blockface: blockfacePolyline.blockface)
             }
 
             // Handle blockface polygons - check before ZonePolygon since BlockfacePolygon is also MKPolygon
             if let blockfacePolygon = overlay as? BlockfacePolygon,
                let blockface = blockfacePolygon.blockface {
-                print("📍 Creating BlockfacePolygonRenderer for \(blockface.street) \(blockface.side)")
+                blockfacePolygonCount += 1
                 return BlockfacePolygonRenderer(polygon: blockfacePolygon, blockface: blockface)
             }
 
