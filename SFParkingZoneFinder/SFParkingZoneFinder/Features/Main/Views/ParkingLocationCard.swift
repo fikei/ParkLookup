@@ -223,8 +223,7 @@ struct ParkingLocationCard: View {
             }
         } else {
             // For non-metered zones (residential, etc.)
-            // Non-permit holders: show time limit instead of zone
-            // Permit holders: show zone
+            // Show time limit if present, then zone (both for non-permit holders and permit holders)
             if !isValidStyle {
                 // Non-permit holder → show time limit
                 if let timeLimit = data.timeLimitMinutes {
@@ -238,20 +237,20 @@ struct ParkingLocationCard: View {
                         components.append("\(minutes) Min Max")
                     }
                 }
-            } else {
-                // Permit holder → show zone
-                let locationToShow: String
-                if data.locationName.lowercased().contains("unknown") {
-                    locationToShow = ""
-                } else if isMultiPermitLocation {
-                    locationToShow = formattedLocationsList
-                } else {
-                    locationToShow = data.locationName
-                }
+            }
 
-                if !locationToShow.isEmpty {
-                    components.append(locationToShow)
-                }
+            // Show zone for everyone (permit holders and non-permit holders)
+            let locationToShow: String
+            if data.locationName.lowercased().contains("unknown") {
+                locationToShow = ""
+            } else if isMultiPermitLocation {
+                locationToShow = formattedLocationsList
+            } else {
+                locationToShow = data.locationName
+            }
+
+            if !locationToShow.isEmpty {
+                components.append(locationToShow)
             }
         }
 
