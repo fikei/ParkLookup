@@ -112,10 +112,21 @@ struct ParkingLocationCard: View {
     /// so "Paid Parking" displays even in permit zones with meters
     private var isMeteredEnforcementActive: Bool {
         let now = Date()
-        return data.detailedRegulations.contains { regulation in
+
+        // Debug logging
+        let meteredRegs = data.detailedRegulations.filter { $0.type == .metered }
+        print("🔍 METERED CHECK: Found \(meteredRegs.count) metered regulations")
+        for reg in meteredRegs {
+            let isActive = isRegulationCurrentlyActive(reg, at: now)
+            print("   - Metered reg: start=\(reg.enforcementStart ?? "nil"), end=\(reg.enforcementEnd ?? "nil"), days=\(reg.enforcementDays?.map(\.rawValue) ?? []), active=\(isActive)")
+        }
+
+        let result = data.detailedRegulations.contains { regulation in
             guard regulation.type == .metered else { return false }
             return isRegulationCurrentlyActive(regulation, at: now)
         }
+        print("   → isMeteredEnforcementActive = \(result)")
+        return result
     }
 
     /// Helper to check if a regulation is currently in effect
