@@ -136,6 +136,13 @@ struct ParkingLocationCard: View {
             print("🧹 STREET CLEANING CHECK: parkUntilResult is nil")
         }
 
+        // If metered enforcement is starting soon, prioritize showing paid parking info
+        // Check if parkUntilResult is enforcementStart (metered parking about to begin)
+        if case .enforcementStart = parkUntilResult {
+            print("🧹 STREET CLEANING CHECK: ❌ Metered enforcement starts before street cleaning, showing paid parking instead")
+            return nil
+        }
+
         // Check if parkUntilResult is a street cleaning restriction
         // If street cleaning is the next restriction, show it in the header
         if case .restriction(let type, let date) = parkUntilResult {
