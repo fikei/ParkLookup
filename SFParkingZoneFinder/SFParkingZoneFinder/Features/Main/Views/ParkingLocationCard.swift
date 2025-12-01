@@ -107,6 +107,26 @@ struct ParkingLocationCard: View {
         }
     }
 
+    /// Check if street cleaning is upcoming within 24 hours (but not currently active)
+    private var upcomingStreetCleaning: Date? {
+        // If street cleaning is active now, don't show as upcoming
+        if isStreetCleaningActive {
+            return nil
+        }
+
+        let now = Date()
+        let twentyFourHoursFromNow = now.addingTimeInterval(24 * 60 * 60)
+
+        // Check if parkUntilResult is a street cleaning restriction within 24h
+        if case .restriction(let type, let date) = parkUntilResult,
+           type == "Street cleaning",
+           date > now && date <= twentyFourHoursFromNow {
+            return date
+        }
+
+        return nil
+    }
+
     /// Check if metered enforcement is currently active
     /// This checks for active metered regulations regardless of location type,
     /// so "Paid Parking" displays even in permit zones with meters
