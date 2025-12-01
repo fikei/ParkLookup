@@ -901,25 +901,54 @@ struct ParkUntilCalculator {
             }
         }
 
-        // 3. Check for metered enforcement ending
+        // 3. Check for metered enforcement ending (if currently enforced)
+        // OR find when metered enforcement starts next (if not currently enforced)
         for regulation in allRegulations {
             if regulation.type == .metered {
-                if let endTime = regulation.enforcementEnd,
+                if let startTime = regulation.enforcementStart,
+                   let endTime = regulation.enforcementEnd,
                    let days = regulation.enforcementDays,
+                   let startTimeOfDay = parseTimeString(startTime),
                    let endTimeOfDay = parseTimeString(endTime) {
-                    let components = calendar.dateComponents([.weekday], from: date)
+
+                    let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
+                    let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+                    let startMinutes = startTimeOfDay.totalMinutes
+                    let endMinutes = endTimeOfDay.totalMinutes
+
                     if let weekday = components.weekday,
-                       let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday),
-                       days.contains(dayOfWeek) {
-                        if let endDate = calendar.date(
-                            bySettingHour: endTimeOfDay.hour,
-                            minute: endTimeOfDay.minute,
-                            second: 0,
-                            of: date
-                        ), endDate > date {
-                            if earliestDate == nil || endDate < earliestDate! {
-                                earliestDate = endDate
-                                earliestRestriction = .meteredEnd(date: endDate)
+                       let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
+
+                        let isEnforcementDay = days.contains(dayOfWeek)
+                        let isDuringEnforcementHours = currentMinutes >= startMinutes && currentMinutes < endMinutes
+
+                        logger.info("  Metered check - currentDay=\(dayOfWeek.rawValue), enforcementDays=\(days.map { $0.rawValue }), isEnforcementDay=\(isEnforcementDay)")
+                        logger.info("  Metered check - currentTime=\(currentMinutes)min, enforcement=\(startMinutes)-\(endMinutes)min, isDuringHours=\(isDuringEnforcementHours)")
+
+                        if isEnforcementDay && isDuringEnforcementHours {
+                            // Currently enforced - show when enforcement ends
+                            if let endDate = calendar.date(
+                                bySettingHour: endTimeOfDay.hour,
+                                minute: endTimeOfDay.minute,
+                                second: 0,
+                                of: date
+                            ), endDate > date {
+                                logger.info("  Metered enforcement active, ends at: \(endDate, privacy: .public)")
+                                if earliestDate == nil || endDate < earliestDate! {
+                                    earliestDate = endDate
+                                    earliestRestriction = .meteredEnd(date: endDate)
+                                }
+                            }
+                        } else {
+                            // Not currently enforced - find next enforcement start
+                            logger.info("  Metered NOT currently enforced, finding next enforcement start...")
+                            let nextStart = findNextEnforcementStart(from: date, startTime: startTimeOfDay, days: days, currentDay: dayOfWeek)
+                            if case .enforcementStart(_, let nextDate) = nextStart {
+                                logger.info("  Parking free until metered enforcement starts: \(nextDate, privacy: .public)")
+                                if earliestDate == nil || nextDate < earliestDate! {
+                                    earliestDate = nextDate
+                                    earliestRestriction = nextStart
+                                }
                             }
                         }
                     }
