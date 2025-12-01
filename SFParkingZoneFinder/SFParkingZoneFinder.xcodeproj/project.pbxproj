@@ -78,6 +78,7 @@
 		3CBD00042EDBF000001BDE61 /* BlockfaceMapOverlays.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */; };
 		3CBD00062EDBF000001BDE61 /* BlockfaceLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */; };
 		3CBD00082EDBF000001BDE61 /* sample_blockfaces.json in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */; };
+		170D6144BED440C99D41E5FA /* sample_blockfaces_multiRPP_20251128.json in Resources */ = {isa = PBXBuildFile; fileRef = 165A516C9FB04F82A42026DB /* sample_blockfaces_multiRPP_20251128.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -161,6 +162,7 @@
 		3CBD00032EDBF000001BDE61 /* BlockfaceMapOverlays.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockfaceMapOverlays.swift; sourceTree = "<group>"; };
 		3CBD00052EDBF000001BDE61 /* BlockfaceLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockfaceLoader.swift; sourceTree = "<group>"; };
 		3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sample_blockfaces.json; sourceTree = "<group>"; };
+		165A516C9FB04F82A42026DB /* sample_blockfaces_multiRPP_20251128.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sample_blockfaces_multiRPP_20251128.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -252,6 +254,7 @@
 			isa = PBXGroup;
 			children = (
 				3CBD00072EDBF000001BDE61 /* sample_blockfaces.json */,
+				165A516C9FB04F82A42026DB /* sample_blockfaces_multiRPP_20251128.json */,
 				3C4145B82ED14A6F001BDE61 /* Assets.xcassets */,
 				3C4145B92ED14A6F001BDE61 /* Config.plist.template */,
 				3C4145BA2ED14A6F001BDE61 /* sf_parking_zones.json */,
@@ -548,6 +551,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CBD00082EDBF000001BDE61 /* sample_blockfaces.json in Resources */,
+				170D6144BED440C99D41E5FA /* sample_blockfaces_multiRPP_20251128.json in Resources */,
 				3C4145E82ED14A6F001BDE61 /* Assets.xcassets in Resources */,
 				3C4145EA2ED14A6F001BDE61 /* sf_parking_zones.json in Resources */,
 				3C4145E92ED14A6F001BDE61 /* Config.plist.template in Resources */,
