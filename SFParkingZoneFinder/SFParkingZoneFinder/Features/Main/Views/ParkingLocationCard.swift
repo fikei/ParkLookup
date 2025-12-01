@@ -507,7 +507,6 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.red)
 
                         Text("Anytime")
                             .font(.subheadline)
@@ -523,7 +522,6 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.orange)
 
                         Text("In progress")
                             .font(.caption)
@@ -539,7 +537,6 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.red)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
@@ -559,7 +556,6 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.blue)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
@@ -579,7 +575,6 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.primary)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
@@ -599,7 +594,6 @@ struct ParkingLocationCard: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.green)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
@@ -760,7 +754,6 @@ struct ParkingLocationCard: View {
                 Text("No Parking")
                     .font(.headline)
             }
-            .foregroundColor(.red)
         } else if isStreetCleaningActive {
             // 2. Street Cleaning (currently active)
             HStack(spacing: 6) {
@@ -769,7 +762,6 @@ struct ParkingLocationCard: View {
                 Text("Street Cleaning")
                     .font(.headline)
             }
-            .foregroundColor(.orange)
         } else if let cleaningDate = upcomingStreetCleaning {
             // 3. Street Cleaning at [TIME] (upcoming within 24 hours)
             HStack(spacing: 6) {
@@ -778,7 +770,6 @@ struct ParkingLocationCard: View {
                 Text("Street Cleaning at \(formatTime(cleaningDate))")
                     .font(.headline)
             }
-            .foregroundColor(.red)
         } else if isMeteredEnforcementActive {
             // 4. Paid Parking (metered and currently enforced)
             HStack(spacing: 6) {
@@ -787,7 +778,6 @@ struct ParkingLocationCard: View {
                 Text("Paid Parking")
                     .font(.headline)
             }
-            .foregroundColor(.blue)
         } else if let parkUntil = parkUntilResult {
             // 4. Until... (Park Until from calculator)
             HStack(spacing: 6) {
@@ -796,7 +786,6 @@ struct ParkingLocationCard: View {
                 Text(parkUntil.shortFormatted())
                     .font(.headline)
             }
-            .foregroundColor(.primary)
         } else {
             // 5. Unlimited Parking (default when no restrictions)
             HStack(spacing: 6) {
@@ -805,7 +794,6 @@ struct ParkingLocationCard: View {
                 Text("Unlimited Parking")
                     .font(.headline)
             }
-            .foregroundColor(.green)
         }
     }
 
@@ -852,7 +840,6 @@ struct ParkingLocationCard: View {
                             Text("No Parking")
                                 .font(.headline)
                         }
-                        .foregroundColor(.red)
 
                         Text("Anytime")
                             .font(.caption)
@@ -865,7 +852,6 @@ struct ParkingLocationCard: View {
                             Text("Street Cleaning")
                                 .font(.headline)
                         }
-                        .foregroundColor(.orange)
 
                         Text("In progress")
                             .font(.caption)
@@ -878,7 +864,6 @@ struct ParkingLocationCard: View {
                             Text("Street Cleaning at \(formatTime(cleaningDate))")
                                 .font(.headline)
                         }
-                        .foregroundColor(.red)
 
                         // Abbreviated details on second line
                         if let details = abbreviatedDetailLine {
@@ -894,7 +879,6 @@ struct ParkingLocationCard: View {
                             Text("Paid Parking")
                                 .font(.headline)
                         }
-                        .foregroundColor(.blue)
 
                         // Abbreviated details on second line
                         if let details = abbreviatedDetailLine {
@@ -910,7 +894,6 @@ struct ParkingLocationCard: View {
                             Text(parkUntil.shortFormatted())
                                 .font(.headline)
                         }
-                        .foregroundColor(.primary)
 
                         // Abbreviated details on second line
                         if let details = abbreviatedDetailLine {
@@ -926,7 +909,6 @@ struct ParkingLocationCard: View {
                             Text("Unlimited Parking")
                                 .font(.headline)
                         }
-                        .foregroundColor(.green)
 
                         // Abbreviated details on second line
                         if let details = abbreviatedDetailLine {
