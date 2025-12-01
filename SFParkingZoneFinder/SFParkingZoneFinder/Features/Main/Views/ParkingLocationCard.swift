@@ -119,16 +119,28 @@ struct ParkingLocationCard: View {
 
     /// Helper to check if a regulation is currently in effect
     private func isRegulationCurrentlyActive(_ regulation: RegulationInfo, at time: Date) -> Bool {
-        guard let startTime = regulation.enforcementStart,
-              let endTime = regulation.enforcementEnd else {
+        guard let startStr = regulation.enforcementStart,
+              let endStr = regulation.enforcementEnd else {
+            return false
+        }
+
+        // Parse time strings (HH:MM format)
+        func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+            let components = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard components.count == 2 else { return nil }
+            return (hour: components[0], minute: components[1])
+        }
+
+        guard let startTime = parseTime(startStr),
+              let endTime = parseTime(endStr) else {
             return false
         }
 
         let calendar = Calendar.current
         let components = calendar.dateComponents([.weekday, .hour, .minute], from: time)
         let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
-        let startMinutes = startTime.totalMinutes
-        let endMinutes = endTime.totalMinutes
+        let startMinutes = startTime.hour * 60 + startTime.minute
+        let endMinutes = endTime.hour * 60 + endTime.minute
 
         // Check day of week if enforcement days specified
         if let enforcementDays = regulation.enforcementDays, !enforcementDays.isEmpty {
