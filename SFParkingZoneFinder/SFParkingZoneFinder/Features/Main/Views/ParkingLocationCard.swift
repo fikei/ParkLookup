@@ -158,9 +158,20 @@ struct ParkingLocationCard: View {
     private var isMeteredEnforcementActive: Bool {
         let now = Date()
 
+        // Format current time for logging
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm (EEE)"
+        let currentTimeStr = formatter.string(from: now)
+
+        // Get calendar components for debugging
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: now)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+
         // Debug logging
         let meteredRegs = data.detailedRegulations.filter { $0.type == .metered }
         print("🔍 METERED CHECK: Found \(meteredRegs.count) metered regulations")
+        print("   Current time: \(currentTimeStr), minutes=\(currentMinutes)")
         for reg in meteredRegs {
             let isActive = isRegulationCurrentlyActive(reg, at: now)
             print("   - Metered reg: start=\(reg.enforcementStart ?? "nil"), end=\(reg.enforcementEnd ?? "nil"), days=\(reg.enforcementDays?.map(\.rawValue) ?? []), active=\(isActive)")
