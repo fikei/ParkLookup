@@ -223,7 +223,34 @@ struct ParkingLocationCard: View {
             }
         } else {
             // For non-metered zones (residential, etc.)
-            if !isValidStyle {
+            if data.validityStatus == .invalid || data.validityStatus == .conditional {
+                // Permit holder outside their zone or with restrictions → show time limit + specific zone name
+                if let timeLimit = data.timeLimitMinutes {
+                    let hours = timeLimit / 60
+                    let minutes = timeLimit % 60
+                    if hours > 0 && minutes > 0 {
+                        components.append("\(hours) Hour \(minutes) Min Max")
+                    } else if hours > 0 {
+                        components.append("\(hours) Hour Max")
+                    } else if minutes > 0 {
+                        components.append("\(minutes) Min Max")
+                    }
+                }
+
+                // Show specific zone name(s)
+                let locationToShow: String
+                if data.locationName.lowercased().contains("unknown") {
+                    locationToShow = ""
+                } else if isMultiPermitLocation {
+                    locationToShow = formattedLocationsList
+                } else {
+                    locationToShow = data.locationName
+                }
+
+                if !locationToShow.isEmpty {
+                    components.append(locationToShow)
+                }
+            } else if !isValidStyle {
                 // Non-permit holder → show time limit and generic "Residential Parking Zone"
                 if let timeLimit = data.timeLimitMinutes {
                     let hours = timeLimit / 60
@@ -242,7 +269,7 @@ struct ParkingLocationCard: View {
                     components.append("Residential Parking Zone")
                 }
             } else {
-                // Permit holder → show specific zone(s)
+                // Permit holder in their zone → show specific zone(s) only
                 let locationToShow: String
                 if data.locationName.lowercased().contains("unknown") {
                     locationToShow = ""
