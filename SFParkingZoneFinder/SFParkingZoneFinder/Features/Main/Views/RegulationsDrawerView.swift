@@ -416,11 +416,15 @@ private struct RegulationRow: View {
                     let hours = timeLimit / 60
                     let minutes = timeLimit % 60
                     if minutes == 0 {
-                        Text("\(hours) hour time limit")
+                        Text("\(hours) Hour Max")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    } else if hours == 0 {
+                        Text("\(minutes) Min Max")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     } else {
-                        Text("\(hours)h \(minutes)m time limit")
+                        Text("\(hours) Hour \(minutes) Min Max")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }

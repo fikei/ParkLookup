@@ -751,9 +751,11 @@ final class MainResultViewModel: ObservableObject {
             let hours = timeLimit / 60
             let minutes = timeLimit % 60
             if minutes == 0 {
-                timeLimitStr = "\(hours)hr max"
+                timeLimitStr = "\(hours) Hour Max"
+            } else if hours == 0 {
+                timeLimitStr = "\(minutes) Min Max"
             } else {
-                timeLimitStr = "\(hours)h\(minutes)m max"
+                timeLimitStr = "\(hours) Hour \(minutes) Min Max"
             }
         }
 

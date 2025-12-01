@@ -231,11 +231,11 @@ struct ParkingLocationCard: View {
                     let hours = timeLimit / 60
                     let minutes = timeLimit % 60
                     if hours > 0 && minutes > 0 {
-                        components.append("\(hours)h \(minutes)m")
+                        components.append("\(hours) Hour \(minutes) Min Max")
                     } else if hours > 0 {
-                        components.append("\(hours)hr")
+                        components.append("\(hours) Hour Max")
                     } else if minutes > 0 {
-                        components.append("\(minutes)m")
+                        components.append("\(minutes) Min Max")
                     }
                 }
             } else {

@@ -128,9 +128,11 @@ struct BlockfaceRegulation: Codable, Hashable, Identifiable {
         let minutes = limit % 60
 
         if minutes == 0 {
-            return "\(hours) hour limit"
+            return "\(hours) Hour Max"
+        } else if hours == 0 {
+            return "\(minutes) Min Max"
         } else {
-            return "\(hours)h \(minutes)m limit"
+            return "\(hours) Hour \(minutes) Min Max"
         }
     }
 
