@@ -350,6 +350,10 @@ private struct RegulationRow: View {
             return "nosign"
         case .free:
             return "checkmark.circle"
+        case .outsideCoverage:
+            return "map"
+        case .unknownArea:
+            return "questionmark.circle"
         }
     }
 
@@ -364,6 +368,10 @@ private struct RegulationRow: View {
             return .orange
         case .free:
             return .green
+        case .outsideCoverage:
+            return .blue
+        case .unknownArea:
+            return .yellow
         }
     }
 
@@ -440,6 +448,10 @@ private struct RegulationRow: View {
             return "No Parking"
         case .free:
             return "Free Parking"
+        case .outsideCoverage:
+            return "Outside Coverage"
+        case .unknownArea:
+            return "Unknown Area"
         }
     }
 
