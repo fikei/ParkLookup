@@ -350,9 +350,12 @@ final class MainResultViewModel: ObservableObject {
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 self.logger.info("📊 Blockface data source changed - refreshing location data")
-                // Re-evaluate current location with new data source
-                if self.lastUpdated != nil {
-                    self.refreshLocation()
+                // Re-evaluate current location with new data source (don't request fresh GPS which may timeout)
+                if let currentCoord = self.currentCoordinate {
+                    self.logger.info("🔄 Data source changed - re-evaluating with cached location")
+                    Task {
+                        await self.performLookupAt(currentCoord)
+                    }
                 }
             }
             .store(in: &cancellables)
