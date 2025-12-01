@@ -275,21 +275,22 @@ struct ParkingLocationCard: View {
         }
     }
 
-    /// Log user tap result for analytics
-    private func logUserTapResult(coordinate: CLLocationCoordinate2D) {
+    /// Log card state for analytics
+    private func logCardState() {
         let state = cardHeaderState
         let zone = data.locationName
         let hasRegulations = !data.detailedRegulations.isEmpty
         let regulationCount = data.detailedRegulations.count
         let validityStatus = data.validityStatus
 
-        print("📊 USER TAP RESULT:")
-        print("   Coordinate: (\(coordinate.latitude), \(coordinate.longitude))")
+        print("📊 PARKING CARD STATE:")
         print("   Zone: \(zone)")
         print("   Card State: \(state)")
+        print("   Display Mode: \(displayMode)")
         print("   Validity: \(validityStatus)")
         print("   Regulations: \(regulationCount)")
         print("   Has ParkUntil: \(parkUntilResult != nil)")
+        print("   Is Current Location: \(data.isCurrentLocation)")
 
         // Detailed regulation logging
         if hasRegulations {
@@ -341,7 +342,7 @@ struct ParkingLocationCard: View {
     /// Find when enforcement starts for valid permit holders (outside enforcement hours)
     private func findNextEnforcementForValidPermit() -> ParkUntilDisplay? {
         guard let startTime = data.enforcementStartTime,
-              let endTime = data.enforcementEndTime else {
+              let _ = data.enforcementEndTime else {
             return nil
         }
 
@@ -608,11 +609,9 @@ struct ParkingLocationCard: View {
                 regulations: data.detailedRegulations
             )
         }
-        .onChange(of: data.coordinate) { newCoordinate in
-            // Log whenever user taps a new location
-            if let coord = newCoordinate {
-                logUserTapResult(coordinate: coord)
-            }
+        .onAppear {
+            // Log card state when it appears
+            logCardState()
         }
     }
 
