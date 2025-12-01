@@ -223,9 +223,8 @@ struct ParkingLocationCard: View {
             }
         } else {
             // For non-metered zones (residential, etc.)
-            // Show time limit if present, then zone (both for non-permit holders and permit holders)
             if !isValidStyle {
-                // Non-permit holder → show time limit
+                // Non-permit holder → show time limit and generic "Residential Parking Zone"
                 if let timeLimit = data.timeLimitMinutes {
                     let hours = timeLimit / 60
                     let minutes = timeLimit % 60
@@ -237,20 +236,25 @@ struct ParkingLocationCard: View {
                         components.append("\(minutes) Min Max")
                     }
                 }
-            }
 
-            // Show zone for everyone (permit holders and non-permit holders)
-            let locationToShow: String
-            if data.locationName.lowercased().contains("unknown") {
-                locationToShow = ""
-            } else if isMultiPermitLocation {
-                locationToShow = formattedLocationsList
+                // For non-permit holders with permit areas, show generic label
+                if !data.allValidPermitAreas.isEmpty && !data.locationName.lowercased().contains("unknown") {
+                    components.append("Residential Parking Zone")
+                }
             } else {
-                locationToShow = data.locationName
-            }
+                // Permit holder → show specific zone(s)
+                let locationToShow: String
+                if data.locationName.lowercased().contains("unknown") {
+                    locationToShow = ""
+                } else if isMultiPermitLocation {
+                    locationToShow = formattedLocationsList
+                } else {
+                    locationToShow = data.locationName
+                }
 
-            if !locationToShow.isEmpty {
-                components.append(locationToShow)
+                if !locationToShow.isEmpty {
+                    components.append(locationToShow)
+                }
             }
         }
 
