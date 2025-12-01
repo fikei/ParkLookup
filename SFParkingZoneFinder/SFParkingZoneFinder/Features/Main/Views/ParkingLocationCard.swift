@@ -108,8 +108,9 @@ struct ParkingLocationCard: View {
     }
 
     /// Check if metered enforcement is currently active
+    /// This checks for active metered regulations regardless of location type,
+    /// so "Paid Parking" displays even in permit zones with meters
     private var isMeteredEnforcementActive: Bool {
-        guard data.locationType == .metered else { return false }
         let now = Date()
         return data.detailedRegulations.contains { regulation in
             guard regulation.type == .metered else { return false }
