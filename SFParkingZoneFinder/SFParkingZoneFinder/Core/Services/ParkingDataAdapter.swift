@@ -425,10 +425,10 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
         // Determine primary regulation type
         let primaryType = determinePrimaryType(blockface: blockface)
 
-        // Extract permit zones
+        // Extract permit zones (use multi-RPP allPermitZones)
         let permitAreas = blockface.regulations
             .filter { $0.type == "residentialPermit" }
-            .compactMap { $0.permitZone }
+            .flatMap { $0.allPermitZones }
 
         // Extract time limit
         let timeLimit = blockface.regulations
@@ -462,8 +462,14 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
 
         // Location name: hide blockface details per PM requirements
         let locationName: String
-        if let permitZone = permitAreas.first {
-            locationName = "Zone \(permitZone)"
+        if !permitAreas.isEmpty {
+            // Residential permit zone(s)
+            if permitAreas.count == 1 {
+                locationName = "Zone \(permitAreas[0])"
+            } else {
+                // Multi-RPP: show all zones
+                locationName = "Zones \(permitAreas.joined(separator: " & "))"
+            }
         } else if primaryType == .metered {
             locationName = "Metered Parking"
         } else {
