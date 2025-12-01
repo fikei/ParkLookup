@@ -925,8 +925,16 @@ struct ParkUntilCalculator {
                             }
                         }
                     } else {
-                        // Outside enforcement window (wrong day OR outside hours)
-                        logger.info("  Top-level time limit NOT currently enforced (outside enforcement window)")
+                        // Outside enforcement window (wrong day OR outside hours) - find next enforcement start
+                        logger.info("  Top-level time limit NOT currently enforced (outside enforcement window), finding next enforcement start...")
+                        let nextStart = findNextEnforcementStart(from: date, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
+                        if case .enforcementStart(_, let nextDate) = nextStart {
+                            logger.info("  Parking free until time limit enforcement starts: \(nextDate, privacy: .public)")
+                            if earliestDate == nil || nextDate < earliestDate! {
+                                earliestDate = nextDate
+                                earliestRestriction = nextStart
+                            }
+                        }
                     }
                 } else {
                     let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
