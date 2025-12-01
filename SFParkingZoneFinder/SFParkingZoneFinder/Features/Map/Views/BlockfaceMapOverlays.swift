@@ -246,6 +246,13 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 var isUserZone = false
                 var parkUntilHours: Double?
 
+                // Debug logging for Zone i
+                let isDebugStreet = bf.street.contains("Buchanan") || bf.street.contains("Pine")
+                if isDebugStreet {
+                    print("🔍 DEBUG POLYGON - Street: \(bf.street), Side: \(bf.side)")
+                    print("  User permits: \(userPermits) → uppercased: \(userPermitSet)")
+                }
+
                 // Check each regulation
                 for reg in bf.regulations {
                     let regType = reg.type.lowercased()
@@ -271,13 +278,24 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
 
                     // Check if this is user's zone (RPP)
                     if regType == "residentialpermit" {
+                        if isDebugStreet {
+                            print("  RPP regulation found:")
+                            print("    permitZone: \(reg.permitZone ?? "nil")")
+                            print("    allPermitZones: \(reg.allPermitZones)")
+                        }
                         if let permitZone = reg.permitZone, userPermitSet.contains(permitZone.uppercased()) {
                             isUserZone = true
+                            if isDebugStreet {
+                                print("    ✅ MATCH via permitZone!")
+                            }
                         }
                         // Also check allPermitZones for multi-RPP
                         for zone in reg.allPermitZones {
                             if userPermitSet.contains(zone.uppercased()) {
                                 isUserZone = true
+                                if isDebugStreet {
+                                    print("    ✅ MATCH via allPermitZones!")
+                                }
                                 break
                             }
                         }
@@ -287,6 +305,9 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 // Calculate park until time for this blockface
                 if isUserZone || bf.regulations.contains(where: { $0.type.lowercased() == "timelimit" }) {
                     parkUntilHours = calculateParkUntilHours(blockface: bf, userPermitZones: userPermitSet, at: now)
+                    if isDebugStreet {
+                        print("  parkUntilHours: \(parkUntilHours ?? -1)")
+                    }
                 }
 
                 // Apply priority-based coloring
@@ -294,22 +315,37 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                     // Priority 1: Red for no parking or active street cleaning
                     baseColor = UIColor.systemRed
                     opacity = devSettings.blockfaceOpacity
+                    if isDebugStreet {
+                        print("  → Color: RED (no parking or street cleaning)")
+                    }
                 } else if isUserZone, let hours = parkUntilHours, hours > 24 {
                     // Priority 2: Green for user's zone with >24 hours park time
                     baseColor = UIColor.systemGreen
                     opacity = devSettings.blockfaceOpacity
+                    if isDebugStreet {
+                        print("  → Color: GREEN (user zone, >24h)")
+                    }
                 } else if hasMeteredEnforced {
                     // Priority 3: Grey for metered parking currently enforced
                     baseColor = UIColor.systemGray
                     opacity = devSettings.blockfaceOpacity
+                    if isDebugStreet {
+                        print("  → Color: GREY (metered enforced)")
+                    }
                 } else if let hours = parkUntilHours, hours <= 24 {
                     // Priority 4: Orange for time limited <24 hours or user's zone <24 hours
                     baseColor = UIColor.systemOrange
                     opacity = devSettings.blockfaceOpacity
+                    if isDebugStreet {
+                        print("  → Color: ORANGE (time limited ≤24h, isUserZone=\(isUserZone))")
+                    }
                 } else {
                     // Priority 5: Blue for no restrictions
                     baseColor = UIColor.systemBlue
                     opacity = devSettings.blockfaceOpacity
+                    if isDebugStreet {
+                        print("  → Color: BLUE (no restrictions)")
+                    }
                 }
             }
 
@@ -625,6 +661,13 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
                 var isUserZone = false
                 var parkUntilHours: Double?
 
+                // Debug logging for Zone i
+                let isDebugStreet = bf.street.contains("Buchanan") || bf.street.contains("Pine")
+                if isDebugStreet {
+                    print("🔍 DEBUG POLYLINE - Street: \(bf.street), Side: \(bf.side)")
+                    print("  User permits: \(userPermits) → uppercased: \(userPermitSet)")
+                }
+
                 // Check each regulation
                 for reg in bf.regulations {
                     let regType = reg.type.lowercased()
@@ -650,13 +693,24 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
 
                     // Check if this is user's zone (RPP)
                     if regType == "residentialpermit" {
+                        if isDebugStreet {
+                            print("  RPP regulation found:")
+                            print("    permitZone: \(reg.permitZone ?? "nil")")
+                            print("    allPermitZones: \(reg.allPermitZones)")
+                        }
                         if let permitZone = reg.permitZone, userPermitSet.contains(permitZone.uppercased()) {
                             isUserZone = true
+                            if isDebugStreet {
+                                print("    ✅ MATCH via permitZone!")
+                            }
                         }
                         // Also check allPermitZones for multi-RPP
                         for zone in reg.allPermitZones {
                             if userPermitSet.contains(zone.uppercased()) {
                                 isUserZone = true
+                                if isDebugStreet {
+                                    print("    ✅ MATCH via allPermitZones!")
+                                }
                                 break
                             }
                         }
@@ -666,24 +720,42 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
                 // Calculate park until time for this blockface
                 if isUserZone || bf.regulations.contains(where: { $0.type.lowercased() == "timelimit" }) {
                     parkUntilHours = calculatePolylineParkUntilHours(blockface: bf, userPermitZones: userPermitSet, at: now)
+                    if isDebugStreet {
+                        print("  parkUntilHours: \(parkUntilHours ?? -1)")
+                    }
                 }
 
                 // Apply priority-based coloring
                 if hasNoParking || hasActiveStreetCleaning {
                     // Priority 1: Red for no parking or active street cleaning
                     baseColor = UIColor.systemRed
+                    if isDebugStreet {
+                        print("  → Color: RED (no parking or street cleaning)")
+                    }
                 } else if isUserZone, let hours = parkUntilHours, hours > 24 {
                     // Priority 2: Green for user's zone with >24 hours park time
                     baseColor = UIColor.systemGreen
+                    if isDebugStreet {
+                        print("  → Color: GREEN (user zone, >24h)")
+                    }
                 } else if hasMeteredEnforced {
                     // Priority 3: Grey for metered parking currently enforced
                     baseColor = UIColor.systemGray
+                    if isDebugStreet {
+                        print("  → Color: GREY (metered enforced)")
+                    }
                 } else if let hours = parkUntilHours, hours <= 24 {
                     // Priority 4: Orange for time limited <24 hours or user's zone <24 hours
                     baseColor = UIColor.systemOrange
+                    if isDebugStreet {
+                        print("  → Color: ORANGE (time limited ≤24h, isUserZone=\(isUserZone))")
+                    }
                 } else {
                     // Priority 5: Blue for no restrictions
                     baseColor = UIColor.systemBlue
+                    if isDebugStreet {
+                        print("  → Color: BLUE (no restrictions)")
+                    }
                 }
             }
         } else {
