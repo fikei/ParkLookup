@@ -323,10 +323,14 @@ final class MainResultViewModel: ObservableObject {
         permitService.permitsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] permits in
-                self?.userPermits = permits
-                // Re-evaluate if we have a current location
-                if self?.lastUpdated != nil {
-                    self?.refreshLocation()
+                guard let self = self else { return }
+                self.userPermits = permits
+                // Re-evaluate parking rules with existing location (don't request fresh GPS which may timeout)
+                if let currentCoord = self.currentCoordinate {
+                    self.logger.info("🎫 Permits changed - re-evaluating with cached location")
+                    Task {
+                        await self.performLookupAt(currentCoord)
+                    }
                 }
             }
             .store(in: &cancellables)
