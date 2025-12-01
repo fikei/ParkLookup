@@ -238,6 +238,21 @@ struct ParkingLocationCard: View {
         return parkUntil.date
     }
 
+    /// Check if we should show "Check Restrictions" instead of "Unlimited Parking"
+    /// True when we have regulations but can't determine park until time (e.g., outside enforcement)
+    private var shouldShowCheckRestrictions: Bool {
+        // Must have no park until result
+        guard parkUntilResult == nil else { return false }
+
+        // Must have regulations
+        guard !data.detailedRegulations.isEmpty else { return false }
+
+        // Don't show for unknown locations
+        guard !data.locationName.lowercased().contains("unknown") else { return false }
+
+        return true
+    }
+
     /// Helper to check if a regulation is currently in effect
     private func isRegulationCurrentlyActive(_ regulation: RegulationInfo, at time: Date) -> Bool {
         guard let startStr = regulation.enforcementStart,
@@ -725,8 +740,27 @@ struct ParkingLocationCard: View {
                                 .multilineTextAlignment(.center)
                         }
                     }
+                } else if shouldShowCheckRestrictions {
+                    // 8. Check Restrictions (have regulations but can't determine park until)
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "questionmark.circle")
+                                .font(.title2)
+                            Text("Check Restrictions")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+
+                        // Abbreviated details below
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
                 } else {
-                    // 8. Unlimited Parking (default when no restrictions)
+                    // 9. Unlimited Parking (default when no restrictions)
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
                             Image(systemName: "infinity")
@@ -943,8 +977,16 @@ struct ParkingLocationCard: View {
                 Text(parkUntil.shortFormatted())
                     .font(.headline)
             }
+        } else if shouldShowCheckRestrictions {
+            // 8. Check Restrictions (have regulations but can't determine park until)
+            HStack(spacing: 6) {
+                Image(systemName: "questionmark.circle")
+                    .font(.headline)
+                Text("Check Restrictions")
+                    .font(.headline)
+            }
         } else {
-            // 8. Unlimited Parking (default when no restrictions)
+            // 9. Unlimited Parking (default when no restrictions)
             HStack(spacing: 6) {
                 Image(systemName: "infinity")
                     .font(.headline)
@@ -1093,8 +1135,23 @@ struct ParkingLocationCard: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
+                    } else if shouldShowCheckRestrictions {
+                        // 8. Check Restrictions (have regulations but can't determine park until)
+                        HStack(spacing: 6) {
+                            Image(systemName: "questionmark.circle")
+                                .font(.headline)
+                            Text("Check Restrictions")
+                                .font(.headline)
+                        }
+
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     } else {
-                        // 8. Unlimited Parking (default when no restrictions)
+                        // 9. Unlimited Parking (default when no restrictions)
                         HStack(spacing: 6) {
                             Image(systemName: "infinity")
                                 .font(.headline)
