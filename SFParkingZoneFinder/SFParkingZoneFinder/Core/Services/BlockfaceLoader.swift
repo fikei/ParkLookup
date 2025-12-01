@@ -26,7 +26,8 @@ final class BlockfaceLoader: @unchecked Sendable {
     func clearCache() {
         queue.async {
             self.allBlockfacesCache = nil
-            logger.info("🗑️ Blockface cache cleared")
+            let currentSource = DeveloperSettings.shared.blockfaceDataSource
+            logger.info("🗑️ Blockface cache cleared - will reload from \(currentSource.displayName)")
         }
     }
 
@@ -97,7 +98,20 @@ final class BlockfaceLoader: @unchecked Sendable {
                     let startTime = Date()
 
                     guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
-                        logger.error("\(filename).json not found in bundle")
+                        logger.error("❌ CRITICAL: \(filename).json not found in app bundle!")
+                        logger.error("   This file needs to be added to the Xcode project's Copy Bundle Resources build phase.")
+                        logger.error("   Current data source: \(dataSource.displayName)")
+                        logger.error("   Expected file: \(filename).json")
+
+                        // List available JSON files in bundle for debugging
+                        if let resourcePath = Bundle.main.resourcePath {
+                            let fileManager = FileManager.default
+                            if let files = try? fileManager.contentsOfDirectory(atPath: resourcePath) {
+                                let jsonFiles = files.filter { $0.hasSuffix(".json") }
+                                logger.info("📁 Available JSON files in bundle: \(jsonFiles.joined(separator: ", "))")
+                            }
+                        }
+
                         throw BlockfaceLoaderError.fileNotFound
                     }
 
