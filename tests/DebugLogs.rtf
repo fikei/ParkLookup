@@ -8,10 +8,10 @@
 
 \f0\fs24 \cf2 \cb3 \uc0\u8505 \u65039  Google Maps SDK not installed. Map features will use placeholder.\
 LocalZoneDataSource initialized\
-PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/4FF5BDFF-5243-49C4-9560-ADA7402A0E2D/Library/Caches/ZoneData\
+PersistentZoneCache initialized at: /Users/ian/Library/Developer/CoreSimulator/Devices/B9A9D495-4857-49A2-B859-36D644F0D98A/data/Containers/Data/Application/6F837772-46D5-4935-B567-C91D75A89D1A/Library/Caches/ZoneData\
 ZoneRepository initialized\
 Getting zones for city: sf\
-Loaded 421 zones from disk cache in 279.5ms\
+Loaded 421 zones from disk cache in 507.0ms\
 \uc0\u10003  Returning 421 zones from cache\
 No active session to load\
 No session history to load\
@@ -33,1663 +33,349 @@ CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000\
 \uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0\
 \uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
 \uc0\u9989  Fade-in animation complete - overlays should be visible\
-\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces.json (32MB)...\
+\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces_multiRPP_20251128.json (32MB)...\
+sample_blockfaces_multiRPP_20251128.json not found in bundle\
 \uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u10060  Failed to load blockfaces for new region: fileNotFound\
 \uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
 Getting zones for city: sf\
 Cache hit (memory) for city: sf\
 \uc0\u10003  Returning 421 zones from cache\
-\uc0\u9989  Loaded 421 zones in 18.9ms: 33 RPP, 388 metered, 0 other\
+\uc0\u9989  Loaded 421 zones in 16.4ms: 33 RPP, 388 metered, 0 other\
 \uc0\u55357 \u56522  Spatial index: 421 bounding boxes, 98 grid cells\
-\uc0\u55357 \u56589  ParkingDataAdapter.lookupParking at (47.771900, -122.389000)\
-  \uc0\u9888 \u65039  Coordinate outside San Francisco bounds - returning outsideCoverage\
-\uc0\u55356 \u57263  Using Blockface Data - Zone: nil, Blockface: Outside Coverage\
+Returning result with primary zone: I, confidence: medium\
+Resetting GeoCodec zone allocator at address 0x600003d55a40 with 22 allocations still alive\
+\uc0\u55357 \u56589  ParkingDataAdapter.lookupParking at (37.759000, -122.423500)\
+\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces_multiRPP_20251128.json (32MB)...\
+sample_blockfaces_multiRPP_20251128.json not found in bundle\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u10060  BlockfaceDataAdapter lookup failed: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u9888 \u65039  Blockface lookup failed, falling back to zone data\
+\uc0\u55357 \u56589  extractRegulationsFromZone: zone=Zone I, ruleCount=1\
+\uc0\u9989  extractRegulationsFromZone: extracted 1 regulations\
+  [0] type=residentialPermit, desc=Residential permit Zone I only\
 \uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
-\uc0\u9989  Loaded 18355 blockfaces from Production (43,364 regulations) in 0.76s\
-\uc0\u55357 \u56589  Filtering 18355 blockfaces near (37.774900, -122.419400) within 3000.000000m\
 \uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
-\uc0\u9989  Loaded 800 blockfaces in 0.876s (filtered from 18355)\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 12th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 12th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Market Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Market Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hickory Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hickory Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Lily Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Lily Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Market Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Market Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hickory Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hickory Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Page Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Page Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Brady Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Brady Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Chase Court NORTH\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Brady Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Brady Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Otis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Otis Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Stevenson Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Stevenson Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Linden Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Linden Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Minna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Minna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Minna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Minna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 10th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 10th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Page Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Page Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 12th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 12th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street ODD\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hickory Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hickory Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Lafayette Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Lafayette Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 10th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 10th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street NORTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Lech Walesa Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Lech Walesa Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Haight Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Haight Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Linden Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Linden Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grace Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grace Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Otis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Otis Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McCoppin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McCoppin Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for McCoppin Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Howard Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Howard Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Valencia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Valencia Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McCoppin Street SOUTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McCoppin Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for McCoppin Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia St, Frontage East UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia St, Frontage East: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia St, Frontage East UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia St, Frontage East: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Octavia St, Frontage East, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Howard Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Howard Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 9th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 9th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Rose Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Rose Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 12th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 12th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 12th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Valencia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Valencia Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Stevenson Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Stevenson Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Stevenson Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McCoppin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McCoppin Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for McCoppin Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Plum Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Plum Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia St, Frontage West UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia St, Frontage West: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia St, Frontage West UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia St, Frontage West: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Lily Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Lily Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 9th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 9th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Page Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Page Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dr Carlton B Goodlett Place UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dr Carlton B Goodlett Place: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia St, Frontage West UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia St, Frontage West: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Rose Street NORTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Rose Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia St, Frontage West UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia St, Frontage West: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Kissling Street ODD\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Kissling Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Haight Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Haight Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Valencia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Valencia Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 10th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 10th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Minna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Minna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 12th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 12th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Linden Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Linden Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fulton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fulton Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street NORTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Octavia Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Waller Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Waller Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dore Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Elgin Park UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Elgin Park: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 11th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 11th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ivy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ivy Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 9th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 9th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fulton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fulton Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Market Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Market Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Duboce Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Duboce Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Howard Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Howard Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fulton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fulton Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Market Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Market Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Laguna Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Octavia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Octavia Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for McAllister Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Woodward Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Woodward Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Woodward Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Duboce Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Duboce Avenue: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Duboce Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Lily Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Lily Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Page Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Page Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Folsom Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Folsom Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Norfolk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Norfolk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 11th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 11th Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 8th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 8th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Gough Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Tehama Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Tehama Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 13th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 13th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Haight Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Haight Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 12th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 12th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 12th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hyde Street ODD\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hyde Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Birch Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Birch Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Birch Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Laguna Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Folsom Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Juniper Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Juniper Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for South Van Ness Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Duboce Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Duboce Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Linden Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Linden Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hickory Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hickory Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street ODD\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Laguna Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street SOUTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 10th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 10th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fulton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fulton Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Clinton Park UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Clinton Park: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Stevenson Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Stevenson Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Clementina Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Clementina Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for South Van Ness Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Minna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Minna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Isis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Isis Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Isis Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 12th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 12th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for South Van Ness Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ivy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ivy Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 13th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 13th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 13th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Clinton Park UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Clinton Park: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hyde Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hyde Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hermann Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hermann Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Duboce Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Duboce Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street EVEN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 13th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 13th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 13th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Market Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Market Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Folsom Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Stevenson Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Stevenson Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Howard Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Howard Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 9th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 9th Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 13th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 13th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 13th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Bernice Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Bernice Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Bernice Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 12th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 12th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 12th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue NORTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Golden Gate Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Market Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Market Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Lily Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Lily Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Lily Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 14th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street NORTH\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Page Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Page Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Minna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Minna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Brosnan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Brosnan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hickory Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hickory Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Sheridan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Sheridan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Natoma Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street SOUTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 14th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 14th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street SOUTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Elm Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Elm Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Haight Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Haight Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Duboce Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Duboce Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laussat Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laussat Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 14th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 14th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Linden Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Linden Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Linden Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Shotwell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Shotwell Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Shotwell Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ringold Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ringold Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 13th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 13th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 13th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 14th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 14th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Sumner Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Sumner Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Waller Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Waller Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hyde Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hyde Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Clementina Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Clementina Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 11th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 11th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Trainor Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Trainor Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Trainor Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Folsom Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ivy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ivy Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Valencia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Valencia Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Clinton Park UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Clinton Park: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 14th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Buchanan Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Buchanan Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Turk Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Van Ness Avenue: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Van Ness Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hermann Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hermann Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Hermann Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Harrison Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Harrison Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 13th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 13th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 13th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 10th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 10th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Rausch Street NORTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Rausch Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hyde Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hyde Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larch Street NORTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larch Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Leavenworth Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Leavenworth Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fulton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fulton Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Fulton Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 7th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 7th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Webster Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Page Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Page Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Harrison Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 9th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 9th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Webster Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Langton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Langton Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Haight Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Haight Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 14th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Laguna Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Webster Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Minna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Minna Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Waller Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Waller Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 15th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 15th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 8th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 8th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street NORTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for South Van Ness Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Heron Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Heron Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Heron Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street NORTH\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for McAllister Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for South Van Ness Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for South Van Ness Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dolores Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dolores Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Germania Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Germania Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 15th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Leavenworth Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Leavenworth Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Shotwell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Shotwell Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Shotwell Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Alameda Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Alameda Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Alameda Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Mission Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Mission Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ramona Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ramona Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 14th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 14th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dolores Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dolores Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street NORTH\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Willow Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Willow Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Eddy Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hyde Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hyde Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Gough Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Gough Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Willow Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Willow Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hermann Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hermann Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 15th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Folsom Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Jones Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Jones Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Division Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Division Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Division Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 8th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 8th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Florida Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Florida Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Florida Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 7th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 7th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Bryant Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Bryant Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Webster Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Treat Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Treat Avenue: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Treat Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Valencia Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Valencia Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Laguna Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Laguna Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Laguna Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hallam Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hallam Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Stevenson Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Stevenson Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Langton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Langton Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street SOUTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fulton Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fulton Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ellis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ellis Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ellis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ellis Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Golden Gate Avenue, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Church Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Church Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ellis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ellis Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Albion Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Albion Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Division Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Division Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Polk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Polk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dolores Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dolores Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Moss Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Moss Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Leavenworth Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Leavenworth Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hyde Street EVEN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hyde Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Bryant Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Bryant Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Bryant Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Duboce Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Duboce Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hermann Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hermann Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Alabama Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Alabama Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Alabama Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hyde Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hyde Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Oak Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Oak Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Page Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Page Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Adair Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Adair Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Adair Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dolores Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dolores Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Golden Gate Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Golden Gate Avenue: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Webster Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Market Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Market Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 16th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 16th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Jones Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Jones Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ellis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ellis Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Treat Avenue UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Treat Avenue: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hidalgo Terrace UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hidalgo Terrace: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fell Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fell Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Haight Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Haight Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Ellis Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Ellis Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Guerrero Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Guerrero Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for McAllister Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for McAllister Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Olive Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Olive Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 7th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 7th Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hayes Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hayes Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 9th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 9th Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Waller Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Waller Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Olive Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Olive Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Folsom Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Folsom Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Jessie Street SOUTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Jessie Street: 'noParking'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Natoma Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Natoma Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Starr King Way UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Starr King Way: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Bryant Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Bryant Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Eddy Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Eddy Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Bryant Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Bryant Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Bryant Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Church Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Church Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Franklin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Franklin Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 15th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Larkin Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Larkin Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Germania Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Germania Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Harrison Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Harrison Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Harrison Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Turk Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Russ Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Russ Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Alameda Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Alameda Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Alameda Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dolores Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dolores Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Olive Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Olive Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Dore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Dore Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Dore Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Unknown Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 15th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 15th Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Fillmore Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Fillmore Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Hermann Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Hermann Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Grove Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Grove Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for 7th Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for 7th Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for 7th Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'metered'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Landers Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Landers Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Cleveland Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Cleveland Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Turk Street SOUTH\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Turk Street: 'streetCleaning'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Church Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Church Street: 'timeLimit'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Unknown Street: 'other'\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Webster Street UNKNOWN\
-\uc0\u55357 \u56525  DEBUG: First regulation type for Webster Street: 'streetCleaning'\
-\uc0\u9888 \u65039  DEBUG: Unknown regulation types for Webster Street, defaulting to green\
-\uc0\u55357 \u56525  Creating BlockfacePolygonRenderer for Unknown Street UNKNOWN\
-\uc0\u55357 \u56580  Dynamically loaded 800 blockfaces for new region\
-Resetting GeoCodec zone allocator at address 0x600003d33ed0 with 192 allocations still alive}
+\uc0\u55357 \u56589  ParkUntilCalculator.calculateParkUntil: validityStatus=multipleApply, regulationCount=1\
+  [0] type=residentialPermit, desc=Residential permit Zone I only, enforcementDays=monday,tuesday,wednesday,thursday,friday,saturday\
+\uc0\u55357 \u56589  Step 1: Checking street cleaning and no parking regulations...\
+\uc0\u9989  ParkUntilCalculator result: nil\
+\uc0\u55357 \u56960  BUILD VERIFICATION: makeUIView called with 421 zones - DUPLICATE FIX ACTIVE\
+Failed to locate resource named "default.csv"\
+CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=false, userPermitAreas=["I"], lastUserPermitAreas=[]\
+\uc0\u55357 \u56589  Updating coordinator userPermitAreas: [] -> ["I"]\
+\uc0\u55357 \u56525  User coordinate changed - recentering map to (37.759000, -122.423500)\
+\uc0\u55356 \u57260  Initial overlay load: 421 zones (overlaysLoaded=false)\
+\uc0\u55357 \u56615  loadOverlays called with shouldShowOverlays=true\
+\uc0\u55357 \u56615  loadOverlays: initialized lastUserPermitAreas=["I"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=0, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=1, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=2, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=3, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=4, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=5, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=6, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=7, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=8, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=C, boundaryIndex=6, validAreas=["C", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=F, boundaryIndex=6, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=F, boundaryIndex=7, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=F, boundaryIndex=8, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=G, boundaryIndex=14, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=G, boundaryIndex=15, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=G, boundaryIndex=16, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=G, boundaryIndex=29, validAreas=["C", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=12, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=13, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=14, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=15, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=16, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=17, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=18, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=19, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=20, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=21, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=22, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=23, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=24, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=25, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=46, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=47, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=48, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=49, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=50, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=51, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=52, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=53, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=54, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=55, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=26, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=27, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=28, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=29, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=30, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=31, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=32, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=33, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=34, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=10, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=11, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=12, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=13, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=13, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=14, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=15, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=16, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=17, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=18, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=19, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=20, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=21, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=22, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=23, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=24, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=25, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=26, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=27, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=28, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=29, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=30, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=31, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=32, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=14, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=15, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=16, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=17, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=18, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=0, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=1, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=63, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=64, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=65, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=66, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=67, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=68, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=69, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=70, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=71, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=72, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=73, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=74, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=75, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=76, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=77, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=78, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=79, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=W, boundaryIndex=26, validAreas=["W", "X"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=X, boundaryIndex=17, validAreas=["W", "X"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=34, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=35, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=36, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=37, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=38, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=39, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=40, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=41, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=42, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=43, validAreas=["I", "Z"]\
+\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces_multiRPP_20251128.json (32MB)...\
+sample_blockfaces_multiRPP_20251128.json not found in bundle\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u10060  Failed to load blockfaces for new region: fileNotFound\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]\
+\uc0\u10003  Overlay parameters updated (no reload needed)\
+\uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=false, overlays.count=0\
+\uc0\u55357 \u56385 \u65039  Showing overlays with fade-in animation (1.6s total), overlay count=0\
+\uc0\u55357 \u56589  Deduplication: Total annotations before: 211\
+\uc0\u9989  Deduplication: Unique annotations after: 211, removed 0 duplicates\
+\uc0\u55357 \u56525  Zone polygons hidden (user setting)\
+\uc0\u55357 \u56525  Initial load with blockface overlays enabled - centering on user location\
+\uc0\u55356 \u56703 \u65039  Parking meters disabled (feature flag off)\
+\uc0\u9989  Fade-in animation complete - overlays should be visible\
+\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces_multiRPP_20251128.json (32MB)...\
+sample_blockfaces_multiRPP_20251128.json not found in bundle\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]\
+\uc0\u55357 \u56525  Added tapped location dot at (37.757824, -122.425874)\
+\uc0\u10003  Overlay parameters updated (no reload needed)\
+\uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0\
+\uc0\u55357 \u56589  performLookupAt: (37.757824, -122.425874)\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+Returning result with primary zone: S, confidence: medium\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]\
+\uc0\u10003  Overlay parameters updated (no reload needed)\
+\uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0\
+\uc0\u9989  Zone found: Zone S (type: rpp)\
+\uc0\u55357 \u56589  ParkingDataAdapter.lookupParking at (37.757824, -122.425874)\
+\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces_multiRPP_20251128.json (32MB)...\
+sample_blockfaces_multiRPP_20251128.json not found in bundle\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u10060  BlockfaceDataAdapter lookup failed: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+clip: empty path.\
+\uc0\u9888 \u65039  Blockface lookup failed, falling back to zone data\
+\uc0\u55357 \u56589  extractRegulationsFromZone: zone=Zone S, ruleCount=1\
+\uc0\u9989  extractRegulationsFromZone: extracted 1 regulations\
+  [0] type=residentialPermit, desc=Residential permit Zone S only\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+clip: empty path.\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u55357 \u56589  ParkUntilCalculator.calculateParkUntil: validityStatus=invalid, regulationCount=1\
+  [0] type=residentialPermit, desc=Residential permit Zone S only, enforcementDays=monday,tuesday,wednesday,thursday,friday,saturday\
+\uc0\u55357 \u56589  Step 1: Checking street cleaning and no parking regulations...\
+\uc0\u55357 \u56589  Step 2: Checking time limits for non-permit holders...\
+  Found top-level time limit: 120 min\
+\uc0\u9989  ParkUntilCalculator result: nil\
+\uc0\u55357 \u56960  BUILD VERIFICATION: makeUIView called with 421 zones - DUPLICATE FIX ACTIVE\
+CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=false, userPermitAreas=["I"], lastUserPermitAreas=[]\
+\uc0\u55357 \u56589  Updating coordinator userPermitAreas: [] -> ["I"]\
+\uc0\u55357 \u56525  Added tapped location dot at (37.757824, -122.425874)\
+\uc0\u55357 \u56525  User coordinate changed - recentering map to (37.757824, -122.425874)\
+\uc0\u55356 \u57260  Initial overlay load: 421 zones (overlaysLoaded=false)\
+\uc0\u55357 \u56615  loadOverlays called with shouldShowOverlays=true\
+\uc0\u55357 \u56615  loadOverlays: initialized lastUserPermitAreas=["I"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=0, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=1, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=2, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=3, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=4, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=5, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=6, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=7, validAreas=["BB", "L"]\
+clip: empty path.\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=BB, boundaryIndex=8, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=F, boundaryIndex=6, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=F, boundaryIndex=8, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=G, boundaryIndex=14, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=G, boundaryIndex=16, validAreas=["F", "G"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=12, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=13, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=14, validAreas=["HV", "Q"]\
+\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces_multiRPP_20251128.json (32MB)...\
+sample_blockfaces_multiRPP_20251128.json not found in bundle\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=15, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=16, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=17, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=18, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=19, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=20, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=21, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=22, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=23, validAreas=["HV", "R"]\
+\uc0\u10060  Failed to load blockfaces for new region: fileNotFound\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=24, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=HV, boundaryIndex=25, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=46, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=47, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=48, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=49, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=50, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=51, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=52, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=53, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=54, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=I, boundaryIndex=55, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=26, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=27, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=28, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=29, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=30, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=31, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=32, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=33, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=L, boundaryIndex=34, validAreas=["BB", "L"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=10, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=11, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=12, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=P, boundaryIndex=13, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=13, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=14, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=15, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=16, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=17, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=18, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=19, validAreas=["HV", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=20, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=21, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=22, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=23, validAreas=["P", "Q"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=24, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=25, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=26, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=27, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=28, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=29, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=30, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=31, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Q, boundaryIndex=32, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=14, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=15, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=16, validAreas=["HV", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=17, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=R, boundaryIndex=18, validAreas=["Q", "R"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=0, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=1, validAreas=["HV", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=63, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=64, validAreas=["HV", "Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=65, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=66, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=67, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=68, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=69, validAreas=["Q", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=70, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=71, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=72, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=73, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=74, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=75, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=76, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=77, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=78, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=S, boundaryIndex=79, validAreas=["I", "S"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=W, boundaryIndex=26, validAreas=["W", "X"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=X, boundaryIndex=17, validAreas=["W", "X"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=34, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=35, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=36, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=37, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=38, validAreas=["S", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=39, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=40, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=41, validAreas=["I", "Z"]\
+clip: empty path.\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=42, validAreas=["I", "Z"]\
+  \uc0\u55356 \u57263  Multi-permit boundary matched: zone=Z, boundaryIndex=43, validAreas=["I", "Z"]\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]\
+\uc0\u10003  Overlay parameters updated (no reload needed)\
+\uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=false, overlays.count=0\
+\uc0\u55357 \u56385 \u65039  Showing overlays with fade-in animation (1.6s total), overlay count=0\
+\uc0\u55357 \u56589  Deduplication: Total annotations before: 206\
+\uc0\u9989  Deduplication: Unique annotations after: 206, removed 0 duplicates\
+\uc0\u55357 \u56525  Zone polygons hidden (user setting)\
+\uc0\u55357 \u56525  Initial load with blockface overlays enabled - centering on user location\
+\uc0\u55356 \u56703 \u65039  Parking meters disabled (feature flag off)\
+\uc0\u9989  Fade-in animation complete - overlays should be visible\
+\uc0\u55357 \u56549  Loading blockface dataset from sample_blockfaces_multiRPP_20251128.json (32MB)...\
+sample_blockfaces_multiRPP_20251128.json not found in bundle\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u10060  Failed to load blockfaces: The operation couldn\'92t be completed. (SFParkingZoneFinder.BlockfaceLoaderError error 0.)\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]\
+\uc0\u10003  Overlay parameters updated (no reload needed)\
+\uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0\
+\uc0\u55357 \u56785 \u65039  Blockface cache cleared\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]\
+\uc0\u10003  Overlay parameters updated (no reload needed)\
+\uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0\
+\uc0\u55357 \u56615  DEBUG: MainResultView body - devMode: true, expanded: true, panel: false\
+\uc0\u55357 \u56589  updateUIView called: overlaysLoaded=true, userPermitAreas=["I"], lastUserPermitAreas=["I"]\
+\uc0\u10003  Overlay parameters updated (no reload needed)\
+\uc0\u55357 \u56589  Visibility check: showOverlays=true, overlaysVisible=true, overlays.count=0}
