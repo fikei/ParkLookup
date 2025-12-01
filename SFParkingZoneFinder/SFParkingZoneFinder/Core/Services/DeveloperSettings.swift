@@ -631,7 +631,7 @@ final class DeveloperSettings: ObservableObject {
         static let showOriginalOverlay = false
         static let showVertexCounts = false
         static let showZoneOverlays = true  // Show zone overlays by default
-        static let useBlockfaceForFeatures = false  // DEFAULT OFF - safe rollback (use zones)
+        static let useBlockfaceForFeatures = true  // DEFAULT ON - use blockface data (zones are legacy)
         static let showZonePolygons = false  // Zone polygons OFF by default (cleaner map with blockfaces)
         static let showBlockfaceOverlays = true  // Enable with new GeoJSON data
         static let showBlockfaceCenterlines = false  // Centerlines OFF by default (debug visualization)
@@ -739,15 +739,29 @@ final class DeveloperSettings: ObservableObject {
             print("🔧 Reset blockface global shifts to 0.0 (new GeoJSON data is correctly positioned)")
         }
 
-        // Migration: Fix blockface display settings for existing users
+        // Migration V1: Fix blockface display settings for existing users
         // Switch from centerlines (blue debug lines) to polygons (proper color-coded overlays)
-        let migrationKey = "dev.blockfaceMigrationV1"
-        let hasMigrated = defaults.bool(forKey: migrationKey)
-        if !hasMigrated {
+        let migrationV1Key = "dev.blockfaceMigrationV1"
+        let hasMigratedV1 = defaults.bool(forKey: migrationV1Key)
+        if !hasMigratedV1 {
             showBlockfacePolygons = true
             showBlockfaceCenterlines = false
-            defaults.set(true, forKey: migrationKey)
-            print("🔧 Migration: Enabled blockface polygons, disabled centerlines for proper color coding")
+            defaults.set(true, forKey: migrationV1Key)
+            print("🔧 Migration V1: Enabled blockface polygons, disabled centerlines for proper color coding")
+        }
+
+        // Migration V2: Enable blockface features for all users
+        // Fixes regression where Park Until, time limits, and metered parking weren't working
+        let migrationV2Key = "dev.blockfaceMigrationV2"
+        let hasMigratedV2 = defaults.bool(forKey: migrationV2Key)
+        if !hasMigratedV2 {
+            // Force enable blockface features if not explicitly set by user
+            if defaults.object(forKey: Keys.useBlockfaceForFeatures) == nil {
+                useBlockfaceForFeatures = true
+                defaults.set(true, forKey: Keys.useBlockfaceForFeatures)
+                print("🔧 Migration V2: Enabled blockface features (Park Until, time limits, metered parking)")
+            }
+            defaults.set(true, forKey: migrationV2Key)
         }
     }
 

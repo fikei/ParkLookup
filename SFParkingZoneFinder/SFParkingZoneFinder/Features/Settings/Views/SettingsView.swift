@@ -40,6 +40,39 @@ struct SettingsView: View {
                     Toggle("Show Parking Meters", isOn: $viewModel.showParkingMeters)
                 }
 
+                // MARK: - Blockface Data Source Section
+                Section(
+                    header: Text("Parking Data"),
+                    footer: Text("Choose which parking dataset to use. Multi-RPP includes improved handling for zones with multiple residential permits.")
+                ) {
+                    ForEach(BlockfaceDataSource.allCases, id: \.self) { dataSource in
+                        Button {
+                            devSettings.blockfaceDataSource = dataSource
+                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                            generator.impactOccurred()
+                        } label: {
+                            HStack {
+                                Image(systemName: devSettings.blockfaceDataSource == dataSource ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(devSettings.blockfaceDataSource == dataSource ? .accentColor : .secondary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(dataSource.displayName)
+                                        .foregroundColor(.primary)
+                                    if dataSource == .multiRPP20251128 {
+                                        Text("Recommended: Latest data with multi-zone support")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    } else {
+                                        Text("Legacy data")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+
                 // MARK: - Parking Notifications Section
                 Section(
                     header: Text("Parking Notifications"),
