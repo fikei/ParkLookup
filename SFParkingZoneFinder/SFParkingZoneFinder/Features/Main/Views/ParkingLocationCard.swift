@@ -804,6 +804,11 @@ struct ParkingLocationCard: View {
             Text("Anytime")
                 .font(.caption)
                 .foregroundColor(.secondary)
+        } else if isStreetCleaningActive {
+            // Street cleaning active - show "In progress"
+            Text("In progress")
+                .font(.caption)
+                .foregroundColor(.secondary)
         } else if let details = abbreviatedDetailLine {
             // Show abbreviated details: "2hr • Zone Q" or "2hr" for non-permit holders
             Text(details)
