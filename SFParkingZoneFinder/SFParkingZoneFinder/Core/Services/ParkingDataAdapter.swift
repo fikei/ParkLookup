@@ -814,10 +814,28 @@ struct ParkUntilCalculator {
 
                     if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
                         let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
-                        logger.info("  Time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
-                        if earliestDate == nil || timeLimitEnd < earliestDate! {
-                            earliestDate = timeLimitEnd
-                            earliestRestriction = .timeLimit(date: timeLimitEnd)
+
+                        // Check if time limit extends past enforcement end
+                        let timeLimitComponents = calendar.dateComponents([.hour, .minute], from: timeLimitEnd)
+                        let timeLimitMinutes = (timeLimitComponents.hour ?? 0) * 60 + (timeLimitComponents.minute ?? 0)
+
+                        if timeLimitMinutes >= endMinutes {
+                            // Time limit extends past enforcement - can park until next enforcement start
+                            logger.info("  Time limit extends past enforcement end, finding next enforcement start...")
+                            let nextStart = findNextEnforcementStart(from: date, startTime: startTime, days: regulation.enforcementDays, currentDay: currentDayOfWeek)
+                            if case .enforcementStart(_, let nextDate) = nextStart {
+                                logger.info("  Can park until next enforcement starts: \(nextDate, privacy: .public)")
+                                if earliestDate == nil || nextDate < earliestDate! {
+                                    earliestDate = nextDate
+                                    earliestRestriction = nextStart
+                                }
+                            }
+                        } else {
+                            logger.info("  Time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
+                            if earliestDate == nil || timeLimitEnd < earliestDate! {
+                                earliestDate = timeLimitEnd
+                                earliestRestriction = .timeLimit(date: timeLimitEnd)
+                            }
                         }
                     }
                 }
@@ -843,10 +861,28 @@ struct ParkUntilCalculator {
 
                     if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
                         let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
-                        logger.info("  Top-level time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
-                        if earliestDate == nil || timeLimitEnd < earliestDate! {
-                            earliestDate = timeLimitEnd
-                            earliestRestriction = .timeLimit(date: timeLimitEnd)
+
+                        // Check if time limit extends past enforcement end
+                        let timeLimitComponents = calendar.dateComponents([.hour, .minute], from: timeLimitEnd)
+                        let timeLimitMinutesOfDay = (timeLimitComponents.hour ?? 0) * 60 + (timeLimitComponents.minute ?? 0)
+
+                        if timeLimitMinutesOfDay >= endMinutes {
+                            // Time limit extends past enforcement - can park until next enforcement start
+                            logger.info("  Top-level time limit extends past enforcement end, finding next enforcement start...")
+                            let nextStart = findNextEnforcementStart(from: date, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
+                            if case .enforcementStart(_, let nextDate) = nextStart {
+                                logger.info("  Can park until next enforcement starts: \(nextDate, privacy: .public)")
+                                if earliestDate == nil || nextDate < earliestDate! {
+                                    earliestDate = nextDate
+                                    earliestRestriction = nextStart
+                                }
+                            }
+                        } else {
+                            logger.info("  Top-level time limit active NOW, expires at: \(timeLimitEnd, privacy: .public)")
+                            if earliestDate == nil || timeLimitEnd < earliestDate! {
+                                earliestDate = timeLimitEnd
+                                earliestRestriction = .timeLimit(date: timeLimitEnd)
+                            }
                         }
                     }
                 } else {
