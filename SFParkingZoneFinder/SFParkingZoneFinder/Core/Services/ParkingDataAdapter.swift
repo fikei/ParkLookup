@@ -346,8 +346,10 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
             sourceData: .blockface(Blockface(
                 id: "outside-coverage",
                 street: "Outside Coverage",
+                fromStreet: nil,
+                toStreet: nil,
                 side: "UNKNOWN",
-                geometry: LineString(coordinates: []),
+                geometry: LineStringGeometry(type: "LineString", coordinates: []),
                 regulations: []
             ))
         )
@@ -366,8 +368,10 @@ class BlockfaceDataAdapter: ParkingDataAdapterProtocol {
             sourceData: .blockface(Blockface(
                 id: "unknown-area",
                 street: "Unknown Area",
+                fromStreet: nil,
+                toStreet: nil,
                 side: "UNKNOWN",
-                geometry: LineString(coordinates: []),
+                geometry: LineStringGeometry(type: "LineString", coordinates: []),
                 regulations: []
             ))
         )
