@@ -118,9 +118,10 @@ struct ParkingLocationCard: View {
         let twentyFourHoursFromNow = now.addingTimeInterval(24 * 60 * 60)
 
         // Check if parkUntilResult is a street cleaning restriction within 24h
+        // Park Until would be equal to or after this time
         if case .restriction(let type, let date) = parkUntilResult,
            type == "Street cleaning",
-           date > now && date <= twentyFourHoursFromNow {
+           date >= now && date <= twentyFourHoursFromNow {
             return date
         }
 
@@ -292,6 +293,13 @@ struct ParkingLocationCard: View {
             return formattedLocationsList
         }
         return nil
+    }
+
+    /// Format time for street cleaning display (e.g., "12:00 AM", "8:00 AM")
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: date)
     }
 
     /// Generates abbreviated detail line: "2hr • $3/hr • Zone Q" or "Zone Q"
@@ -504,6 +512,26 @@ struct ParkingLocationCard: View {
                         Text("In progress")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    }
+                } else if let cleaningDate = upcomingStreetCleaning {
+                    // 3. Street Cleaning at [TIME] (upcoming within 24 hours)
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "wind")
+                                .font(.title2)
+                            Text("Street Cleaning at \(formatTime(cleaningDate))")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.red)
+
+                        // Abbreviated details below
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                 } else if isMeteredEnforcementActive {
                     // 3. Paid Parking (metered and currently enforced)
@@ -726,8 +754,17 @@ struct ParkingLocationCard: View {
                     .font(.headline)
             }
             .foregroundColor(.orange)
+        } else if let cleaningDate = upcomingStreetCleaning {
+            // 3. Street Cleaning at [TIME] (upcoming within 24 hours)
+            HStack(spacing: 6) {
+                Image(systemName: "wind")
+                    .font(.headline)
+                Text("Street Cleaning at \(formatTime(cleaningDate))")
+                    .font(.headline)
+            }
+            .foregroundColor(.red)
         } else if isMeteredEnforcementActive {
-            // 3. Paid Parking (metered and currently enforced)
+            // 4. Paid Parking (metered and currently enforced)
             HStack(spacing: 6) {
                 Image(systemName: "dollarsign.circle.fill")
                     .font(.headline)
@@ -817,8 +854,24 @@ struct ParkingLocationCard: View {
                         Text("In progress")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    } else if let cleaningDate = upcomingStreetCleaning {
+                        // 3. Street Cleaning at [TIME] (upcoming within 24 hours)
+                        HStack(spacing: 6) {
+                            Image(systemName: "wind")
+                                .font(.headline)
+                            Text("Street Cleaning at \(formatTime(cleaningDate))")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.red)
+
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     } else if isMeteredEnforcementActive {
-                        // 3. Paid Parking (metered and currently enforced)
+                        // 4. Paid Parking (metered and currently enforced)
                         HStack(spacing: 6) {
                             Image(systemName: "dollarsign.circle.fill")
                                 .font(.headline)
