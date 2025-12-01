@@ -120,18 +120,38 @@ struct ParkingLocationCard: View {
 
         // Debug: log what parkUntilResult is
         if let result = parkUntilResult {
-            print("🧹 STREET CLEANING CHECK: parkUntilResult = \(result)")
+            switch result {
+            case .restriction(let type, let date):
+                let hoursUntil = date.timeIntervalSince(now) / 3600
+                print("🧹 STREET CLEANING CHECK: parkUntilResult is restriction, type='\(type)', date=\(date) (in \(String(format: "%.1f", hoursUntil))h)")
+            case .timeLimit(let date):
+                print("🧹 STREET CLEANING CHECK: parkUntilResult is timeLimit, date=\(date)")
+            case .enforcementStart(let time, let date):
+                print("🧹 STREET CLEANING CHECK: parkUntilResult is enforcementStart, time=\(time), date=\(date)")
+            case .meteredEnd(let date):
+                print("🧹 STREET CLEANING CHECK: parkUntilResult is meteredEnd, date=\(date)")
+            case .unknown:
+                print("🧹 STREET CLEANING CHECK: parkUntilResult is unknown")
+            }
         } else {
             print("🧹 STREET CLEANING CHECK: parkUntilResult is nil")
         }
 
         // Check if parkUntilResult is a street cleaning restriction within 24h
         // Park Until would be equal to or after this time
-        if case .restriction(let type, let date) = parkUntilResult,
-           type == "Street cleaning",
-           date >= now && date <= twentyFourHoursFromNow {
-            print("🧹 STREET CLEANING CHECK: Found upcoming cleaning at \(date)")
-            return date
+        if case .restriction(let type, let date) = parkUntilResult {
+            print("🧹 STREET CLEANING CHECK: Checking restriction type '\(type)' against 'Street cleaning'")
+            if type == "Street cleaning" {
+                print("🧹 STREET CLEANING CHECK: Type matches! Checking date range...")
+                if date >= now && date <= twentyFourHoursFromNow {
+                    print("🧹 STREET CLEANING CHECK: ✅ Found upcoming cleaning at \(date)")
+                    return date
+                } else {
+                    print("🧹 STREET CLEANING CHECK: ❌ Date outside 24h window (date >= now: \(date >= now), date <= 24h: \(date <= twentyFourHoursFromNow))")
+                }
+            } else {
+                print("🧹 STREET CLEANING CHECK: ❌ Type doesn't match (got '\(type)')")
+            }
         }
 
         print("🧹 STREET CLEANING CHECK: No upcoming cleaning found")
