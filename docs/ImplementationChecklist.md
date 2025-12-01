@@ -57,18 +57,18 @@ For a functional Alpha release with real data, complete these in order:
 | S18: Beta Release Prep | Not Started | 0/6 |
 | S19: UI Testing | Not Started | 0/8 |
 | S20: Performance Optimization | In Progress | 5/14 |
-| S21: Zone Card UI Refinements | In Progress | 25/28 |
+| S21: Zone Card UI Refinements | In Progress | 29/32 |
 | S22: CarPlay Experience Update | Not Started | 0/10 |
 | S23: Parking Rules & Location Lookups | Not Started | 0/13 |
 | S24: Street Cleaning Data | Not Started | 0/13 |
 | S25: Metered Parking Layer | Not Started | 0/19 |
 | S26: Blockface Migration | Not Started | 0/24 |
 
-**Beta Progress:** 66/219 tasks complete (30%)
+**Beta Progress:** 70/223 tasks complete (31%)
 
 ---
 
-**Overall Progress:** 167/324 tasks complete (52%)
+**Overall Progress:** 171/328 tasks complete (52%)
 
 *Note: Future Enhancement tasks (F-series) not included in progress counts*
 
@@ -1239,6 +1239,28 @@ Currently, the app uses RPP zone polygons for lookups. To transition to blockfac
 - [x] **21.27** Remove pin when returning to GPS location
 
 - [x] **21.28** Fix location timeout when returning from address search (use cached GPS)
+
+#### Parking Card Header & Time Display Refinements (Dec 2025)
+- [x] **21.29** Fix time limit enforcement detection to show restriction start time when outside enforcement window
+  - Added enforcement day and time checks to ParkUntilCalculator
+  - When time limit not enforced (wrong day or outside hours), logs "outside enforcement window"
+  - Prevents showing "Unlimited Parking" when 2-hour max only applies Mon-Fri
+
+- [x] **21.30** Add metered parking "Free Until" display when outside meter hours
+  - Enhanced metered enforcement check to detect when NOT enforced
+  - Calculate next metered enforcement start time
+  - Show "Free Until [TIME]" instead of "Unlimited Parking" after meter hours end
+
+- [x] **21.31** Prioritize paid parking header over street cleaning when enforcement starts first
+  - Added check in upcomingStreetCleaning for .enforcementStart
+  - Shows "Free Until" for metered enforcement instead of "Street Cleaning at [TIME]"
+  - Users see the more immediate concern (paying for parking)
+
+- [x] **21.32** Remove "Tomorrow" from time displays when current time of day has passed
+  - Updated formatTime() in ParkingLocationCard to compare time of day (not full date)
+  - Updated ParkUntilDisplay.formatted() for all cases (timeLimit, restriction, meteredEnd, enforcementStart)
+  - Example: At 6:01 AM with restriction tomorrow at 6:00 AM → shows "6:00 AM" not "Tomorrow 6:00 AM"
+  - Applies to Street Cleaning, Park Until, and Free Until displays
 
 **Story 21 Complete When:**
 - [x] Expanded card has reduced height with proportional elements
