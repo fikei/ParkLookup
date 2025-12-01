@@ -439,18 +439,45 @@ struct ParkingLocationCard: View {
                         }
                     }
                 } else {
-                    VStack(spacing: 4) {
-                        Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                    // Non-valid permit or no permit
+                    // If there's a time limit, show time-based display instead of zone name
+                    if let timeLimitMinutes = data.timeLimitMinutes {
+                        let timeLimitEnd = Date().addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
+                        let formatter = DateFormatter()
+                        formatter.dateFormat = "h:mm a"
+
+                        VStack(spacing: 4) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "timer")
+                                    .font(.title2)
+                                Text("Until \(formatter.string(from: timeLimitEnd))")
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                            }
                             .foregroundColor(.primary)
 
-                        // Abbreviated details below
-                        if let details = abbreviatedDetailLine {
-                            Text(details)
+                            // Abbreviated details below
+                            if let details = abbreviatedDetailLine {
+                                Text(details)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                    } else {
+                        VStack(spacing: 4) {
+                            Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+
+                            // Abbreviated details below
+                            if let details = abbreviatedDetailLine {
+                                Text(details)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
+                            }
                         }
                     }
                 }
@@ -642,6 +669,19 @@ struct ParkingLocationCard: View {
             Text("Paid Parking")
                 .font(.headline)
                 .foregroundColor(.primary)
+        } else if let timeLimitMinutes = data.timeLimitMinutes {
+            // Has time limit but parkUntilResult is nil - show simple time-based display
+            let timeLimitEnd = Date().addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
+            let formatter = DateFormatter()
+            formatter.dateFormat = "h:mm a"
+
+            HStack(spacing: 6) {
+                Image(systemName: "timer")
+                    .font(.headline)
+                Text("Until \(formatter.string(from: timeLimitEnd))")
+                    .font(.headline)
+            }
+            .foregroundColor(.primary)
         } else {
             Text(data.locationName)
                 .font(.headline)
@@ -730,16 +770,39 @@ struct ParkingLocationCard: View {
                                 .foregroundColor(.secondary)
                         }
                     } else {
-                        // Other cases - show location name
-                        Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
-                            .font(.headline)
+                        // Other cases - check for time limit first
+                        if let timeLimitMinutes = data.timeLimitMinutes {
+                            // Has time limit - show time-based display
+                            let timeLimitEnd = Date().addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "h:mm a"
+
+                            HStack(spacing: 6) {
+                                Image(systemName: "timer")
+                                    .font(.headline)
+                                Text("Until \(formatter.string(from: timeLimitEnd))")
+                                    .font(.headline)
+                            }
                             .foregroundColor(.primary)
 
-                        // Abbreviated details on second line
-                        if let details = abbreviatedDetailLine {
-                            Text(details)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            // Abbreviated details on second line
+                            if let details = abbreviatedDetailLine {
+                                Text(details)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            // No time limit - show location name
+                            Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+
+                            // Abbreviated details on second line
+                            if let details = abbreviatedDetailLine {
+                                Text(details)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
                 }
