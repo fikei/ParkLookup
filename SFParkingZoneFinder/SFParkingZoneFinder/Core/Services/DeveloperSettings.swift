@@ -308,7 +308,10 @@ final class DeveloperSettings: ObservableObject {
             UserDefaults.standard.set(blockfaceDataSource.rawValue, forKey: Keys.blockfaceDataSource)
             // Only post notification after initialization is complete (avoid deadlocks)
             if !isInitializing {
+                // Post notification for cache clearing (BlockfaceLoader listens)
                 NotificationCenter.default.post(name: .blockfaceDataSourceChanged, object: nil)
+                // Force reload map overlays to show new data
+                forceReloadOverlays()
             }
         }
     }
