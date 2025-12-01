@@ -185,6 +185,23 @@ struct ParkingLocationCard: View {
         return result
     }
 
+    /// Check if this is a metered zone where the user has a valid permit
+    /// Shows "Free with Permit" instead of "Unlimited Parking"
+    private var isFreeWithPermit: Bool {
+        // Must have metered regulations
+        let hasMeters = data.detailedRegulations.contains { $0.type == .metered }
+        guard hasMeters else { return false }
+
+        // Must have a valid permit
+        let hasValidPermit = data.validityStatus == .valid || data.validityStatus == .multipleApply
+        guard hasValidPermit else { return false }
+
+        // Meters must not be currently enforced
+        guard !isMeteredEnforcementActive else { return false }
+
+        return true
+    }
+
     /// Helper to check if a regulation is currently in effect
     private func isRegulationCurrentlyActive(_ regulation: RegulationInfo, at time: Date) -> Bool {
         guard let startStr = regulation.enforcementStart,
@@ -582,7 +599,7 @@ struct ParkingLocationCard: View {
                         }
                     }
                 } else if isMeteredEnforcementActive {
-                    // 3. Paid Parking (metered and currently enforced)
+                    // 4. Paid Parking (metered and currently enforced)
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
                             Image(systemName: "dollarsign.circle.fill")
@@ -600,8 +617,27 @@ struct ParkingLocationCard: View {
                                 .multilineTextAlignment(.center)
                         }
                     }
+                } else if isFreeWithPermit {
+                    // 5. Free with Permit (metered zone, valid permit, meters not enforced)
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title2)
+                            Text("Free with Permit")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+
+                        // Abbreviated details below
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
                 } else if let parkUntil = parkUntilResult {
-                    // 4. Until... (Park Until from calculator)
+                    // 6. Until... (Park Until from calculator)
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
                             Image(systemName: "timer")
@@ -620,7 +656,7 @@ struct ParkingLocationCard: View {
                         }
                     }
                 } else {
-                    // 5. Unlimited Parking (default when no restrictions)
+                    // 7. Unlimited Parking (default when no restrictions)
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
                             Image(systemName: "infinity")
@@ -813,8 +849,16 @@ struct ParkingLocationCard: View {
                 Text("Paid Parking")
                     .font(.headline)
             }
+        } else if isFreeWithPermit {
+            // 5. Free with Permit (metered zone, valid permit, meters not enforced)
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.headline)
+                Text("Free with Permit")
+                    .font(.headline)
+            }
         } else if let parkUntil = parkUntilResult {
-            // 4. Until... (Park Until from calculator)
+            // 6. Until... (Park Until from calculator)
             HStack(spacing: 6) {
                 Image(systemName: "timer")
                     .font(.headline)
@@ -822,7 +866,7 @@ struct ParkingLocationCard: View {
                     .font(.headline)
             }
         } else {
-            // 5. Unlimited Parking (default when no restrictions)
+            // 7. Unlimited Parking (default when no restrictions)
             HStack(spacing: 6) {
                 Image(systemName: "infinity")
                     .font(.headline)
@@ -926,8 +970,23 @@ struct ParkingLocationCard: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
+                    } else if isFreeWithPermit {
+                        // 5. Free with Permit (metered zone, valid permit, meters not enforced)
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.headline)
+                            Text("Free with Permit")
+                                .font(.headline)
+                        }
+
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     } else if let parkUntil = parkUntilResult {
-                        // 4. Until... (Park Until from calculator)
+                        // 6. Until... (Park Until from calculator)
                         HStack(spacing: 6) {
                             Image(systemName: "timer")
                                 .font(.headline)
@@ -942,7 +1001,7 @@ struct ParkingLocationCard: View {
                                 .foregroundColor(.secondary)
                         }
                     } else {
-                        // 5. Unlimited Parking (default when no restrictions)
+                        // 7. Unlimited Parking (default when no restrictions)
                         HStack(spacing: 6) {
                             Image(systemName: "infinity")
                                 .font(.headline)
