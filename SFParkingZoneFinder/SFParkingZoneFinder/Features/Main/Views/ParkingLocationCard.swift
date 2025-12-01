@@ -295,11 +295,27 @@ struct ParkingLocationCard: View {
         return nil
     }
 
-    /// Format time for street cleaning display (e.g., "12:00 AM", "8:00 AM")
+    /// Format time for street cleaning display
+    /// - Today: "8:00 AM"
+    /// - Tomorrow: "Tomorrow 8:00 AM"
+    /// - Further out: "Mon 8:00 AM"
     private func formatTime(_ date: Date) -> String {
+        let calendar = Calendar.current
         let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: date)
+
+        if calendar.isDateInToday(date) {
+            // Today: just show time
+            formatter.dateFormat = "h:mm a"
+            return formatter.string(from: date)
+        } else if calendar.isDateInTomorrow(date) {
+            // Tomorrow: show "Tomorrow [time]"
+            formatter.dateFormat = "h:mm a"
+            return "Tomorrow \(formatter.string(from: date))"
+        } else {
+            // Further out: show day name abbreviation and time
+            formatter.dateFormat = "EEE h:mm a"
+            return formatter.string(from: date)
+        }
     }
 
     /// Generates abbreviated detail line: "2hr • $3/hr • Zone Q" or "Zone Q"
