@@ -385,7 +385,8 @@ struct ParkingLocationCard: View {
 
     /// Format time for street cleaning display
     /// - Today: "8:00 AM"
-    /// - Tomorrow: "Tomorrow 8:00 AM"
+    /// - Tomorrow (if time hasn't passed): "Tomorrow 8:00 AM"
+    /// - Tomorrow (if time has passed): "8:00 AM"
     /// - Further out: "Mon 8:00 AM"
     private func formatTime(_ date: Date) -> String {
         let calendar = Calendar.current
@@ -396,9 +397,23 @@ struct ParkingLocationCard: View {
             formatter.dateFormat = "h:mm a"
             return formatter.string(from: date)
         } else if calendar.isDateInTomorrow(date) {
-            // Tomorrow: show "Tomorrow [time]"
+            // Tomorrow: check if current time of day is later than the restriction time
+            let now = Date()
+            let nowComponents = calendar.dateComponents([.hour, .minute], from: now)
+            let dateComponents = calendar.dateComponents([.hour, .minute], from: date)
+
+            let nowMinutes = (nowComponents.hour ?? 0) * 60 + (nowComponents.minute ?? 0)
+            let dateMinutes = (dateComponents.hour ?? 0) * 60 + (dateComponents.minute ?? 0)
+
             formatter.dateFormat = "h:mm a"
-            return "Tomorrow \(formatter.string(from: date))"
+
+            if nowMinutes > dateMinutes {
+                // Current time is later than restriction time - just show time
+                return formatter.string(from: date)
+            } else {
+                // Current time is earlier - show "Tomorrow [time]"
+                return "Tomorrow \(formatter.string(from: date))"
+            }
         } else {
             // Further out: show day name abbreviation and time
             formatter.dateFormat = "EEE h:mm a"
