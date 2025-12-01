@@ -857,7 +857,9 @@ struct ParkUntilCalculator {
                        let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday) {
                         currentDayOfWeek = dayOfWeek
                         isEnforcementDay = days.contains(dayOfWeek)
+                        logger.info("  Top-level time limit - currentDay=\(dayOfWeek.rawValue), enforcementDays=\(days.map { $0.rawValue }), isEnforcementDay=\(isEnforcementDay)")
                     }
+                    logger.info("  Top-level time limit - currentTime=\(currentMinutes)min, enforcement=\(startMinutes)-\(endMinutes)min, isEnforcementDay=\(isEnforcementDay)")
 
                     if isEnforcementDay && currentMinutes >= startMinutes && currentMinutes < endMinutes {
                         let timeLimitEnd = date.addingTimeInterval(TimeInterval(limit * 60))
@@ -882,6 +884,17 @@ struct ParkUntilCalculator {
                             if earliestDate == nil || timeLimitEnd < earliestDate! {
                                 earliestDate = timeLimitEnd
                                 earliestRestriction = .timeLimit(date: timeLimitEnd)
+                            }
+                        }
+                    } else if !isEnforcementDay || currentMinutes < startMinutes || currentMinutes >= endMinutes {
+                        // Outside enforcement window (wrong day OR outside hours) - find next enforcement start
+                        logger.info("  Top-level time limit NOT currently enforced (wrong day or outside hours), finding next enforcement start...")
+                        let nextStart = findNextEnforcementStart(from: date, startTime: startTime, days: enforcementDays, currentDay: currentDayOfWeek)
+                        if case .enforcementStart(_, let nextDate) = nextStart {
+                            logger.info("  Parking free until next enforcement starts: \(nextDate, privacy: .public)")
+                            if earliestDate == nil || nextDate < earliestDate! {
+                                earliestDate = nextDate
+                                earliestRestriction = nextStart
                             }
                         }
                     }
