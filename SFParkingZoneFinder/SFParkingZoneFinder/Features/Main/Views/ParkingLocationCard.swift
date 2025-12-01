@@ -98,6 +98,51 @@ struct ParkingLocationCard: View {
         }
     }
 
+    /// Check if street cleaning is currently active
+    private var isStreetCleaningActive: Bool {
+        let now = Date()
+        return data.detailedRegulations.contains { regulation in
+            guard regulation.type == .streetCleaning else { return false }
+            return isRegulationCurrentlyActive(regulation, at: now)
+        }
+    }
+
+    /// Check if metered enforcement is currently active
+    private var isMeteredEnforcementActive: Bool {
+        guard data.locationType == .metered else { return false }
+        let now = Date()
+        return data.detailedRegulations.contains { regulation in
+            guard regulation.type == .metered else { return false }
+            return isRegulationCurrentlyActive(regulation, at: now)
+        }
+    }
+
+    /// Helper to check if a regulation is currently in effect
+    private func isRegulationCurrentlyActive(_ regulation: RegulationInfo, at time: Date) -> Bool {
+        guard let startTime = regulation.enforcementStart,
+              let endTime = regulation.enforcementEnd else {
+            return false
+        }
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: time)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.totalMinutes
+        let endMinutes = endTime.totalMinutes
+
+        // Check day of week if enforcement days specified
+        if let enforcementDays = regulation.enforcementDays, !enforcementDays.isEmpty {
+            guard let weekday = components.weekday,
+                  let dayOfWeek = DayOfWeek.from(calendarWeekday: weekday),
+                  enforcementDays.contains(dayOfWeek) else {
+                return false
+            }
+        }
+
+        // Check time window
+        return currentMinutes >= startMinutes && currentMinutes < endMinutes
+    }
+
     /// Find when enforcement starts for valid permit holders (outside enforcement hours)
     private func findNextEnforcementForValidPermit() -> ParkUntilDisplay? {
         guard let startTime = data.enforcementStartTime,
@@ -383,8 +428,9 @@ struct ParkingLocationCard: View {
                 // Zone circle hidden per user request
                 // locationCircle(size: 160)
 
-                // Park Until display
+                // Park Until display - ONLY 5 acceptable titles
                 if isAlwaysNoParking {
+                    // 1. No Parking
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
                             Image(systemName: "nosign")
@@ -399,7 +445,44 @@ struct ParkingLocationCard: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
+                } else if isStreetCleaningActive {
+                    // 2. Street Cleaning (currently active)
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "wind")
+                                .font(.title2)
+                            Text("Street Cleaning")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.orange)
+
+                        Text("In progress")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                } else if isMeteredEnforcementActive {
+                    // 3. Paid Parking (metered and currently enforced)
+                    VStack(spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "dollarsign.circle.fill")
+                                .font(.title2)
+                            Text("Paid Parking")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.blue)
+
+                        // Abbreviated details below
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
                 } else if let parkUntil = parkUntilResult {
+                    // 4. Until... (Park Until from calculator)
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
                             Image(systemName: "timer")
@@ -418,66 +501,24 @@ struct ParkingLocationCard: View {
                                 .multilineTextAlignment(.center)
                         }
                     }
-                } else if isValidStyle {
+                } else {
+                    // 5. Unlimited Parking (default when no restrictions)
                     VStack(spacing: 4) {
                         HStack(spacing: 6) {
-                            Image(systemName: "checkmark.circle.fill")
+                            Image(systemName: "infinity")
                                 .font(.title2)
-                            Text(isOutsideEnforcement && findNextEnforcementForValidPermit() != nil ?
-                                 findNextEnforcementForValidPermit()!.shortFormatted() : "Unlimited parking")
+                            Text("Unlimited Parking")
                                 .font(.title2)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.primary)
+                        .foregroundColor(.green)
 
                         // Abbreviated details below
                         if let details = abbreviatedDetailLine {
                             Text(details)
-                                .font(.subheadline)
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
-                        }
-                    }
-                } else {
-                    // Non-valid permit or no permit
-                    // If there's a time limit, show time-based display instead of zone name
-                    if let timeLimitMinutes = data.timeLimitMinutes {
-                        let timeLimitEnd = Date().addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
-                        let formatter = DateFormatter()
-                        formatter.dateFormat = "h:mm a"
-
-                        VStack(spacing: 4) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "timer")
-                                    .font(.title2)
-                                Text("Until \(formatter.string(from: timeLimitEnd))")
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                            }
-                            .foregroundColor(.primary)
-
-                            // Abbreviated details below
-                            if let details = abbreviatedDetailLine {
-                                Text(details)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                            }
-                        }
-                    } else {
-                        VStack(spacing: 4) {
-                            Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-
-                            // Abbreviated details below
-                            if let details = abbreviatedDetailLine {
-                                Text(details)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                            }
                         }
                     }
                 }
@@ -622,13 +663,9 @@ struct ParkingLocationCard: View {
 
     @ViewBuilder
     private var compactMainText: some View {
-        // PRIORITY ORDER:
-        // 1. Always no parking zones → "No Parking"
-        // 2. Park Until (street cleaning, time limits, etc.) → "Until [time]"
-        // 3. Valid permit with no restrictions → "Unlimited parking"
-        // 4. Other cases → Location name or type
+        // ONLY 5 ACCEPTABLE TITLES
         if isAlwaysNoParking {
-            // Always no parking - parking never allowed
+            // 1. No Parking
             HStack(spacing: 6) {
                 Image(systemName: "nosign")
                     .font(.headline)
@@ -636,9 +673,26 @@ struct ParkingLocationCard: View {
                     .font(.headline)
             }
             .foregroundColor(.red)
+        } else if isStreetCleaningActive {
+            // 2. Street Cleaning (currently active)
+            HStack(spacing: 6) {
+                Image(systemName: "wind")
+                    .font(.headline)
+                Text("Street Cleaning")
+                    .font(.headline)
+            }
+            .foregroundColor(.orange)
+        } else if isMeteredEnforcementActive {
+            // 3. Paid Parking (metered and currently enforced)
+            HStack(spacing: 6) {
+                Image(systemName: "dollarsign.circle.fill")
+                    .font(.headline)
+                Text("Paid Parking")
+                    .font(.headline)
+            }
+            .foregroundColor(.blue)
         } else if let parkUntil = parkUntilResult {
-            // Show "Park Until" for ANY restriction (street cleaning, time limits, etc.)
-            // This ensures street cleaning is always displayed, even for valid permit holders
+            // 4. Until... (Park Until from calculator)
             HStack(spacing: 6) {
                 Image(systemName: "timer")
                     .font(.headline)
@@ -646,46 +700,15 @@ struct ParkingLocationCard: View {
                     .font(.headline)
             }
             .foregroundColor(.primary)
-        } else if isValidStyle {
-            // Valid permit with no restrictions - show "Unlimited parking" or enforcement start time
-            if isOutsideEnforcement, let nextEnforcement = findNextEnforcementForValidPermit() {
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.headline)
-                    Text(nextEnforcement.shortFormatted())
-                        .font(.headline)
-                }
-                .foregroundColor(.primary)
-            } else {
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.headline)
-                    Text("Unlimited parking")
-                        .font(.headline)
-                }
-                .foregroundColor(.primary)
-            }
-        } else if data.locationType == .metered {
-            Text("Paid Parking")
-                .font(.headline)
-                .foregroundColor(.primary)
-        } else if let timeLimitMinutes = data.timeLimitMinutes {
-            // Has time limit but parkUntilResult is nil - show simple time-based display
-            let timeLimitEnd = Date().addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
-            let formatter = DateFormatter()
-            formatter.dateFormat = "h:mm a"
-
-            HStack(spacing: 6) {
-                Image(systemName: "timer")
-                    .font(.headline)
-                Text("Until \(formatter.string(from: timeLimitEnd))")
-                    .font(.headline)
-            }
-            .foregroundColor(.primary)
         } else {
-            Text(data.locationName)
-                .font(.headline)
-                .foregroundColor(.primary)
+            // 5. Unlimited Parking (default when no restrictions)
+            HStack(spacing: 6) {
+                Image(systemName: "infinity")
+                    .font(.headline)
+                Text("Unlimited Parking")
+                    .font(.headline)
+            }
+            .foregroundColor(.green)
         }
     }
 
@@ -723,8 +746,9 @@ struct ParkingLocationCard: View {
                 // locationCircle(size: 48)
 
                 VStack(alignment: .leading, spacing: 4) {
+                    // ONLY 5 ACCEPTABLE TITLES
                     if isAlwaysNoParking {
-                        // Always no parking zone
+                        // 1. No Parking
                         HStack(spacing: 6) {
                             Image(systemName: "nosign")
                                 .font(.headline)
@@ -736,9 +760,37 @@ struct ParkingLocationCard: View {
                         Text("Anytime")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    } else if isStreetCleaningActive {
+                        // 2. Street Cleaning (currently active)
+                        HStack(spacing: 6) {
+                            Image(systemName: "wind")
+                                .font(.headline)
+                            Text("Street Cleaning")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.orange)
+
+                        Text("In progress")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else if isMeteredEnforcementActive {
+                        // 3. Paid Parking (metered and currently enforced)
+                        HStack(spacing: 6) {
+                            Image(systemName: "dollarsign.circle.fill")
+                                .font(.headline)
+                            Text("Paid Parking")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.blue)
+
+                        // Abbreviated details on second line
+                        if let details = abbreviatedDetailLine {
+                            Text(details)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     } else if let parkUntil = parkUntilResult {
-                        // Show "Park Until" for any restriction
-                        // Includes street cleaning (applies to everyone, even valid permit holders)
+                        // 4. Until... (Park Until from calculator)
                         HStack(spacing: 6) {
                             Image(systemName: "timer")
                                 .font(.headline)
@@ -753,12 +805,12 @@ struct ParkingLocationCard: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-                    } else if isValidStyle {
-                        // Valid permit - show unlimited parking
+                    } else {
+                        // 5. Unlimited Parking (default when no restrictions)
                         HStack(spacing: 6) {
-                            Image(systemName: "checkmark.circle.fill")
+                            Image(systemName: "infinity")
                                 .font(.headline)
-                            Text("Unlimited parking")
+                            Text("Unlimited Parking")
                                 .font(.headline)
                         }
                         .foregroundColor(.green)
@@ -768,41 +820,6 @@ struct ParkingLocationCard: View {
                             Text(details)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                        }
-                    } else {
-                        // Other cases - check for time limit first
-                        if let timeLimitMinutes = data.timeLimitMinutes {
-                            // Has time limit - show time-based display
-                            let timeLimitEnd = Date().addingTimeInterval(TimeInterval(timeLimitMinutes * 60))
-                            let formatter = DateFormatter()
-                            formatter.dateFormat = "h:mm a"
-
-                            HStack(spacing: 6) {
-                                Image(systemName: "timer")
-                                    .font(.headline)
-                                Text("Until \(formatter.string(from: timeLimitEnd))")
-                                    .font(.headline)
-                            }
-                            .foregroundColor(.primary)
-
-                            // Abbreviated details on second line
-                            if let details = abbreviatedDetailLine {
-                                Text(details)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        } else {
-                            // No time limit - show location name
-                            Text(data.locationName.lowercased().contains("unknown") ? "Location" : data.locationName)
-                                .font(.headline)
-                                .foregroundColor(.primary)
-
-                            // Abbreviated details on second line
-                            if let details = abbreviatedDetailLine {
-                                Text(details)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
                         }
                     }
                 }
