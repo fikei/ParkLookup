@@ -671,25 +671,58 @@ enum ParkUntilDisplay {
     func formatted() -> String {
         let calendar = Calendar.current
         let formatter = DateFormatter()
+        let now = Date()
 
         switch self {
         case .timeLimit(let date):
-            formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
+            if calendar.isDateInToday(date) {
+                formatter.dateFormat = "h:mm a"
+            } else if calendar.isDateInTomorrow(date) {
+                // Check if current time of day is later than restriction time
+                let nowComponents = calendar.dateComponents([.hour, .minute], from: now)
+                let dateComponents = calendar.dateComponents([.hour, .minute], from: date)
+                let nowMinutes = (nowComponents.hour ?? 0) * 60 + (nowComponents.minute ?? 0)
+                let dateMinutes = (dateComponents.hour ?? 0) * 60 + (dateComponents.minute ?? 0)
+
+                formatter.dateFormat = nowMinutes > dateMinutes ? "h:mm a" : "EEE h:mm a"
+            } else {
+                formatter.dateFormat = "EEE h:mm a"
+            }
             return "Park until \(formatter.string(from: date))"
 
         case .restriction(let type, let date):
-            formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
+            if calendar.isDateInToday(date) {
+                formatter.dateFormat = "h:mm a"
+            } else if calendar.isDateInTomorrow(date) {
+                // Check if current time of day is later than restriction time
+                let nowComponents = calendar.dateComponents([.hour, .minute], from: now)
+                let dateComponents = calendar.dateComponents([.hour, .minute], from: date)
+                let nowMinutes = (nowComponents.hour ?? 0) * 60 + (nowComponents.minute ?? 0)
+                let dateMinutes = (dateComponents.hour ?? 0) * 60 + (dateComponents.minute ?? 0)
+
+                formatter.dateFormat = nowMinutes > dateMinutes ? "h:mm a" : "EEE h:mm a"
+            } else {
+                formatter.dateFormat = "EEE h:mm a"
+            }
             return "Park until \(formatter.string(from: date))"
 
         case .meteredEnd(let date):
-            formatter.dateFormat = calendar.isDateInToday(date) ? "h:mm a" : "EEE h:mm a"
+            if calendar.isDateInToday(date) {
+                formatter.dateFormat = "h:mm a"
+            } else if calendar.isDateInTomorrow(date) {
+                // Check if current time of day is later than restriction time
+                let nowComponents = calendar.dateComponents([.hour, .minute], from: now)
+                let dateComponents = calendar.dateComponents([.hour, .minute], from: date)
+                let nowMinutes = (nowComponents.hour ?? 0) * 60 + (nowComponents.minute ?? 0)
+                let dateMinutes = (dateComponents.hour ?? 0) * 60 + (dateComponents.minute ?? 0)
+
+                formatter.dateFormat = nowMinutes > dateMinutes ? "h:mm a" : "EEE h:mm a"
+            } else {
+                formatter.dateFormat = "EEE h:mm a"
+            }
             return "Park until \(formatter.string(from: date))"
 
         case .enforcementStart(let time, let targetDate):
-            let now = Date()
-            let currentHour = calendar.component(.hour, from: now)
-            let targetIsAM = time.hour < 12
-
             if calendar.isDateInToday(targetDate) {
                 formatter.dateFormat = "h:mm a"
                 guard let dateAtTime = calendar.date(
@@ -703,8 +736,13 @@ enum ParkUntilDisplay {
                 return "Park until \(formatter.string(from: dateAtTime))"
             }
 
-            if calendar.isDateInTomorrow(targetDate) && currentHour >= 12 && targetIsAM {
-                formatter.dateFormat = "h:mm a"
+            if calendar.isDateInTomorrow(targetDate) {
+                // Check if current time of day is later than target time
+                let nowComponents = calendar.dateComponents([.hour, .minute], from: now)
+                let nowMinutes = (nowComponents.hour ?? 0) * 60 + (nowComponents.minute ?? 0)
+                let targetMinutes = time.hour * 60 + time.minute
+
+                formatter.dateFormat = nowMinutes > targetMinutes ? "h:mm a" : "EEE h:mm a"
                 guard let dateAtTime = calendar.date(
                     bySettingHour: time.hour,
                     minute: time.minute,
