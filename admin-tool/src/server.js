@@ -19,7 +19,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.get('/api/blockfaces', async (req, res) => {
     try {
         const data = await fs.readFile(BLOCKFACES_PATH, 'utf-8');
-        const blockfaces = JSON.parse(data);
+        const json = JSON.parse(data);
+        // Handle both array format and object with blockfaces property
+        const blockfaces = Array.isArray(json) ? json : json.blockfaces;
         res.json(blockfaces);
     } catch (error) {
         console.error('Error reading blockfaces:', error);
@@ -31,7 +33,8 @@ app.get('/api/blockfaces', async (req, res) => {
 app.get('/api/blockfaces/:id', async (req, res) => {
     try {
         const data = await fs.readFile(BLOCKFACES_PATH, 'utf-8');
-        const blockfaces = JSON.parse(data);
+        const json = JSON.parse(data);
+        const blockfaces = Array.isArray(json) ? json : json.blockfaces;
         const blockface = blockfaces.find(bf => bf.id === req.params.id);
 
         if (!blockface) {
@@ -50,7 +53,9 @@ app.put('/api/blockfaces/:id', async (req, res) => {
     try {
         // Read current blockfaces
         const data = await fs.readFile(BLOCKFACES_PATH, 'utf-8');
-        const blockfaces = JSON.parse(data);
+        const json = JSON.parse(data);
+        const isWrapped = !Array.isArray(json);
+        const blockfaces = isWrapped ? json.blockfaces : json;
 
         // Find and update the blockface
         const index = blockfaces.findIndex(bf => bf.id === req.params.id);
@@ -64,8 +69,9 @@ app.put('/api/blockfaces/:id', async (req, res) => {
         // Update the blockface
         blockfaces[index] = newBlockface;
 
-        // Save updated blockfaces
-        await fs.writeFile(BLOCKFACES_PATH, JSON.stringify(blockfaces, null, 2));
+        // Save updated blockfaces (preserve wrapper if it exists)
+        const outputJson = isWrapped ? { blockfaces } : blockfaces;
+        await fs.writeFile(BLOCKFACES_PATH, JSON.stringify(outputJson, null, 2));
 
         // Track customization
         await trackCustomization(req.params.id, oldBlockface, newBlockface);
