@@ -5,6 +5,9 @@ import CoreLocation
 /// Custom polygon that holds reference to blockface data
 class BlockfacePolygon: MKPolygon {
     var blockface: Blockface?
+    /// True if this blockface has both metered parking AND user has a valid permit for the zone
+    /// These blockfaces are colored green but require users to check street signs
+    var isMeteredWithPermit: Bool = false
 }
 
 /// Custom polyline for blockface centerlines (debug visualization)
