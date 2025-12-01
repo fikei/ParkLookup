@@ -303,7 +303,11 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 }
 
                 // Calculate park until time for this blockface
-                if isUserZone || bf.regulations.contains(where: { $0.type.lowercased() == "timelimit" }) {
+                // Include street cleaning so blocks turn orange when cleaning is within 24 hours
+                if isUserZone || bf.regulations.contains(where: {
+                    let type = $0.type.lowercased()
+                    return type == "timelimit" || type == "streetcleaning"
+                }) {
                     parkUntilHours = calculateParkUntilHours(blockface: bf, userPermitZones: userPermitSet, at: now)
                     if isDebugStreet {
                         print("  parkUntilHours: \(parkUntilHours ?? -1)")
@@ -720,7 +724,11 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
                 }
 
                 // Calculate park until time for this blockface
-                if isUserZone || bf.regulations.contains(where: { $0.type.lowercased() == "timelimit" }) {
+                // Include street cleaning so blocks turn orange when cleaning is within 24 hours
+                if isUserZone || bf.regulations.contains(where: {
+                    let type = $0.type.lowercased()
+                    return type == "timelimit" || type == "streetcleaning"
+                }) {
                     parkUntilHours = calculatePolylineParkUntilHours(blockface: bf, userPermitZones: userPermitSet, at: now)
                     if isDebugStreet {
                         print("  parkUntilHours: \(parkUntilHours ?? -1)")
