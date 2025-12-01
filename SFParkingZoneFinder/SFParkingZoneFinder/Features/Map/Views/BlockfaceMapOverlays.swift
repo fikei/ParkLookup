@@ -233,7 +233,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
                 opacity = devSettings.blockfaceOpacity
             } else {
                 let now = Date()
-                let calendar = Calendar.current
+                _ = Calendar.current
 
                 // Get user permits
                 let userPermits = getUserPermits()
@@ -325,10 +325,18 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         lineWidth = 0
     }
 
-    /// Get user permits from PermitManager
+    /// Get user permits from UserDefaults
     private func getUserPermits() -> [String] {
-        // Import PermitManager to access user permits
-        return PermitManager.shared.allPermits.map { $0.area }
+        guard let data = UserDefaults.standard.data(forKey: "user_parking_permits") else {
+            return []
+        }
+
+        do {
+            let permits = try JSONDecoder().decode([ParkingPermit].self, from: data)
+            return permits.map { $0.area }
+        } catch {
+            return []
+        }
     }
 
     /// Check if a regulation is currently in effect
@@ -384,7 +392,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     /// Calculate park until time in hours for a blockface
     private func calculateParkUntilHours(blockface: Blockface, userPermitZones: Set<String>, at time: Date) -> Double? {
         var earliestRestrictionDate: Date?
-        let calendar = Calendar.current
+        _ = Calendar.current
 
         for reg in blockface.regulations {
             let regType = reg.type.lowercased()
@@ -440,8 +448,7 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     /// Find next street cleaning date
     private func findNextStreetCleaningDate(regulation: BlockfaceRegulation, from date: Date) -> Date? {
         guard let daysStr = regulation.enforcementDays,
-              let startStr = regulation.enforcementStart,
-              let endStr = regulation.enforcementEnd else {
+              let startStr = regulation.enforcementStart else {
             return nil
         }
 
@@ -608,7 +615,7 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
                 let now = Date()
 
                 // Get user permits
-                let userPermits = PermitManager.shared.allPermits.map { $0.area }
+                let userPermits = getPolylineUserPermits()
                 let userPermitSet = Set(userPermits.map { $0.uppercased() })
 
                 // Analyze regulations
@@ -855,6 +862,20 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         }
 
         return nil
+    }
+
+    /// Get user permits from UserDefaults (for polyline)
+    private func getPolylineUserPermits() -> [String] {
+        guard let data = UserDefaults.standard.data(forKey: "user_parking_permits") else {
+            return []
+        }
+
+        do {
+            let permits = try JSONDecoder().decode([ParkingPermit].self, from: data)
+            return permits.map { $0.area }
+        } catch {
+            return []
+        }
     }
 }
 
