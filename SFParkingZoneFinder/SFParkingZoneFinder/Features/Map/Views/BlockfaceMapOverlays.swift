@@ -217,81 +217,98 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
     private func configureStyle() {
         let devSettings = DeveloperSettings.shared
 
-        // Updated color coding based on regulation type:
-        // 1. No parking → Red
-        // 2. Street cleaning (when ACTIVE or within park-until window) → Red
-        // 3. Metered/Paid → Grey
-        // 4. Time Limited → Orange
-        // 5. RPP (residential permit) → Orange
-        // 6. No restrictions (free parking) → Green
+        // Priority-based color coding:
+        // 1. Red: No Parking, Active street cleaning
+        // 2. Green: Your zone where park until is >24 hours
+        // 3. Grey: Paid Parking currently enforced
+        // 4. Orange: Time Limited & enforced <24 hours, Your zone where park until is <24 hours
+        // 5. Blue: No restrictions (excluding street cleaning)
         let baseColor: UIColor
         let opacity: Double
 
         if let bf = blockface {
             if bf.regulations.isEmpty {
-                // No restrictions = free parking → Green
-                baseColor = UIColor.systemGreen
+                // No restrictions = free parking → Blue
+                baseColor = UIColor.systemBlue
                 opacity = devSettings.blockfaceOpacity
             } else {
-                // Check regulation types to determine color (priority order)
-                var hasActiveStreetCleaning = false
-                var hasMetered = false
-                var hasRPP = false
-                var hasTimeLimit = false
-                var hasNoParking = false
-
                 let now = Date()
                 let calendar = Calendar.current
-                // Check within next 2 hours for "park until" window
-                let parkUntilWindow = calendar.date(byAdding: .hour, value: 2, to: now) ?? now
 
-                for (index, reg) in bf.regulations.enumerated() {
+                // Get user permits
+                let userPermits = getUserPermits()
+                let userPermitSet = Set(userPermits.map { $0.uppercased() })
+
+                // Analyze regulations
+                var hasNoParking = false
+                var hasActiveStreetCleaning = false
+                var hasMeteredEnforced = false
+                var isUserZone = false
+                var parkUntilHours: Double?
+
+                // Check each regulation
+                for reg in bf.regulations {
                     let regType = reg.type.lowercased()
 
-                    if regType == "noparking" || regType == "no parking" {
+                    // 1. No parking (highest priority)
+                    if regType == "noparking" {
                         hasNoParking = true
                     }
-                    if regType == "streetcleaning" || regType == "street cleaning" {
-                        // Only consider street cleaning if active NOW or within park-until window
-                        if isStreetCleaningActive(regulation: reg, at: now, untilDate: parkUntilWindow) {
+
+                    // 2. Active street cleaning
+                    if regType == "streetcleaning" {
+                        if isRegulationCurrentlyActive(reg, at: now) {
                             hasActiveStreetCleaning = true
                         }
                     }
-                    if regType == "metered" || regType == "meter" {
-                        hasMetered = true
-                    }
-                    if let permitZone = reg.permitZone, !permitZone.isEmpty {
-                        hasRPP = true
-                    }
-                    if regType == "timelimit" || regType == "time limit" {
-                        hasTimeLimit = true
+
+                    // 3. Metered and currently enforced
+                    if regType == "metered" {
+                        if isRegulationCurrentlyActive(reg, at: now) {
+                            hasMeteredEnforced = true
+                        }
                     }
 
-                    // Debug: Log first regulation type for this blockface
-                    if index == 0 {
-                        print("📍 DEBUG: First regulation type for \(bf.street): '\(reg.type)'")
+                    // Check if this is user's zone (RPP)
+                    if regType == "residentialpermit" {
+                        if let permitZone = reg.permitZone, userPermitSet.contains(permitZone.uppercased()) {
+                            isUserZone = true
+                        }
+                        // Also check allPermitZones for multi-RPP
+                        for zone in reg.allPermitZones {
+                            if userPermitSet.contains(zone.uppercased()) {
+                                isUserZone = true
+                                break
+                            }
+                        }
                     }
                 }
 
-                // Priority: No Parking > Active Street Cleaning > Metered > Time Limited/RPP
-                if hasNoParking {
+                // Calculate park until time for this blockface
+                if isUserZone || bf.regulations.contains(where: { $0.type.lowercased() == "timelimit" }) {
+                    parkUntilHours = calculateParkUntilHours(blockface: bf, userPermitZones: userPermitSet, at: now)
+                }
+
+                // Apply priority-based coloring
+                if hasNoParking || hasActiveStreetCleaning {
+                    // Priority 1: Red for no parking or active street cleaning
                     baseColor = UIColor.systemRed
                     opacity = devSettings.blockfaceOpacity
-                } else if hasActiveStreetCleaning {
-                    baseColor = UIColor.systemRed
+                } else if isUserZone, let hours = parkUntilHours, hours > 24 {
+                    // Priority 2: Green for user's zone with >24 hours park time
+                    baseColor = UIColor.systemGreen
                     opacity = devSettings.blockfaceOpacity
-                } else if hasMetered {
-                    // Metered/Paid parking → Grey
+                } else if hasMeteredEnforced {
+                    // Priority 3: Grey for metered parking currently enforced
                     baseColor = UIColor.systemGray
                     opacity = devSettings.blockfaceOpacity
-                } else if hasTimeLimit || hasRPP {
-                    // Timed zones and RPP → Orange
+                } else if let hours = parkUntilHours, hours <= 24 {
+                    // Priority 4: Orange for time limited <24 hours or user's zone <24 hours
                     baseColor = UIColor.systemOrange
                     opacity = devSettings.blockfaceOpacity
                 } else {
-                    // Default to green for unknown types (free parking)
-                    print("⚠️ DEBUG: Unknown regulation types for \(bf.street), defaulting to green")
-                    baseColor = UIColor.systemGreen
+                    // Priority 5: Blue for no restrictions
+                    baseColor = UIColor.systemBlue
                     opacity = devSettings.blockfaceOpacity
                 }
             }
@@ -306,6 +323,177 @@ class BlockfacePolygonRenderer: MKPolygonRenderer {
         // between centerline and offset that look wrong on the map
         strokeColor = nil
         lineWidth = 0
+    }
+
+    /// Get user permits from PermitManager
+    private func getUserPermits() -> [String] {
+        // Import PermitManager to access user permits
+        return PermitManager.shared.allPermits.map { $0.area }
+    }
+
+    /// Check if a regulation is currently in effect
+    private func isRegulationCurrentlyActive(_ regulation: BlockfaceRegulation, at time: Date) -> Bool {
+        guard let startStr = regulation.enforcementStart,
+              let endStr = regulation.enforcementEnd else {
+            return false
+        }
+
+        // Parse time strings
+        func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+            let components = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard components.count == 2 else { return nil }
+            return (hour: components[0], minute: components[1])
+        }
+
+        guard let startTime = parseTime(startStr),
+              let endTime = parseTime(endStr) else {
+            return false
+        }
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: time)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.hour * 60 + startTime.minute
+        let endMinutes = endTime.hour * 60 + endTime.minute
+
+        // Check day of week if enforcement days specified
+        if let enforcementDays = regulation.enforcementDays, !enforcementDays.isEmpty {
+            guard let weekday = components.weekday else { return false }
+
+            // Map day strings to weekday numbers
+            let activeDays = enforcementDays.compactMap { dayStr -> Int? in
+                switch dayStr.lowercased() {
+                case "sunday", "sun": return 1
+                case "monday", "mon": return 2
+                case "tuesday", "tue", "tues": return 3
+                case "wednesday", "wed": return 4
+                case "thursday", "thu", "thurs": return 5
+                case "friday", "fri": return 6
+                case "saturday", "sat": return 7
+                default: return nil
+                }
+            }
+
+            guard activeDays.contains(weekday) else { return false }
+        }
+
+        // Check time window
+        return currentMinutes >= startMinutes && currentMinutes < endMinutes
+    }
+
+    /// Calculate park until time in hours for a blockface
+    private func calculateParkUntilHours(blockface: Blockface, userPermitZones: Set<String>, at time: Date) -> Double? {
+        var earliestRestrictionDate: Date?
+        let calendar = Calendar.current
+
+        for reg in blockface.regulations {
+            let regType = reg.type.lowercased()
+
+            // Skip if this is a permit zone and user has the permit (unlimited parking)
+            if regType == "residentialpermit" {
+                if let permitZone = reg.permitZone, userPermitZones.contains(permitZone.uppercased()) {
+                    // User has permit for single-zone RPP
+                    continue
+                }
+                // Check multi-RPP
+                var hasPermit = false
+                for zone in reg.allPermitZones {
+                    if userPermitZones.contains(zone.uppercased()) {
+                        hasPermit = true
+                        break
+                    }
+                }
+                if hasPermit {
+                    continue
+                }
+            }
+
+            // Calculate restriction date for this regulation
+            if regType == "timelimit" || regType == "residentialpermit" {
+                if let timeLimit = reg.timeLimit {
+                    let expirationDate = time.addingTimeInterval(TimeInterval(timeLimit * 60))
+                    if earliestRestrictionDate == nil || expirationDate < earliestRestrictionDate! {
+                        earliestRestrictionDate = expirationDate
+                    }
+                }
+            }
+
+            if regType == "streetcleaning" {
+                if let nextCleaning = findNextStreetCleaningDate(regulation: reg, from: time) {
+                    if earliestRestrictionDate == nil || nextCleaning < earliestRestrictionDate! {
+                        earliestRestrictionDate = nextCleaning
+                    }
+                }
+            }
+        }
+
+        // Convert to hours
+        if let restrictionDate = earliestRestrictionDate {
+            let interval = restrictionDate.timeIntervalSince(time)
+            return interval / 3600.0  // Convert seconds to hours
+        }
+
+        // No restrictions found - unlimited parking (return very large number)
+        return 9999.0
+    }
+
+    /// Find next street cleaning date
+    private func findNextStreetCleaningDate(regulation: BlockfaceRegulation, from date: Date) -> Date? {
+        guard let daysStr = regulation.enforcementDays,
+              let startStr = regulation.enforcementStart,
+              let endStr = regulation.enforcementEnd else {
+            return nil
+        }
+
+        // Parse time strings
+        func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+            let components = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard components.count == 2 else { return nil }
+            return (hour: components[0], minute: components[1])
+        }
+
+        guard let startTime = parseTime(startStr) else { return nil }
+
+        let cleaningDays = daysStr.compactMap { dayStr -> Int? in
+            switch dayStr.lowercased() {
+            case "sunday", "sun": return 1
+            case "monday", "mon": return 2
+            case "tuesday", "tue", "tues": return 3
+            case "wednesday", "wed": return 4
+            case "thursday", "thu", "thurs": return 5
+            case "friday", "fri": return 6
+            case "saturday", "sat": return 7
+            default: return nil
+            }
+        }
+
+        guard !cleaningDays.isEmpty else { return nil }
+
+        let calendar = Calendar.current
+
+        // Check next 7 days
+        for dayOffset in 0..<7 {
+            guard let checkDate = calendar.date(byAdding: .day, value: dayOffset, to: date) else {
+                continue
+            }
+
+            let weekday = calendar.component(.weekday, from: checkDate)
+
+            if cleaningDays.contains(weekday) {
+                if let cleaningStart = calendar.date(
+                    bySettingHour: startTime.hour,
+                    minute: startTime.minute,
+                    second: 0,
+                    of: checkDate
+                ) {
+                    if cleaningStart > date {
+                        return cleaningStart
+                    }
+                }
+            }
+        }
+
+        return nil
     }
 
     /// Check if street cleaning is active now or will be active within the park-until window
@@ -404,62 +592,90 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
     }
 
     private func configureStyle() {
-        let devSettings = DeveloperSettings.shared
-
-        // Use zone color scheme for consistency with parking zone overlays
+        // Use same priority-based color coding as polygon renderer
+        // 1. Red: No Parking, Active street cleaning
+        // 2. Green: Your zone where park until is >24 hours
+        // 3. Grey: Paid Parking currently enforced
+        // 4. Orange: Time Limited & enforced <24 hours, Your zone where park until is <24 hours
+        // 5. Blue: No restrictions (excluding street cleaning)
         let baseColor: UIColor
 
         if let bf = blockface {
             if bf.regulations.isEmpty {
-                // No restrictions = free parking → My Permit Zones color (Green)
-                baseColor = devSettings.myPermitZonesColor
+                // No restrictions = free parking → Blue
+                baseColor = UIColor.systemBlue
             } else {
-                // Check regulation types to determine color (priority order)
-                var hasStreetCleaning = false
-                var hasMetered = false
-                var hasRPP = false
-                var hasTimeLimit = false
-                var hasNoParking = false
+                let now = Date()
 
+                // Get user permits
+                let userPermits = PermitManager.shared.allPermits.map { $0.area }
+                let userPermitSet = Set(userPermits.map { $0.uppercased() })
+
+                // Analyze regulations
+                var hasNoParking = false
+                var hasActiveStreetCleaning = false
+                var hasMeteredEnforced = false
+                var isUserZone = false
+                var parkUntilHours: Double?
+
+                // Check each regulation
                 for reg in bf.regulations {
-                    if reg.type == "streetCleaning" {
-                        hasStreetCleaning = true
-                    }
-                    if reg.type == "metered" {
-                        hasMetered = true
-                    }
-                    if let permitZone = reg.permitZone, !permitZone.isEmpty {
-                        hasRPP = true
-                    }
-                    if reg.type == "timeLimit" {
-                        hasTimeLimit = true
-                    }
-                    if reg.type == "noParking" {
+                    let regType = reg.type.lowercased()
+
+                    // 1. No parking (highest priority)
+                    if regType == "noparking" {
                         hasNoParking = true
+                    }
+
+                    // 2. Active street cleaning
+                    if regType == "streetcleaning" {
+                        if isPolylineRegulationActive(reg, at: now) {
+                            hasActiveStreetCleaning = true
+                        }
+                    }
+
+                    // 3. Metered and currently enforced
+                    if regType == "metered" {
+                        if isPolylineRegulationActive(reg, at: now) {
+                            hasMeteredEnforced = true
+                        }
+                    }
+
+                    // Check if this is user's zone (RPP)
+                    if regType == "residentialpermit" {
+                        if let permitZone = reg.permitZone, userPermitSet.contains(permitZone.uppercased()) {
+                            isUserZone = true
+                        }
+                        // Also check allPermitZones for multi-RPP
+                        for zone in reg.allPermitZones {
+                            if userPermitSet.contains(zone.uppercased()) {
+                                isUserZone = true
+                                break
+                            }
+                        }
                     }
                 }
 
-                // Priority: No Parking > Street Cleaning > Metered > RPP > Time Limited
-                // Use zone color scheme:
-                // - Metered = Paid Zones (grey)
-                // - RPP = Free Timed Zones (orange)
-                // - Free/Time Limited = My Permit Zones (green)
-                // - Restrictions (no parking/street cleaning) = Red (safety)
-                if hasNoParking {
+                // Calculate park until time for this blockface
+                if isUserZone || bf.regulations.contains(where: { $0.type.lowercased() == "timelimit" }) {
+                    parkUntilHours = calculatePolylineParkUntilHours(blockface: bf, userPermitZones: userPermitSet, at: now)
+                }
+
+                // Apply priority-based coloring
+                if hasNoParking || hasActiveStreetCleaning {
+                    // Priority 1: Red for no parking or active street cleaning
                     baseColor = UIColor.systemRed
-                } else if hasStreetCleaning {
-                    baseColor = UIColor.systemRed
-                } else if hasMetered {
-                    // Paid/Metered parking → Paid Zones color (grey)
-                    baseColor = devSettings.paidZonesColor
-                } else if hasRPP {
-                    // RPP without user permit → Free Timed Zones color (orange)
-                    baseColor = devSettings.freeTimedZonesColor
-                } else if hasTimeLimit {
-                    // Time limited free parking → My Permit Zones color (green)
-                    baseColor = devSettings.myPermitZonesColor
+                } else if isUserZone, let hours = parkUntilHours, hours > 24 {
+                    // Priority 2: Green for user's zone with >24 hours park time
+                    baseColor = UIColor.systemGreen
+                } else if hasMeteredEnforced {
+                    // Priority 3: Grey for metered parking currently enforced
+                    baseColor = UIColor.systemGray
+                } else if let hours = parkUntilHours, hours <= 24 {
+                    // Priority 4: Orange for time limited <24 hours or user's zone <24 hours
+                    baseColor = UIColor.systemOrange
                 } else {
-                    // Fallback for unknown regulation types
+                    // Priority 5: Blue for no restrictions
                     baseColor = UIColor.systemBlue
                 }
             }
@@ -478,6 +694,167 @@ class BlockfacePolylineRenderer: MKPolylineRenderer {
         lineCap = .round
         lineJoin = .round
         lineDashPattern = nil
+    }
+
+    /// Check if a regulation is currently in effect (for polyline)
+    private func isPolylineRegulationActive(_ regulation: BlockfaceRegulation, at time: Date) -> Bool {
+        guard let startStr = regulation.enforcementStart,
+              let endStr = regulation.enforcementEnd else {
+            return false
+        }
+
+        // Parse time strings
+        func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+            let components = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard components.count == 2 else { return nil }
+            return (hour: components[0], minute: components[1])
+        }
+
+        guard let startTime = parseTime(startStr),
+              let endTime = parseTime(endStr) else {
+            return false
+        }
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.weekday, .hour, .minute], from: time)
+        let currentMinutes = (components.hour ?? 0) * 60 + (components.minute ?? 0)
+        let startMinutes = startTime.hour * 60 + startTime.minute
+        let endMinutes = endTime.hour * 60 + endTime.minute
+
+        // Check day of week if enforcement days specified
+        if let enforcementDays = regulation.enforcementDays, !enforcementDays.isEmpty {
+            guard let weekday = components.weekday else { return false }
+
+            // Map day strings to weekday numbers
+            let activeDays = enforcementDays.compactMap { dayStr -> Int? in
+                switch dayStr.lowercased() {
+                case "sunday", "sun": return 1
+                case "monday", "mon": return 2
+                case "tuesday", "tue", "tues": return 3
+                case "wednesday", "wed": return 4
+                case "thursday", "thu", "thurs": return 5
+                case "friday", "fri": return 6
+                case "saturday", "sat": return 7
+                default: return nil
+                }
+            }
+
+            guard activeDays.contains(weekday) else { return false }
+        }
+
+        // Check time window
+        return currentMinutes >= startMinutes && currentMinutes < endMinutes
+    }
+
+    /// Calculate park until time in hours for a blockface (for polyline)
+    private func calculatePolylineParkUntilHours(blockface: Blockface, userPermitZones: Set<String>, at time: Date) -> Double? {
+        var earliestRestrictionDate: Date?
+
+        for reg in blockface.regulations {
+            let regType = reg.type.lowercased()
+
+            // Skip if this is a permit zone and user has the permit (unlimited parking)
+            if regType == "residentialpermit" {
+                if let permitZone = reg.permitZone, userPermitZones.contains(permitZone.uppercased()) {
+                    continue
+                }
+                var hasPermit = false
+                for zone in reg.allPermitZones {
+                    if userPermitZones.contains(zone.uppercased()) {
+                        hasPermit = true
+                        break
+                    }
+                }
+                if hasPermit {
+                    continue
+                }
+            }
+
+            // Calculate restriction date for this regulation
+            if regType == "timelimit" || regType == "residentialpermit" {
+                if let timeLimit = reg.timeLimit {
+                    let expirationDate = time.addingTimeInterval(TimeInterval(timeLimit * 60))
+                    if earliestRestrictionDate == nil || expirationDate < earliestRestrictionDate! {
+                        earliestRestrictionDate = expirationDate
+                    }
+                }
+            }
+
+            if regType == "streetcleaning" {
+                if let nextCleaning = findPolylineNextStreetCleaningDate(regulation: reg, from: time) {
+                    if earliestRestrictionDate == nil || nextCleaning < earliestRestrictionDate! {
+                        earliestRestrictionDate = nextCleaning
+                    }
+                }
+            }
+        }
+
+        // Convert to hours
+        if let restrictionDate = earliestRestrictionDate {
+            let interval = restrictionDate.timeIntervalSince(time)
+            return interval / 3600.0  // Convert seconds to hours
+        }
+
+        // No restrictions found - unlimited parking (return very large number)
+        return 9999.0
+    }
+
+    /// Find next street cleaning date (for polyline)
+    private func findPolylineNextStreetCleaningDate(regulation: BlockfaceRegulation, from date: Date) -> Date? {
+        guard let daysStr = regulation.enforcementDays,
+              let startStr = regulation.enforcementStart else {
+            return nil
+        }
+
+        // Parse time strings
+        func parseTime(_ timeStr: String) -> (hour: Int, minute: Int)? {
+            let components = timeStr.split(separator: ":").compactMap { Int($0) }
+            guard components.count == 2 else { return nil }
+            return (hour: components[0], minute: components[1])
+        }
+
+        guard let startTime = parseTime(startStr) else { return nil }
+
+        let cleaningDays = daysStr.compactMap { dayStr -> Int? in
+            switch dayStr.lowercased() {
+            case "sunday", "sun": return 1
+            case "monday", "mon": return 2
+            case "tuesday", "tue", "tues": return 3
+            case "wednesday", "wed": return 4
+            case "thursday", "thu", "thurs": return 5
+            case "friday", "fri": return 6
+            case "saturday", "sat": return 7
+            default: return nil
+            }
+        }
+
+        guard !cleaningDays.isEmpty else { return nil }
+
+        let calendar = Calendar.current
+
+        // Check next 7 days
+        for dayOffset in 0..<7 {
+            guard let checkDate = calendar.date(byAdding: .day, value: dayOffset, to: date) else {
+                continue
+            }
+
+            let weekday = calendar.component(.weekday, from: checkDate)
+
+            if cleaningDays.contains(weekday) {
+                if let cleaningStart = calendar.date(
+                    bySettingHour: startTime.hour,
+                    minute: startTime.minute,
+                    second: 0,
+                    of: checkDate
+                ) {
+                    if cleaningStart > date {
+                        return cleaningStart
+                    }
+                }
+            }
+        }
+
+        return nil
     }
 }
 
