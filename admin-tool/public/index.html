@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Face Admin Tool</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header>
+            <h1>Block Face Admin Tool</h1>
+            <div class="header-stats">
+                <span id="totalCount">Total: 0</span>
+                <span id="selectedCount">Selected: None</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Map Panel -->
+            <div class="map-panel">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <button id="loadAllBtn" class="btn btn-primary">Load All Block Faces</button>
+                    <button id="clearMapBtn" class="btn btn-secondary">Clear Map</button>
+                    <input type="text" id="searchInput" placeholder="Search by street name..." />
+                </div>
+            </div>
+
+            <!-- Editor Panel -->
+            <div class="editor-panel">
+                <div id="noSelection" class="placeholder">
+                    <p>Click on a block face on the map to view and edit its data</p>
+                </div>
+
+                <div id="editorContent" class="hidden">
+                    <div class="editor-header">
+                        <h2 id="editorTitle">Block Face Editor</h2>
+                        <button id="closeEditorBtn" class="btn btn-small">✕</button>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="fields">Fields</button>
+                        <button class="tab-btn" data-tab="json">Raw JSON</button>
+                        <button class="tab-btn" data-tab="history">History</button>
+                    </div>
+
+                    <!-- Fields Tab -->
+                    <div id="fieldsTab" class="tab-content active">
+                        <div class="form-group">
+                            <label>ID</label>
+                            <input type="text" id="fieldId" disabled />
+                        </div>
+                        <div class="form-group">
+                            <label>Street</label>
+                            <input type="text" id="fieldStreet" />
+                        </div>
+                        <div class="form-group">
+                            <label>From Street</label>
+                            <input type="text" id="fieldFromStreet" />
+                        </div>
+                        <div class="form-group">
+                            <label>To Street</label>
+                            <input type="text" id="fieldToStreet" />
+                        </div>
+                        <div class="form-group">
+                            <label>Side</label>
+                            <select id="fieldSide">
+                                <option value="EVEN">EVEN</option>
+                                <option value="ODD">ODD</option>
+                                <option value="NORTH">NORTH</option>
+                                <option value="SOUTH">SOUTH</option>
+                                <option value="EAST">EAST</option>
+                                <option value="WEST">WEST</option>
+                            </select>
+                        </div>
+
+                        <h3>Regulations</h3>
+                        <div id="regulationsContainer"></div>
+                        <button id="addRegulationBtn" class="btn btn-secondary">+ Add Regulation</button>
+                    </div>
+
+                    <!-- JSON Tab -->
+                    <div id="jsonTab" class="tab-content">
+                        <textarea id="jsonEditor"></textarea>
+                    </div>
+
+                    <!-- History Tab -->
+                    <div id="historyTab" class="tab-content">
+                        <div id="historyContainer">
+                            <p>No customizations yet for this block face.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="editor-actions">
+                        <button id="saveBtn" class="btn btn-primary">Save Changes</button>
+                        <button id="revertBtn" class="btn btn-secondary">Revert</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
