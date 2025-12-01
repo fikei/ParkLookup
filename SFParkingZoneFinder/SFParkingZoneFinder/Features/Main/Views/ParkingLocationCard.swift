@@ -111,20 +111,30 @@ struct ParkingLocationCard: View {
     private var upcomingStreetCleaning: Date? {
         // If street cleaning is active now, don't show as upcoming
         if isStreetCleaningActive {
+            print("🧹 STREET CLEANING CHECK: Currently active, not showing as upcoming")
             return nil
         }
 
         let now = Date()
         let twentyFourHoursFromNow = now.addingTimeInterval(24 * 60 * 60)
 
+        // Debug: log what parkUntilResult is
+        if let result = parkUntilResult {
+            print("🧹 STREET CLEANING CHECK: parkUntilResult = \(result)")
+        } else {
+            print("🧹 STREET CLEANING CHECK: parkUntilResult is nil")
+        }
+
         // Check if parkUntilResult is a street cleaning restriction within 24h
         // Park Until would be equal to or after this time
         if case .restriction(let type, let date) = parkUntilResult,
            type == "Street cleaning",
            date >= now && date <= twentyFourHoursFromNow {
+            print("🧹 STREET CLEANING CHECK: Found upcoming cleaning at \(date)")
             return date
         }
 
+        print("🧹 STREET CLEANING CHECK: No upcoming cleaning found")
         return nil
     }
 
