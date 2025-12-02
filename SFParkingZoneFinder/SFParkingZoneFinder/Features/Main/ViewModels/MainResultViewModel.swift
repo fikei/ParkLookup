@@ -63,6 +63,9 @@ final class MainResultViewModel: ObservableObject {
     @Published private(set) var applicablePermits: [ParkingPermit] = []
     @Published private(set) var userPermits: [ParkingPermit] = []
 
+    // Parking adapter result (for blockface-based parking sessions)
+    private var currentParkingLookupResult: ParkingLookupResult?
+
     // Logging
     private let logger = Logger(subsystem: "com.sfparkingzonefinder", category: "MainViewModel")
 
@@ -488,6 +491,9 @@ final class MainResultViewModel: ObservableObject {
     }
 
     private func updateState(from result: ParkingResult) {
+        // Clear adapter result when using zone-based data
+        currentParkingLookupResult = nil
+
         // Check for data loading errors first
         if let dataError = result.lookupResult.dataError {
             error = convertToAppError(dataError)
@@ -577,6 +583,9 @@ final class MainResultViewModel: ObservableObject {
 
     /// Update view model state from blockface adapter result
     private func updateStateFromBlockface(from result: ParkingLookupResult) {
+        // Store the adapter result for parking session creation
+        currentParkingLookupResult = result
+
         // Basic location info
         zoneName = result.locationName
         currentZoneId = nil  // Blockfaces don't have zone IDs
@@ -859,6 +868,117 @@ final class MainResultViewModel: ObservableObject {
 
     /// Create session rules from current zone information
     private func createSessionRules() -> [SessionRule] {
+        // If using blockface data and we have adapter result, use that
+        if DeveloperSettings.shared.useBlockfaceForFeatures,
+           let adapterResult = currentParkingLookupResult {
+            return createSessionRulesFromAdapter(adapterResult)
+        }
+
+        // Otherwise, fall back to zone-based logic
+        return createSessionRulesFromZoneData()
+    }
+
+    /// Create session rules from ParkingDataAdapter result (blockface-based)
+    private func createSessionRulesFromAdapter(_ adapterResult: ParkingLookupResult) -> [SessionRule] {
+        var rules: [SessionRule] = []
+
+        let userPermitSet = Set(userPermits.map { $0.area.uppercased() })
+
+        // Use adapter to calculate park until time
+        let parkUntilResult = ParkingDataAdapter.shared.calculateParkUntil(
+            for: adapterResult,
+            userPermits: userPermitSet,
+            parkingStartTime: Date()
+        )
+
+        // Add park until rule if we have one
+        if let parkUntil = parkUntilResult {
+            let sessionType: SessionRuleType
+            switch parkUntil.restrictionType {
+            case .streetCleaning:
+                sessionType = .streetCleaning
+            case .timeLimited:
+                sessionType = .timeLimit
+            case .metered:
+                sessionType = .meter
+            case .noParking:
+                sessionType = .noParking
+            default:
+                sessionType = .enforcement
+            }
+
+            rules.append(SessionRule(
+                type: sessionType,
+                description: parkUntil.reason,
+                deadline: parkUntil.parkUntilTime
+            ))
+        }
+
+        // Add detailed regulations from blockface
+        for regulation in adapterResult.allRegulations {
+            let ruleType: SessionRuleType
+            let description: String
+
+            switch regulation.type {
+            case .streetCleaning:
+                ruleType = .streetCleaning
+                description = formatRegulationDescription(regulation)
+            case .timeLimited:
+                // Skip if already added as park until rule
+                if parkUntilResult?.restrictionType == .timeLimited {
+                    continue
+                }
+                ruleType = .timeLimit
+                description = formatRegulationDescription(regulation)
+            case .metered:
+                ruleType = .meter
+                description = formatRegulationDescription(regulation)
+            case .noParking:
+                ruleType = .noParking
+                description = formatRegulationDescription(regulation)
+            case .residentialPermit:
+                ruleType = .enforcement
+                description = formatRegulationDescription(regulation)
+            default:
+                continue
+            }
+
+            rules.append(SessionRule(
+                type: ruleType,
+                description: description,
+                deadline: nil  // Deadline already set in park until rule
+            ))
+        }
+
+        return rules
+    }
+
+    /// Format a regulation into a human-readable description
+    private func formatRegulationDescription(_ regulation: RegulationInfo) -> String {
+        var description = regulation.description
+
+        if let days = regulation.enforcementDays, !days.isEmpty {
+            let daysText: String
+            if days == [.monday, .tuesday, .wednesday, .thursday, .friday] {
+                daysText = "Mon-Fri"
+            } else if days == [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday] {
+                daysText = "Mon-Sat"
+            } else {
+                daysText = days.map { $0.shortName }.joined(separator: ", ")
+            }
+
+            if let start = regulation.enforcementStart, let end = regulation.enforcementEnd {
+                description += " (\(daysText), \(start)-\(end))"
+            } else {
+                description += " (\(daysText))"
+            }
+        }
+
+        return description
+    }
+
+    /// Create session rules from zone-based data (legacy)
+    private func createSessionRulesFromZoneData() -> [SessionRule] {
         var rules: [SessionRule] = []
 
         // Only add time limit rule if user doesn't have applicable permit for this zone

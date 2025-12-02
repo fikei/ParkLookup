@@ -343,42 +343,124 @@ struct RulesCard: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Parking Rules")
                 .font(.headline)
+                .fontWeight(.semibold)
 
             ForEach(rules) { rule in
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: rule.type.iconName)
-                        .font(.body)
-                        .foregroundColor(colorForRule(rule.type))
-                        .frame(width: 24)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(rule.description)
-                            .font(.subheadline)
-                    }
-
-                    Spacer()
-                }
+                RuleRow(rule: rule)
             }
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
     }
+}
 
-    private func colorForRule(_ type: SessionRuleType) -> Color {
-        switch type {
-        case .timeLimit: return .orange
-        case .streetCleaning: return .red
-        case .enforcement: return .yellow
-        case .meter: return .blue
-        case .noParking: return .red
+// MARK: - Rule Row
+
+private struct RuleRow: View {
+    let rule: SessionRule
+
+    /// Icon for rule type
+    private var ruleIcon: String {
+        switch rule.type {
+        case .streetCleaning:
+            return "wind"
+        case .timeLimit:
+            return "clock"
+        case .enforcement:
+            return "parkingsign"
+        case .meter:
+            return "dollarsign.circle"
+        case .noParking:
+            return "nosign"
         }
+    }
+
+    /// Color for rule type
+    private var ruleColor: Color {
+        switch rule.type {
+        case .noParking, .streetCleaning:
+            return .red
+        case .timeLimit:
+            return .orange
+        case .enforcement:
+            return .blue
+        case .meter:
+            return .green
+        }
+    }
+
+    /// Title for rule type
+    private var ruleTitle: String {
+        switch rule.type {
+        case .streetCleaning:
+            return "Street Cleaning"
+        case .timeLimit:
+            return "Time Limit"
+        case .enforcement:
+            return "Enforcement"
+        case .meter:
+            return "Paid Parking"
+        case .noParking:
+            return "No Parking"
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Header with icon and title
+            HStack(spacing: 10) {
+                Image(systemName: ruleIcon)
+                    .font(.body)
+                    .foregroundColor(ruleColor)
+                    .frame(width: 24)
+
+                Text(ruleTitle)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+
+                Spacer()
+
+                // Show deadline badge if applicable
+                if let deadline = rule.deadline {
+                    Text(formatDeadline(deadline))
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(urgencyColor(for: deadline))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(urgencyColor(for: deadline).opacity(0.15))
+                        .cornerRadius(6)
+                }
+            }
+
+            // Description
+            Text(rule.description)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 4)
     }
 
     private func formatDeadline(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+
+    private func urgencyColor(for deadline: Date) -> Color {
+        let timeRemaining = deadline.timeIntervalSince(Date())
+        if timeRemaining <= 0 {
+            return .red
+        } else if timeRemaining < 900 { // 15 minutes
+            return .orange
+        } else if timeRemaining < 3600 { // 1 hour
+            return .yellow
+        } else {
+            return .green
+        }
     }
 }
 
