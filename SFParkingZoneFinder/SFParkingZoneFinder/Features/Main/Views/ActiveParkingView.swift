@@ -293,7 +293,7 @@ struct CountdownCard: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(formatDeadline(deadline))
+                    Text(formatDeadlineWithSmartDate(deadline))
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(urgencyColor)
 
@@ -314,6 +314,38 @@ struct CountdownCard: View {
         .padding()
         .background(urgencyColor.opacity(0.1))
         .cornerRadius(16)
+    }
+
+    /// Format deadline with smart date logic (removes "tomorrow" when obvious)
+    private func formatDeadlineWithSmartDate(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let formatter = DateFormatter()
+
+        if calendar.isDateInToday(date) {
+            // Today: just show time
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        } else if calendar.isDateInTomorrow(date) {
+            // Tomorrow: check if current time is later than deadline time
+            let nowComponents = calendar.dateComponents([.hour, .minute], from: currentTime)
+            let deadlineComponents = calendar.dateComponents([.hour, .minute], from: date)
+            let nowMinutes = (nowComponents.hour ?? 0) * 60 + (nowComponents.minute ?? 0)
+            let deadlineMinutes = (deadlineComponents.hour ?? 0) * 60 + (deadlineComponents.minute ?? 0)
+
+            formatter.timeStyle = .short
+
+            if nowMinutes > deadlineMinutes {
+                // Current time is later than deadline time - tomorrow is obvious, just show time
+                return formatter.string(from: date)
+            } else {
+                // Current time is earlier - include "Tomorrow" for clarity
+                return "Tomorrow \(formatter.string(from: date))"
+            }
+        } else {
+            // Further out: show day name and time
+            formatter.dateFormat = "EEE h:mm a"
+            return formatter.string(from: date)
+        }
     }
 
     private func formatDeadline(_ date: Date) -> String {

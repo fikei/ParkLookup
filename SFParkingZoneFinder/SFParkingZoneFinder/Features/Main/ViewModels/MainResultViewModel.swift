@@ -891,7 +891,7 @@ final class MainResultViewModel: ObservableObject {
             parkingStartTime: Date()
         )
 
-        // Add park until rule if we have one
+        // Add park until rule if we have one (this will be the primary/most urgent deadline)
         if let parkUntil = parkUntilResult {
             let sessionType: SessionRuleType
             switch parkUntil.restrictionType {
@@ -914,7 +914,7 @@ final class MainResultViewModel: ObservableObject {
             ))
         }
 
-        // Add detailed regulations from blockface
+        // Add detailed regulations from blockface (informational, no deadlines)
         for regulation in adapterResult.allRegulations {
             let ruleType: SessionRuleType
             let description: String
@@ -950,7 +950,23 @@ final class MainResultViewModel: ObservableObject {
             ))
         }
 
+        // Sort rules by priority: street cleaning > no parking > time limits > enforcement > meter
+        rules.sort { rule1, rule2 in
+            rulePriority(rule1.type) < rulePriority(rule2.type)
+        }
+
         return rules
+    }
+
+    /// Get priority value for rule type (lower = higher priority = shows first)
+    private func rulePriority(_ type: SessionRuleType) -> Int {
+        switch type {
+        case .streetCleaning: return 0  // Highest priority
+        case .noParking: return 1
+        case .timeLimit: return 2
+        case .enforcement: return 3
+        case .meter: return 4           // Lowest priority
+        }
     }
 
     /// Format a regulation into a human-readable description
