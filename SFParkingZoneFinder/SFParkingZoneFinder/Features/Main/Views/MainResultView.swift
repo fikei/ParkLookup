@@ -57,6 +57,22 @@ struct MainResultView: View {
         viewModel.error == .outsideCoverage
     }
 
+    /// Check if error is critical (should hide UI) vs non-critical (can show UI with banner)
+    private var isCriticalError: Bool {
+        guard let error = viewModel.error else { return false }
+        switch error {
+        case .outsideCoverage, .unknownArea:
+            // Non-critical: Show map with banner
+            return false
+        case .locationPermissionDenied, .locationUnavailable:
+            // Critical: Need permission/location to function
+            return true
+        case .dataLoadingFailed, .unknown:
+            // Critical: Can't load data
+            return true
+        }
+    }
+
     /// The coordinate to use for map centering (searched or current)
     /// Validates coordinates to prevent NaN errors in CoreGraphics
     private var activeCoordinate: CLLocationCoordinate2D? {
@@ -175,7 +191,8 @@ struct MainResultView: View {
             let _ = print("🔧 DEBUG: MainResultView body - devMode: \(devSettings.developerModeUnlocked), expanded: \(isMapExpanded), panel: \(developerPanelExpanded)")
             ZStack {
             // Layer 1: Fullscreen Map (always visible as background)
-            if viewModel.error == nil && !viewModel.isLoading {
+            // Show map even when outside coverage (just shows SF overview)
+            if !viewModel.isLoading && !isCriticalError {
                 ZStack {
                     ZoneMapView(
                         zones: viewModel.allLoadedZones,
@@ -284,7 +301,8 @@ struct MainResultView: View {
             }
 
             // Layer 2: Card overlays
-            if !viewModel.isLoading && viewModel.error == nil {
+            // Show cards even when outside coverage (banner will indicate the issue)
+            if !viewModel.isLoading && !isCriticalError {
                 VStack {
                     // Address search card (always visible for location button)
                     AddressSearchCard(
