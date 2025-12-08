@@ -40,6 +40,9 @@ struct ZoneMapView: UIViewRepresentable {
     /// Coordinate where user tapped on map (shows a blue dot when set)
     var tappedCoordinate: CLLocationCoordinate2D? = nil
 
+    /// Coordinate where car is parked (shows a parking pin when set)
+    var parkedCarCoordinate: CLLocationCoordinate2D? = nil
+
     /// Toggle to force map recenter (for when coordinate doesn't change but we want to recenter anyway)
     var recenterTrigger: Bool = false
 
@@ -159,6 +162,9 @@ struct ZoneMapView: UIViewRepresentable {
 
         // Handle tapped location annotation (blue dot)
         updateTappedAnnotation(mapView: mapView, context: context)
+
+        // Handle parked car annotation (parking pin)
+        updateParkedCarAnnotation(mapView: mapView, context: context)
 
         // Handle SF overview mode (zoom out to show all of San Francisco)
         if showSFOverview != context.coordinator.lastShowSFOverview {
@@ -707,6 +713,37 @@ struct ZoneMapView: UIViewRepresentable {
         }
     }
 
+    private func updateParkedCarAnnotation(mapView: MKMapView, context: Context) {
+        let coordinator = context.coordinator
+
+        // Remove existing parked car annotation if coordinate changed or cleared
+        if let existingAnnotation = coordinator.parkedCarAnnotation {
+            // Check if we need to remove it (coordinate cleared or changed)
+            if parkedCarCoordinate == nil {
+                mapView.removeAnnotation(existingAnnotation)
+                coordinator.parkedCarAnnotation = nil
+                logger.info("🚗 Removed parked car pin")
+            } else if let newCoord = parkedCarCoordinate,
+                      abs(existingAnnotation.coordinate.latitude - newCoord.latitude) > 0.000001 ||
+                      abs(existingAnnotation.coordinate.longitude - newCoord.longitude) > 0.000001 {
+                // Coordinate changed - remove old annotation
+                mapView.removeAnnotation(existingAnnotation)
+                coordinator.parkedCarAnnotation = nil
+            } else {
+                // Same coordinate, nothing to do
+                return
+            }
+        }
+
+        // Add new annotation if we have a parked car coordinate
+        if let coord = parkedCarCoordinate, isValidCoordinate(coord) {
+            let annotation = ParkedCarAnnotation(coordinate: coord)
+            mapView.addAnnotation(annotation)
+            coordinator.parkedCarAnnotation = annotation
+            logger.info("🚗 Added parked car pin at (\(coord.latitude), \(coord.longitude))")
+        }
+    }
+
     // MARK: - Overlay Loading
 
     private func loadOverlays(mapView: MKMapView, context: Context) {
@@ -1165,6 +1202,9 @@ struct ZoneMapView: UIViewRepresentable {
         // Track the tapped location annotation
         weak var tappedAnnotation: TappedLocationAnnotation?
 
+        // Track the parked car annotation
+        weak var parkedCarAnnotation: ParkedCarAnnotation?
+
         // Track developer settings hash to detect changes and refresh overlays
         var lastSettingsHash: Int = 0
 
@@ -1400,6 +1440,25 @@ struct ZoneMapView: UIViewRepresentable {
                     annotationView?.annotation = meterAnnotation
                     annotationView?.canShowCallout = showCallout
                     annotationView?.markerTintColor = meterAnnotation.meter.isActive ? .systemGreen : .systemGray
+                }
+
+                return annotationView
+            }
+
+            // Handle parked car annotation (parking pin with car icon)
+            if let parkedCarAnnotation = annotation as? ParkedCarAnnotation {
+                let identifier = "ParkedCar"
+                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+
+                if annotationView == nil {
+                    annotationView = MKMarkerAnnotationView(annotation: parkedCarAnnotation, reuseIdentifier: identifier)
+                    annotationView?.canShowCallout = false
+                    annotationView?.markerTintColor = .systemPurple
+                    annotationView?.glyphImage = UIImage(systemName: "car.fill")
+                    annotationView?.glyphTintColor = .white
+                    annotationView?.displayPriority = .required
+                } else {
+                    annotationView?.annotation = parkedCarAnnotation
                 }
 
                 return annotationView
@@ -2079,6 +2138,17 @@ class ParkingMeterAnnotation: NSObject, MKAnnotation {
     init(coordinate: CLLocationCoordinate2D, meter: ParkingMeter) {
         self.coordinate = coordinate
         self.meter = meter
+        super.init()
+    }
+}
+
+/// Annotation for parked car location
+class ParkedCarAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    var title: String? { "Parked Car" }
+
+    init(coordinate: CLLocationCoordinate2D) {
+        self.coordinate = coordinate
         super.init()
     }
 }

@@ -85,6 +85,11 @@ struct MainResultView: View {
         Set(viewModel.userPermits.map { $0.area.uppercased() })
     }
 
+    /// Coordinate of parked car (if there's an active parking session)
+    private var parkedCarCoordinate: CLLocationCoordinate2D? {
+        viewModel.getActiveSession()?.location.coordinate
+    }
+
     /// Create LocationCardData from a tapped ParkingZone
     private func createLocationCardData(for zone: ParkingZone) -> LocationCardData {
         // Determine permit areas for this zone
@@ -231,6 +236,8 @@ struct MainResultView: View {
                         searchedCoordinate: searchedCoordinate,
                         // Show blue dot for tapped location
                         tappedCoordinate: tappedCoordinate,
+                        // Show parking pin for parked car
+                        parkedCarCoordinate: parkedCarCoordinate,
                         // Force recenter trigger
                         recenterTrigger: recenterTrigger,
                         // Show SF overview when outside coverage
@@ -475,6 +482,16 @@ struct MainResultView: View {
             viewModel.onAppear()
             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.1)) {
                 contentAppeared = true
+            }
+
+            // If there's an active parking session, center map on parked location
+            if let parkedCoord = parkedCarCoordinate {
+                // Center the map on the parked location
+                searchedCoordinate = parkedCoord
+                // Lookup zone at parked location
+                viewModel.lookupZone(at: parkedCoord)
+                // Expand the map to show the parking location
+                isMapExpanded = true
             }
         }
         .onDisappear {
