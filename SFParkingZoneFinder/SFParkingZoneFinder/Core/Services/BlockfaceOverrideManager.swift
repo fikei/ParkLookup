@@ -55,15 +55,29 @@ class BlockfaceOverrideManager: ObservableObject {
         // Create new blockface with overridden regulations
         let overriddenRegulations = override.regulations.map { $0.toBlockfaceRegulation() }
 
-        return Blockface(
-            id: blockface.id,
-            street: blockface.street,
-            fromStreet: blockface.fromStreet,
-            toStreet: blockface.toStreet,
-            side: blockface.side,
-            geometry: blockface.geometry,
-            regulations: overriddenRegulations
-        )
+        // Use JSON encoding/decoding to create a modified copy
+        do {
+            let encoder = JSONEncoder()
+            let decoder = JSONDecoder()
+
+            // Encode the original blockface
+            var data = try encoder.encode(blockface)
+
+            // Decode to dictionary, modify regulations, re-encode
+            var dict = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+            // Replace regulations with overridden ones
+            let regulationsData = try encoder.encode(overriddenRegulations)
+            let regulationsArray = try JSONSerialization.jsonObject(with: regulationsData)
+            dict["regulations"] = regulationsArray
+
+            // Convert back to Blockface
+            data = try JSONSerialization.data(withJSONObject: dict)
+            return try decoder.decode(Blockface.self, from: data)
+        } catch {
+            print("⚠️ Failed to apply override to blockface \(blockface.id): \(error)")
+            return nil
+        }
     }
 
     /// Export overrides as JSON (for sharing or testing)
@@ -170,25 +184,4 @@ struct OverrideStatistics {
     let totalRegulations: Int
     let oldestOverride: Date?
     let newestOverride: Date?
-}
-
-// MARK: - Blockface Extension
-
-extension Blockface {
-    /// Create a new blockface with modified regulations
-    init(id: String,
-         street: String,
-         fromStreet: String?,
-         toStreet: String?,
-         side: String,
-         geometry: LineStringGeometry,
-         regulations: [BlockfaceRegulation]) {
-        self.id = id
-        self.street = street
-        self.fromStreet = fromStreet
-        self.toStreet = toStreet
-        self.side = side
-        self.geometry = geometry
-        self.regulations = regulations
-    }
 }

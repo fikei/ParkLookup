@@ -58,41 +58,34 @@ struct BlockfaceRegulationOverride: Codable, Identifiable {
     }
 
     /// Convert to BlockfaceRegulation
+    /// Note: Creates a new regulation with a new UUID
     func toBlockfaceRegulation() -> BlockfaceRegulation {
-        BlockfaceRegulation(
-            type: type,
-            permitZone: permitZone,
-            permitZones: permitZones,
-            timeLimit: timeLimit,
-            meterRate: meterRate,
-            enforcementDays: enforcementDays,
-            enforcementStart: enforcementStart,
-            enforcementEnd: enforcementEnd,
-            specialConditions: specialConditions
-        )
-    }
-}
+        // Use JSONEncoder/Decoder to create a proper instance with all CodingKeys
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
 
-// Need to add a custom init to BlockfaceRegulation in the original file
-extension BlockfaceRegulation {
-    /// Initialize with all properties (for overrides)
-    init(type: String,
-         permitZone: String? = nil,
-         permitZones: [String]? = nil,
-         timeLimit: Int? = nil,
-         meterRate: Decimal? = nil,
-         enforcementDays: [String]? = nil,
-         enforcementStart: String? = nil,
-         enforcementEnd: String? = nil,
-         specialConditions: String? = nil) {
-        self.type = type
-        self.permitZone = permitZone
-        self.permitZones = permitZones
-        self.timeLimit = timeLimit
-        self.meterRate = meterRate
-        self.enforcementDays = enforcementDays
-        self.enforcementStart = enforcementStart
-        self.enforcementEnd = enforcementEnd
-        self.specialConditions = specialConditions
+        // Create a dictionary representation
+        let dict: [String: Any?] = [
+            "type": type,
+            "permitZone": permitZone,
+            "permitZones": permitZones,
+            "timeLimit": timeLimit,
+            "meterRate": meterRate.map { NSDecimalNumber(decimal: $0).doubleValue },
+            "enforcementDays": enforcementDays,
+            "enforcementStart": enforcementStart,
+            "enforcementEnd": enforcementEnd,
+            "specialConditions": specialConditions
+        ]
+
+        // Filter out nil values
+        let filtered = dict.compactMapValues { $0 }
+
+        do {
+            let data = try JSONSerialization.data(withJSONObject: filtered)
+            return try decoder.decode(BlockfaceRegulation.self, from: data)
+        } catch {
+            // Fallback: This should never happen, but if it does, we'll handle it gracefully
+            fatalError("Failed to convert BlockfaceRegulationOverride to BlockfaceRegulation: \(error)")
+        }
     }
 }
