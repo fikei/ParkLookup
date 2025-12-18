@@ -151,10 +151,6 @@ class BlockfaceOverrideManager: ObservableObject {
 
 // MARK: - Supporting Types
 
-extension Notification.Name {
-    static let blockfaceOverridesChanged = Notification.Name("blockfaceOverridesChanged")
-}
-
 enum OverrideError: Error, LocalizedError {
     case invalidJSON
     case decodingFailed

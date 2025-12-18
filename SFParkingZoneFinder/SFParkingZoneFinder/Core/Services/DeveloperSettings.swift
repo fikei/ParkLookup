@@ -4,6 +4,7 @@ import UIKit
 
 extension Notification.Name {
     static let blockfaceDataSourceChanged = Notification.Name("blockfaceDataSourceChanged")
+    static let blockfaceOverridesChanged = Notification.Name("blockfaceOverridesChanged")
 }
 
 /// Available blockface data sources
