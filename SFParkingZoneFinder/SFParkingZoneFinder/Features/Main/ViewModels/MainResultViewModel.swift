@@ -315,8 +315,8 @@ final class MainResultViewModel: ObservableObject {
 
         // Create session rules from the lookup result
         let rules: [SessionRule]
-        if DeveloperSettings.shared.useBlockfaceForFeatures {
-            rules = createSessionRulesFromAdapter(lookupResult)
+        if DeveloperSettings.shared.useBlockfaceForFeatures, let result = lookupResult {
+            rules = createSessionRulesFromAdapter(result)
         } else {
             // Fallback to zone-based rules
             rules = createSessionRulesFromZoneData(
