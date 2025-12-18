@@ -690,7 +690,7 @@ enum ParkUntilDisplay {
             }
             return "Park until \(formatter.string(from: date))"
 
-        case .restriction(let type, let date):
+        case .restriction(_, let date):
             if calendar.isDateInToday(date) {
                 formatter.dateFormat = "h:mm a"
             } else if calendar.isDateInTomorrow(date) {
