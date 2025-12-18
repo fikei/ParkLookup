@@ -311,10 +311,7 @@ final class MainResultViewModel: ObservableObject {
     /// Start a parking session at a specific tapped location
     func startParkingSessionAt(coordinate: CLLocationCoordinate2D, zone: ParkingZone) async {
         // Look up parking data at this location
-        let lookupResult = await ParkingDataAdapter.shared.lookupParking(
-            at: coordinate,
-            userPermits: Set(userPermits.map { $0.area.uppercased() })
-        )
+        let lookupResult = await ParkingDataAdapter.shared.lookupParking(at: coordinate)
 
         // Create session rules from the lookup result
         let rules: [SessionRule]
@@ -325,7 +322,7 @@ final class MainResultViewModel: ObservableObject {
             rules = createSessionRulesFromZoneData(
                 zoneName: zone.displayName,
                 zoneType: zone.zoneType,
-                timeLimitMinutes: zone.timeLimitMinutes,
+                timeLimitMinutes: zone.rules.first?.timeLimit,
                 enforcementStartTime: zone.rules.first?.enforcementStartTime,
                 enforcementEndTime: zone.rules.first?.enforcementEndTime
             )
