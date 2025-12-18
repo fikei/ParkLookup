@@ -308,6 +308,41 @@ final class MainResultViewModel: ObservableObject {
         self.logger.info("Started parking session at \(self.zoneName)")
     }
 
+    /// Start a parking session at a specific tapped location
+    func startParkingSessionAt(coordinate: CLLocationCoordinate2D, zone: ParkingZone) async {
+        // Look up parking data at this location
+        let lookupResult = await ParkingDataAdapter.shared.lookupParking(
+            at: coordinate,
+            userPermits: Set(userPermits.map { $0.area.uppercased() })
+        )
+
+        // Create session rules from the lookup result
+        let rules: [SessionRule]
+        if DeveloperSettings.shared.useBlockfaceForFeatures {
+            rules = createSessionRulesFromAdapter(lookupResult)
+        } else {
+            // Fallback to zone-based rules
+            rules = createSessionRulesFromZoneData(
+                zoneName: zone.displayName,
+                zoneType: zone.zoneType,
+                timeLimitMinutes: zone.timeLimitMinutes,
+                enforcementStartTime: zone.rules.first?.enforcementStartTime,
+                enforcementEndTime: zone.rules.first?.enforcementEndTime
+            )
+        }
+
+        // Start the session
+        await self.parkingSessionManager.startSession(
+            location: coordinate,
+            address: nil,  // We don't have an address for tapped locations
+            zoneName: zone.displayName,
+            zoneType: zone.zoneType,
+            rules: rules
+        )
+
+        self.logger.info("Started parking session at tapped location: \(zone.displayName)")
+    }
+
     /// Get the current active parking session
     func getActiveSession() -> ParkingSession? {
         parkingSessionManager.getActiveSession()
@@ -994,6 +1029,71 @@ final class MainResultViewModel: ObservableObject {
     }
 
     /// Create session rules from zone-based data (legacy)
+    /// Create session rules from zone data (for tapped locations)
+    private func createSessionRulesFromZoneData(
+        zoneName: String,
+        zoneType: ZoneType,
+        timeLimitMinutes: Int?,
+        enforcementStartTime: TimeOfDay?,
+        enforcementEndTime: TimeOfDay?
+    ) -> [SessionRule] {
+        var rules: [SessionRule] = []
+
+        // Check if user has applicable permit for this zone
+        // Extract zone code from name (e.g., "Zone Q" -> "Q")
+        let zoneCode: String
+        if zoneName.hasPrefix("Zone ") {
+            zoneCode = String(zoneName.dropFirst(5))
+        } else if zoneName.hasPrefix("Area ") {
+            zoneCode = String(zoneName.dropFirst(5))
+        } else {
+            zoneCode = zoneName
+        }
+        let hasApplicablePermit = userPermits.contains { $0.area.uppercased() == zoneCode.uppercased() }
+
+        // Add time limit rule if present and user doesn't have a permit
+        if !hasApplicablePermit,
+           let timeLimit = timeLimitMinutes,
+           let startTime = enforcementStartTime,
+           let endTime = enforcementEndTime {
+
+            // Calculate deadline based on current time and enforcement hours
+            let deadline = calculateParkingDeadline(
+                timeLimitMinutes: timeLimit,
+                enforcementStart: startTime,
+                enforcementEnd: endTime,
+                enforcementDays: nil
+            )
+
+            let description: String
+            let hours = timeLimit / 60
+            if hours > 0 {
+                description = "\(hours)-hour limit"
+            } else {
+                description = "\(timeLimit)-minute limit"
+            }
+
+            rules.append(SessionRule(
+                type: .timeLimit,
+                description: description,
+                deadline: deadline
+            ))
+        }
+
+        // Add enforcement hours info
+        if let start = enforcementStartTime,
+           let end = enforcementEndTime {
+            rules.append(SessionRule(
+                type: .enforcement,
+                description: "Enforced \(start.formatted) - \(end.formatted)",
+                deadline: nil
+            ))
+        }
+
+        return rules
+    }
+
+    /// Create session rules from zone data (for current location)
     private func createSessionRulesFromZoneData() -> [SessionRule] {
         var rules: [SessionRule] = []
 

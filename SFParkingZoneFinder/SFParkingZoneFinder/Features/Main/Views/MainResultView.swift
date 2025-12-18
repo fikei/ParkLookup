@@ -387,7 +387,20 @@ struct MainResultView: View {
                             ParkingLocationCard(
                                 data: createLocationCardData(for: selected),
                                 displayMode: .spotDetail,
-                                screenHeight: geometry.size.height
+                                screenHeight: geometry.size.height,
+                                onPark: {
+                                    // Start parking session at tapped location
+                                    Task {
+                                        if let coordinate = tappedCoordinate {
+                                            await viewModel.startParkingSessionAt(coordinate: coordinate, zone: selected)
+                                            showingActiveParkingView = true
+                                            // Close the tapped location card
+                                            selectedZone = nil
+                                            tappedPermitAreas = nil
+                                            tappedCoordinate = nil
+                                        }
+                                    }
+                                }
                             )
 
                             // Close button

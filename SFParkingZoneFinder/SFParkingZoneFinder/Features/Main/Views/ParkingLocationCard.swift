@@ -51,6 +51,7 @@ struct ParkingLocationCard: View {
     let displayMode: CardDisplayMode
     let screenHeight: CGFloat
     var namespace: Namespace.ID?       // For matched geometry in primary mode
+    var onPark: (() -> Void)?          // Callback when user taps "Park Here"
 
     @State private var animationIndex: Int = 0
     @State private var isFlipped: Bool = false
@@ -832,19 +833,40 @@ struct ParkingLocationCard: View {
                 Spacer()
             }
 
-            // Bottom section - just regulations button
+            // Bottom section - Park Here and regulations buttons
             VStack {
                 Spacer()
 
-                // "See regulations" button - always show (drawer handles empty state)
-                Button {
-                    showRegulationsDrawer = true
-                } label: {
-                    Text("See regulations")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
-                        .underline()
+                VStack(spacing: 12) {
+                    // "Park Here" button - only show when not at current location
+                    if !data.isCurrentLocation, let parkAction = onPark {
+                        Button {
+                            parkAction()
+                        } label: {
+                            HStack {
+                                Image(systemName: "parkingsign.circle.fill")
+                                Text("Park Here")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                        }
+                        .padding(.horizontal, 16)
+                    }
+
+                    // "See regulations" button - always show (drawer handles empty state)
+                    Button {
+                        showRegulationsDrawer = true
+                    } label: {
+                        Text("See regulations")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(isValidStyle ? .white.opacity(0.9) : .blue)
+                            .underline()
+                    }
                 }
                 .padding(.bottom, 24)
             }
@@ -935,6 +957,25 @@ struct ParkingLocationCard: View {
                 }
 
                 Spacer()
+
+                // "Park Here" button - only when not at current location
+                if !data.isCurrentLocation, let parkAction = onPark {
+                    Button {
+                        parkAction()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "parkingsign.circle.fill")
+                            Text("Park Here")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                }
 
                 // "See regulations" button - compact icon version
                 Button {
@@ -1179,6 +1220,24 @@ struct ParkingLocationCard: View {
                 }
 
                 Spacer()
+            }
+
+            // "Park Here" button - only when not at current location
+            if !data.isCurrentLocation, let parkAction = onPark {
+                Button {
+                    parkAction()
+                } label: {
+                    HStack {
+                        Image(systemName: "parkingsign.circle.fill")
+                        Text("Park Here")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
             }
 
             // Regulations button - always show (drawer handles empty state)
