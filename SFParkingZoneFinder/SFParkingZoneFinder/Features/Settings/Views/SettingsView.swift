@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingAddPermit = false
     @State private var showingPrivacyPolicy = false
+    @State private var showingBlockfaceEditor = false
 
     var body: some View {
         NavigationStack {
@@ -209,6 +210,38 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    // MARK: - Regulation Editor Section (Developer Mode Only)
+                    Section(
+                        header: Text("Development Tools"),
+                        footer: Text("Edit parking regulations for individual blockfaces. Overrides are stored locally and only active when Developer Mode is enabled.")
+                    ) {
+                        Button {
+                            showingBlockfaceEditor = true
+                        } label: {
+                            HStack {
+                                Label("Edit Blockface Regulations", systemImage: "pencil.circle.fill")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if BlockfaceOverrideManager.shared.statistics.totalOverrides > 0 {
+                                    Text("\(BlockfaceOverrideManager.shared.statistics.totalOverrides)")
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.orange)
+                                        .cornerRadius(12)
+                                }
+                            }
+                        }
+
+                        Button(role: .destructive) {
+                            BlockfaceOverrideManager.shared.clearAllOverrides()
+                        } label: {
+                            Label("Clear All Overrides", systemImage: "trash.circle")
+                        }
+                        .disabled(BlockfaceOverrideManager.shared.statistics.totalOverrides == 0)
+                    }
                 }
 
                 // MARK: - About Section
@@ -279,6 +312,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingPrivacyPolicy) {
                 PrivacyPolicyView()
+            }
+            .sheet(isPresented: $showingBlockfaceEditor) {
+                BlockfaceEditorView()
             }
         }
     }
