@@ -197,7 +197,7 @@ struct RegulationRowView: View {
             }
 
             if let rate = regulation.meterRate {
-                Label("$\(rate)/hr", systemImage: "dollarsign.circle")
+                Label("$\(NSDecimalNumber(decimal: rate).doubleValue, specifier: "%.2f")/hr", systemImage: "dollarsign.circle")
                     .font(.caption)
             }
         }
@@ -271,102 +271,12 @@ struct RegulationEditorView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("Type") {
-                    Picker("Regulation Type", selection: $regulation.type) {
-                        Text("Metered Parking").tag("metered")
-                        Text("Residential Permit").tag("residentialPermit")
-                        Text("Time Limit").tag("timeLimit")
-                        Text("Street Cleaning").tag("streetCleaning")
-                        Text("No Parking").tag("noParking")
-                        Text("Tow-Away Zone").tag("towAway")
-                        Text("Loading Zone").tag("loadingZone")
-                    }
-                }
-
-                Section("Enforcement Days") {
-                    MultiDayPicker(selectedDays: Binding(
-                        get: { Set(regulation.enforcementDays ?? []) },
-                        set: { regulation.enforcementDays = Array($0).sorted() }
-                    ))
-                }
-
-                Section("Enforcement Times") {
-                    HStack {
-                        Text("Start")
-                        Spacer()
-                        TextField("HH:MM", text: Binding(
-                            get: { regulation.enforcementStart ?? "" },
-                            set: { regulation.enforcementStart = $0.isEmpty ? nil : $0 }
-                        ))
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.numbersAndPunctuation)
-                    }
-
-                    HStack {
-                        Text("End")
-                        Spacer()
-                        TextField("HH:MM", text: Binding(
-                            get: { regulation.enforcementEnd ?? "" },
-                            set: { regulation.enforcementEnd = $0.isEmpty ? nil : $0 }
-                        ))
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.numbersAndPunctuation)
-                    }
-                }
-
-                if regulation.type == "residentialPermit" {
-                    Section("Permit Zones") {
-                        TextField("Zones (comma-separated)", text: Binding(
-                            get: { regulation.permitZones?.joined(separator: ", ") ?? regulation.permitZone ?? "" },
-                            set: {
-                                let zones = $0.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }
-                                regulation.permitZones = zones.isEmpty ? nil : zones
-                                regulation.permitZone = zones.first
-                            }
-                        ))
-                    }
-                }
-
-                if regulation.type == "timeLimit" {
-                    Section("Time Limit") {
-                        Stepper(value: Binding(
-                            get: { regulation.timeLimit ?? 0 },
-                            set: { regulation.timeLimit = $0 == 0 ? nil : $0 }
-                        ), in: 0...480, step: 15) {
-                            if let limit = regulation.timeLimit {
-                                Text("\(limit) minutes")
-                            } else {
-                                Text("No limit")
-                            }
-                        }
-                    }
-                }
-
-                if regulation.type == "metered" {
-                    Section("Meter Rate") {
-                        TextField("Rate ($/hr)", value: Binding(
-                            get: { regulation.meterRate ?? 0 },
-                            set: { regulation.meterRate = $0 == 0 ? nil : Decimal($0) }
-                        ), format: .number)
-                        .keyboardType(.decimalPad)
-                    }
-                }
-
-                Section("Special Conditions") {
-                    TextField("Optional notes", text: Binding(
-                        get: { regulation.specialConditions ?? "" },
-                        set: { regulation.specialConditions = $0.isEmpty ? nil : $0 }
-                    ))
-                }
-
-                Section {
-                    Button(role: .destructive, action: {
-                        onDelete()
-                        dismiss()
-                    }) {
-                        Label("Delete Regulation", systemImage: "trash")
-                    }
-                }
+                typeSection
+                enforcementDaysSection
+                enforcementTimesSection
+                typeSpecificSections
+                specialConditionsSection
+                deleteSection
             }
             .navigationTitle("Edit Regulation")
             .navigationBarTitleDisplayMode(.inline)
@@ -376,6 +286,118 @@ struct RegulationEditorView: View {
                         dismiss()
                     }
                 }
+            }
+        }
+    }
+
+    // MARK: - Subviews
+
+    private var typeSection: some View {
+        Section("Type") {
+            Picker("Regulation Type", selection: $regulation.type) {
+                Text("Metered Parking").tag("metered")
+                Text("Residential Permit").tag("residentialPermit")
+                Text("Time Limit").tag("timeLimit")
+                Text("Street Cleaning").tag("streetCleaning")
+                Text("No Parking").tag("noParking")
+                Text("Tow-Away Zone").tag("towAway")
+                Text("Loading Zone").tag("loadingZone")
+            }
+        }
+    }
+
+    private var enforcementDaysSection: some View {
+        Section("Enforcement Days") {
+            MultiDayPicker(selectedDays: Binding(
+                get: { Set(regulation.enforcementDays ?? []) },
+                set: { regulation.enforcementDays = Array($0).sorted() }
+            ))
+        }
+    }
+
+    private var enforcementTimesSection: some View {
+        Section("Enforcement Times") {
+            HStack {
+                Text("Start")
+                Spacer()
+                TextField("HH:MM", text: Binding(
+                    get: { regulation.enforcementStart ?? "" },
+                    set: { regulation.enforcementStart = $0.isEmpty ? nil : $0 }
+                ))
+                .multilineTextAlignment(.trailing)
+                .keyboardType(.numbersAndPunctuation)
+            }
+
+            HStack {
+                Text("End")
+                Spacer()
+                TextField("HH:MM", text: Binding(
+                    get: { regulation.enforcementEnd ?? "" },
+                    set: { regulation.enforcementEnd = $0.isEmpty ? nil : $0 }
+                ))
+                .multilineTextAlignment(.trailing)
+                .keyboardType(.numbersAndPunctuation)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var typeSpecificSections: some View {
+        if regulation.type == "residentialPermit" {
+            Section("Permit Zones") {
+                TextField("Zones (comma-separated)", text: Binding(
+                    get: { regulation.permitZones?.joined(separator: ", ") ?? regulation.permitZone ?? "" },
+                    set: {
+                        let zones = $0.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }
+                        regulation.permitZones = zones.isEmpty ? nil : zones
+                        regulation.permitZone = zones.first
+                    }
+                ))
+            }
+        }
+
+        if regulation.type == "timeLimit" {
+            Section("Time Limit") {
+                Stepper(value: Binding(
+                    get: { regulation.timeLimit ?? 0 },
+                    set: { regulation.timeLimit = $0 == 0 ? nil : $0 }
+                ), in: 0...480, step: 15) {
+                    if let limit = regulation.timeLimit {
+                        Text("\(limit) minutes")
+                    } else {
+                        Text("No limit")
+                    }
+                }
+            }
+        }
+
+        if regulation.type == "metered" {
+            Section("Meter Rate") {
+                TextField("Rate ($/hr)", value: Binding(
+                    get: { regulation.meterRate ?? 0 },
+                    set: { regulation.meterRate = $0 == 0 ? nil : Decimal($0) }
+                ), format: .number)
+                .keyboardType(.decimalPad)
+            }
+        }
+    }
+
+    private var specialConditionsSection: some View {
+        Section("Special Conditions") {
+            TextField("Optional notes", text: Binding(
+                get: { regulation.specialConditions ?? "" },
+                set: { regulation.specialConditions = $0.isEmpty ? nil : $0 }
+            ))
+        }
+    }
+
+    private var deleteSection: some View {
+        Section {
+            Button(role: .destructive, action: {
+                onDelete()
+                dismiss()
+            }) {
+                Label("Delete Regulation", systemImage: "trash")
             }
         }
     }

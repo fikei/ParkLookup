@@ -60,8 +60,7 @@ struct BlockfaceRegulationOverride: Codable, Identifiable {
     /// Convert to BlockfaceRegulation
     /// Note: Creates a new regulation with a new UUID
     func toBlockfaceRegulation() -> BlockfaceRegulation {
-        // Use JSONEncoder/Decoder to create a proper instance with all CodingKeys
-        let encoder = JSONEncoder()
+        // Use JSONDecoder to create a proper instance with all CodingKeys
         let decoder = JSONDecoder()
 
         // Create a dictionary representation

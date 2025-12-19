@@ -133,13 +133,9 @@ class BlockfaceEditorViewModel: ObservableObject {
             isLoading = true
             defer { isLoading = false }
 
-            do {
-                // This is a simplified implementation - you might need to search through all blockfaces
-                // For now, we'll just log that this functionality needs implementation
-                print("⚠️ loadBlockface(id:) not yet fully implemented")
-            } catch {
-                print("❌ Error loading blockface: \(error)")
-            }
+            // This is a simplified implementation - you might need to search through all blockfaces
+            // For now, we'll just log that this functionality needs implementation
+            print("⚠️ loadBlockface(id:) not yet fully implemented")
         }
     }
 
