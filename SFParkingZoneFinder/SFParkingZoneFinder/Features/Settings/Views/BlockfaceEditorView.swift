@@ -320,75 +320,113 @@ struct RegulationEditorView: View {
             HStack {
                 Text("Start")
                 Spacer()
-                TextField("HH:MM", text: Binding(
-                    get: { regulation.enforcementStart ?? "" },
-                    set: { regulation.enforcementStart = $0.isEmpty ? nil : $0 }
-                ))
-                .multilineTextAlignment(.trailing)
-                .keyboardType(.numbersAndPunctuation)
+                TextField("HH:MM", text: enforcementStartBinding)
+                    .multilineTextAlignment(.trailing)
+                    .keyboardType(.numbersAndPunctuation)
             }
 
             HStack {
                 Text("End")
                 Spacer()
-                TextField("HH:MM", text: Binding(
-                    get: { regulation.enforcementEnd ?? "" },
-                    set: { regulation.enforcementEnd = $0.isEmpty ? nil : $0 }
-                ))
-                .multilineTextAlignment(.trailing)
-                .keyboardType(.numbersAndPunctuation)
+                TextField("HH:MM", text: enforcementEndBinding)
+                    .multilineTextAlignment(.trailing)
+                    .keyboardType(.numbersAndPunctuation)
             }
         }
+    }
+
+    private var enforcementStartBinding: Binding<String> {
+        Binding(
+            get: { regulation.enforcementStart ?? "" },
+            set: { regulation.enforcementStart = $0.isEmpty ? nil : $0 }
+        )
+    }
+
+    private var enforcementEndBinding: Binding<String> {
+        Binding(
+            get: { regulation.enforcementEnd ?? "" },
+            set: { regulation.enforcementEnd = $0.isEmpty ? nil : $0 }
+        )
     }
 
     @ViewBuilder
     private var typeSpecificSections: some View {
         if regulation.type == "residentialPermit" {
-            Section("Permit Zones") {
-                TextField("Zones (comma-separated)", text: Binding(
-                    get: { regulation.permitZones?.joined(separator: ", ") ?? regulation.permitZone ?? "" },
-                    set: {
-                        let zones = $0.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }
-                        regulation.permitZones = zones.isEmpty ? nil : zones
-                        regulation.permitZone = zones.first
-                    }
-                ))
-            }
+            permitZonesSection
         }
 
         if regulation.type == "timeLimit" {
-            Section("Time Limit") {
-                Stepper(value: Binding(
-                    get: { regulation.timeLimit ?? 0 },
-                    set: { regulation.timeLimit = $0 == 0 ? nil : $0 }
-                ), in: 0...480, step: 15) {
-                    if let limit = regulation.timeLimit {
-                        Text("\(limit) minutes")
-                    } else {
-                        Text("No limit")
-                    }
-                }
-            }
+            timeLimitSection
         }
 
         if regulation.type == "metered" {
-            Section("Meter Rate") {
-                TextField("Rate ($/hr)", value: Binding(
-                    get: { regulation.meterRate ?? 0 },
-                    set: { regulation.meterRate = $0 == 0 ? nil : Decimal($0) }
-                ), format: .number)
-                .keyboardType(.decimalPad)
+            meterRateSection
+        }
+    }
+
+    private var permitZonesSection: some View {
+        Section("Permit Zones") {
+            TextField("Zones (comma-separated)", text: permitZonesBinding)
+        }
+    }
+
+    private var permitZonesBinding: Binding<String> {
+        Binding(
+            get: {
+                regulation.permitZones?.joined(separator: ", ") ?? regulation.permitZone ?? ""
+            },
+            set: { newValue in
+                let zones = newValue.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }
+                regulation.permitZones = zones.isEmpty ? nil : zones
+                regulation.permitZone = zones.first
+            }
+        )
+    }
+
+    private var timeLimitSection: some View {
+        Section("Time Limit") {
+            Stepper(value: timeLimitBinding, in: 0...480, step: 15) {
+                if let limit = regulation.timeLimit {
+                    Text("\(limit) minutes")
+                } else {
+                    Text("No limit")
+                }
             }
         }
     }
 
+    private var timeLimitBinding: Binding<Int> {
+        Binding(
+            get: { regulation.timeLimit ?? 0 },
+            set: { regulation.timeLimit = $0 == 0 ? nil : $0 }
+        )
+    }
+
+    private var meterRateSection: some View {
+        Section("Meter Rate") {
+            TextField("Rate ($/hr)", value: meterRateBinding, format: .number)
+                .keyboardType(.decimalPad)
+        }
+    }
+
+    private var meterRateBinding: Binding<Decimal> {
+        Binding(
+            get: { regulation.meterRate ?? 0 },
+            set: { regulation.meterRate = $0 == 0 ? nil : Decimal($0) }
+        )
+    }
+
     private var specialConditionsSection: some View {
         Section("Special Conditions") {
-            TextField("Optional notes", text: Binding(
-                get: { regulation.specialConditions ?? "" },
-                set: { regulation.specialConditions = $0.isEmpty ? nil : $0 }
-            ))
+            TextField("Optional notes", text: specialConditionsBinding)
         }
+    }
+
+    private var specialConditionsBinding: Binding<String> {
+        Binding(
+            get: { regulation.specialConditions ?? "" },
+            set: { regulation.specialConditions = $0.isEmpty ? nil : $0 }
+        )
     }
 
     private var deleteSection: some View {
