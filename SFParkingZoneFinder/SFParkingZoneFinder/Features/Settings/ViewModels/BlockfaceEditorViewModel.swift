@@ -21,6 +21,14 @@ class BlockfaceEditorViewModel: ObservableObject {
     private let blockfaceLoader = BlockfaceLoader.shared
     private var locationManager: CLLocationManager?
 
+    // MARK: - Initialization
+
+    init(initialBlockface: Blockface? = nil) {
+        if let blockface = initialBlockface {
+            selectBlockface(blockface)
+        }
+    }
+
     // MARK: - Computed Properties
 
     var hasChanges: Bool {

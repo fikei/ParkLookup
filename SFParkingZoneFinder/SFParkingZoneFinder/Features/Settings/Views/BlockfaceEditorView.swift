@@ -3,8 +3,15 @@ import MapKit
 
 /// Developer mode view for editing parking regulations on individual blockfaces
 struct BlockfaceEditorView: View {
-    @StateObject private var viewModel = BlockfaceEditorViewModel()
+    let initialBlockface: Blockface?
+
+    @StateObject private var viewModel: BlockfaceEditorViewModel
     @Environment(\.dismiss) private var dismiss
+
+    init(initialBlockface: Blockface? = nil) {
+        self.initialBlockface = initialBlockface
+        _viewModel = StateObject(wrappedValue: BlockfaceEditorViewModel(initialBlockface: initialBlockface))
+    }
 
     var body: some View {
         NavigationView {
