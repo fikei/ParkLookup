@@ -412,7 +412,7 @@ struct RegulationEditorView: View {
     private var meterRateBinding: Binding<Decimal> {
         Binding(
             get: { regulation.meterRate ?? 0 },
-            set: { regulation.meterRate = $0 == 0 ? nil : Decimal($0) }
+            set: { regulation.meterRate = $0 == 0 ? nil : $0 }
         )
     }
 
