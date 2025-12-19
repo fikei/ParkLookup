@@ -67,7 +67,7 @@ struct MainResultView: View {
         case .locationPermissionDenied, .locationUnavailable:
             // Critical: Need permission/location to function
             return true
-        case .dataLoadingFailed, .unknown:
+        case .dataLoadFailed, .unknown:
             // Critical: Can't load data
             return true
         }
