@@ -2,6 +2,7 @@ import CarPlay
 import CoreLocation
 import Combine
 import AVFoundation
+import MapKit
 import os.log
 
 /// Handles CarPlay connection and UI
@@ -29,6 +30,24 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
 
     // Active parking session
     private var activeSession: ParkingSession?
+
+    // Nearby zone tracking for proactive announcements
+    private var nearbyValidZones: [(zone: ParkingZone, distance: Double)] = []
+    private var nearestValidZone: (zone: ParkingZone, distance: Double)?
+    private var lastAnnouncedProximity: Double = .infinity
+    private var hasAnnouncedNearbyParking = false
+
+    // Filter state
+    private enum ParkingFilter {
+        case all
+        case freeOnly
+        case allDay
+        case myPermitsOnly
+    }
+    private var currentFilter: ParkingFilter = .all
+
+    // Template state
+    private var isShowingMap = false
 
     private var speechSynthesizer: AVSpeechSynthesizer?
     private var voiceFeedbackEnabled: Bool = true
@@ -182,6 +201,17 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             detail: currentValidityStatus.displayText
         ))
 
+        // Show distance to nearest valid parking
+        if currentValidityStatus == .invalid || currentValidityStatus == .noPermitSet {
+            if let nearest = nearestValidZone {
+                let distanceText = formatDistance(nearest.distance)
+                items.append(CPInformationItem(
+                    title: "Nearest Valid Parking",
+                    detail: "\(distanceText) - \(nearest.zone.displayName)"
+                ))
+            }
+        }
+
         // Show park until time if available
         if let parkUntil = currentParkUntil {
             let formatter = DateFormatter()
@@ -219,25 +249,58 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             }
             buttons.append(endParkingButton)
         } else {
-            // Otherwise, show park here button
-            let parkHereButton = CPTextButton(
-                title: "Park Here",
-                textStyle: .confirm
-            ) { [weak self] _ in
-                Task { @MainActor in
-                    await self?.startParking()
+            // Find Parking button - primary action
+            if currentValidityStatus == .invalid || currentValidityStatus == .noPermitSet {
+                let findParkingButton = CPTextButton(
+                    title: "Find Parking",
+                    textStyle: .confirm
+                ) { [weak self] _ in
+                    self?.navigateToNearestValidParking()
                 }
+                buttons.append(findParkingButton)
+            } else {
+                // Park here button if in valid zone
+                let parkHereButton = CPTextButton(
+                    title: "Park Here",
+                    textStyle: .confirm
+                ) { [weak self] _ in
+                    Task { @MainActor in
+                        await self?.startParking()
+                    }
+                }
+                buttons.append(parkHereButton)
             }
-            buttons.append(parkHereButton)
-        }
 
-        let refreshButton = CPTextButton(
-            title: "Refresh",
-            textStyle: .normal
-        ) { [weak self] _ in
-            self?.refreshLocation()
+            // Show Map button
+            let mapButton = CPTextButton(
+                title: "Show Map",
+                textStyle: .normal
+            ) { [weak self] _ in
+                self?.showMapView()
+            }
+            buttons.append(mapButton)
+
+            // Filter button (cycles through filters)
+            let filterTitle: String
+            switch currentFilter {
+            case .all:
+                filterTitle = "Filter: All"
+            case .freeOnly:
+                filterTitle = "Filter: Free"
+            case .allDay:
+                filterTitle = "Filter: All Day"
+            case .myPermitsOnly:
+                filterTitle = "Filter: My Permits"
+            }
+
+            let filterButton = CPTextButton(
+                title: filterTitle,
+                textStyle: .normal
+            ) { [weak self] _ in
+                self?.cycleFilter()
+            }
+            buttons.append(filterButton)
         }
-        buttons.append(refreshButton)
 
         let voiceButton = CPTextButton(
             title: voiceFeedbackEnabled ? "Voice: On" : "Voice: Off",
@@ -330,6 +393,11 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             currentParkUntil = nil
         }
 
+        // Find nearby valid zones for proactive guidance
+        if let location = currentLocation {
+            findNearbyValidZones(at: location)
+        }
+
         // Update template
         updateTemplate()
 
@@ -337,6 +405,9 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         if previousZone != currentZoneName && previousZone != "—" {
             announceZoneChange()
         }
+
+        // Proactive announcement if approaching valid parking
+        checkProximityAndAnnounce()
     }
 
     @MainActor
@@ -375,6 +446,9 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             currentParkUntil = nil
         }
 
+        // Find nearby valid zones for proactive guidance
+        findNearbyValidZones(at: location.coordinate)
+
         // Update the template
         updateTemplate()
 
@@ -382,6 +456,9 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         if previousZone != currentZoneName && previousZone != "—" {
             announceZoneChange()
         }
+
+        // Proactive announcement if approaching valid parking
+        checkProximityAndAnnounce()
     }
 
     private func refreshLocation() {
@@ -572,5 +649,241 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
 
         synthesizer.speak(utterance)
+    }
+
+    // MARK: - Nearby Zone Discovery & Proactive Announcements
+
+    private func findNearbyValidZones(at coordinate: CLLocationCoordinate2D) {
+        let allZones = zoneService.allLoadedZones
+        let userLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let userPermitSet = Set(userPermits.map { $0.area.uppercased() })
+
+        // Find zones within 500m and check if valid for user
+        var validZones: [(zone: ParkingZone, distance: Double)] = []
+
+        for zone in allZones {
+            // Calculate distance to zone (use first boundary point as approximation)
+            guard let firstBoundary = zone.boundaries.first,
+                  let firstPoint = firstBoundary.coordinates.first else {
+                continue
+            }
+
+            let zoneLocation = CLLocation(
+                latitude: firstPoint.latitude,
+                longitude: firstPoint.longitude
+            )
+            let distance = userLocation.distance(from: zoneLocation)
+
+            // Only consider zones within 500m
+            guard distance <= 500 else { continue }
+
+            // Check if zone is valid for user based on filter
+            let isValidForUser: Bool
+            switch currentFilter {
+            case .all:
+                isValidForUser = isZoneValidForUser(zone, userPermits: userPermitSet)
+            case .freeOnly:
+                isValidForUser = zone.zoneType != .metered && isZoneValidForUser(zone, userPermits: userPermitSet)
+            case .allDay:
+                // All day = no time limits
+                let hasTimeLimit = zone.rules.contains { $0.timeLimit != nil && $0.timeLimit! < 240 }
+                isValidForUser = !hasTimeLimit && isZoneValidForUser(zone, userPermits: userPermitSet)
+            case .myPermitsOnly:
+                isValidForUser = isZoneValidForUser(zone, userPermits: userPermitSet)
+            }
+
+            if isValidForUser {
+                validZones.append((zone: zone, distance: distance))
+            }
+        }
+
+        // Sort by distance
+        validZones.sort { $0.distance < $1.distance }
+
+        nearbyValidZones = validZones
+        nearestValidZone = validZones.first
+
+        logger.info("Found \(validZones.count) valid zones nearby")
+        if let nearest = nearestValidZone {
+            logger.info("Nearest valid: \(nearest.zone.displayName) at \(Int(nearest.distance))m")
+        }
+    }
+
+    private func isZoneValidForUser(_ zone: ParkingZone, userPermits: Set<String>) -> Bool {
+        if zone.zoneType == .metered {
+            return true  // Can always park at metered (just need to pay)
+        }
+
+        // For RPP zones, check if user has matching permit
+        if zone.zoneType == .residentialPermit {
+            let zonePermitAreas = Set(zone.validPermitAreas.map { $0.uppercased() })
+            return !zonePermitAreas.isDisjoint(with: userPermits)
+        }
+
+        return true
+    }
+
+    private func checkProximityAndAnnounce() {
+        guard voiceFeedbackEnabled else { return }
+        guard currentValidityStatus == .invalid || currentValidityStatus == .noPermitSet else {
+            // Reset announcement state when in valid zone
+            hasAnnouncedNearbyParking = false
+            lastAnnouncedProximity = .infinity
+            return
+        }
+
+        guard let nearest = nearestValidZone else { return }
+
+        // Announce at different proximity thresholds
+        let distance = nearest.distance
+
+        if distance <= 100 && lastAnnouncedProximity > 100 {
+            // Very close - 100m
+            speak("Valid parking zone ahead in 100 meters")
+            lastAnnouncedProximity = 100
+        } else if distance <= 200 && lastAnnouncedProximity > 200 {
+            // Close - 200m
+            speak("Valid parking zone ahead in 200 meters - \(nearest.zone.displayName)")
+            lastAnnouncedProximity = 200
+        } else if distance <= 400 && !hasAnnouncedNearbyParking {
+            // Nearby - 400m
+            let distanceText = formatDistance(distance)
+            speak("Valid parking found \(distanceText) ahead")
+            hasAnnouncedNearbyParking = true
+        }
+    }
+
+    // MARK: - Navigation & Actions
+
+    private func navigateToNearestValidParking() {
+        guard let nearest = nearestValidZone else {
+            speak("No valid parking zones found nearby")
+            return
+        }
+
+        logger.info("Navigating to \(nearest.zone.displayName)")
+
+        // Get zone center coordinate
+        guard let firstBoundary = nearest.zone.boundaries.first,
+              let centerPoint = firstBoundary.coordinates.first else {
+            speak("Unable to navigate to parking zone")
+            return
+        }
+
+        // Create map item for destination
+        let placemark = MKPlacemark(coordinate: centerPoint)
+        let mapItem = MKMapItem(placemark: placemark)
+        mapItem.name = nearest.zone.displayName
+
+        // Open in Maps with driving directions
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+        ])
+
+        let distanceText = formatDistance(nearest.distance)
+        speak("Navigating to \(nearest.zone.displayName), \(distanceText) away")
+    }
+
+    private func showMapView() {
+        guard let interfaceController = interfaceController else { return }
+        guard let currentLocation = currentLocation else {
+            speak("Location unavailable")
+            return
+        }
+
+        logger.info("Showing map view")
+
+        // Create map template
+        let mapTemplate = CPMapTemplate()
+        mapTemplate.showPanningInterface(animated: false)
+
+        // Create map region centered on current location
+        let region = MKCoordinateRegion(
+            center: currentLocation,
+            latitudinalMeters: 1000,  // 1km view
+            longitudinalMeters: 1000
+        )
+
+        // Add zone markers for nearby valid zones
+        var mapItems: [MKMapItem] = []
+        for (zone, _) in nearbyValidZones.prefix(10) {  // Show up to 10 nearest zones
+            guard let firstBoundary = zone.boundaries.first,
+                  let centerPoint = firstBoundary.coordinates.first else {
+                continue
+            }
+
+            let placemark = MKPlacemark(coordinate: centerPoint)
+            let mapItem = MKMapItem(placemark: placemark)
+            mapItem.name = zone.displayName
+            mapItems.append(mapItem)
+        }
+
+        // Back button
+        let backButton = CPBarButton(title: "Back") { [weak self] _ in
+            self?.dismissMapView()
+        }
+        mapTemplate.leadingNavigationBarButtons = [backButton]
+
+        // Show map
+        interfaceController.pushTemplate(mapTemplate, animated: true, completion: nil)
+        isShowingMap = true
+
+        speak("Showing nearby parking zones")
+    }
+
+    private func dismissMapView() {
+        guard let interfaceController = interfaceController else { return }
+        interfaceController.popTemplate(animated: true, completion: nil)
+        isShowingMap = false
+    }
+
+    private func cycleFilter() {
+        switch currentFilter {
+        case .all:
+            currentFilter = .freeOnly
+        case .freeOnly:
+            currentFilter = .allDay
+        case .allDay:
+            currentFilter = .myPermitsOnly
+        case .myPermitsOnly:
+            currentFilter = .all
+        }
+
+        logger.info("Filter changed to: \(currentFilter)")
+
+        // Re-find nearby zones with new filter
+        if let location = currentLocation {
+            findNearbyValidZones(at: location)
+        }
+
+        // Update UI
+        updateTemplate()
+
+        // Announce filter change
+        let filterName: String
+        switch currentFilter {
+        case .all:
+            filterName = "all parking"
+        case .freeOnly:
+            filterName = "free parking only"
+        case .allDay:
+            filterName = "all day parking"
+        case .myPermitsOnly:
+            filterName = "my permits only"
+        }
+        speak("Filter set to \(filterName)")
+    }
+
+    // MARK: - Utilities
+
+    private func formatDistance(_ meters: Double) -> String {
+        if meters < 100 {
+            return "\(Int(meters))m"
+        } else if meters < 1000 {
+            return "\(Int(meters / 10) * 10)m"  // Round to nearest 10m
+        } else {
+            let km = meters / 1000.0
+            return String(format: "%.1fkm", km)
+        }
     }
 }
