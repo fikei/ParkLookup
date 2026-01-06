@@ -48,6 +48,8 @@ struct MainResultView: View {
     @State private var isLoadingOverlays = false
     @State private var overlayLoadingMessage = ""
     @State private var showingActiveParkingView = false
+    @State private var showingBlockfaceEditor = false
+    @State private var selectedBlockfaceForEditing: Blockface?
 
     @Namespace private var cardAnimation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -231,6 +233,14 @@ struct MainResultView: View {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                     isMapExpanded = true
                                 }
+                            }
+                        },
+                        onBlockfaceTapped: { blockface in
+                            // Developer mode: Open editor for tapped blockface
+                            if devSettings.developerModeUnlocked {
+                                selectedBlockfaceForEditing = blockface
+                                showingBlockfaceEditor = true
+                                HapticFeedback.medium()
                             }
                         },
                         userPermitAreas: userPermitAreaCodes,
@@ -518,6 +528,11 @@ struct MainResultView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+        }
+        .sheet(isPresented: $showingBlockfaceEditor) {
+            if let blockface = selectedBlockfaceForEditing {
+                BlockfaceEditorView(initialBlockface: blockface)
+            }
         }
         .sheet(isPresented: $showingActiveParkingView) {
             if let session = viewModel.getActiveSession() {

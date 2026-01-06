@@ -20,6 +20,15 @@ final class BlockfaceLoader: @unchecked Sendable {
         ) { [weak self] _ in
             self?.clearCache()
         }
+
+        // Listen for override changes to clear cache
+        NotificationCenter.default.addObserver(
+            forName: .blockfaceOverridesChanged,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            self?.clearCache()
+        }
     }
 
     /// Clear the blockface cache (called when data source changes)
@@ -118,12 +127,15 @@ final class BlockfaceLoader: @unchecked Sendable {
                     let data = try Data(contentsOf: url)
                     let response = try JSONDecoder().decode(BlockfaceDataResponse.self, from: data)
 
-                    self.allBlockfacesCache = response.blockfaces
+                    // Apply developer overrides if in developer mode
+                    let blockfaces = self.applyOverrides(to: response.blockfaces)
+
+                    self.allBlockfacesCache = blockfaces
 
                     let elapsed = Date().timeIntervalSince(startTime)
-                    logger.info("✅ Loaded \(response.blockfaces.count) blockfaces from \(dataSource.displayName) in \(String(format: "%.2f", elapsed))s")
+                    logger.info("✅ Loaded \(blockfaces.count) blockfaces from \(dataSource.displayName) in \(String(format: "%.2f", elapsed))s")
 
-                    continuation.resume(returning: response.blockfaces)
+                    continuation.resume(returning: blockfaces)
                 } catch {
                     logger.error("❌ Failed to load blockfaces: \(error.localizedDescription)")
                     continuation.resume(throwing: error)
@@ -154,11 +166,14 @@ final class BlockfaceLoader: @unchecked Sendable {
         let data = try Data(contentsOf: url)
         let response = try JSONDecoder().decode(BlockfaceDataResponse.self, from: data)
 
-        allBlockfacesCache = response.blockfaces
+        // Apply developer overrides if in developer mode
+        let blockfaces = applyOverrides(to: response.blockfaces)
 
-        logger.info("Loaded \(response.blockfaces.count) blockfaces from \(dataSource.displayName)")
+        allBlockfacesCache = blockfaces
 
-        return response.blockfaces
+        logger.info("Loaded \(blockfaces.count) blockfaces from \(dataSource.displayName)")
+
+        return blockfaces
     }
 
     /// Find blockfaces with active street cleaning (optimized version)
@@ -169,6 +184,33 @@ final class BlockfaceLoader: @unchecked Sendable {
     ) async throws -> [Blockface] {
         let nearby = try await loadBlockfacesNear(coordinate: coordinate, radiusMeters: radiusMeters, maxCount: 150)
         return nearby.filter { $0.hasActiveStreetCleaning(at: date) }
+    }
+
+    // MARK: - Developer Overrides
+
+    /// Apply developer overrides to blockfaces (only if developer mode is enabled)
+    private func applyOverrides(to blockfaces: [Blockface]) -> [Blockface] {
+        // Only apply overrides in developer mode
+        guard DeveloperSettings.shared.developerModeUnlocked else {
+            return blockfaces
+        }
+
+        let overrideManager = BlockfaceOverrideManager.shared
+        var overrideCount = 0
+
+        let result = blockfaces.map { blockface -> Blockface in
+            if let overridden = overrideManager.applyOverride(to: blockface) {
+                overrideCount += 1
+                return overridden
+            }
+            return blockface
+        }
+
+        if overrideCount > 0 {
+            logger.info("🛠️ Applied \(overrideCount) developer overrides to blockfaces")
+        }
+
+        return result
     }
 }
 

@@ -12,6 +12,7 @@ struct ZoneMapView: UIViewRepresentable {
     let userCoordinate: CLLocationCoordinate2D?
     let onZoneTapped: ((ParkingZone, [String]?, CLLocationCoordinate2D) -> Void)?  // Pass zone, permit areas, and tap coordinate
     let onMapTapped: ((CLLocationCoordinate2D) -> Void)?  // Generic tap callback (fires for any tap on map)
+    let onBlockfaceTapped: ((Blockface) -> Void)?  // Developer mode: Edit blockface when tapped
 
     /// User's valid permit areas (uppercase codes like "Q", "AA")
     /// Zones matching these will be colored green, others orange
@@ -1916,6 +1917,9 @@ struct ZoneMapView: UIViewRepresentable {
 
                         // Add annotation at blockface center
                         mapView.addAnnotation(annotation)
+
+                        // Trigger blockface tap callback (opens editor in developer mode)
+                        onBlockfaceTapped?(nearest.blockface)
                     }
 
                     // Trigger map tap callback (updates spot card)
